@@ -36,6 +36,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+SUPPORTED_GRANT_TYPES = {"authorization_code", "client_credentials", "refresh_token"}
+SUPPORTED_CODE_CHALLENGE_METHODS = {"S256", "plain"}
+
 
 def validate_redirect_uris(redirect_uris: Optional[List[str]]) -> None:
     """
@@ -165,18 +168,54 @@ def validate_redirect_uris(redirect_uris: Optional[List[str]]) -> None:
 
 def validate_grant_types(grant_types: List[str]) -> None:
     """Validate that requested grant types are supported."""
-    supported_grant_types = {"authorization_code", "client_credentials"}
 
     for grant_type in grant_types:
-        if grant_type not in supported_grant_types:
+        if grant_type not in SUPPORTED_GRANT_TYPES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "error": "invalid_client_metadata",
-                    "error_description": f"Unsupported grant type: {grant_type}. Supported: {list(supported_grant_types)}"
+                    "error_description": (
+                        "Unsupported grant type: "
+                        f"{grant_type}. Supported: {sorted(SUPPORTED_GRANT_TYPES)}"
+                    )
                 }
             )
 
+    if "refresh_token" in grant_types and "authorization_code" not in grant_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "invalid_client_metadata",
+                "error_description": "refresh_token grant requires authorization_code grant support"
+            }
+        )
+
+
+def validate_code_challenge_methods(methods: List[str]) -> None:
+    """Validate PKCE code challenge methods requested during registration."""
+
+    if not methods:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "invalid_client_metadata",
+                "error_description": "At least one code challenge method must be specified"
+            }
+        )
+
+    for method in methods:
+        if method not in SUPPORTED_CODE_CHALLENGE_METHODS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "invalid_client_metadata",
+                    "error_description": (
+                        "Unsupported code challenge method: "
+                        f"{method}. Supported: {sorted(SUPPORTED_CODE_CHALLENGE_METHODS)}"
+                    )
+                }
+            )
 
 def validate_response_types(response_types: List[str]) -> None:
     """Validate that requested response types are supported."""
@@ -214,14 +253,19 @@ async def register_client(request: ClientRegistrationRequest) -> ClientRegistrat
         if request.response_types:
             validate_response_types(request.response_types)
 
+        if request.code_challenge_methods:
+            validate_code_challenge_methods(request.code_challenge_methods)
+
         # Generate client credentials
         client_id = oauth_storage.generate_client_id()
         client_secret = oauth_storage.generate_client_secret()
 
         # Prepare default values
-        grant_types = request.grant_types or ["authorization_code"]
+        grant_types = request.grant_types or ["authorization_code", "refresh_token"]
         response_types = request.response_types or ["code"]
         token_endpoint_auth_method = request.token_endpoint_auth_method or "client_secret_basic"
+        code_challenge_methods = request.code_challenge_methods or ["S256"]
+        validate_code_challenge_methods(code_challenge_methods)
 
         # Create registered client
         registered_client = RegisteredClient(
@@ -232,6 +276,7 @@ async def register_client(request: ClientRegistrationRequest) -> ClientRegistrat
             response_types=response_types,
             token_endpoint_auth_method=token_endpoint_auth_method,
             client_name=request.client_name,
+            code_challenge_methods=code_challenge_methods,
             created_at=time.time()
         )
 
@@ -246,7 +291,8 @@ async def register_client(request: ClientRegistrationRequest) -> ClientRegistrat
             grant_types=grant_types,
             response_types=response_types,
             token_endpoint_auth_method=token_endpoint_auth_method,
-            client_name=request.client_name
+            client_name=request.client_name,
+            code_challenge_methods=code_challenge_methods
         )
 
         logger.info(f"OAuth client registered successfully: client_id={client_id}, name={request.client_name}")
@@ -303,5 +349,6 @@ async def get_client_info(client_id: str) -> ClientRegistrationResponse:
         grant_types=client.grant_types,
         response_types=client.response_types,
         token_endpoint_auth_method=client.token_endpoint_auth_method,
-        client_name=client.client_name
+        client_name=client.client_name,
+        code_challenge_methods=client.code_challenge_methods
     )

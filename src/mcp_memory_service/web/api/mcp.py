@@ -8,7 +8,7 @@ to directly access memory operations using the MCP standard.
 import asyncio
 import logging
 from typing import Dict, List, Any, Optional, Union, TYPE_CHECKING
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -166,6 +166,10 @@ async def mcp_endpoint(
                     }
                 }
             )
+
+        elif request.method.startswith("notifications/"):
+            logger.debug(f"Received MCP notification: {request.method}")
+            return Response(status_code=204)
 
         elif request.method == "tools/list":
             return MCPResponse(

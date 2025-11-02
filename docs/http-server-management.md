@@ -5,6 +5,7 @@ The MCP Memory Service HTTP server is **required** for Claude Code hooks (Natura
 ## Why is the HTTP Server Required?
 
 When using **Natural Memory Triggers** in Claude Code:
+
 - The session-start hook needs the HTTP server to retrieve relevant memories
 - Without the HTTP server, hooks fail silently and no memories are injected
 - HTTP protocol avoids conflicts with Claude Code's MCP server
@@ -22,14 +23,16 @@ uv run python scripts/server/check_http_server.py -q
 ```
 
 **Sample Output (Running):**
+
 ```
 [OK] HTTP server is running
    Version: 8.3.0
-   Endpoint: http://localhost:8000/api/health
+   Endpoint: http://localhost:8001/api/health
    Status: healthy
 ```
 
 **Sample Output (Not Running):**
+
 ```
 [ERROR] HTTP server is NOT running
 
@@ -47,7 +50,7 @@ Error: [WinError 10061] No connection could be made...
 ### Manual Start
 
 ```bash
-# HTTP mode (default, port 8000)
+# HTTP mode (default, port 8001)
 uv run python scripts/server/run_http_server.py
 
 # HTTPS mode (port 8443)
@@ -59,16 +62,19 @@ MCP_HTTPS_ENABLED=true uv run python scripts/server/run_http_server.py
 These scripts check if the server is running and start it only if needed:
 
 **Unix/macOS:**
+
 ```bash
 ./scripts/server/start_http_server.sh
 ```
 
 **Windows:**
+
 ```cmd
 scripts\server\start_http_server.bat
 ```
 
 **Features:**
+
 - Checks if server is already running (avoids duplicate instances)
 - Starts server in background/new window
 - Verifies successful startup
@@ -81,12 +87,15 @@ scripts\server\start_http_server.bat
 **Symptom:** Claude Code starts but no memories are shown
 
 **Solution:**
+
 1. Check if HTTP server is running:
+
    ```bash
    uv run python scripts/server/check_http_server.py
    ```
 
 2. If not running, start it:
+
    ```bash
    uv run python scripts/server/run_http_server.py
    ```
@@ -100,23 +109,27 @@ scripts\server\start_http_server.bat
 **Common Issue:** Port mismatch between hooks configuration and actual server
 
 **Check your hooks configuration:**
+
 ```bash
 cat ~/.claude/hooks/config.json | grep -A5 "http"
 ```
 
 Should match your server configuration:
-- Default HTTP: `http://localhost:8000` or `http://127.0.0.1:8000`
+
+- Default HTTP: `http://localhost:8001` or `http://127.0.0.1:8001`
 - Default HTTPS: `https://localhost:8443`
 
-**Important:** The HTTP server uses port **8000** by default (configured in `.env`). If your hooks are configured for a different port (e.g., 8889), you need to either:
-1. Update hooks config to match port 8000, OR
+**Important:** The HTTP server uses port **8001** by default (configured in `.env`). If your hooks are configured for a different port (e.g., 8889), you need to either:
+
+1. Update hooks config to match port 8001, OR
 2. Change `MCP_HTTP_PORT` in `.env` and restart the server
 
 **Fix for port mismatch:**
+
 ```bash
 # Option 1: Update hooks config (recommended)
 # Edit ~/.claude/hooks/config.json and change endpoint to:
-# "endpoint": "http://127.0.0.1:8000"
+# "endpoint": "http://127.0.0.1:8001"
 
 # Option 2: Change server port (if needed)
 # Edit .env: MCP_HTTP_PORT=8889
@@ -126,23 +139,27 @@ Should match your server configuration:
 ### Server Startup Issues
 
 **Common causes:**
+
 - Port already in use
 - Missing dependencies
 - Configuration errors
 
 **Debug steps:**
+
 1. Check if port is in use:
+
    ```bash
    # Unix/macOS
-   lsof -i :8000
+   lsof -i :8001
    ```
 
    ```cmd
    # Windows
-   netstat -ano | findstr :8000
+   netstat -ano | findstr :8001
    ```
 
 2. Check server logs (when using auto-start scripts):
+
    ```bash
    # Unix/macOS
    tail -f /tmp/mcp-http-server.log
@@ -154,21 +171,23 @@ Should match your server configuration:
 ## Integration with Hooks
 
 The session-start hook automatically:
+
 1. Attempts to connect to HTTP server (preferred)
 2. Falls back to MCP if HTTP unavailable
 3. Falls back to environment-only if both fail
 
 **Recommended setup for Claude Code** (`~/.claude/hooks/config.json`):
+
 ```json
 {
-  "memoryService": {
-    "protocol": "http",
-    "preferredProtocol": "http",
-    "http": {
-      "endpoint": "http://localhost:8000",
-      "healthCheckTimeout": 3000
-    }
-  }
+	"memoryService": {
+		"protocol": "http",
+		"preferredProtocol": "http",
+		"http": {
+			"endpoint": "http://localhost:8001",
+			"healthCheckTimeout": 3000
+		}
+	}
 }
 ```
 
@@ -178,6 +197,7 @@ The session-start hook automatically:
 
 **Unix/macOS (launchd):**
 Create `~/Library/LaunchAgents/com.mcp.memory.http.plist` and replace `/path/to/repository` with the absolute path to this repository:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -196,6 +216,7 @@ Create `~/Library/LaunchAgents/com.mcp.memory.http.plist` and replace `/path/to/
 ```
 
 **Windows (Task Scheduler):**
+
 1. Open Task Scheduler
 2. Create Basic Task
 3. Trigger: At log on
@@ -205,6 +226,7 @@ Create `~/Library/LaunchAgents/com.mcp.memory.http.plist` and replace `/path/to/
 ### Pre-Claude Code Script
 
 Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
+
 ```bash
 # Auto-start MCP Memory HTTP server before Claude Code
 # Replace /path/to/repository with the absolute path to this project
@@ -216,6 +238,7 @@ alias claude-code='/path/to/repository/scripts/server/start_http_server.sh && cl
 For a persistent, auto-starting service on Linux, use systemd. See [Systemd Service Guide](deployment/systemd-service.md) for detailed setup.
 
 Quick setup:
+
 ```bash
 # Install service
 bash scripts/service/install_http_service.sh
@@ -229,6 +252,7 @@ loginctl enable-linger $USER  # Run even when logged out
 ```
 
 **Quick Commands:**
+
 ```bash
 # Service control
 systemctl --user start/stop/restart mcp-memory-http.service
@@ -238,7 +262,7 @@ systemctl --user status mcp-memory-http.service
 journalctl --user -u mcp-memory-http.service -f
 
 # Health check
-curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8001/api/health
 ```
 
 ## See Also

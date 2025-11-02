@@ -2,6 +2,12 @@
 
 import asyncio
 import pytest
+
+pytest.importorskip(
+    "mcp_memory_service.storage.chroma",
+    reason="Chroma backend not available in this environment."
+)
+
 from mcp_memory_service.storage.chroma import ChromaMemoryStorage
 from mcp_memory_service.models.memory import Memory
 import argparse

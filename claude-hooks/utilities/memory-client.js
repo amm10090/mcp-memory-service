@@ -3,27 +3,27 @@
  * Supports both HTTP and MCP protocols with automatic fallback
  */
 
-const https = require('https');
-const http = require('http');
-const { MCPClient } = require('./mcp-client');
+const https = require('https')
+const http = require('http')
+const { MCPClient } = require('./mcp-client')
 
 class MemoryClient {
     constructor(config) {
-        this.config = config;
-        this.protocol = config.protocol || 'auto';
-        this.preferredProtocol = config.preferredProtocol || 'mcp';
-        this.fallbackEnabled = config.fallbackEnabled !== false;
-        this.httpConfig = config.http || {};
-        this.mcpConfig = config.mcp || {};
+        this.config = config
+        this.protocol = config.protocol || 'auto'
+        this.preferredProtocol = config.preferredProtocol || 'mcp'
+        this.fallbackEnabled = config.fallbackEnabled !== false
+        this.httpConfig = config.http || {}
+        this.mcpConfig = config.mcp || {}
 
         // Connection state
-        this.activeProtocol = null;
-        this.httpAvailable = null;
-        this.mcpAvailable = null;
-        this.mcpClient = null;
+        this.activeProtocol = null
+        this.httpAvailable = null
+        this.mcpAvailable = null
+        this.mcpClient = null
 
         // Cache successful connections
-        this.connectionCache = new Map();
+        this.connectionCache = new Map()
     }
 
     /**
@@ -31,12 +31,12 @@ class MemoryClient {
      */
     async connect() {
         if (this.protocol === 'http') {
-            return this.connectHTTP();
+            return this.connectHTTP()
         } else if (this.protocol === 'mcp') {
-            return this.connectMCP();
+            return this.connectMCP()
         } else {
             // Auto mode: try preferred first, then fallback
-            return this.connectAuto();
+            return this.connectAuto()
         }
     }
 
@@ -44,29 +44,29 @@ class MemoryClient {
      * Auto-connect: try preferred protocol first, fallback if needed
      */
     async connectAuto() {
-        const protocols = this.preferredProtocol === 'mcp' ? ['mcp', 'http'] : ['http', 'mcp'];
+        const protocols = this.preferredProtocol === 'mcp' ? ['mcp', 'http'] : ['http', 'mcp']
 
         for (const protocol of protocols) {
             try {
                 if (protocol === 'mcp') {
-                    await this.connectMCP();
-                    this.activeProtocol = 'mcp';
-                    return { protocol: 'mcp', client: this.mcpClient };
+                    await this.connectMCP()
+                    this.activeProtocol = 'mcp'
+                    return { protocol: 'mcp', client: this.mcpClient }
                 } else {
-                    await this.connectHTTP();
-                    this.activeProtocol = 'http';
-                    return { protocol: 'http', client: null };
+                    await this.connectHTTP()
+                    this.activeProtocol = 'http'
+                    return { protocol: 'http', client: null }
                 }
             } catch (error) {
                 if (!this.fallbackEnabled || protocols.length === 1) {
-                    throw error;
+                    throw error
                 }
                 // Continue to try next protocol
-                continue;
+                continue
             }
         }
 
-        throw new Error('Failed to connect using any available protocol');
+        throw new Error('Failed to connect using any available protocol')
     }
 
     /**
@@ -74,7 +74,7 @@ class MemoryClient {
      */
     async connectMCP() {
         if (this.mcpClient) {
-            return this.mcpClient;
+            return this.mcpClient
         }
 
         this.mcpClient = new MCPClient(
@@ -84,17 +84,17 @@ class MemoryClient {
                 connectionTimeout: this.mcpConfig.connectionTimeout || 5000,
                 toolCallTimeout: this.mcpConfig.toolCallTimeout || 10000
             }
-        );
+        )
 
         // Handle MCP client errors gracefully
         this.mcpClient.on('error', (error) => {
-            this.mcpAvailable = false;
-        });
+            this.mcpAvailable = false
+        })
 
-        await this.mcpClient.connect();
-        this.mcpAvailable = true;
-        this.activeProtocol = 'mcp';
-        return this.mcpClient;
+        await this.mcpClient.connect()
+        this.mcpAvailable = true
+        this.activeProtocol = 'mcp'
+        return this.mcpClient
     }
 
     /**
@@ -102,13 +102,13 @@ class MemoryClient {
      */
     async connectHTTP() {
         // Test HTTP connection with a simple health check
-        const healthResult = await this.queryHealthHTTP();
+        const healthResult = await this.queryHealthHTTP()
         if (!healthResult.success) {
-            throw new Error(`HTTP connection failed: ${healthResult.error}`);
+            throw new Error(`HTTP connection failed: ${healthResult.error}`)
         }
-        this.httpAvailable = true;
-        this.activeProtocol = 'http';
-        return true;
+        this.httpAvailable = true
+        this.activeProtocol = 'http'
+        return true
     }
 
     /**
@@ -116,11 +116,11 @@ class MemoryClient {
      */
     async getHealthStatus() {
         if (this.activeProtocol === 'mcp' && this.mcpClient) {
-            return this.mcpClient.getHealthStatus();
+            return this.mcpClient.getHealthStatus()
         } else if (this.activeProtocol === 'http') {
-            return this.queryHealthHTTP();
+            return this.queryHealthHTTP()
         } else {
-            throw new Error('No active connection available');
+            throw new Error('No active connection available')
         }
     }
 
@@ -129,27 +129,27 @@ class MemoryClient {
      */
     async queryHealthHTTP() {
         const healthPath = this.httpConfig.useDetailedHealthCheck ?
-            '/api/health/detailed' : '/api/health';
+            '/api/health/detailed' : '/api/health'
 
         // Parse the configured endpoint to extract protocol, host, and port
-        let endpointUrl;
+        let endpointUrl
         try {
-            endpointUrl = new URL(this.httpConfig.endpoint);
+            endpointUrl = new URL(this.httpConfig.endpoint)
         } catch (error) {
-            return { success: false, error: `Invalid endpoint URL: ${this.httpConfig.endpoint}` };
+            return { success: false, error: `Invalid endpoint URL: ${this.httpConfig.endpoint}` }
         }
 
         // Try with configured protocol first
-        const result = await this._attemptHealthCheck(endpointUrl, healthPath);
+        const result = await this._attemptHealthCheck(endpointUrl, healthPath)
 
         // If HTTPS failed, try HTTP fallback on same host:port
         if (!result.success && endpointUrl.protocol === 'https:') {
-            const httpUrl = new URL(endpointUrl);
-            httpUrl.protocol = 'http:';
-            return this._attemptHealthCheck(httpUrl, healthPath);
+            const httpUrl = new URL(endpointUrl)
+            httpUrl.protocol = 'http:'
+            return this._attemptHealthCheck(httpUrl, healthPath)
         }
 
-        return result;
+        return result
     }
 
     /**
@@ -159,7 +159,7 @@ class MemoryClient {
     async _attemptHealthCheck(baseUrl, healthPath) {
         return new Promise((resolve) => {
             try {
-                const url = new URL(healthPath, baseUrl);
+                const url = new URL(healthPath, baseUrl)
 
                 const requestOptions = {
                     hostname: url.hostname,
@@ -172,41 +172,41 @@ class MemoryClient {
                     },
                     timeout: this.httpConfig.healthCheckTimeout || 3000,
                     rejectUnauthorized: false  // Allow self-signed certificates
-                };
+                }
 
-                const protocol = url.protocol === 'https:' ? https : http;
+                const protocol = url.protocol === 'https:' ? https : http
                 const req = protocol.request(requestOptions, (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => data += chunk);
+                    let data = ''
+                    res.on('data', (chunk) => data += chunk)
                     res.on('end', () => {
                         try {
                             if (res.statusCode === 200) {
-                                const healthData = JSON.parse(data);
-                                resolve({ success: true, data: healthData });
+                                const healthData = JSON.parse(data)
+                                resolve({ success: true, data: healthData })
                             } else {
-                                resolve({ success: false, error: `HTTP ${res.statusCode}`, fallback: true });
+                                resolve({ success: false, error: `HTTP ${res.statusCode}`, fallback: true })
                             }
                         } catch (parseError) {
-                            resolve({ success: false, error: 'Invalid JSON response', fallback: true });
+                            resolve({ success: false, error: 'Invalid JSON response', fallback: true })
                         }
-                    });
-                });
+                    })
+                })
 
                 req.on('error', (error) => {
-                    resolve({ success: false, error: error.message, fallback: true });
-                });
+                    resolve({ success: false, error: error.message, fallback: true })
+                })
 
                 req.on('timeout', () => {
-                    req.destroy();
-                    resolve({ success: false, error: 'Health check timeout', fallback: true });
-                });
+                    req.destroy()
+                    resolve({ success: false, error: 'Health check timeout', fallback: true })
+                })
 
-                req.end();
+                req.end()
 
             } catch (error) {
-                resolve({ success: false, error: error.message, fallback: true });
+                resolve({ success: false, error: error.message, fallback: true })
             }
-        });
+        })
     }
 
     /**
@@ -214,11 +214,11 @@ class MemoryClient {
      */
     async queryMemories(query, limit = 10) {
         if (this.activeProtocol === 'mcp' && this.mcpClient) {
-            return this.mcpClient.queryMemories(query, limit);
+            return this.mcpClient.queryMemories(query, limit)
         } else if (this.activeProtocol === 'http') {
-            return this.queryMemoriesHTTP(query, limit);
+            return this.queryMemoriesHTTP(query, limit)
         } else {
-            throw new Error('No active connection available');
+            throw new Error('No active connection available')
         }
     }
 
@@ -228,11 +228,11 @@ class MemoryClient {
     async queryMemoriesByTime(timeQuery, limit = 10, semanticQuery = null) {
         if (this.activeProtocol === 'mcp' && this.mcpClient) {
             // TODO: Update MCP client to support semantic query parameter
-            return this.mcpClient.queryMemoriesByTime(timeQuery, limit);
+            return this.mcpClient.queryMemoriesByTime(timeQuery, limit)
         } else if (this.activeProtocol === 'http') {
-            return this.queryMemoriesByTimeHTTP(timeQuery, limit, semanticQuery);
+            return this.queryMemoriesByTimeHTTP(timeQuery, limit, semanticQuery)
         } else {
-            throw new Error('No active connection available');
+            throw new Error('No active connection available')
         }
     }
 
@@ -242,8 +242,8 @@ class MemoryClient {
      */
     _performApiPost(path, payload) {
         return new Promise((resolve) => {
-            const url = new URL(path, this.httpConfig.endpoint);
-            const postData = JSON.stringify(payload);
+            const url = new URL(path, this.httpConfig.endpoint)
+            const postData = JSON.stringify(payload)
 
             const options = {
                 hostname: url.hostname,
@@ -256,61 +256,61 @@ class MemoryClient {
                     'X-API-Key': this.httpConfig.apiKey
                 },
                 rejectUnauthorized: false  // Allow self-signed certificates
-            };
+            }
 
-            const protocol = url.protocol === 'https:' ? https : http;
+            const protocol = url.protocol === 'https:' ? https : http
             const req = protocol.request(options, (res) => {
-                let data = '';
-                res.on('data', (chunk) => data += chunk);
+                let data = ''
+                res.on('data', (chunk) => data += chunk)
                 res.on('end', () => {
                     try {
-                        const response = JSON.parse(data);
+                        const response = JSON.parse(data)
                         // REST API returns { results: [{memory: {...}, similarity_score: ...}] }
                         if (response.results && Array.isArray(response.results)) {
                             // Extract memory objects from results and preserve similarity_score
                             const memories = response.results
                                 .filter(result => result && result.memory)
                                 .map(result => {
-                                    const memory = { ...result.memory };
+                                    const memory = { ...result.memory }
 
                                     // FIX: API returns Unix timestamps in SECONDS, but JavaScript Date expects MILLISECONDS
                                     // Convert created_at and updated_at from seconds to milliseconds
                                     if (memory.created_at && typeof memory.created_at === 'number') {
-                                        // Only convert if value looks like seconds (< year 2100 in milliseconds = 4102444800000)
+                                        // Only convert if value looks like seconds (< year 2100 in milliseconds = 4102444800100)
                                         if (memory.created_at < 4102444800) {
-                                            memory.created_at = memory.created_at * 1000;
+                                            memory.created_at = memory.created_at * 1000
                                         }
                                     }
                                     if (memory.updated_at && typeof memory.updated_at === 'number') {
                                         if (memory.updated_at < 4102444800) {
-                                            memory.updated_at = memory.updated_at * 1000;
+                                            memory.updated_at = memory.updated_at * 1000
                                         }
                                     }
 
                                     return {
                                         ...memory,
                                         similarity_score: result.similarity_score
-                                    };
-                                });
-                            resolve(memories);
+                                    }
+                                })
+                            resolve(memories)
                         } else {
-                            resolve([]);
+                            resolve([])
                         }
                     } catch (parseError) {
-                        console.warn('[Memory Client] HTTP parse error:', parseError.message);
-                        resolve([]);
+                        console.warn('[Memory Client] HTTP parse error:', parseError.message)
+                        resolve([])
                     }
-                });
-            });
+                })
+            })
 
             req.on('error', (error) => {
-                console.warn('[Memory Client] HTTP network error:', error.message);
-                resolve([]);
-            });
+                console.warn('[Memory Client] HTTP network error:', error.message)
+                resolve([])
+            })
 
-            req.write(postData);
-            req.end();
-        });
+            req.write(postData)
+            req.end()
+        })
     }
 
     /**
@@ -320,7 +320,7 @@ class MemoryClient {
         return this._performApiPost('/api/search', {
             query: query,
             n_results: limit
-        });
+        })
     }
 
     /**
@@ -330,14 +330,14 @@ class MemoryClient {
         const payload = {
             query: timeQuery,
             n_results: limit
-        };
+        }
 
         // Add semantic query if provided for relevance filtering
         if (semanticQuery) {
-            payload.semantic_query = semanticQuery;
+            payload.semantic_query = semanticQuery
         }
 
-        return this._performApiPost('/api/search/by-time', payload);
+        return this._performApiPost('/api/search/by-time', payload)
     }
 
     /**
@@ -350,7 +350,7 @@ class MemoryClient {
             mcpAvailable: this.mcpAvailable,
             fallbackEnabled: this.fallbackEnabled,
             preferredProtocol: this.preferredProtocol
-        };
+        }
     }
 
     /**
@@ -359,18 +359,18 @@ class MemoryClient {
     async disconnect() {
         if (this.mcpClient) {
             try {
-                await this.mcpClient.disconnect();
+                await this.mcpClient.disconnect()
             } catch (error) {
                 // Ignore cleanup errors
             }
-            this.mcpClient = null;
+            this.mcpClient = null
         }
 
-        this.activeProtocol = null;
-        this.httpAvailable = null;
-        this.mcpAvailable = null;
-        this.connectionCache.clear();
+        this.activeProtocol = null
+        this.httpAvailable = null
+        this.mcpAvailable = null
+        this.connectionCache.clear()
     }
 }
 
-module.exports = { MemoryClient };
+module.exports = { MemoryClient }

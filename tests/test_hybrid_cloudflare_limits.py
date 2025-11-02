@@ -11,7 +11,8 @@ Tests cover:
 
 import asyncio
 import pytest
-import pytest_asyncio
+
+pytest_asyncio = pytest.importorskip("pytest_asyncio")
 import json
 import tempfile
 import os

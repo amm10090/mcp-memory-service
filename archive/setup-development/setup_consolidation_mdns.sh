@@ -43,7 +43,7 @@ export MCP_HTTPS_ENABLED=true
 # HTTP server configuration
 export MCP_HTTP_ENABLED=true
 export MCP_HTTP_HOST=0.0.0.0
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 
 # Storage backend
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec

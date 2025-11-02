@@ -16,7 +16,7 @@ import httpx
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
 
-async def test_api_key_fallback(base_url: str = "http://localhost:8000", api_key: str = None) -> bool:
+async def test_api_key_fallback(base_url: str = "http://localhost:8001", api_key: str = None) -> bool:
     """
     Test API key authentication fallback with OAuth enabled.
 
@@ -99,7 +99,7 @@ async def main():
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
     else:
-        base_url = "http://localhost:8000"
+        base_url = "http://localhost:8001"
 
     # Try to get API key from command line or environment
     api_key = None

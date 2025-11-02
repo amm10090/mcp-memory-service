@@ -7,6 +7,7 @@ The Cloudflare backend implementation has been thoroughly tested and is **produc
 ### ✅ Tests Completed Successfully
 
 #### 1. Basic Implementation Tests
+
 - **CloudflareStorage class initialization**: ✅ All parameters set correctly
 - **URL construction**: ✅ Correct API endpoints generated
 - **HTTP client creation**: ✅ Headers and configuration correct
@@ -18,17 +19,20 @@ The Cloudflare backend implementation has been thoroughly tested and is **produc
 **Result**: 26/26 tests passed
 
 #### 2. Configuration System Tests
+
 - **Missing environment variables**: ✅ Proper validation and error handling
 - **Complete configuration**: ✅ All settings loaded correctly
 - **Backend registration**: ✅ Cloudflare properly added to SUPPORTED_BACKENDS
 - **Environment variable parsing**: ✅ All types and defaults working
 
 #### 3. Server Integration Tests
+
 - **Server import with Cloudflare backend**: ✅ Successfully imports and configures
 - **Backend selection logic**: ✅ Correctly identifies and would initialize CloudflareStorage
 - **Configuration compatibility**: ✅ Server properly reads Cloudflare settings
 
 #### 4. Migration Script Tests
+
 - **DataMigrator class**: ✅ Proper initialization and structure
 - **Command-line interface**: ✅ Argument parsing working
 - **Data format conversion**: ✅ Memory objects convert to migration format
@@ -89,7 +93,7 @@ from mcp_memory_service.utils.hashing import generate_content_hash
 async def test_real_cloudflare():
     """Test with real Cloudflare credentials."""
     import os
-    
+
     # Initialize with real credentials
     storage = CloudflareStorage(
         api_token=os.getenv('CLOUDFLARE_API_TOKEN'),
@@ -98,13 +102,13 @@ async def test_real_cloudflare():
         d1_database_id=os.getenv('CLOUDFLARE_D1_DATABASE_ID'),
         r2_bucket=os.getenv('CLOUDFLARE_R2_BUCKET')
     )
-    
+
     try:
         # Test initialization
         print("🔄 Initializing Cloudflare storage...")
         await storage.initialize()
         print("✅ Initialization successful!")
-        
+
         # Test storing a memory
         content = "This is a test memory for real Cloudflare backend"
         memory = Memory(
@@ -113,25 +117,25 @@ async def test_real_cloudflare():
             tags=["test", "real-cloudflare"],
             memory_type="standard"
         )
-        
+
         print("🔄 Storing test memory...")
         success, message = await storage.store(memory)
         print(f"✅ Store result: {success} - {message}")
-        
+
         # Test retrieval
         print("🔄 Searching for stored memory...")
         results = await storage.retrieve("test memory", n_results=5)
         print(f"✅ Retrieved {len(results)} memories")
-        
+
         # Test statistics
         print("🔄 Getting storage statistics...")
         stats = await storage.get_stats()
         print(f"✅ Stats: {stats}")
-        
+
         # Cleanup
         await storage.close()
         print("✅ All real Cloudflare tests completed successfully!")
-        
+
     except Exception as e:
         print(f"❌ Real Cloudflare test failed: {e}")
         await storage.close()
@@ -142,11 +146,11 @@ if __name__ == '__main__':
     import os
     required_vars = [
         'CLOUDFLARE_API_TOKEN',
-        'CLOUDFLARE_ACCOUNT_ID', 
+        'CLOUDFLARE_ACCOUNT_ID',
         'CLOUDFLARE_VECTORIZE_INDEX',
         'CLOUDFLARE_D1_DATABASE_ID'
     ]
-    
+
     if all(os.getenv(var) for var in required_vars):
         asyncio.run(test_real_cloudflare())
     else:
@@ -161,7 +165,7 @@ if __name__ == '__main__':
 python -m src.mcp_memory_service.server
 
 # Test via HTTP API (if HTTP enabled)
-curl -X POST http://localhost:8000/api/memories \
+curl -X POST http://localhost:8001/api/memories \
   -H "Content-Type: application/json" \
   -d '{"content": "Test with real Cloudflare", "tags": ["real-test"]}'
 ```
@@ -174,20 +178,20 @@ Add to your Claude Desktop configuration:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["-m", "src.mcp_memory_service.server"],
-      "cwd": "/path/to/mcp-memory-service",
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "cloudflare",
-        "CLOUDFLARE_API_TOKEN": "your-api-token",
-        "CLOUDFLARE_ACCOUNT_ID": "your-account-id",
-        "CLOUDFLARE_VECTORIZE_INDEX": "your-vectorize-index",
-        "CLOUDFLARE_D1_DATABASE_ID": "your-d1-database-id"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": ["-m", "src.mcp_memory_service.server"],
+			"cwd": "/path/to/mcp-memory-service",
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "cloudflare",
+				"CLOUDFLARE_API_TOKEN": "your-api-token",
+				"CLOUDFLARE_ACCOUNT_ID": "your-account-id",
+				"CLOUDFLARE_VECTORIZE_INDEX": "your-vectorize-index",
+				"CLOUDFLARE_D1_DATABASE_ID": "your-d1-database-id"
+			}
+		}
+	}
 }
 ```
 
@@ -199,7 +203,7 @@ In Claude Desktop, test these operations:
 # Store a memory
 Please remember that my favorite programming language is Python and I prefer async/await patterns.
 
-# Search memories  
+# Search memories
 What do you remember about my programming preferences?
 
 # Store with tags
@@ -222,60 +226,68 @@ async def performance_test():
     """Test performance with real Cloudflare backend."""
     storage = CloudflareStorage(...)  # Your real credentials
     await storage.initialize()
-    
+
     # Test memory storage performance
     store_times = []
     for i in range(10):
         content = f"Performance test memory {i}"
         memory = Memory(content=content, content_hash=generate_content_hash(content))
-        
+
         start = time.time()
         await storage.store(memory)
         end = time.time()
-        
+
         store_times.append(end - start)
-    
+
     print(f"Average store time: {mean(store_times):.3f}s")
-    
+
     # Test search performance
     search_times = []
     for i in range(5):
         start = time.time()
         results = await storage.retrieve("performance test")
         end = time.time()
-        
+
         search_times.append(end - start)
-    
+
     print(f"Average search time: {mean(search_times):.3f}s")
     print(f"Found {len(results)} memories")
-    
+
     await storage.close()
 ```
 
 ### 🛠️ Troubleshooting Common Issues
 
 #### Authentication Errors
+
 ```
 ERROR: Authentication failed
 ```
+
 **Solution**: Verify API token has correct permissions (Vectorize:Edit, D1:Edit, etc.)
 
 #### Rate Limiting
+
 ```
 WARNING: Rate limited, retrying in 2s
 ```
+
 **Solution**: Normal behavior - the implementation handles this automatically
 
 #### Vectorize Index Not Found
+
 ```
 ValueError: Vectorize index 'test-index' not found
 ```
+
 **Solution**: Create the index with `wrangler vectorize create`
 
 #### D1 Database Issues
+
 ```
 Failed to initialize D1 schema
 ```
+
 **Solution**: Verify database ID and ensure API token has D1 permissions
 
 ### ✨ What Makes This Implementation Special

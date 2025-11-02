@@ -26,7 +26,7 @@ def check_http_server(verbose: bool = False) -> bool:
     """
     # Determine the endpoint from environment
     https_enabled = os.getenv('MCP_HTTPS_ENABLED', 'false').lower() == 'true'
-    http_port = int(os.getenv('MCP_HTTP_PORT', '8000'))
+    http_port = int(os.getenv('MCP_HTTP_PORT', '8001'))
     https_port = int(os.getenv('MCP_HTTPS_PORT', '8443'))
 
     if https_enabled:

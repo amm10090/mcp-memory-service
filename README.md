@@ -27,12 +27,23 @@
 - 🔧 **Customizable Mappings** - JSON config with 168 predefined consolidation rules
 - 📚 **Production-Tested** - Real-world test: 1,049 memories, 63% type reduction, zero data loss
 
+**Additional Windows Enhancements (v8.15.0)**:
+- ✨ **New `/session-start` slash command** - Manual session initialization that works on all platforms
+- 🪟 **Windows-aware installer** - Automatic platform detection prevents configuration issues
+- 📚 **Enhanced documentation** - Comprehensive Windows troubleshooting and workarounds
+- 🛡️ **Safe installation** - Prevents SessionStart hook deadlock on Windows (#160)
+
+**Platform Support**:
+- Windows: `/session-start` command + UserPromptSubmit hooks ✅
+- macOS: All features including automatic SessionStart hooks ✅
+- Linux: All features including automatic SessionStart hooks ✅
+
 **Database Health**:
 - Before: 342 fragmented types, 609 NULL/empty memories
 - After: 128 organized types, all memories properly categorized
 - Impact: Improved query efficiency, consistent naming, better semantic grouping
 
-**📖 Full Details**: [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01) | [Maintenance Guide](scripts/maintenance/README.md#consolidate_memory_typespy-new) | [All Releases](https://github.com/doobidoo/mcp-memory-service/releases)
+**📖 Full Details**: [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01) | [Maintenance Guide](scripts/maintenance/README.md#consolidate_memory_typespy-new) | [Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160) | [All Releases](https://github.com/doobidoo/mcp-memory-service/releases)
 
 ---
 
@@ -53,6 +64,7 @@ cd mcp-memory-service && python install.py
 ### PyPI Installation (Simplest)
 
 **Install from PyPI:**
+
 ```bash
 # Install latest version from PyPI
 pip install mcp-memory-service
@@ -62,17 +74,18 @@ uv pip install mcp-memory-service
 ```
 
 **Then configure Claude Desktop** by adding to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or equivalent:
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "memory",
-      "args": ["server"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "hybrid"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "memory",
+			"args": ["server"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "hybrid"
+			}
+		}
+	}
 }
 ```
 
@@ -81,6 +94,7 @@ For advanced configuration with the interactive installer, clone the repo and ru
 ### Traditional Setup Options
 
 **Universal Installer (Most Compatible):**
+
 ```bash
 # Clone and install with automatic platform detection
 git clone https://github.com/doobidoo/mcp-memory-service.git
@@ -97,11 +111,13 @@ python install.py --storage-backend hybrid
 ```
 
 **📝 Installation Options Explained:**
+
 - **Default (recommended)**: Lightweight SQLite-vec with ONNX embeddings - fast, works offline, <100MB dependencies
 - **`--with-ml`**: Adds PyTorch + sentence-transformers for advanced ML features - heavier but more capable
 - **`--storage-backend hybrid`**: Hybrid backend with SQLite-vec + Cloudflare sync - best for multi-device access
 
 **Docker (Fastest):**
+
 ```bash
 # For MCP protocol (Claude Desktop)
 docker-compose up -d
@@ -111,6 +127,7 @@ docker-compose -f docker-compose.http.yml up -d
 ```
 
 **Smithery (Claude Desktop):**
+
 ```bash
 # Auto-install for Claude Desktop
 npx -y @smithery/cli install @doobidoo/mcp-memory-service --client claude
@@ -119,6 +136,7 @@ npx -y @smithery/cli install @doobidoo/mcp-memory-service --client claude
 ## ⚠️ v6.17.0+ Script Migration Notice
 
 **Updating from an older version?** Scripts have been reorganized for better maintainability:
+
 - **Recommended**: Use `python -m mcp_memory_service.server` in your Claude Desktop config (no path dependencies!)
 - **Alternative 1**: Use `uv run memory server` with UV tooling
 - **Alternative 2**: Update path from `scripts/run_memory_server.py` to `scripts/server/run_memory_server.py`
@@ -137,6 +155,7 @@ These warnings disappear after the first successful run. The service is working 
 ### 🐍 Python 3.13 Compatibility Note
 
 **sqlite-vec** may not have pre-built wheels for Python 3.13 yet. If installation fails:
+
 - The installer will automatically try multiple installation methods
 - Consider using Python 3.12 for the smoothest experience: `brew install python@3.12`
 - Alternative: Use Cloudflare backend with `--storage-backend cloudflare`
@@ -145,6 +164,7 @@ These warnings disappear after the first successful run. The service is working 
 ### 🍎 macOS SQLite Extension Support
 
 **macOS users** may encounter `enable_load_extension` errors with sqlite-vec:
+
 - **System Python** on macOS lacks SQLite extension support by default
 - **Solution**: Use Homebrew Python: `brew install python && rehash`
 - **Alternative**: Use pyenv: `PYTHON_CONFIGURE_OPTS='--enable-loadable-sqlite-extensions' pyenv install 3.12.0`
@@ -156,6 +176,7 @@ These warnings disappear after the first successful run. The service is working 
 **👉 Visit our comprehensive [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki) for detailed guides:**
 
 ### 🧠 v7.1.0 Natural Memory Triggers (Latest)
+
 - **[Natural Memory Triggers v7.1.0 Guide](https://github.com/doobidoo/mcp-memory-service/wiki/Natural-Memory-Triggers-v7.1.0)** - Intelligent automatic memory awareness
   - ✅ **85%+ trigger accuracy** with semantic pattern detection
   - ✅ **Multi-tier performance** (50ms instant → 150ms fast → 500ms intensive)
@@ -164,22 +185,26 @@ These warnings disappear after the first successful run. The service is working 
   - ✅ **Zero-restart installation** with dynamic hook loading
 
 ### 🆕 v7.0.0 OAuth & Team Collaboration
+
 - **[🔐 OAuth 2.1 Setup Guide](https://github.com/doobidoo/mcp-memory-service/wiki/OAuth-2.1-Setup-Guide)** - **NEW!** Complete OAuth 2.1 Dynamic Client Registration guide
 - **[🔗 Integration Guide](https://github.com/doobidoo/mcp-memory-service/wiki/03-Integration-Guide)** - Claude Desktop, **Claude Code HTTP transport**, VS Code, and more
 - **[🛡️ Advanced Configuration](https://github.com/doobidoo/mcp-memory-service/wiki/04-Advanced-Configuration)** - **Updated!** OAuth security, enterprise features
 
 ### 🚀 Setup & Installation
+
 - **[📋 Installation Guide](https://github.com/doobidoo/mcp-memory-service/wiki/01-Installation-Guide)** - Complete installation for all platforms and use cases
 - **[🖥️ Platform Setup Guide](https://github.com/doobidoo/mcp-memory-service/wiki/02-Platform-Setup-Guide)** - Windows, macOS, and Linux optimizations
 - **[⚡ Performance Optimization](https://github.com/doobidoo/mcp-memory-service/wiki/05-Performance-Optimization)** - Speed up queries, optimize resources, scaling
 
 ### 🧠 Advanced Topics
+
 - **[👨‍💻 Development Reference](https://github.com/doobidoo/mcp-memory-service/wiki/06-Development-Reference)** - Claude Code hooks, API reference, debugging
 - **[🔧 Troubleshooting Guide](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING)** - **Updated!** OAuth troubleshooting + common issues
 - **[❓ FAQ](https://github.com/doobidoo/mcp-memory-service/wiki/08-FAQ)** - Frequently asked questions
 - **[📝 Examples](https://github.com/doobidoo/mcp-memory-service/wiki/09-Examples)** - Practical code examples and workflows
 
 ### 📂 Internal Documentation
+
 - **[📊 Repository Statistics](docs/statistics/REPOSITORY_STATISTICS.md)** - 10 months of development metrics, activity patterns, and insights
 - **[🏗️ Architecture Specs](docs/architecture/)** - Search enhancement specifications and design documents
 - **[👩‍💻 Development Docs](docs/development/)** - AI agent instructions, release checklist, refactoring notes
@@ -189,6 +214,7 @@ These warnings disappear after the first successful run. The service is working 
 ## ✨ Key Features
 
 ### 🏆 **Production-Ready Reliability** 🆕 v8.9.0
+
 - **Hybrid Backend** - Fast 5ms local SQLite + background Cloudflare sync (RECOMMENDED default)
   - Zero user-facing latency for cloud operations
   - Automatic multi-device synchronization
@@ -204,6 +230,7 @@ These warnings disappear after the first successful run. The service is working 
   - Graceful fallback to sqlite_vec if cloud setup fails
 
 ### 📄 **Document Ingestion System** v8.6.0
+
 - **Interactive Web UI** - Drag-and-drop document upload with real-time progress
 - **Multiple Formats** - PDF, TXT, MD, JSON with intelligent chunking
 - **Document Viewer** - Browse chunks, view metadata, search content
@@ -213,6 +240,7 @@ These warnings disappear after the first successful run. The service is working 
 - **7 New Endpoints** - Complete REST API for document management
 
 ### 🔐 **Enterprise Authentication & Team Collaboration**
+
 - **OAuth 2.1 Dynamic Client Registration** - RFC 7591 & RFC 8414 compliant
 - **Claude Code HTTP Transport** - Zero-configuration team collaboration
 - **JWT Authentication** - Enterprise-grade security with scope validation
@@ -220,6 +248,7 @@ These warnings disappear after the first successful run. The service is working 
 - **Multi-Auth Support** - OAuth + API keys + optional anonymous access
 
 ### 🧠 **Intelligent Memory Management**
+
 - **Semantic search** with vector embeddings
 - **Natural language time queries** ("yesterday", "last week")
 - **Tag-based organization** with smart categorization
@@ -227,6 +256,7 @@ These warnings disappear after the first successful run. The service is working 
 - **Document-aware search** - Query across uploaded documents and manual memories
 
 ### 🔗 **Universal Compatibility**
+
 - **Claude Desktop** - Native MCP integration
 - **Claude Code** - **HTTP transport** + Memory-aware development with hooks
   - 🪟 **Windows Support**: `/session-start` command for manual session initialization (workaround for issue #160)
@@ -235,6 +265,7 @@ These warnings disappear after the first successful run. The service is working 
 - **13+ AI applications** - REST API compatibility
 
 ### 💾 **Flexible Storage**
+
 - **Hybrid** 🌟 (RECOMMENDED) - Fast local SQLite + background Cloudflare sync (v8.9.0 default)
   - 5ms local reads with zero user-facing latency
   - Multi-device synchronization
@@ -249,6 +280,7 @@ These warnings disappear after the first successful run. The service is working 
 > **Note**: All heavy ML dependencies (PyTorch, sentence-transformers) are now optional to dramatically reduce build times and image sizes. SQLite-vec uses lightweight ONNX embeddings by default. Install with `--with-ml` for full ML capabilities.
 
 ### 🚀 **Production Ready**
+
 - **Cross-platform** - Windows, macOS, Linux
 - **Service installation** - Auto-start background operation
 - **HTTPS/SSL** - Secure connections with OAuth 2.1
@@ -258,6 +290,7 @@ These warnings disappear after the first successful run. The service is working 
 ## 💡 Basic Usage
 
 ### 📄 **Document Ingestion** (v8.6.0+)
+
 ```bash
 # Start server with web interface
 uv run memory server --http
@@ -277,17 +310,19 @@ curl -X POST http://127.0.0.1:8888/api/search \
 ```
 
 ### 🔗 **Team Collaboration with OAuth** (v7.0.0+)
+
 ```bash
 # Start OAuth-enabled server for team collaboration
 export MCP_OAUTH_ENABLED=true
 uv run memory server --http
 
 # Claude Code team members connect via HTTP transport
-claude mcp add --transport http memory-service http://your-server:8000/mcp
+claude mcp add --transport http memory-service http://your-server:8001/mcp
 # → Automatic OAuth discovery, registration, and authentication
 ```
 
 ### 🧠 **Memory Operations**
+
 ```bash
 # Store a memory
 uv run memory store "Fixed race condition in authentication by adding mutex locks"
@@ -305,23 +340,25 @@ uv run memory health
 ## 🔧 Configuration
 
 ### Claude Desktop Integration
+
 **Recommended approach** - Add to your Claude Desktop config (`~/.claude/config.json`):
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["-m", "mcp_memory_service.server"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": ["-m", "mcp_memory_service.server"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
 **Alternative approaches:**
+
 ```json
 // Option 1: UV tooling (if using UV)
 {
@@ -353,6 +390,7 @@ uv run memory health
 ### Environment Variables
 
 **Hybrid Backend (v8.9.0+ RECOMMENDED):**
+
 ```bash
 # Hybrid backend with auto-configured pragmas
 export MCP_MEMORY_STORAGE_BACKEND=hybrid
@@ -366,13 +404,14 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 
 # Enable HTTP API
 export MCP_HTTP_ENABLED=true
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 
 # Security
 export MCP_API_KEY="your-secure-key"
 ```
 
 **SQLite-vec Only (Local):**
+
 ```bash
 # Local-only storage
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
@@ -399,6 +438,7 @@ export MCP_MEMORY_SQLITE_PRAGMAS="busy_timeout=15000,cache_size=20000"
 ## 🛠️ Development
 
 ### Project Structure
+
 ```
 mcp-memory-service/
 ├── src/mcp_memory_service/    # Core application
@@ -412,6 +452,7 @@ mcp-memory-service/
 ```
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes with tests
@@ -431,6 +472,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 ## 📊 In Production
 
 **Real-world metrics from active deployments:**
+
 - **1700+ memories** stored and actively used across teams
 - **5ms local reads** with hybrid backend (v8.9.0)
 - **Zero database locks** with concurrent HTTP + MCP access (v8.9.0)
@@ -459,4 +501,4 @@ Apache License 2.0 - see [LICENSE](LICENSE) for details.
 
 👉 **[Start with our Installation Guide](https://github.com/doobidoo/mcp-memory-service/wiki/01-Installation-Guide)** or explore the **[Wiki](https://github.com/doobidoo/mcp-memory-service/wiki)** for comprehensive documentation.
 
-*Transform your AI conversations into persistent, searchable knowledge that grows with you.*
+_Transform your AI conversations into persistent, searchable knowledge that grows with you._

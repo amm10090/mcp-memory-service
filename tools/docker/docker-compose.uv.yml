@@ -5,7 +5,7 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "8000:8000"
+      - '8001:8001'
     volumes:
       - .:/app
       - ${CHROMA_DB_PATH:-$HOME/mcp-memory/chroma_db}:/app/chroma_db
@@ -21,6 +21,29 @@ services:
       - UV_ACTIVE=1
       - CHROMA_TELEMETRY_IMPL=none
       - ANONYMIZED_TELEMETRY=false
+      # Storage configuration
+      - MCP_MEMORY_STORAGE_BACKEND=cloudflare
+      - CLOUDFLARE_API_TOKEN=8hsVk6pEey-6qEy-DPJowSlYMSk0-pq_ARNrcGnk
+      - CLOUDFLARE_ACCOUNT_ID=198ba79e8177dcc4ca65de919cbfc722
+      - CLOUDFLARE_D1_DATABASE_ID=2bb9ef18-9e17-4356-abe8-fadb3be4df59
+      - CLOUDFLARE_VECTORIZE_INDEX=tutorial-index
+      # HTTP configuration
+      - MCP_HTTP_PORT=8001
+      - MCP_HTTP_HOST=0.0.0.0
+      - MCP_HTTP_ENABLED=true
+      # Authentication configuration
+      - MCP_OAUTH_ENABLED=true
+
+      - MCP_OAUTH_ISSUER=http://localhost:8001 # Match server port
+      - MCP_HTTPS_ENABLED=false # Optional for localhost
+      - MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES=10
+
+      # Optional: HTTPS configuration
+      # - MCP_HTTPS_ENABLED=true
+      # - MCP_HTTPS_PORT=8443
+      # - MCP_SSL_CERT_FILE=/app/certs/cert.pem
+      # - MCP_SSL_KEY_FILE
     restart: unless-stopped
     build:
       context: .

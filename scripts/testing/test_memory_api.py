@@ -25,15 +25,15 @@ import json
 import time
 from typing import Dict, Any
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 async def test_memory_crud():
     """Test the complete CRUD workflow for memories."""
-    
+
     async with aiohttp.ClientSession() as session:
         print("Testing Memory CRUD Operations")
         print("=" * 50)
-        
+
         # Test 1: Health check
         print("\n[1] Testing health check...")
         try:
@@ -48,7 +48,7 @@ async def test_memory_crud():
             print(f"[FAIL] Cannot connect to server: {e}")
             print("NOTE: Make sure the server is running with: python scripts/run_http_server.py")
             return
-        
+
         # Test 2: Store a memory
         print("\n[2] Testing memory storage...")
         test_memory = {
@@ -57,7 +57,7 @@ async def test_memory_crud():
             "memory_type": "test",
             "metadata": {"test_run": time.time(), "importance": "high"}
         }
-        
+
         try:
             async with session.post(
                 f"{BASE_URL}/api/memories",
@@ -82,7 +82,7 @@ async def test_memory_crud():
         except Exception as e:
             print(f"[FAIL] Memory storage error: {e}")
             return
-        
+
         # Test 3: List memories
         print("\n[3] Testing memory listing...")
         try:
@@ -93,7 +93,7 @@ async def test_memory_crud():
                     print(f"✅ Retrieved {len(memories)} memories")
                     print(f"   Total memories: {result['total']}")
                     print(f"   Page: {result['page']}, Has more: {result['has_more']}")
-                    
+
                     if memories:
                         print(f"   First memory preview: {memories[0]['content'][:50]}...")
                 else:
@@ -102,7 +102,7 @@ async def test_memory_crud():
                     print(f"   Error: {error}")
         except Exception as e:
             print(f"❌ Memory listing error: {e}")
-        
+
         # Test 4: Get specific memory
         print("\n4️⃣  Testing specific memory retrieval...")
         try:
@@ -121,7 +121,7 @@ async def test_memory_crud():
                     print(f"   Error: {error}")
         except Exception as e:
             print(f"❌ Memory retrieval error: {e}")
-        
+
         # Test 5: Filter by tag
         print("\n5️⃣  Testing tag filtering...")
         try:
@@ -137,7 +137,7 @@ async def test_memory_crud():
                     print(f"❌ Tag filtering failed: {resp.status}")
         except Exception as e:
             print(f"❌ Tag filtering error: {e}")
-        
+
         # Test 6: Delete memory
         print("\n6️⃣  Testing memory deletion...")
         try:
@@ -155,7 +155,7 @@ async def test_memory_crud():
                     print(f"   Error: {error}")
         except Exception as e:
             print(f"❌ Memory deletion error: {e}")
-        
+
         # Test 7: Verify deletion
         print("\n7️⃣  Verifying memory deletion...")
         try:
@@ -168,7 +168,7 @@ async def test_memory_crud():
                     print(f"❓ Unexpected response: {resp.status}")
         except Exception as e:
             print(f"❌ Deletion verification error: {e}")
-        
+
         print("\n" + "=" * 50)
         print("🎉 Memory CRUD testing completed!")
 

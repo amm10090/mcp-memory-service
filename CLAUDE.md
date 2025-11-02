@@ -89,12 +89,12 @@ df -h /                                               # Check disk space (critic
 journalctl -u mcp-memory-service -f                   # Monitor service logs
 
 # Interactive Dashboard Testing & Validation
-curl "http://127.0.0.1:8000/api/health"              # Health check (expect 200 OK)
-curl "http://127.0.0.1:8000/api/search" -H "Content-Type: application/json" -d '{"query":"test"}' # Semantic search
-curl "http://127.0.0.1:8000/api/search/by-tag" -H "Content-Type: application/json" -d '{"tags":["test"]}' # Tag search
-curl "http://127.0.0.1:8000/api/search/by-time" -H "Content-Type: application/json" -d '{"query":"last week"}' # Time search
-curl -N "http://127.0.0.1:8000/api/events"           # Test SSE real-time updates
-time curl -s "http://127.0.0.1:8000/" > /dev/null     # Dashboard page load performance
+curl "http://127.0.0.1:8001/api/health"              # Health check (expect 200 OK)
+curl "http://127.0.0.1:8001/api/search" -H "Content-Type: application/json" -d '{"query":"test"}' # Semantic search
+curl "http://127.0.0.1:8001/api/search/by-tag" -H "Content-Type: application/json" -d '{"tags":["test"]}' # Tag search
+curl "http://127.0.0.1:8001/api/search/by-time" -H "Content-Type: application/json" -d '{"query":"last week"}' # Time search
+curl -N "http://127.0.0.1:8001/api/events"           # Test SSE real-time updates
+time curl -s "http://127.0.0.1:8001/" > /dev/null     # Dashboard page load performance
 
 # Critical: Post-v8.12.0 Testing Requirements
 # After architecture changes, ALWAYS test:
@@ -107,9 +107,10 @@ time curl -s "http://127.0.0.1:8000/" > /dev/null     # Dashboard page load perf
 ## Architecture
 
 **Core Components:**
+
 - **Server Layer**: MCP protocol implementation with async handlers and global caches (`src/mcp_memory_service/server.py`)
 - **Storage Backends**: SQLite-Vec (fast local, 5ms reads), Cloudflare (edge distribution), Hybrid (SQLite+Cloudflare sync)
-- **Web Interface**: FastAPI dashboard at `http://127.0.0.1:8000/` (HTTP) or `https://localhost:8443/` (HTTPS) with REST API
+- **Web Interface**: FastAPI dashboard at `http://127.0.0.1:8001/` (HTTP) or `https://localhost:8443/` (HTTPS) with REST API
 - **Document Ingestion**: Pluggable loaders for PDF, DOCX, PPTX, text with semtools support
 - **Dual Protocol Memory Hooks** 🆕: Advanced Claude Code integration with HTTP + MCP support
   - **HTTP Protocol**: Web-based memory service connection (`https://localhost:8443/api/*`)
@@ -118,6 +119,7 @@ time curl -s "http://127.0.0.1:8000/" > /dev/null     # Dashboard page load perf
   - **Unified Interface**: Transparent protocol switching via `MemoryClient` wrapper
 
 **Key Design Patterns:**
+
 - Async/await for all I/O operations
 - Type safety with Python 3.10+ hints
 - Platform detection for hardware optimization (CUDA, MPS, DirectML, ROCm)
@@ -130,12 +132,12 @@ time curl -s "http://127.0.0.1:8000/" > /dev/null     # Dashboard page load perf
 
 ### Supported Formats
 
-| Format | Native Parser | With Semtools | Quality |
-|--------|--------------|---------------|---------|
-| PDF | PyPDF2/pdfplumber | ✅ LlamaParse | Excellent (OCR, tables) |
-| DOCX | ❌ Not supported | ✅ LlamaParse | Excellent |
-| PPTX | ❌ Not supported | ✅ LlamaParse | Excellent |
-| TXT/MD | ✅ Built-in | N/A | Perfect |
+| Format | Native Parser     | With Semtools | Quality                 |
+| ------ | ----------------- | ------------- | ----------------------- |
+| PDF    | PyPDF2/pdfplumber | ✅ LlamaParse | Excellent (OCR, tables) |
+| DOCX   | ❌ Not supported  | ✅ LlamaParse | Excellent               |
+| PPTX   | ❌ Not supported  | ✅ LlamaParse | Excellent               |
+| TXT/MD | ✅ Built-in       | N/A           | Perfect                 |
 
 ### Semtools Integration (Optional)
 
@@ -193,6 +195,7 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 **Production-ready web interface** providing complete memory management capabilities with excellent performance.
 
 ### ✅ **Core Features**
+
 - **Complete CRUD Operations**: Create, read, update, delete memories with intuitive UI
 - **Advanced Search**: Semantic search, tag-based filtering, and time-based queries
 - **Real-time Updates**: Server-Sent Events (SSE) with 30-second heartbeat for live dashboard updates
@@ -201,14 +204,16 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 - **OAuth Integration**: Seamless conditional loading for both enabled/disabled OAuth modes
 
 ### 📊 **Performance Benchmarks** (Validated v7.2.2)
-| Component | Target | Actual | Status |
-|-----------|--------|--------|--------|
-| Page Load | <2s | 25ms | ✅ EXCELLENT |
-| Memory Operations | <1s | 26ms | ✅ EXCELLENT |
-| Tag Search | <500ms | <100ms | ✅ EXCELLENT |
-| Large Dataset | 1000+ | 994+ tested | ✅ EXCELLENT |
+
+| Component         | Target | Actual      | Status       |
+| ----------------- | ------ | ----------- | ------------ |
+| Page Load         | <2s    | 25ms        | ✅ EXCELLENT |
+| Memory Operations | <1s    | 26ms        | ✅ EXCELLENT |
+| Tag Search        | <500ms | <100ms      | ✅ EXCELLENT |
+| Large Dataset     | 1000+  | 994+ tested | ✅ EXCELLENT |
 
 ### 🔍 **Search API Endpoints**
+
 ```bash
 # Semantic search (similarity-based)
 POST /api/search
@@ -224,17 +229,19 @@ POST /api/search/by-time
 ```
 
 ### 🎯 **Usage**
+
 - **Dashboard Access**:
-  - HTTP mode (default): `http://127.0.0.1:8000/`
+  - HTTP mode (default): `http://127.0.0.1:8001/`
   - HTTPS mode (when enabled): `https://localhost:8443/`
 - **API Base**: `/api/` for programmatic access
 - **SSE Events**: `/api/events` for real-time updates
-- **Server Ports**: Same port for both HTTP/HTTPS API and MCP protocol (default: 8000)
+- **Server Ports**: Same port for both HTTP/HTTPS API and MCP protocol (default: 8001)
 - **File Structure**: `src/mcp_memory_service/web/static/` (index.html, app.js, style.css)
 
 ## Environment Variables
 
 **Essential Configuration:**
+
 ```bash
 # Storage Backend (Hybrid is RECOMMENDED for production)
 export MCP_MEMORY_STORAGE_BACKEND=hybrid  # hybrid|cloudflare|sqlite_vec
@@ -255,7 +262,7 @@ export MCP_API_KEY="$(openssl rand -base64 32)" # Generate secure API key
 
 **✅ Automatic Configuration Loading (v6.16.0+):** The service now automatically loads `.env` files and respects environment variable precedence. CLI defaults no longer override environment configuration.
 
-**⚠️  Important:** When using hybrid or cloudflare backends, ensure Cloudflare credentials are properly configured. If health checks show "sqlite-vec" when you expect "cloudflare" or "hybrid", this indicates a configuration issue that needs to be resolved.
+**⚠️ Important:** When using hybrid or cloudflare backends, ensure Cloudflare credentials are properly configured. If health checks show "sqlite-vec" when you expect "cloudflare" or "hybrid", this indicates a configuration issue that needs to be resolved.
 
 **Platform Support:** macOS (MPS/CPU), Windows (CUDA/DirectML/CPU), Linux (CUDA/ROCm/CPU)
 
@@ -278,6 +285,7 @@ node ~/.claude/hooks/memory-mode-controller.js sensitivity 0.6
 ```
 
 **Key Features:**
+
 - ✅ **85%+ trigger accuracy** for memory-seeking pattern detection
 - ✅ **Multi-tier processing**: 50ms instant → 150ms fast → 500ms intensive
 - ✅ **CLI management system** for real-time configuration without restart
@@ -285,23 +293,25 @@ node ~/.claude/hooks/memory-mode-controller.js sensitivity 0.6
 - ✅ **Adaptive learning** based on user preferences and usage patterns
 
 **Configuration (`~/.claude/hooks/config.json`):**
+
 ```json
 {
-  "naturalTriggers": {
-    "enabled": true,
-    "triggerThreshold": 0.6,
-    "cooldownPeriod": 30000,
-    "maxMemoriesPerTrigger": 5
-  },
-  "performance": {
-    "defaultProfile": "balanced",
-    "enableMonitoring": true,
-    "autoAdjust": true
-  }
+	"naturalTriggers": {
+		"enabled": true,
+		"triggerThreshold": 0.6,
+		"cooldownPeriod": 30000,
+		"maxMemoriesPerTrigger": 5
+	},
+	"performance": {
+		"defaultProfile": "balanced",
+		"enableMonitoring": true,
+		"autoAdjust": true
+	}
 }
 ```
 
 **Performance Profiles:**
+
 - `speed_focused`: <100ms, instant tier only - minimal memory awareness for speed
 - `balanced`: <200ms, instant + fast tiers - optimal for general development (recommended)
 - `memory_aware`: <500ms, all tiers - maximum context awareness for complex work
@@ -321,14 +331,16 @@ mcp context optimize                           # Get optimization suggestions
 #### **Available Contexts:**
 
 **1. Python MCP Memory Service Context** (`python_mcp_memory`)
+
 - Project-specific patterns for FastAPI, MCP protocol, and storage backends
 - Auto-store: MCP protocol changes, backend configs, performance optimizations
 - Auto-retrieve: Troubleshooting, setup queries, implementation examples
 - Smart tagging: Auto-detects tools (fastapi, cloudflare, sqlite-vec, hybrid, etc.)
 
 **2. Release Workflow Context** 🆕 (`mcp_memory_release_workflow`)
+
 - **PR Review Cycle**: Iterative Gemini Code Assist workflow (Fix → Comment → /gemini review → Wait 1min → Repeat)
-- **Version Management**: Three-file procedure (__init__.py → pyproject.toml → uv lock)
+- **Version Management**: Three-file procedure (**init**.py → pyproject.toml → uv lock)
 - **CHANGELOG Management**: Format guidelines, conflict resolution (combine PR entries)
 - **Documentation Matrix**: When to use CHANGELOG vs Wiki vs CLAUDE.md vs code comments
 - **Release Procedure**: Merge → Tag → Push → Verify workflows (Docker Publish, Publish and Test, HTTP-MCP Bridge)
@@ -339,6 +351,7 @@ mcp context optimize                           # Get optimization suggestions
   - **Triage Intelligence**: Auto-categorizes issues (bug, feature, docs, performance) based on patterns
 
 **Auto-Store Patterns:**
+
 - **Technical**: `MCP protocol`, `tool handler`, `storage backend switch`, `25ms page load`, `embedding cache`
 - **Configuration**: `cloudflare configuration`, `hybrid backend setup`, `oauth integration`
 - **Release Workflow** 🆕: `merged PR`, `gemini review`, `created tag`, `CHANGELOG conflict`, `version bump`
@@ -346,6 +359,7 @@ mcp context optimize                           # Get optimization suggestions
 - **Issue Tracking** 🆕: `fixes #`, `closes #`, `resolves #`, `created issue`, `closed issue #`
 
 **Auto-Retrieve Patterns:**
+
 - **Troubleshooting**: `cloudflare backend error`, `MCP client connection`, `storage backend failed`
 - **Setup**: `backend configuration`, `environment setup`, `claude desktop config`
 - **Development**: `MCP handler example`, `API endpoint pattern`, `async error handling`
@@ -362,6 +376,7 @@ mcp context optimize                           # Get optimization suggestions
 | Troubleshooting | In notes | If common | ✅ Detailed guide | For maintainers |
 
 **Integration Benefits:**
+
 - **Structured Memory Management**: Rule-based triggers complement AI-based Natural Memory Triggers
 - **Project-Specific Intelligence**: Captures MCP Memory Service-specific terminology and workflows
 - **Enhanced Git Workflow**: Automatic semantic commit formatting and branch naming conventions
@@ -377,32 +392,34 @@ mcp context optimize                           # Get optimization suggestions
 
 ```json
 {
-  "memoryService": {
-    "protocol": "auto",
-    "preferredProtocol": "mcp",
-    "fallbackEnabled": true,
-    "http": {
-      "endpoint": "https://localhost:8443",
-      "apiKey": "your-api-key",
-      "healthCheckTimeout": 3000,
-      "useDetailedHealthCheck": true
-    },
-    "mcp": {
-      "serverCommand": ["uv", "run", "memory", "server", "-s", "cloudflare"],
-      "serverWorkingDir": "/Users/yourname/path/to/mcp-memory-service",
-      "connectionTimeout": 5000,
-      "toolCallTimeout": 10000
-    }
-  }
+	"memoryService": {
+		"protocol": "auto",
+		"preferredProtocol": "mcp",
+		"fallbackEnabled": true,
+		"http": {
+			"endpoint": "https://localhost:8443",
+			"apiKey": "your-api-key",
+			"healthCheckTimeout": 3000,
+			"useDetailedHealthCheck": true
+		},
+		"mcp": {
+			"serverCommand": ["uv", "run", "memory", "server", "-s", "cloudflare"],
+			"serverWorkingDir": "/Users/yourname/path/to/mcp-memory-service",
+			"connectionTimeout": 5000,
+			"toolCallTimeout": 10000
+		}
+	}
 }
 ```
 
 **Protocol Options:**
+
 - `"auto"`: Smart detection (MCP → HTTP → Environment fallback)
 - `"http"`: HTTP-only mode (web server at localhost:8443)
 - `"mcp"`: MCP-only mode (direct server process)
 
 **Benefits:**
+
 - **Reliability**: Multiple connection methods ensure hooks always work
 - **Performance**: MCP direct for speed, HTTP for stability
 - **Flexibility**: Works with local development or remote deployments
@@ -410,15 +427,16 @@ mcp context optimize                           # Get optimization suggestions
 
 ## Storage Backends
 
-| Backend | Performance | Use Case | Installation |
-|---------|-------------|----------|--------------|
-| **Hybrid** ⚡ | **Fast (5ms read)** | **🌟 Production (Recommended)** | `install.py --storage-backend hybrid` |
-| **Cloudflare** ☁️ | Network dependent | Cloud-only deployment | `install.py --storage-backend cloudflare` |
-| **SQLite-Vec** 🪶 | Fast (5ms read) | Development, single-user local | `install.py --storage-backend sqlite_vec` |
+| Backend           | Performance         | Use Case                        | Installation                              |
+| ----------------- | ------------------- | ------------------------------- | ----------------------------------------- |
+| **Hybrid** ⚡     | **Fast (5ms read)** | **🌟 Production (Recommended)** | `install.py --storage-backend hybrid`     |
+| **Cloudflare** ☁️ | Network dependent   | Cloud-only deployment           | `install.py --storage-backend cloudflare` |
+| **SQLite-Vec** 🪶 | Fast (5ms read)     | Development, single-user local  | `install.py --storage-backend sqlite_vec` |
 
 ### ⚠️ **Database Lock Prevention (v8.9.0+)**
 
 **CRITICAL**: After adding `MCP_MEMORY_SQLITE_PRAGMAS` to `.env`, you **MUST restart all servers**:
+
 - HTTP server: `kill <PID>` then restart with `uv run python scripts/server/run_http_server.py`
 - MCP servers: Use `/mcp` in Claude Code to reconnect, or restart Claude Desktop
 - Verify: Check logs for `Custom pragma from env: busy_timeout=15000`
@@ -426,6 +444,7 @@ mcp context optimize                           # Get optimization suggestions
 SQLite pragmas are **per-connection**, not global. Long-running servers (days/weeks old) won't pick up new `.env` settings automatically.
 
 **Symptoms of missing pragmas**:
+
 - "database is locked" errors despite v8.9.0+ installation
 - `PRAGMA busy_timeout` returns `0` instead of `15000`
 - Concurrent HTTP + MCP access fails
@@ -451,6 +470,7 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 ```
 
 **Key Benefits:**
+
 - ✅ **5ms read/write performance** (SQLite-vec speed)
 - ✅ **Zero user-facing latency** - Cloud sync happens in background
 - ✅ **Multi-device synchronization** - Access memories everywhere
@@ -458,11 +478,13 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 - ✅ **Automatic failover** - Falls back to SQLite-only if Cloudflare unavailable
 
 **Architecture:**
+
 - **Primary Storage**: SQLite-vec (all user operations)
 - **Secondary Storage**: Cloudflare (background sync)
 - **Background Service**: Async queue with retry logic and health monitoring
 
 **v6.16.0+ Installer Enhancements:**
+
 - **Interactive backend selection** with usage-based recommendations
 - **Automatic Cloudflare credential setup** and `.env` file generation
 - **Connection testing** during installation to validate configuration
@@ -471,6 +493,7 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 ## Development Guidelines
 
 ### 🧠 **Memory & Documentation**
+
 - Use `claude /memory-store` to capture decisions during development
 - Memory operations handle duplicates via content hashing
 - Time parsing supports natural language ("yesterday", "last week")
@@ -520,6 +543,7 @@ Database consolidated from 342 fragmented types to 128 organized types. Use thes
 - Run `python scripts/maintenance/consolidate_memory_types.py --dry-run` to preview type cleanup
 
 ### 🏗️ **Architecture & Testing**
+
 - Storage backends must implement abstract base class
 - All features require corresponding tests
 - **Comprehensive UI Testing**: Validate performance benchmarks (page load <2s, operations <1s)
@@ -527,12 +551,14 @@ Database consolidated from 342 fragmented types to 128 organized types. Use thes
 - **Mobile Testing**: Confirm responsive design at 768px and 1024px breakpoints
 
 ### 🚀 **Version Management Best Practices**
+
 - Document major milestones in CHANGELOG.md with performance metrics
 - Create descriptive git tags for releases (`git tag -a v7.2.2 -m "description"`)
 - Sync develop/main branches after releases
 - Update version in both `__init__.py` and `pyproject.toml`
 
 ### 🔧 **Configuration & Deployment**
+
 - Run `python scripts/validation/validate_configuration_complete.py` when troubleshooting setup issues
 - Use sync utilities for hybrid Cloudflare/SQLite deployments
 - Test both OAuth enabled/disabled modes for web interface
@@ -541,40 +567,47 @@ Database consolidated from 342 fragmented types to 128 organized types. Use thes
 ## Key Endpoints
 
 ### 🌐 **Web Interface**
+
 - **Dashboard**:
-  - HTTP mode (default): `http://127.0.0.1:8000/`
+  - HTTP mode (default): `http://127.0.0.1:8001/`
   - HTTPS mode (when enabled): `https://localhost:8443/`
 - **Health Check**: `/api/health` - Server status and version
 - **SSE Events**: `/api/events` - Real-time updates via Server-Sent Events
 
 ### 📋 **Memory Management**
+
 - **CRUD Operations**: `/api/memories` - Create, read, update, delete memories
 - **Memory Details**: `/api/memories/{hash}` - Get specific memory by content hash
 - **Tags**: `/api/tags` - Get all available tags with counts
 
 ### 🔍 **Search APIs**
+
 - **Semantic Search**: `POST /api/search` - Similarity-based search
 - **Tag Search**: `POST /api/search/by-tag` - Filter by specific tags
 - **Time Search**: `POST /api/search/by-time` - Natural language time queries
 - **Similar**: `GET /api/search/similar/{hash}` - Find memories similar to given hash
 
 ### 📚 **Documentation**
+
 - **Wiki**: `https://github.com/doobidoo/mcp-memory-service/wiki`
 - **API Reference**: Available in dashboard at `/api/docs` (when enabled)
 
 ## Configuration Management
 
 **Validation & Troubleshooting:**
+
 ```bash
 python scripts/validation/validate_configuration_complete.py  # Comprehensive configuration validation
 ```
 
 **Single Source of Truth:**
+
 - **Global Configuration**: `~/.claude.json` (authoritative for all projects)
 - **Project Environment**: `.env` file (Cloudflare credentials only)
 - **No Local Overrides**: Project `.mcp.json` should NOT contain memory server config
 
 **Common Configuration Issues (Pre-v6.16.0):**
+
 - **✅ FIXED**: CLI defaults overriding environment variables
 - **✅ FIXED**: Manual .env file loading required
 - **Multiple Backends**: Conflicting SQLite/Cloudflare configurations
@@ -582,11 +615,13 @@ python scripts/validation/validate_configuration_complete.py  # Comprehensive co
 - **Cache Issues**: Restart Claude Code to refresh MCP connections
 
 **v6.16.0+ Configuration Benefits:**
+
 - **Automatic .env loading**: No manual configuration required
 - **Proper precedence**: Environment variables respected over CLI defaults
 - **Better error messages**: Clear indication of configuration loading issues
 
 **Cloudflare Backend Troubleshooting:**
+
 - **Enhanced Initialization Logging**: Look for these indicators in Claude Desktop logs:
   - 🚀 SERVER INIT: Main server initialization flow
   - ☁️ Cloudflare-specific initialization steps
@@ -599,6 +634,7 @@ python scripts/validation/validate_configuration_complete.py  # Comprehensive co
   - Network timeouts: Enhanced error messages show specific Cloudflare API failures
 
 **Dual Environment Setup (Claude Desktop + Claude Code):**
+
 ```bash
 # Quick setup for both environments - see docs/quick-setup-cloudflare-dual-environment.md
 python scripts/validation/diagnose_backend_config.py  # Validate Cloudflare configuration
@@ -606,6 +642,7 @@ claude mcp list                             # Check Claude Code MCP servers
 ```
 
 **Troubleshooting Health Check Showing Wrong Backend:**
+
 ```bash
 # If health check shows "sqlite-vec" instead of "cloudflare":
 python scripts/validation/diagnose_backend_config.py  # Check configuration
@@ -613,6 +650,7 @@ claude mcp remove memory && claude mcp add memory python -e MCP_MEMORY_STORAGE_B
 ```
 
 **Troubleshooting Hooks Not Retrieving Memories:**
+
 ```bash
 # Check if HTTP server is running
 systemctl --user status mcp-memory-http.service  # Linux
@@ -621,7 +659,7 @@ uv run python scripts/server/check_http_server.py  # All platforms
 
 # Verify hooks endpoint matches server port
 cat ~/.claude/hooks/config.json | grep endpoint
-# Should show: http://127.0.0.1:8000 (not 8889 or other port)
+# Should show: http://127.0.0.1:8001 (not 8889 or other port)
 
 # See detailed guide: docs/http-server-management.md
 ```
@@ -631,28 +669,32 @@ cat ~/.claude/hooks/config.json | grep endpoint
 When configuring Claude Code hooks, **all HTTP endpoints MUST use the same port** across configuration files:
 
 **Configuration Files to Check:**
-1. **`~/.claude/hooks/config.json`** - Line 7: `"endpoint": "http://127.0.0.1:8000"`
-2. **HTTP Server** - Default port: `8000` (check `scripts/server/run_http_server.py`)
-3. **Dashboard/Web Interface** - Separate port: `8000` (HTTP) or `8443` (HTTPS)
+
+1. **`~/.claude/hooks/config.json`** - Line 7: `"endpoint": "http://127.0.0.1:8001"`
+2. **HTTP Server** - Default port: `8001` (check `scripts/server/run_http_server.py`)
+3. **Dashboard/Web Interface** - Separate port: `8001` (HTTP) or `8443` (HTTPS)
 
 **Common Mistakes:**
-- ❌ Port mismatch (config.json shows 8889 but server runs on 8000)
-- ❌ Using dashboard port (8000/8443) instead of API server port (8000)
+
+- ❌ Port mismatch (config.json shows 8889 but server runs on 8001)
+- ❌ Using dashboard port (8001/8443) instead of API server port (8001)
 - ❌ Different ports in `settings.json` MCP server env vs hooks config
 
 **Quick Verification:**
+
 ```bash
 # Windows
-netstat -ano | findstr "8000"
+netstat -ano | findstr "8001"
 
 # Linux/macOS
-lsof -i :8000
+lsof -i :8001
 
 # Check hooks config
 grep endpoint ~/.claude/hooks/config.json
 ```
 
 **Symptoms of Port Mismatch:**
+
 - SessionStart hook hangs/times out
 - Claude Code becomes unresponsive on startup
 - Hooks show "connection timeout" in logs
@@ -661,11 +703,13 @@ grep endpoint ~/.claude/hooks/config.json
 **Troubleshooting Schema Validation Errors After PR Merges:**
 
 **Symptom**: After merging a PR that changes tool schemas, you still see validation errors like:
+
 ```
 Input validation error: 'value' is not of type 'expected_type'
 ```
 
 **Root Cause**: MCP clients (like Claude Code) cache tool schemas when they first connect. Even after:
+
 - ✅ PR is merged
 - ✅ Git pull completes
 - ✅ Code is updated
@@ -674,6 +718,7 @@ Input validation error: 'value' is not of type 'expected_type'
 The old MCP server continues advertising the old schema, and the client validates against this cached schema.
 
 **Diagnosis**:
+
 ```bash
 # 1. Check when PR was merged
 gh pr view <PR_NUMBER> --json mergedAt,title
@@ -685,6 +730,7 @@ ps aux | grep "memory.*server" | grep -v grep
 ```
 
 **Solution**:
+
 ```bash
 # In Claude Code, reconnect MCP:
 /mcp
@@ -700,6 +746,7 @@ systemctl --user restart mcp-memory-http.service
 ```
 
 **Example**: PR #162 (comma-separated tags fix)
+
 - Merged: Oct 20, 2025 17:22 UTC
 - Error persisted: "Input validation error: 'tag1,tag2' is not of type 'array'"
 - Server process: Started Oct 21 10:43 (before git pull)
@@ -708,6 +755,7 @@ systemctl --user restart mcp-memory-http.service
 **See**: `docs/troubleshooting/pr162-schema-caching-issue.md` for detailed analysis
 
 **Emergency Debugging:**
+
 ```bash
 /mcp                                         # Check active MCP servers in Claude
 python scripts/validation/diagnose_backend_config.py  # Run configuration validation
@@ -719,11 +767,12 @@ tail -50 ~/Library/Logs/Claude/mcp-server-memory.log | grep -E "(🚀|☁️|✅
 **⚠️ Accidental Database Creation:**
 
 If you find a `data/memory.db` file in your project directory:
+
 - This is **not** the configured database location
 - It may be created accidentally by tools running in the project directory
 - Safe to delete: `rm -rf data/` (already in `.gitignore`)
 - Configured location: `~/Library/Application Support/mcp-memory/sqlite_vec.db` (macOS)
-- Verify: `curl http://localhost:8000/api/health` should show correct memory count
+- Verify: `curl http://localhost:8001/api/health` should show correct memory count
 
 ### SessionEnd Hook Troubleshooting
 
@@ -826,6 +875,7 @@ curl -sk "https://localhost:8000/api/health"
 **Issue**: [#160](https://github.com/doobidoo/mcp-memory-service/issues/160)
 
 **Symptoms**:
+
 - Claude Code becomes completely unresponsive when starting
 - Hook executes but process never terminates
 - Cannot enter prompts or cancel with Ctrl+C
@@ -835,6 +885,7 @@ curl -sk "https://localhost:8000/api/health"
 Windows-specific subprocess management issue. Even with `process.exit(0)`, Node.js subprocesses with open connections (HTTP client, etc.) don't close all file descriptors properly on Windows, causing the parent process (Claude Code) to wait indefinitely.
 
 **Tested Solutions** (None worked on Windows):
+
 - ❌ Multiple `process.exit(0)` calls
 - ❌ `.finally()` blocks with forced exit
 - ❌ Minimal hook (just print + exit)
@@ -844,9 +895,11 @@ Windows-specific subprocess management issue. Even with `process.exit(0)`, Node.
 **Workarounds**:
 
 1. **Use `/session-start` slash command** (recommended):
+
 ```bash
 claude /session-start
 ```
+
 - Provides same functionality as automatic SessionStart hook
 - Works on all platforms (Windows, macOS, Linux)
 - Safe manual alternative - no configuration changes needed
@@ -854,40 +907,44 @@ claude /session-start
 - See: `claude_commands/session-start.md` for full documentation
 
 2. **Disable SessionStart hooks** (if manually configured):
+
 ```json
 {
-  "hooks": {
-    "SessionStart": []
-  }
+	"hooks": {
+		"SessionStart": []
+	}
 }
 ```
 
 3. **Use UserPromptSubmit hooks instead** (these work on Windows):
+
 ```json
 {
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matchers": ["*"],
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/core/mid-conversation.js",
-            "timeout": 8
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"UserPromptSubmit": [
+			{
+				"matchers": ["*"],
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node ~/.claude/hooks/core/mid-conversation.js",
+						"timeout": 8
+					}
+				]
+			}
+		]
+	}
 }
 ```
 
 4. **Manual hook invocation** (advanced):
+
 ```bash
 node C:\Users\username\.claude\hooks\core\session-start.js
 ```
 
 **Platform Status**:
+
 - macOS: Works correctly ✅
 - Linux: Works correctly ✅ (assumed)
 - Windows: Fatal hang ❌
@@ -897,6 +954,7 @@ node C:\Users\username\.claude\hooks\core\session-start.js
 ---
 
 > **For detailed troubleshooting, architecture, and deployment guides:**
+>
 > - **Backend Configuration Issues**: See [Wiki Troubleshooting Guide](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING#backend-configuration-issues) for comprehensive solutions to missing memories, environment variable issues, Cloudflare auth, hooks timeouts, and more
 > - **Historical Context**: Retrieve memories tagged with `claude-code-reference`
 > - **Quick Diagnostic**: Run `python scripts/validation/diagnose_backend_config.py`

@@ -63,7 +63,7 @@ docker-compose -f docker-compose.http.yml logs 2>&1 | grep -q "Uvicorn\|FastAPI\
 print_status $? "HTTP server started (Uvicorn/FastAPI)"
 
 # Test health endpoint
-HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health 2>/dev/null || echo "000")
+HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/api/health 2>/dev/null || echo "000")
 if [ "$HTTP_RESPONSE" = "200" ]; then
     print_status 0 "Health endpoint responding (HTTP $HTTP_RESPONSE)"
 else
@@ -71,7 +71,7 @@ else
 fi
 
 # Test with API key
-API_TEST=$(curl -s -X POST http://localhost:8000/api/memories \
+API_TEST=$(curl -s -X POST http://localhost:8001/api/memories \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-secure-api-key-here" \
   -d '{"content": "Docker test memory", "tags": ["test"]}' 2>/dev/null | grep -q "success\|unauthorized" && echo "ok" || echo "fail")

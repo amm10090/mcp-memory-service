@@ -47,10 +47,11 @@ async def oauth_authorization_server_metadata() -> OAuthServerMetadata:
         authorization_endpoint=f"{OAUTH_ISSUER}/oauth/authorize",
         token_endpoint=f"{OAUTH_ISSUER}/oauth/token",
         registration_endpoint=f"{OAUTH_ISSUER}/oauth/register",
-        grant_types_supported=["authorization_code", "client_credentials"],
+        grant_types_supported=["authorization_code", "client_credentials", "refresh_token"],
         response_types_supported=["code"],
         token_endpoint_auth_methods_supported=["client_secret_basic", "client_secret_post"],
-        scopes_supported=["read", "write", "admin"],
+        scopes_supported=["read", "write", "admin", "offline_access"],
+        code_challenge_methods_supported=["S256", "plain"],
         id_token_signing_alg_values_supported=[algorithm]
     )
 

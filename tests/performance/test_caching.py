@@ -8,8 +8,15 @@ import time
 import sys
 import os
 
+import pytest
+
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+pytest.importorskip(
+    "mcp_memory_service.storage.chroma",
+    reason="Chroma backend not available in this environment."
+)
 
 from mcp_memory_service.storage.chroma import ChromaMemoryStorage
 from mcp_memory_service.models.memory import Memory

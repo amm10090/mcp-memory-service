@@ -5,6 +5,7 @@ Run the session-start memory awareness hook manually to display relevant memorie
 ## What this does:
 
 Executes the session-start.js hook to:
+
 1. **Load Project Context**: Detect current project and framework
 2. **Analyze Git History**: Review recent commits and changes
 3. **Retrieve Relevant Memories**: Find memories related to current project
@@ -64,22 +65,25 @@ Your UserPromptSubmit hook already runs automatically and retrieves memories whe
 ## Technical Details:
 
 - Runs: `node ~/.claude/hooks/core/session-start.js`
-- HTTP endpoint: http://127.0.0.1:8000
+- HTTP endpoint: http://127.0.0.1:8001
 - Protocol: HTTP (MCP fallback if HTTP unavailable)
 - Performance: <2 seconds typical execution time
 
 ## Troubleshooting:
 
 ### Command not found
+
 - Ensure hooks are installed: `ls ~/.claude/hooks/core/session-start.js`
 - Reinstall: `cd claude-hooks && python install_hooks.py --basic`
 
 ### No memories displayed
-- Check HTTP server is running: `curl http://127.0.0.1:8000/api/health`
+
+- Check HTTP server is running: `curl http://127.0.0.1:8001/api/health`
 - Verify hooks config: `cat ~/.claude/hooks/config.json`
-- Check endpoint matches: Should be `http://127.0.0.1:8000`
+- Check endpoint matches: Should be `http://127.0.0.1:8001`
 
 ### Error: Cannot find module
+
 - **Windows**: Ensure path is quoted properly in hooks config
 - Check Node.js installed: `node --version`
 - Verify hook file exists at expected location

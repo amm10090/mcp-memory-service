@@ -11,13 +11,14 @@
 ./start_hybrid_server.sh
 
 # Server will be available at:
-# - HTTP: http://localhost:8000
+# - HTTP: http://localhost:8001
 # - HTTPS: https://localhost:8443 (if configured)
 ```
 
 ## 📋 Installation Steps Performed
 
 ### 1. Git Update
+
 ```bash
 git stash push  # Saved local changes
 git pull origin main  # Updated from v6.23.0 to v8.5.3
@@ -87,6 +88,7 @@ python scripts/server/run_http_server.py
 ```
 
 Made executable:
+
 ```bash
 chmod +x start_hybrid_server.sh
 ```
@@ -94,15 +96,17 @@ chmod +x start_hybrid_server.sh
 ## 🎯 Key Features in v8.5.3
 
 ### Natural Memory Triggers v8.5.3
+
 - **85%+ Trigger Accuracy**: Intelligent automatic memory retrieval
 - **Dynamic Weight Adjustment**: Auto-calibration for stale memory detection
 - **Critical Bug Fixes**:
   - Empty semantic query handling
   - Time-based search patterns
   - 4 missing `await` keywords in hybrid.py
-  - Port consistency (8000 vs 8443)
+  - Port consistency (8001 vs 8443)
 
 ### Hybrid Backend Architecture
+
 - **Primary Storage**: SQLite-vec (local, ~5ms read/write)
 - **Secondary Storage**: Cloudflare (cloud persistence)
 - **Background Sync**: Automatic bidirectional sync every 5 minutes
@@ -110,6 +114,7 @@ chmod +x start_hybrid_server.sh
 - **Zero Latency**: All user operations hit local SQLite
 
 ### Embedding Model
+
 - **Model**: all-MiniLM-L6-v2
 - **Dimension**: 384
 - **Device**: CPU (PyTorch 2.7.1+cpu)
@@ -117,6 +122,7 @@ chmod +x start_hybrid_server.sh
 ## 📊 Initial Sync Status
 
 On first startup, the system performed an initial sync:
+
 - **Cloudflare Memories**: 1,426
 - **Local Memories**: 25
 - **To Sync**: 1,401 memories from Cloudflare → Local SQLite
@@ -124,6 +130,7 @@ On first startup, the system performed an initial sync:
 ## 🔧 Troubleshooting
 
 ### Check Server Status
+
 ```bash
 # View server logs
 tail -f /tmp/mcp-hybrid-final.log
@@ -132,21 +139,24 @@ tail -f /tmp/mcp-hybrid-final.log
 ps aux | grep run_http_server.py
 
 # Test health endpoint
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```
 
 ### Common Issues
 
 1. **Server shows sqlite_vec instead of hybrid**
+
    - Verify `.env` file exists in project root
    - Ensure `start_hybrid_server.sh` sources `.env` correctly
    - Check logs for "Using storage backend: hybrid"
 
 2. **OAuth errors**
+
    - Set `MCP_OAUTH_ENABLED=false` in `.env` for development
    - Restart server after changes
 
 3. **Cloudflare connection issues**
+
    - Verify API token and credentials in `.env`
    - Check internet connectivity
    - System will fall back to SQLite-only mode
@@ -158,10 +168,10 @@ curl http://localhost:8000/api/health
 
 ## 🔗 API Endpoints
 
-- **Health Check**: `http://localhost:8000/api/health`
-- **Store Memory**: `POST http://localhost:8000/api/memories`
-- **Search Memories**: `GET http://localhost:8000/api/memories?query=...`
-- **Dashboard**: `http://localhost:8000/` (Web UI)
+- **Health Check**: `http://localhost:8001/api/health`
+- **Store Memory**: `POST http://localhost:8001/api/memories`
+- **Search Memories**: `GET http://localhost:8001/api/memories?query=...`
+- **Dashboard**: `http://localhost:8001/` (Web UI)
 
 ## 📚 Additional Resources
 
@@ -176,19 +186,19 @@ Run these commands to verify the installation:
 
 ```bash
 # 1. Check backend configuration
-curl http://localhost:8000/api/health | jq '.storage_backend'
+curl http://localhost:8001/api/health | jq '.storage_backend'
 # Should return: "hybrid"
 
 # 2. Verify Cloudflare connection
-curl http://localhost:8000/api/health | jq '.cloudflare'
+curl http://localhost:8001/api/health | jq '.cloudflare'
 # Should return: {"status": "connected"}
 
 # 3. Check sync status
-curl http://localhost:8000/api/sync/status | jq
+curl http://localhost:8001/api/sync/status | jq
 # Should show sync statistics
 
 # 4. Test memory storage
-curl -X POST http://localhost:8000/api/memories \
+curl -X POST http://localhost:8001/api/memories \
   -H "Content-Type: application/json" \
   -d '{"content": "Test memory from v8.5.3 installation"}'
 ```

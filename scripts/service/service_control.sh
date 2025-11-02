@@ -30,7 +30,7 @@ case "$1" in
         ;;
     health)
         echo "Checking service health..."
-        curl -k -s https://localhost:8000/api/health | jq '.' 2>/dev/null || curl -k -s https://localhost:8000/api/health
+        curl -k -s https://localhost:8001/api/health | jq '.' 2>/dev/null || curl -k -s https://localhost:8001/api/health
         ;;
     enable)
         echo "Enabling service for startup..."

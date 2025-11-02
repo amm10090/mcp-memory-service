@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "🚀 Deploying Dual MCP Services with mDNS..."
-echo "   - FastMCP Server (port 8000) for Claude Code MCP clients"
+echo "   - FastMCP Server (port 8001) for Claude Code MCP clients"
 echo "   - HTTP Dashboard (port 8080) for web interface"
 echo "   - mDNS enabled for both services"
 echo ""
@@ -12,7 +12,7 @@ sudo systemctl stop mcp-memory 2>/dev/null || true
 sudo systemctl stop mcp-http-dashboard 2>/dev/null || true
 
 # Install FastMCP service with mDNS
-echo "📝 Installing FastMCP service (port 8000)..."
+echo "📝 Installing FastMCP service (port 8001)..."
 sudo cp /tmp/fastmcp-server-with-mdns.service /etc/systemd/system/mcp-memory.service
 
 # Install HTTP Dashboard service
@@ -29,7 +29,7 @@ sudo systemctl enable mcp-memory
 sudo systemctl enable mcp-http-dashboard
 
 # Start FastMCP service first
-echo "▶️ Starting FastMCP server (port 8000)..."
+echo "▶️ Starting FastMCP server (port 8001)..."
 sudo systemctl start mcp-memory
 sleep 2
 
@@ -42,7 +42,7 @@ sleep 2
 echo ""
 echo "🔍 Checking service status..."
 echo ""
-echo "=== FastMCP Server (port 8000) ==="
+echo "=== FastMCP Server (port 8001) ==="
 sudo systemctl status mcp-memory --no-pager
 echo ""
 echo "=== HTTP Dashboard (port 8080) ==="
@@ -61,7 +61,7 @@ echo ""
 echo "✅ Dual service deployment complete!"
 echo ""
 echo "🔗 Available Services:"
-echo "   - FastMCP Protocol: http://memory.local:8000/mcp (for Claude Code)"
+echo "   - FastMCP Protocol: http://memory.local:8001/mcp (for Claude Code)"
 echo "   - HTTP Dashboard:   http://memory.local:8080/ (for web access)"
 echo "   - API Endpoints:    http://memory.local:8080/api/* (for curl/scripts)"
 echo ""

@@ -24,7 +24,7 @@ Environment=MCP_HTTPS_ENABLED=false
 Environment=MCP_MDNS_SERVICE_NAME="MCP Memory Service - Hybrid"
 Environment=MCP_HTTP_ENABLED=true
 Environment=MCP_HTTP_HOST=0.0.0.0
-Environment=MCP_HTTP_PORT=8000
+Environment=MCP_HTTP_PORT=8001
 Environment=MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 Environment=MCP_API_KEY=test-key-123
 ExecStart=/home/hkr/repositories/mcp-memory-service/venv/bin/python /home/hkr/repositories/mcp-memory-service/scripts/run_http_server.py
@@ -55,8 +55,8 @@ echo ""
 echo "✅ HTTP server with MCP protocol support is now running!"
 echo ""
 echo "🌐 Available Services:"
-echo "   - HTTP API: http://localhost:8000/api/*"
-echo "   - Dashboard: http://localhost:8000/"
-echo "   - Health: http://localhost:8000/api/health"
+echo "   - HTTP API: http://localhost:8001/api/*"
+echo "   - Dashboard: http://localhost:8001/"
+echo "   - Health: http://localhost:8001/api/health"
 echo ""
 echo "🔧 Next: Add MCP protocol endpoints to the HTTP server"

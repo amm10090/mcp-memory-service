@@ -8,6 +8,11 @@ from datetime import datetime, timedelta, date
 import sys
 import os
 
+pytest.importorskip(
+    "mcp_memory_service.storage.chroma",
+    reason="Chroma backend not available in this environment."
+)
+
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 

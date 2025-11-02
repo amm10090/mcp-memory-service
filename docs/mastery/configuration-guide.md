@@ -28,7 +28,7 @@ SQLite-vec options:
 Chroma options:
 
 - `MCP_MEMORY_CHROMADB_HOST`: Hostname for remote Chroma.
-- `MCP_MEMORY_CHROMADB_PORT`: Port (default 8000).
+- `MCP_MEMORY_CHROMADB_PORT`: Port (default 8001).
 - `MCP_MEMORY_CHROMADB_SSL`: `true|false` for HTTPS.
 - `MCP_MEMORY_CHROMADB_API_KEY`: API key when remote.
 - `MCP_MEMORY_COLLECTION_NAME`: Collection name (default `memory_collection`).
@@ -54,7 +54,7 @@ Cloudflare options (required unless otherwise noted):
 
 - `MCP_HTTP_ENABLED`: `true|false` to enable HTTP interface.
 - `MCP_HTTP_HOST`: Bind address (default `0.0.0.0`).
-- `MCP_HTTP_PORT`: Port (default `8000`).
+- `MCP_HTTP_PORT`: Port (default `8001`).
 - `MCP_CORS_ORIGINS`: Comma-separated origins (default `*`).
 - `MCP_SSE_HEARTBEAT`: SSE heartbeat interval seconds (default 30).
 - `MCP_API_KEY`: Optional API key for HTTP.
@@ -103,4 +103,3 @@ TLS:
   - HNSW space/ef/M values tuned for balanced accuracy and speed; migration messaging warns of deprecation and recommends moving to SQLite-vec.
 - Cloudflare:
   - Ensure required variables are set or the process exits with a clear error and checklist.
-

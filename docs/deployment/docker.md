@@ -35,6 +35,7 @@ docker-compose logs -f
 ```
 
 This will:
+
 - Build a Docker image for the Memory Service
 - Create persistent volumes for the database and backups
 - Start the service configured for MCP clients
@@ -77,14 +78,14 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "8000:8000"
+      - '8001:8001'
     volumes:
       - ./data/chroma_db:/app/chroma_db
       - ./data/backups:/app/backups
     environment:
       - MCP_STANDALONE_MODE=1
       - MCP_HTTP_HOST=0.0.0.0
-      - MCP_HTTP_PORT=8000
+      - MCP_HTTP_PORT=8001
     restart: unless-stopped
 ```
 
@@ -93,7 +94,7 @@ services:
 docker-compose -f docker-compose.standalone.yml up -d
 
 # Test connectivity
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 ```
 
 ### 3. UV Configuration (`docker-compose.uv.yml`)
@@ -108,7 +109,7 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "8000:8000"
+      - '8001:8001'
     volumes:
       - ./data/chroma_db:/app/chroma_db
       - ./data/backups:/app/backups
@@ -147,12 +148,12 @@ docker run -d --name memory-service \
   mcp-memory-service
 
 # Run in standalone/HTTP mode
-docker run -d -p 8000:8000 --name memory-service \
+docker run -d -p 8001:8001 --name memory-service \
   -v $(pwd)/data/chroma_db:/app/chroma_db \
   -v $(pwd)/data/backups:/app/backups \
   -e MCP_STANDALONE_MODE=1 \
   -e MCP_HTTP_HOST=0.0.0.0 \
-  -e MCP_HTTP_PORT=8000 \
+  -e MCP_HTTP_PORT=8001 \
   --stdin --tty \
   mcp-memory-service
 ```
@@ -161,14 +162,14 @@ docker run -d -p 8000:8000 --name memory-service \
 
 ```bash
 # Use pre-built Glama deployment image
-docker run -d -p 8000:8000 \
+docker run -d -p 8001:8001 \
   -v $(pwd)/data:/app/data \
   -e MCP_API_KEY=your-api-key \
   --name memory-service \
   mcp-memory-service:glama
 
 # Use SQLite-vec optimized image
-docker run -d -p 8000:8000 \
+docker run -d -p 8001:8001 \
   -v $(pwd)/data:/app/data \
   -e MCP_MEMORY_STORAGE_BACKEND=sqlite_vec \
   --name memory-service \
@@ -179,21 +180,21 @@ docker run -d -p 8000:8000 \
 
 ### Core Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable                     | Default    | Description                            |
+| ---------------------------- | ---------- | -------------------------------------- |
 | `MCP_MEMORY_STORAGE_BACKEND` | `chromadb` | Storage backend (chromadb, sqlite_vec) |
-| `MCP_HTTP_HOST` | `0.0.0.0` | HTTP server bind address |
-| `MCP_HTTP_PORT` | `8000` | HTTP server port |
-| `MCP_STANDALONE_MODE` | `false` | Enable standalone HTTP mode |
-| `MCP_API_KEY` | `none` | API key for authentication |
+| `MCP_HTTP_HOST`              | `0.0.0.0`  | HTTP server bind address               |
+| `MCP_HTTP_PORT`              | `8001`     | HTTP server port                       |
+| `MCP_STANDALONE_MODE`        | `false`    | Enable standalone HTTP mode            |
+| `MCP_API_KEY`                | `none`     | API key for authentication             |
 
 ### Docker-Specific Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable           | Default       | Description                 |
+| ------------------ | ------------- | --------------------------- |
 | `DOCKER_CONTAINER` | `auto-detect` | Indicates running in Docker |
-| `UV_ACTIVE` | `false` | Use UV package manager |
-| `PYTHONPATH` | `/app/src` | Python module search path |
+| `UV_ACTIVE`        | `false`       | Use UV package manager      |
+| `PYTHONPATH`       | `/app/src`    | Python module search path   |
 
 ### Storage Configuration
 
@@ -224,7 +225,7 @@ services:
   mcp-memory-service:
     image: mcp-memory-service:latest
     ports:
-      - "8000:8000"
+      - '8001:8001'
     environment:
       - MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
       - MCP_HTTP_HOST=0.0.0.0
@@ -279,34 +280,34 @@ spec:
         app: mcp-memory-service
     spec:
       containers:
-      - name: mcp-memory-service
-        image: mcp-memory-service:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: MCP_MEMORY_STORAGE_BACKEND
-          value: "sqlite_vec"
-        - name: MCP_HTTP_HOST
-          value: "0.0.0.0"
-        - name: MCP_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: mcp-api-key
-              key: api-key
-        volumeMounts:
-        - name: data-volume
-          mountPath: /app/data
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 2Gi
-          requests:
-            cpu: 500m
-            memory: 1Gi
+        - name: mcp-memory-service
+          image: mcp-memory-service:latest
+          ports:
+            - containerPort: 8001
+          env:
+            - name: MCP_MEMORY_STORAGE_BACKEND
+              value: 'sqlite_vec'
+            - name: MCP_HTTP_HOST
+              value: '0.0.0.0'
+            - name: MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-api-key
+                  key: api-key
+          volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
       volumes:
-      - name: data-volume
-        persistentVolumeClaim:
-          claimName: mcp-memory-pvc
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: mcp-memory-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -316,8 +317,8 @@ spec:
   selector:
     app: mcp-memory-service
   ports:
-  - port: 80
-    targetPort: 8000
+    - port: 80
+      targetPort: 8001
   type: LoadBalancer
 ```
 
@@ -364,7 +365,7 @@ services:
   mcp-memory-service:
     build: .
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8001/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -387,10 +388,10 @@ version: '3.8'
 services:
   mcp-memory-service:
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 ```
 
 ### Monitoring with Prometheus
@@ -404,12 +405,12 @@ services:
       - MCP_MEMORY_ENABLE_METRICS=true
       - MCP_MEMORY_METRICS_PORT=9090
     ports:
-      - "9090:9090"
-  
+      - '9090:9090'
+
   prometheus:
     image: prom/prometheus
     ports:
-      - "9091:9090"
+      - '9091:9090'
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
 ```
@@ -474,7 +475,7 @@ docker exec memory-service netstat -tlnp
 docker port memory-service
 
 # Test external connectivity
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 ```
 
 #### 5. Model Download Issues
@@ -570,8 +571,8 @@ docker stats memory-service
 
 ```bash
 # Test HTTP endpoints
-curl http://localhost:8000/health
-curl http://localhost:8000/stats
+curl http://localhost:8001/health
+curl http://localhost:8001/stats
 
 # Check database connectivity
 docker exec memory-service python -c "
@@ -612,7 +613,7 @@ API_KEY=$(openssl rand -hex 32)
 # Use with Docker
 docker run -d \
   -e MCP_API_KEY=$API_KEY \
-  -p 8000:8000 \
+  -p 8001:8001 \
   mcp-memory-service
 ```
 
@@ -630,7 +631,7 @@ services:
     volumes:
       - ./certs:/app/certs:ro
     ports:
-      - "8443:8443"
+      - '8443:8443'
 ```
 
 ### Container Security

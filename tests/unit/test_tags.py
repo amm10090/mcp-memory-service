@@ -11,6 +11,11 @@ import sys
 import os
 import pytest
 
+pytest.importorskip(
+    "mcp_memory_service.storage.chroma",
+    reason="Chroma backend not available in this environment."
+)
+
 # Add the path to the MCP Memory Service
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 

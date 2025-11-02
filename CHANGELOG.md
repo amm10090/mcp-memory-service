@@ -99,6 +99,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.15.1] - 2025-10-31
 
 ### Fixed
+
 - **Critical Python Syntax Error in Hook Installer** - Fixed IndentationError in `claude-hooks/install_hooks.py` (line 790)
   - **Issue**: Extra closing braces in SessionEnd hook configuration caused installation to fail
   - **Symptom**: `IndentationError: unexpected indent` when running `python install_hooks.py`
@@ -109,6 +110,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Testing**: Verified successful installation on macOS after fix
 
 ### Technical Details
+
 - **Line Numbers**: 788-791 in install_hooks.py
 - **Error Type**: IndentationError (Python syntax)
 - **Detection Method**: Manual testing during hook reinstallation
@@ -117,6 +119,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.15.0] - 2025-10-31
 
 ### Added
+
 - **`/session-start` Slash Command** - Manual session initialization for all platforms
   - Provides same functionality as automatic SessionStart hook
   - Displays project context, git history, relevant memories
@@ -130,6 +133,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - ✅ Prevents Claude Code hangs on Windows
 
 ### Changed
+
 - **Windows-Aware Installer** - Platform detection and automatic configuration
   - Detects Windows platform during hook installation
   - Automatically skips SessionStart hook configuration on Windows
@@ -140,6 +144,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **User Impact**: Prevents Windows users from accidentally breaking Claude Code
 
 ### Documentation
+
 - **Enhanced Windows Support Documentation**
   - Updated `claude_commands/README.md` with `/session-start` command details
   - Added Windows workaround section to `claude-hooks/README.md`
@@ -148,6 +153,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Updated GitHub issue #160 with new workaround instructions
 
 ### Fixed
+
 - **Windows Installation Experience** - Prevents SessionStart hook deadlock (Issue #160)
   - **Previous Behavior**: Windows users install hooks → Claude Code hangs → frustration
   - **New Behavior**: Windows users see warning → skip SessionStart → use `/session-start` → works
@@ -155,9 +161,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Upstream Issue**: Awaiting fix from Anthropic Claude Code team (claude-code#9542)
 
 ### Technical Details
+
 - **Files Created**: 1 new slash command
   - `claude_commands/session-start.md` - Full command documentation
 - **Files Modified**: 4 files
+
   - `claude-hooks/install_hooks.py` - Windows platform detection and warnings
   - `claude_commands/README.md` - Added `/session-start` to available commands
   - `claude-hooks/README.md` - Added slash command workaround reference
@@ -171,6 +179,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.14.2] - 2025-10-31
 
 ### Performance
+
 - **Optimized MemoryService.get_memory_by_hash()** - O(1) direct lookup replaces O(n) scan (Issue #196)
   - **Previous Implementation**: Loaded ALL memories via `storage.get_all_memories()`, then filtered by hash
   - **New Implementation**: Direct O(1) database lookup via `storage.get_by_hash()`
@@ -181,7 +190,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Memory Usage**: Single memory object vs loading entire dataset into memory
 
 ### Added
+
 - **Abstract method `get_by_hash()` in MemoryStorage base class** (storage/base.py)
+
   - Enforces O(1) direct hash lookup across all storage backends
   - Required implementation for all storage backends
   - Returns `Optional[Memory]` (None if not found)
@@ -193,13 +204,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Follows same pattern as SqliteVecMemoryStorage implementation
 
 ### Changed
+
 - **MemoryService.get_memory_by_hash()** now uses direct storage lookup
   - Removed inefficient `get_all_memories()` + filter approach
   - Simplified implementation (5 lines vs 10 lines)
   - Updated docstring to reflect O(1) lookup
 
 ### Testing
+
 - **Updated unit tests** (tests/unit/test_memory_service.py)
+
   - Mocks now use `storage.get_by_hash()` instead of `storage.get_all_memories()`
   - Added assertions to verify method calls
   - All 3 test cases pass (found, not found, error handling)
@@ -209,7 +223,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Real storage backends (SqliteVecMemoryStorage, HybridMemoryStorage) work correctly
 
 ### Technical Details
+
 - **Files Modified**: 5 files
+
   - `src/mcp_memory_service/storage/base.py`: Added abstract `get_by_hash()` method
   - `src/mcp_memory_service/storage/cloudflare.py`: Implemented `get_by_hash()` (40 lines)
   - `src/mcp_memory_service/services/memory_service.py`: Optimized `get_memory_by_hash()`
@@ -225,6 +241,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.14.1] - 2025-10-31
 
 ### Added
+
 - **Type Safety Improvements** - Comprehensive TypedDict definitions for all MemoryService return types
   - **Problem**: All MemoryService methods returned loose `Dict[str, Any]` types, providing no IDE support or compile-time validation
   - **Solution**: Created 14 specific TypedDict classes for structured return types
@@ -243,6 +260,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - ✅ Zero performance impact - pure static typing
 
 ### Fixed
+
 - **Missing HybridMemoryStorage.get_by_hash()** - Added delegation method to HybridMemoryStorage
   - Fixed `AttributeError: 'HybridMemoryStorage' object has no attribute 'get_by_hash'`
   - All storage backends now implement `get_by_hash()`: SqliteVecMemoryStorage, CloudflareMemoryStorage, HybridMemoryStorage
@@ -250,6 +268,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - See issue #196 for planned optimization to use this method in MemoryService
 
 ### Technical Details
+
 - **Files Modified**:
   - `src/mcp_memory_service/services/memory_service.py`: Added 14 TypedDict classes, updated 6 method signatures
   - `src/mcp_memory_service/storage/hybrid.py`: Added `get_by_hash()` delegation method
@@ -259,6 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.14.0] - 2025-10-31
 
 ### Fixed
+
 - **Comprehensive Tag Normalization** - DRY solution for all tag format handling
   - **Problem**: Inconsistent tag handling across different APIs caused validation errors
     - Top-level `tags` parameter accepted strings, but MemoryService expected arrays
@@ -297,6 +317,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Improved developer experience and reduced friction
 
 ### Technical Details
+
 - **Affected Components**: MemoryService (business logic layer), MCP server documentation
 - **Breaking Changes**: None - fully backward compatible
 - **Tag Merge Behavior**: When tags provided in both parameter and metadata, they are merged and deduplicated
@@ -305,6 +326,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.5] - 2025-10-31
 
 ### Fixed
+
 - **Memory Hooks Display Polish** - Visual improvements for cleaner, more professional CLI output
   - **Issue**: Multiple visual inconsistencies in memory hooks tree structure display
   - **Problems Identified**:
@@ -326,6 +348,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **User Impact**: Professional CLI output, easier to scan, maintains continuous blue tree lines properly
 
 ### Technical Details
+
 - **Affected Component**: Claude Code memory awareness hooks (SessionStart display)
 - **Deployment**: Hooks loaded from repository automatically, no server restart needed
 - **Testing**: Verified with mock execution and real Claude Code session
@@ -333,6 +356,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.4] - 2025-10-30
 
 ### Fixed
+
 - **Critical: Memory Hooks Showing Incorrect Ages** (#195) - Timestamp unit mismatch causing 20,371-day ages
   - **Error**: Memory hooks reporting `avgAge: 20371 days, medianAge: 20371 days` when actual age was 6 days
   - **User Impact**: Recent memories didn't surface, auto-calibration incorrectly triggered "stale memory" warnings
@@ -356,6 +380,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Note**: Affects all users using HTTP protocol for memory hooks
 
 ### Technical Details
+
 - **Affected Component**: Claude Code memory awareness hooks (HTTP protocol path)
 - **File Changed**: `claude-hooks/utilities/memory-client.js` (lines 273-294)
 - **Deployment**: Hooks loaded from repository automatically, no server restart needed
@@ -364,6 +389,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.3] - 2025-10-30
 
 ### Fixed
+
 - **Critical: MCP Memory Tools Broken** - v8.12.0 regression preventing all MCP memory operations
   - **Error**: `KeyError: 'message'` when calling any MCP memory tool (store, retrieve, search, etc.)
   - **User Impact**: MCP tools completely non-functional - "Error storing memory: 'message'"
@@ -381,6 +407,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Note**: Requires MCP server restart (`/mcp` command in Claude Code) to load fix
 
 ### Technical Details
+
 - **Introduced**: v8.12.0 MemoryService architecture refactoring (#176)
 - **Affected Tools**: store_memory, all MCP protocol operations
 - **HTTP API**: Unaffected (different response format requirements)
@@ -389,6 +416,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.2] - 2025-10-30
 
 ### Fixed
+
 - **Memory Sync Script Broken** (#193): Fixed sync_memory_backends.py calling non-existent `store_memory()` method
   - **Error**: `AttributeError: 'CloudflareStorage' object has no attribute 'store_memory'`
   - **User Impact**: Sync script completely non-functional - couldn't sync memories between Cloudflare and SQLite backends
@@ -404,6 +432,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.1] - 2025-10-30
 
 ### Fixed
+
 - **Critical Concurrent Access Bug**: MCP server initialization failed with "database is locked" when HTTP server running
   - **Error**: `sqlite3.OperationalError: database is locked` during MCP tool initialization
   - **User Impact**: MCP memory tools completely non-functional while HTTP server running - "this worked before without any flaws"
@@ -425,6 +454,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Result**: MCP and HTTP servers now coexist without conflicts, maintaining pre-v8.9.0 concurrent access behavior
 
 ### Technical Details
+
 - **Timeline**: Bug discovered during memory consolidation testing, fixed same day
 - **Affected Versions**: v8.9.0 introduced database lock prevention pragmas but didn't fix concurrent initialization
 - **Test Validation**: MCP health check returns healthy with 1857 memories while HTTP server running
@@ -433,7 +463,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.13.0] - 2025-10-29
 
 ### Added
+
 - **HTTP Server Integration Tests** (#190): Comprehensive test suite with 32 tests prevents production bugs like v8.12.0
+
   - `tests/integration/test_http_server_startup.py`: 8 tests for server startup validation
   - `tests/unit/test_fastapi_dependencies.py`: 11 tests for dependency injection
   - `tests/unit/test_storage_interface_compatibility.py`: 13 tests for backend interface consistency
@@ -446,16 +478,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Analytics dashboard now queries entire dataset for truly largest memories
 
 ### Fixed
+
 - **Analytics Dashboard Timezone Bug** (#186): Fixed heatmap calendar showing wrong day-of-week near timezone boundaries
   - JavaScript `new Date('YYYY-MM-DD')` parsed as UTC midnight, but `getDay()` used local timezone
   - Changed to parse date components in local timezone: `new Date(year, month-1, day)`
   - Prevents calendar cells from shifting to previous/next day for users in UTC-12 to UTC+12 timezones
 
 ### Improved
+
 - **Analytics Performance**: Reduced memory sample for average size calculation from 1000→100 memories
 - **Test Coverage**: Zero HTTP integration tests → 32 comprehensive tests covering server startup, dependencies, and API endpoints
 
 ### Documentation
+
 - **MCP Schema Caching** (#173): Closed with comprehensive documentation in CLAUDE.md and troubleshooting guides
   - Root cause: MCP protocol caches tool schemas client-side
   - Workaround: `/mcp` command reconnects server with fresh schema
@@ -464,7 +499,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.12.1] - 2025-10-28
 
 ### Fixed
+
 - **Critical Production Bug #1** (ef2c64d): Import-time default parameter evaluation in `get_memory_service()`
+
   - **Error**: `HTTPException: 503: Storage not initialized` during module import
   - **Root Cause**: Python evaluates default parameters at function definition time, not call time
   - **Impact**: HTTP server couldn't start - module import failed immediately
@@ -472,12 +509,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Technical**: FastAPI's `Depends()` defers evaluation until request time and integrates with dependency injection
 
 - **Critical Production Bug #2** (77de4d2): Syntax error + missing FastAPI Depends import in `memories.py`
+
   - **Error**: `SyntaxError: expected an indented block after 'if' statement on line 152`
   - **Root Cause**: `if INCLUDE_HOSTNAME:` had no indented body, nested if-elif-else block not indented
   - **Impact**: SyntaxError prevented module import + FastAPI validation failure
   - **Fix**: Properly indented hostname resolution logic, added missing `Depends` import to dependencies.py
 
 - **Critical Production Bug #3** (f935c56): Missing `tags` parameter in `count_all_memories()` across all storage backends
+
   - **Error**: `TypeError: count_all_memories() got an unexpected keyword argument 'tags'`
   - **User Report**: "failed to load dashboard data"
   - **Root Cause**: MemoryService called `count_all_memories(memory_type=type, tags=tags)` but base class and implementations didn't accept tags parameter
@@ -492,10 +531,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Performance**: Eliminated O(n) memory loading for simple count operation, now uses efficient SQL COUNT
 
 ### Changed
+
 - **Analytics Endpoint Performance** - Increased monthly sample from 2,000 to 5,000 memories
 - **Code Quality** - Added TODO comments for moving monthly calculations to storage layer
 
 ### Technical Details
+
 - **Timeline**: All 4 bugs discovered and fixed within 4 hours of v8.12.0 release (15:03 UTC → 22:03 UTC)
 - **Post-Mortem**: Created Issue #190 for HTTP server integration tests to prevent future production bugs
 - **Test Coverage Gap**: v8.12.0 had 55 tests but zero HTTP server integration tests
@@ -506,6 +547,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.12.0] - 2025-10-28
 
 ### Added
+
 - **MemoryService Architecture** - Centralized business logic layer (Issue #188, PR #189)
   - Single source of truth for all memory operations
   - Consistent behavior across API endpoints and MCP tools
@@ -518,6 +560,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Performance validation for database-level filtering
 
 ### Fixed
+
 - **Critical Bug #1**: `split_content()` missing required `max_length` parameter
   - Impact: Would crash immediately on any content chunking operation
   - Fix: Added proper parameter passing with storage backend max_length
@@ -541,6 +584,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Fix: Proper unpacking of `(success, message)` tuple from storage operations
 
 ### Changed
+
 - **API Endpoints** - Refactored to use MemoryService dependency injection
   - `/api/memories` (list, create) uses MemoryService
   - `/api/search` endpoints use MemoryService
@@ -554,6 +598,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Efficient tag and type filtering
 
 ### Technical Details
+
 - **Files Modified**: 6 files, 1469 additions, 356 deletions
 - **Test Coverage**: 55 new tests (34 unit + 21 integration)
 - **Bug Discovery**: Comprehensive testing revealed 7 critical bugs that would have made the release non-functional
@@ -564,7 +609,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.11.0] - 2025-10-28
 
 ### Added
+
 - **JSON Document Loader** - Complete implementation of JSON file ingestion (Issue #181, PR #187)
+
   - **Nested Structure Flattening**: Converts nested JSON to searchable text with dot notation or bracket notation
   - **Configurable Strategies**: Choose flattening style, max depth, type inclusion
   - **Array Handling**: Multiple modes (expand, summarize, flatten) for different use cases
@@ -580,17 +627,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Use Cases**: Data dictionaries, reference tables, tabular documentation, log analysis
 
 ### Fixed
+
 - **False Advertising** - Resolved issue where JSON and CSV were listed in `SUPPORTED_FORMATS` but had no loader implementations
   - Previous behavior: Upload would fail with "No loader available" error
   - New behavior: Full functional support with proper chunking and metadata
 
 ### Changed
+
 - **Ingestion Module** - Updated to register new JSON and CSV loaders
 - **Test Coverage** - Added 29 new unit tests (15 JSON + 14 CSV)
 
 ## [8.10.0] - 2025-10-28
 
 ### Added
+
 - **Complete Analytics Dashboard Implementation** (Issue #182, PR #183)
   - Memory Types Breakdown (pie chart)
   - Activity Heatmap (GitHub-style calendar with 90d/6mo/1yr periods)
@@ -600,17 +650,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Streak Tracking (current and longest consecutive days)
 
 ### Fixed
+
 - **Activity Streak Calculation** - Fixed current streak to include today check
 - **Total Days Calculation** - Corrected date span vs active days count
 - **Longest Streak Initialization** - Fixed from 0 to 1
 
 ### Changed
+
 - **Analytics API** - Added 5 new endpoints with Pydantic models
 - **Dashboard Documentation** - Updated wiki with complete analytics features
 
 ## [8.9.0] - 2025-10-27
 
 ### Fixed
+
 - **Database Lock Prevention** - Resolved "database is locked" errors during concurrent HTTP + MCP server access (Issue discovered during performance troubleshooting)
   - **Root Cause**: Default `busy_timeout=5000ms` too short for concurrent writes from multiple MCP clients
   - **Solution**: Applied recommended SQLite pragmas (`busy_timeout=15000,cache_size=20000`)
@@ -619,6 +672,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Documentation**: Updated multi-client architecture docs with pragma recommendations
 
 ### Added
+
 - **Hybrid Backend Installer Support** - Full hybrid backend support in simplified installer (`scripts/installation/install.py`)
   - **Interactive Selection**: Hybrid now option 4 (recommended default) in installer menu
   - **Automatic Configuration**: SQLite pragmas set automatically for sqlite_vec and hybrid backends
@@ -635,6 +689,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Concurrent access support
 
 ### Changed
+
 - **Installer Defaults** - Hybrid backend now recommended for production use
   - Updated argparse choices to include `hybrid` option
   - Changed default selection from sqlite_vec to hybrid (option 4)
@@ -650,6 +705,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Backward compatible with existing installations
 
 ### Technical Details
+
 - **Files Modified**:
   - `scripts/installation/install.py`: Lines 655-659 (compatibility), 758 (menu), 784-802 (selection), 970-1017 (hybrid install), 1123-1133 (env config), 1304 (path config), 1381-1401 (Claude Desktop config), 1808-1821 (final messages)
   - `src/mcp_memory_service/__init__.py`: Line 50 (version bump)
@@ -660,6 +716,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.8.2] - 2025-10-26
 
 ### Fixed
+
 - **Document Upload Tag Validation** - Prevents bloated tags from space-separated file paths (Issue #174, PR #179)
   - **Enhanced Tag Parsing**: Split tags by comma OR space instead of comma only
   - **Robust file:// URI Handling**: Uses `urllib.parse` for proper URL decoding and path handling
@@ -670,6 +727,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Explicit Tag Length Validation**: Tags exceeding 100 chars now raise explicit HTTPException instead of being silently dropped
 
 ### Added
+
 - **Processing Mode Toggle** - UI enhancement for multiple file uploads (PR #179)
   - **Batch Processing**: All files processed together (faster, default)
   - **Individual Processing**: Each file processed separately with better error isolation
@@ -677,6 +735,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Comprehensive help section explaining both modes with pros/cons
 
 ### Changed
+
 - **Code Quality Improvements** - Eliminated code duplication in document upload endpoints (PR #179)
   - Extracted `parse_and_validate_tags()` helper function to eliminate duplicate tag parsing logic
   - Removed 44 lines of duplicate code from `upload_document` and `batch_upload_documents`
@@ -687,6 +746,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.8.1] - 2025-10-26
 
 ### Fixed
+
 - **Error Handling Improvements** - Enhanced robustness in MemoryService and maintenance scripts (Issue #177)
   - **MemoryService.store_memory()**: Added specific exception handling for better error classification
     - `ValueError` → validation errors with "Validation error" messages
@@ -697,6 +757,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `delete_orphaned_vectors_fixed.py`: Already used public API (no changes needed)
 
 ### Added
+
 - **Encapsulation Methods** - New public APIs for Cloudflare storage operations (Issue #177)
   - `CloudflareStorage.delete_vectors_by_ids()` - Batch vector deletion with proper error handling
   - `CloudflareStorage.get_all_memories_bulk()` - Efficient bulk loading without N+1 tag queries
@@ -705,18 +766,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Maintainability**: Public APIs instead of direct access to private `_retry_request` method
 
 ### Changed
+
 - **Dependency Management** - Added conditional typing-extensions for Python 3.10 (Issue #177)
   - Added `"typing-extensions>=4.0.0; python_version < '3.11'"` to pyproject.toml
   - Ensures `NotRequired` import works correctly on Python 3.10
   - No impact on Python 3.11+ installations
 
 ### Review
+
 - **Gemini Code Assist**: "This pull request significantly improves the codebase by enhancing error handling and improving encapsulation... well-executed and contribute to better maintainability"
 - **Feedback Addressed**: All review suggestions implemented, including enhanced exception handling
 
 ## [8.8.0] - 2025-10-26
 
 ### Changed
+
 - **DRY Refactoring** - Eliminated code duplication between MCP and HTTP servers (PR #176, Issue #172)
   - **Problem**: MCP (`mcp_server.py`) and HTTP (`server.py`) servers had 364 lines of duplicated business logic
     - Bug fixes applied to one server were missed in the other (e.g., PR #162 tags validation)
@@ -740,12 +804,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Follow-up**: Minor improvements tracked in Issue #177 (error handling, encapsulation)
 
 ### Fixed
+
 - **Python 3.10 Compatibility** - Added `NotRequired` import fallback (src/mcp_memory_service/mcp_server.py:23-26)
   - Uses `typing.NotRequired` on Python 3.11+
   - Falls back to `typing_extensions.NotRequired` on Python 3.10
   - Ensures compatibility across Python versions
 
 ### Added
+
 - **Maintenance Scripts** - Cloudflare cleanup utilities (from v8.7.1 work)
   - `scripts/maintenance/find_cloudflare_duplicates.py` - Detect duplicates in Cloudflare D1
   - `scripts/maintenance/delete_orphaned_vectors_fixed.py` - Clean orphaned Vectorize vectors
@@ -755,6 +821,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.7.1] - 2025-10-26
 
 ### Fixed
+
 - **Cloudflare Vectorize Deletion** - Fixed vector deletion endpoint bug (src/mcp_memory_service/storage/cloudflare.py:671)
   - **Problem**: Used incorrect endpoint `/delete-by-ids` (hyphens) causing 404 Not Found errors, preventing vector deletion
   - **Solution**:
@@ -769,7 +836,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.7.0] - 2025-10-26
 
 ### Fixed
+
 - **Cosine Similarity Migration** - Fixed 0% similarity scores in search results (src/mcp_memory_service/storage/sqlite_vec.py:187)
+
   - **Problem**: L2 distance metric gave 0% similarity for all searches due to score calculation `max(0, 1-distance)` returning 0 for distances >1.0
   - **Solution**:
     - Migrated embeddings table from L2 to cosine distance metric
@@ -787,6 +856,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Better handling of `memory.memory_type` and `memory.tags` for document results
 
 ### Added
+
 - **Maintenance Scripts** - Comprehensive database maintenance tooling (scripts/maintenance/)
   - **regenerate_embeddings.py** - Regenerate all embeddings after migrations (~5min for 2600 memories)
   - **fast_cleanup_duplicates.sh** - 1800x faster duplicate removal using direct SQL (<5s for 100+ duplicates vs 2.5 hours via API)
@@ -794,6 +864,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **README.md** - Complete documentation with performance benchmarks, best practices, and troubleshooting
 
 ### Technical Details
+
 - **Migration Approach**: Drop-and-recreate embeddings table to change distance metric (vec0 limitation)
 - **Retry Logic**: Exponential backoff for database locking (1s → 2s → 4s delays)
 - **Performance Benchmark**: Direct SQL vs API operations show 1800x speedup for bulk deletions
@@ -802,7 +873,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.6.0] - 2025-10-25
 
 ### Added
+
 - **Document Ingestion System** - Complete document upload and management through web UI (#147, #164)
+
   - **Single and Batch Upload**: Drag-and-drop or file browser support for PDF, TXT, MD, JSON documents
   - **Background Processing**: Async document processing with progress tracking and status updates
   - **Document Management UI**: New Documents tab in web dashboard with full CRUD operations
@@ -826,6 +899,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `docs/development/dashboard-workflow.md` - Development workflow documentation
 
 - **Chunking Configuration Help** - Interactive UI guidance for document chunking parameters
+
   - Inline help panels with collapsible sections for chunk size and overlap settings
   - Visual diagram showing how overlap works between consecutive chunks
   - Pre-configured recommendations (Default: 1000/200, Smaller: 500/100, Larger: 2000/400)
@@ -840,13 +914,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Prevents bloated tags from accidental file path pasting
 
 ### Fixed
+
 - **Security Vulnerabilities** - Multiple critical security fixes addressed
+
   - Path traversal vulnerability in file uploads (use `tempfile.NamedTemporaryFile()`)
   - XSS prevention in tag display and event handlers (escape all user-provided filenames)
   - CSP compliance by removing inline `onclick` handlers, using `addEventListener` instead
   - Proper input validation and sanitization throughout upload flow
 
 - **Document Viewer Critical Bugs** - Comprehensive fixes for document management
+
   - **Chunk Limit**: Increased from 10 to 1000 chunks (was only showing first 10 of 430 chunks)
   - **Upload Session Persistence**: Documents now viewable after server restart (session optional, uses `upload_id` tag search)
   - **Filename Retrieval**: Get filename from memory metadata when session unavailable
@@ -855,12 +932,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Event Listener Deduplication**: Added `documentsListenersSetup` flag to prevent duplicate setup
 
 - **Storage Backend Enhancements** - `delete_by_tags` implementation for document deletion
+
   - Added `delete_by_tags()` method to `MemoryStorage` base class with error aggregation
   - Optimized `SqliteVecMemoryStorage.delete_by_tags()` with single SQL query using OR conditions
   - Added `HybridMemoryStorage.delete_by_tags()` with sync queue support for cloud backends
   - Fixed return value handling (tuple unpacking instead of dict access)
 
 - **UI/UX Improvements** - Enhanced user experience across document management
+
   - Added scrolling to Recent Memories section (max-height: 600px) to prevent infinite expansion
   - Document chunk modal now scrollable (max-height: 400px) for long content
   - Modal visibility fixed with proper `active` class pattern and CSS transitions
@@ -869,6 +948,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Responsive design with mobile breakpoints (768px, 1024px)
 
 - **Resource Management** - Proper cleanup and error handling
+
   - Temp file cleanup moved to `finally` blocks to prevent orphaned files
   - File extension validation fixed (strip leading dot for consistent checking)
   - Session cleanup timing bug fixed (use `total_seconds()` instead of `.seconds`)
@@ -880,18 +960,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Fixes validation errors from schema mismatches
 
 ### Changed
+
 - **API Response Improvements** - Better error messages and status handling
   - Float timestamp handling in document search (convert via `datetime.fromtimestamp()`)
   - Partial success handling for bulk operations with clear error reporting
   - Progress tracking for background tasks with status updates
 
 ### Technical Details
+
 - **Testing**: 19 Gemini Code Assist reviews addressed with comprehensive fixes
 - **Performance**: Document viewer handles 430+ chunks efficiently
 - **Compatibility**: Cross-platform temp file handling (Windows, macOS, Linux)
 - **Code Quality**: Removed dead code, duplicate docstrings, and unused Pydantic models
 
 ### Migration Notes
+
 - No breaking changes - fully backward compatible
 - Existing installations will automatically gain document ingestion capabilities
 - Tag validation only affects new uploads (existing tags unchanged)
@@ -899,6 +982,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.14] - 2025-10-23
 
 ### Added
+
 - **Memory Hooks: Expanded Git Keyword Extraction** - Dramatically improved memory retrieval by capturing more relevant technical terms from git commits
   - **Problem**: Limited keyword extraction (only 12 terms) missed important development context
     - Git analyzer captured only generic terms: `fix, memory, chore, feat, refactor`
@@ -930,6 +1014,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.13] - 2025-10-23
 
 ### Fixed
+
 - **Memory Hooks: Unix Timestamp Parsing in Date Sorting** - Fixed critical bug where memories were not sorting chronologically in Claude Code session start
   - **Root Cause**: JavaScript `Date()` constructor expects milliseconds but API returns Unix timestamps in seconds
   - **Impact**: Memory hooks showed old memories (Oct 11-21) before recent ones (Oct 23) despite `sortByCreationDate: true` configuration
@@ -950,7 +1035,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.12] - 2025-10-23
 
 ### Fixed
+
 - **Dashboard: Analytics Stats Display** - Fixed analytics tab showing 0/N/A for key metrics
+
   - **Root Cause**: Async/sync mismatch in `get_stats()` method implementations
   - **Impact**: Analytics dashboard displayed only "this week" count; total memories, unique tags, and database size showed 0 or N/A
   - **Fix**:
@@ -966,6 +1053,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `src/mcp_memory_service/web/api/mcp.py` - Added await calls
 
 - **Dashboard: Footer Layout** - Fixed footer appearing between header and content instead of at bottom
+
   - **Root Cause**: Footer not included in CSS grid layout template
   - **Impact**: Broken visual layout with footer misplaced in page flow
   - **Fix**:
@@ -984,6 +1072,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.11] - 2025-10-23
 
 ### Fixed
+
 - **Consolidation System: Embedding Retrieval in get_all_memories()** - Fixed SQLite-vec backend to actually retrieve embeddings (PR #171, fixes #169)
   - **Root Cause**: `get_all_memories()` methods only queried `memories` table without joining `memory_embeddings` virtual table
   - **Impact**: Consolidation system received 0 embeddings despite 1773 memories in database, preventing association discovery and semantic clustering
@@ -1006,6 +1095,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.10] - 2025-10-23
 
 ### Fixed
+
 - **Debug Tools: Embedding Retrieval Functionality** - Fixed debug MCP tools for SQLite-vec backend (PR #170, addresses #169)
   - **Root Cause**: `debug_retrieve_memory` function was written for ChromaDB but codebase now uses SQLite-vec storage
   - **Impact**: Debug tools (`debug_retrieve`) were broken, preventing debugging of embedding retrieval operations
@@ -1019,6 +1109,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `src/mcp_memory_service/server.py` - Enhanced debug output formatting
 
 ### Added
+
 - **Debug Tool: get_raw_embedding MCP Tool** - New debugging capability for embedding inspection (PR #170)
   - **Purpose**: Direct debugging of embedding generation process
   - **Features**:
@@ -1032,7 +1123,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.9] - 2025-10-22
 
 ### Fixed
+
 - **Consolidation System: Missing update_memory() Method** - Added `update_memory()` method to all storage backends (PR #166, fixes #165)
+
   - **Root Cause**: Storage backends only implemented `update_memory_metadata()`, but consolidation system's `StorageProtocol` required `update_memory()` for saving consolidated results
   - **Impact**: Prevented consolidation system from saving associations, clusters, compressions, and archived memories
   - **Fix**: Added `update_memory()` method to base `MemoryStorage` class, delegating to `update_memory_metadata()` for proper implementation
@@ -1058,6 +1151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `src/mcp_memory_service/consolidation/decay.py` - Added timezone normalization logic
 
 ### Added
+
 - **Consolidation Documentation** - Comprehensive setup and testing guides
   - `CONSOLIDATION_SETUP.md` - Complete configuration guide for dream-inspired memory consolidation
   - `CONSOLIDATION_TEST_RESULTS.md` - Expected results and troubleshooting guide
@@ -1066,6 +1160,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.8] - 2025-10-22
 
 ### Fixed
+
 - **Critical: Memory Age Calculation in Hooks** - Fixed Unix timestamp handling that caused memories to appear 20,363 days old (55 years) when they were actually recent
   - **Root Cause**: JavaScript's `Date()` constructor expects milliseconds, but SQLite database stores Unix timestamps in seconds. Three functions incorrectly treated seconds as milliseconds: `calculateTimeDecay()`, `calculateRecencyBonus()`, and `analyzeMemoryAgeDistribution()`
   - **Symptoms**:
@@ -1082,6 +1177,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Platform**: All platforms (macOS, Linux, Windows)
 
 ### Changed
+
 - **Installer Enhancement**: Added automatic statusLine configuration for v8.5.7 features
   - Installer now copies `statusline.sh` to `~/.claude/hooks/`
   - Checks for `jq` dependency (required for statusLine parsing)
@@ -1089,6 +1185,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Enhanced documentation for statusLine setup and requirements
 
 ### Documentation
+
 - Added `jq` as required dependency for statusLine feature
 - Documented statusLine configuration in README.md installation section
 - Clarified Unix timestamp handling in memory-scorer.js code comments
@@ -1096,6 +1193,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.7] - 2025-10-21
 
 ### Added
+
 - **SessionStart Hook Visibility Features** - Three complementary methods to view session memory context
   - **Visible Summary Output**: Clean bordered console display showing project, storage, memory count with recent indicator, and git context
   - **Detailed Log File**: Complete session context written to `~/.claude/last-session-context.txt` including project details, storage backend, memory statistics, git analysis, and top loaded memories
@@ -1110,11 +1208,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Platform**: Linux/macOS (Windows SessionStart hook still broken - issue #160)
 
 ### Changed
+
 - SessionStart hook output now provides visible feedback instead of being hidden in system-reminder tags
 - Status line updates every 300ms with latest session memory context
 - Log file automatically updates on each SessionStart hook execution
 
 ### Documentation
+
 - Clarified difference between macOS and Linux hook output behavior (both use system-reminder tags since v2.2.0)
 - Documented that `<session-start-hook>` wrapper tags were intentionally removed in v2.2.0 for cleaner output
 - Added troubleshooting guide for status line visibility features
@@ -1122,6 +1222,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.5.6] - 2025-10-16
 
 ### Fixed
+
 - **Critical: Memory Hooks HTTPS SSL Certificate Validation** - Fixed hooks failing to connect to HTTPS server with self-signed certificates
   - **Root Cause**: Node.js HTTPS requests were rejecting self-signed SSL certificates silently, causing "No active connection available" errors
   - **Symptoms**:
@@ -1137,15 +1238,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Platform**: All platforms (macOS, Linux, Windows)
 
 ### Changed
+
 - Memory hooks now support HTTPS endpoints with self-signed certificates without manual certificate trust configuration
 
 ## [8.5.5] - 2025-10-14
 
 ### Fixed
+
 - **Critical: Claude Code Hooks Configuration** - Fixed session-start hook hanging/unresponsiveness on Windows
   - **Root Cause**: Missing forced process exit in session-start.js caused Node.js event loop to remain active with unclosed connections
   - **Fix 1**: Added `.finally()` block with 100ms delayed `process.exit(0)` to ensure clean termination
-  - **Fix 2**: Corrected port mismatch in `~/.claude/hooks/config.json` (8889 → 8000) to match HTTP server
+  - **Fix 2**: Corrected port mismatch in `~/.claude/hooks/config.json` (8889 → 8001) to match HTTP server
   - **Impact**: Hooks now complete in <15 seconds without hanging, Claude Code remains responsive
   - **Files Modified**:
     - `~/.claude/hooks/core/session-start.js` (lines 1010-1013)
@@ -1153,21 +1256,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Platform**: Windows (also applies to macOS/Linux)
 
 ### Changed
+
 - **Documentation**: Added critical warning section to CLAUDE.md about hook configuration synchronization
   - Documents port mismatch symptoms (hanging hooks, unresponsive Claude Code, connection timeouts)
   - Lists all configuration files to check (`config.json`, HTTP server port, dashboard port)
   - Provides verification commands for Windows/Linux/macOS
-  - Explains common mistakes (using dashboard port 8888/8443 instead of API port 8000)
+  - Explains common mistakes (using dashboard port 8888/8443 instead of API port 8001)
 
 ## [8.5.4] - 2025-10-13
 
 ### Fixed
+
 - **MCP Server**: Added explicit documentation to `store_memory` tool clarifying that `metadata.tags` must be an array, not a comma-separated string
   - Prevents validation error: `Input validation error: '...' is not of type 'array'`
   - Includes clear examples showing correct (array) vs incorrect (string) format
   - Documentation-only change - no code logic modified
 
 ### Changed
+
 - Improved `store_memory` tool docstring with metadata format validation examples in `src/mcp_memory_service/mcp_server.py`
 
 ## [Unreleased]
@@ -1175,14 +1281,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### ✨ **Added**
 
 #### **Linux systemd Service Support**
+
 Added comprehensive systemd user service support for automatic HTTP server management on Linux systems.
 
 **New Files:**
+
 - `scripts/service/mcp-memory-http.service` - systemd user service definition
 - `scripts/service/install_http_service.sh` - Interactive installation script
 - `docs/deployment/systemd-service.md` - Detailed systemd setup guide
 
 **Features:**
+
 - ✅ **Automatic startup** on user login
 - ✅ **Persistent operation** with loginctl linger support
 - ✅ **Automatic restarts** on failure (RestartSec=10)
@@ -1192,6 +1301,7 @@ Added comprehensive systemd user service support for automatic HTTP server manag
 - ✅ **Security hardening** (NoNewPrivileges, PrivateTmp)
 
 **Usage:**
+
 ```bash
 bash scripts/service/install_http_service.sh  # Install
 systemctl --user start mcp-memory-http.service
@@ -1202,11 +1312,13 @@ loginctl enable-linger $USER
 ### 📚 **Documentation**
 
 #### **Enhanced HTTP Server Management**
+
 - Updated `docs/http-server-management.md` with systemd section
-- Added troubleshooting for port mismatch issues (8000 vs 8889)
+- Added troubleshooting for port mismatch issues (8001 vs 8889)
 - Documented hooks endpoint configuration requirements
 
 #### **CLAUDE.md Updates**
+
 - Added systemd commands to Essential Commands section
 - Added "Troubleshooting Hooks Not Retrieving Memories" section
 - Cross-referenced detailed documentation guides
@@ -1214,16 +1326,18 @@ loginctl enable-linger $USER
 ### 🐛 **Fixed**
 
 #### **Hooks Configuration Troubleshooting**
+
 - Documented common port mismatch issue between hooks config and HTTP server
 - Added diagnostic commands for verifying HTTP server status
 - Clarified that HTTP server is **required** for hooks (stdio MCP cannot be used)
 
-**Root Cause:** Many installations had hooks configured for port 8889 while HTTP server runs on port 8000 (default in .env). This caused silent failures where hooks couldn't connect.
+**Root Cause:** Many installations had hooks configured for port 8889 while HTTP server runs on port 8001 (default in .env). This caused silent failures where hooks couldn't connect.
 
 **Solution:**
-1. Update hooks config endpoint to `http://127.0.0.1:8000`
+
+1. Update hooks config endpoint to `http://127.0.0.1:8001`
 2. Verify with: `systemctl --user status mcp-memory-http.service`
-3. Test with: `curl http://127.0.0.1:8000/api/health`
+3. Test with: `curl http://127.0.0.1:8001/api/health`
 
 ### 🔧 **Changed**
 
@@ -1234,9 +1348,11 @@ loginctl enable-linger $USER
 ### 🎨 **Improved**
 
 #### **Claude Code Hooks UI Enhancements**
+
 Significantly improved visual formatting and readability of memory context injection in Claude Code hooks.
 
 **Enhanced Features:**
+
 - ✅ **Intelligent Text Wrapping** - New `wrapText()` function preserves word boundaries and indentation
 - ✅ **Unicode Box Drawing** - Professional visual formatting with ╭╮╯╰ characters for better structure
 - ✅ **Recency-Based Display** - Recent memories (< 7 days) stay prominent, older ones are dimmed
@@ -1244,11 +1360,13 @@ Significantly improved visual formatting and readability of memory context injec
 - ✅ **Enhanced Memory Categorization** - Better visual hierarchy for different memory types
 
 **Files Modified:**
+
 - `claude-hooks/utilities/context-formatter.js` - Major refactoring with wrapText function and enhanced formatMemoryForCLI
 - `claude-hooks/core/session-start.js` - Minor display improvements for project detection
 - `.claude/settings.local.json` - Platform-specific configuration updates (Windows→Linux path migration)
 
 **Performance:**
+
 - No performance impact - Lightweight formatting enhancements
 - Better readability improves development efficiency
 - Maintains all existing functionality while improving presentation
@@ -1260,6 +1378,7 @@ Significantly improved visual formatting and readability of memory context injec
 ### 🐛 **Fixed**
 
 #### **Critical Memory Hooks Bug Fixes (Claude Code Integration)**
+
 Fixed critical bugs preventing memory retrieval in Claude Code session-start hooks. Memory awareness now works correctly with both semantic and time-based searches.
 
 **Problem**: Memory hooks showed "No relevant memories found" despite 1,419 memories in database. Retrieved memories were unrelated (from wrong projects) and sorted incorrectly (oldest first).
@@ -1267,21 +1386,25 @@ Fixed critical bugs preventing memory retrieval in Claude Code session-start hoo
 **Root Causes Fixed:**
 
 1. **Empty Semantic Query Bug** (search.py:264-272)
+
    - **Issue**: `storage.retrieve("")` with empty string returned no results
    - **Fix**: Now uses `get_recent_memories()` when `semantic_query` is empty
    - **Impact**: Time-based searches without semantic filtering now work correctly
 
 2. **Missing Time Expression** (search.py:401-403)
+
    - **Issue**: Hook sends `'last-2-weeks'` but parser didn't recognize it
    - **Fix**: Added support for 'last 2 weeks', 'past 2 weeks', 'last-2-weeks'
    - **Impact**: Phase 2 fallback queries now work properly
 
 3. **Performance Optimization** (search.py:36)
+
    - **Change**: Reduced candidate pool from 1000 to 100 for time filtering
    - **Rationale**: Prevents timeout on large databases, improves response time
    - **Impact**: Search completes in <100ms vs timing out
 
 4. **CRITICAL: Missing `await` Keywords** (hybrid.py:912, 916, 935, 947)
+
    - **Issue**: 4 async methods returned unawaited coroutines, causing server hangs
    - **Methods Fixed**:
      - Line 912: `get_all_tags()`
@@ -1291,6 +1414,7 @@ Fixed critical bugs preventing memory retrieval in Claude Code session-start hoo
    - **Impact**: Hybrid backend now works perfectly (11ms response time!)
 
 5. **JavaScript Refactoring** (memory-client.js:213-293)
+
    - **Issue**: ~100 lines of duplicated HTTP request code
    - **Fix**: Created `_performApiPost()` helper to eliminate duplication
    - **Impact**: Improved maintainability, DRY compliance
@@ -1301,6 +1425,7 @@ Fixed critical bugs preventing memory retrieval in Claude Code session-start hoo
    - **Impact**: Prevents connection failures with development endpoints
 
 **Testing & Verification:**
+
 ```bash
 # Before fix: Timeout
 curl -s -m 5 "http://127.0.0.1:8889/api/search/by-time" -H "Content-Type: application/json" -d '{"query":"last-2-weeks","n_results":10}'
@@ -1313,6 +1438,7 @@ curl -s -m 5 "http://127.0.0.1:8889/api/search/by-time" -H "Content-Type: applic
 ```
 
 **Files Modified:**
+
 - `src/mcp_memory_service/web/api/search.py` - Empty query fix, time expression, pool size, UTC timezone
 - `src/mcp_memory_service/storage/hybrid.py` - Fixed 4 missing await keywords
 - `claude-hooks/utilities/memory-client.js` - Refactored HTTP helpers, port consistency, API contract
@@ -1328,15 +1454,18 @@ curl -s -m 5 "http://127.0.0.1:8889/api/search/by-time" -H "Content-Type: applic
 ### 🐛 **Fixed**
 
 #### **v8.5.0 Implementation Missing (Code Completion)**
+
 Complete implementation of Hybrid Backend Sync Dashboard feature that was documented in v8.5.0 CHANGELOG but code was never committed.
 
 **Context**: v8.5.0 release (c241292) included CHANGELOG documentation and version bump but the actual implementation files were accidentally not staged/committed. This release completes the v8.5.0 feature by committing the missing implementation code.
 
 **Files Added:**
+
 - `src/mcp_memory_service/web/api/sync.py` - Sync API endpoints (GET /api/sync/status, POST /api/sync/force)
 - `start_http_server.sh` - Cross-platform HTTP server management script
 
 **Files Modified:**
+
 - `src/mcp_memory_service/web/app.py` - Integrated sync router
 - `src/mcp_memory_service/web/static/app.js` - Sync status UI with polling
 - `src/mcp_memory_service/web/static/index.html` - Sync status bar markup
@@ -1346,6 +1475,7 @@ Complete implementation of Hybrid Backend Sync Dashboard feature that was docume
 - `src/mcp_memory_service/storage/sqlite_vec.py` - Database path fixes
 
 **Additional Improvements:**
+
 - `claude-hooks/utilities/context-formatter.js` - Tree text wrapping improvements for better CLI output
 
 **Impact**: Users can now access the complete Hybrid Backend Sync Dashboard feature including manual sync triggers and real-time status monitoring as originally intended in v8.5.0.
@@ -1355,12 +1485,14 @@ Complete implementation of Hybrid Backend Sync Dashboard feature that was docume
 ### 🎯 **New Features**
 
 #### **Dynamic Memory Weight Adjustment (Claude Code Hooks)**
+
 Intelligent auto-calibration prevents stale memories from dominating session context when recent development exists.
 
 **Problem Solved:**
 Users reported "Current Development" section showing outdated memories (24-57 days old) instead of recent work from the last 7 days. Root cause: static configuration couldn't adapt to mismatches between git activity and memory age.
 
 **Solution - Memory Age Distribution Analyzer:**
+
 - **Auto-Detection**: Analyzes memory age percentiles (median, p75, p90, avg)
 - **Staleness Detection**: Triggers when median > 30 days or < 20% recent memories
 - **Smart Calibration**: Automatically adjusts weights:
@@ -1369,6 +1501,7 @@ Users reported "Current Development" section showing outdated memories (24-57 da
 - **Impact**: Stale memory sets automatically prioritize any recent memories
 
 **Solution - Adaptive Git Context Weight:**
+
 - **Scenario 1**: Recent commits (< 7d) + Stale memories (median > 30d)
   - Reduces git weight by 30%: `1.8x → 1.3x`
   - Prevents old git-related memories from dominating
@@ -1380,18 +1513,20 @@ Users reported "Current Development" section showing outdated memories (24-57 da
   - Lets recent non-git memories surface
 
 **Configuration Options:**
+
 ```json
 {
-  "memoryScoring": {
-    "autoCalibrate": true  // Enable/disable auto-calibration
-  },
-  "gitAnalysis": {
-    "adaptiveGitWeight": true  // Enable/disable adaptive git weight
-  }
+	"memoryScoring": {
+		"autoCalibrate": true // Enable/disable auto-calibration
+	},
+	"gitAnalysis": {
+		"adaptiveGitWeight": true // Enable/disable adaptive git weight
+	}
 }
 ```
 
 **Transparency Output:**
+
 ```
 🎯 Auto-Calibration → Stale memory set detected (median: 54d old, 0% recent)
    Adjusted Weights → timeDecay: 0.50, tagRelevance: 0.20
@@ -1399,9 +1534,11 @@ Users reported "Current Development" section showing outdated memories (24-57 da
 ```
 
 **Files Added:**
+
 - `claude-hooks/test-adaptive-weights.js` - Comprehensive test scenarios
 
 **Files Modified:**
+
 - `claude-hooks/utilities/memory-scorer.js` (+162 lines):
   - `analyzeMemoryAgeDistribution()` - Detects staleness and recommends adjustments
   - `calculateAdaptiveGitWeight()` - Dynamically adjusts git boost based on context alignment
@@ -1414,6 +1551,7 @@ Users reported "Current Development" section showing outdated memories (24-57 da
   - Added `gitAnalysis.adaptiveGitWeight: true` (default enabled)
 
 **Benefits:**
+
 - ✅ **Automatic Detection**: No manual config changes when memories become stale
 - ✅ **Context-Aware**: Git boost only applies when it enhances (not harms) relevance
 - ✅ **Transparent**: Shows reasoning for adjustments in session output
@@ -1421,6 +1559,7 @@ Users reported "Current Development" section showing outdated memories (24-57 da
 - ✅ **Backward Compatible**: Defaults preserve existing behavior when memories are recent
 
 **Test Results:**
+
 - Scenario 1 (Stale): Automatically calibrated weights and reduced git boost 1.8x → 1.3x
 - Scenario 2 (Recent): No calibration needed, preserved git weight at 1.8x
 - Both scenarios working as expected, preventing outdated context issues
@@ -1430,9 +1569,11 @@ Users reported "Current Development" section showing outdated memories (24-57 da
 ### 🎉 **New Features**
 
 #### **Hybrid Backend Sync Dashboard**
+
 Manual sync management UI with real-time status monitoring for hybrid storage backend.
 
 **Features:**
+
 - **Sync Status Bar** - Color-coded visual indicator between navigation and main content
   - 🔄 Syncing (blue gradient) - Active synchronization in progress
   - ⏱️ Pending (yellow gradient) - Operations queued, shows ETA and count
@@ -1445,6 +1586,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
   - `POST /api/sync/force` - Manually trigger immediate sync
 
 **Technical Implementation:**
+
 - New sync API router: `src/mcp_memory_service/web/api/sync.py` (complete CRUD endpoints)
 - Frontend integration: `src/mcp_memory_service/web/static/app.js:379-485` (status monitoring + manual sync)
 - CSS styling: `src/mcp_memory_service/web/static/style.css:292-403` (grid layout + animations)
@@ -1454,17 +1596,20 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Fixed**
 
 - **CSS Grid Layout Bug** - Sync status bar invisible despite JavaScript detecting hybrid mode
+
   - **Root Cause**: `.app-container` grid layout defined `"header" "nav" "main"` but sync bar wasn't assigned a grid area
   - **Fix**: Added `grid-area: sync` to `.sync-status-bar` and expanded grid to include sync row
   - **Files**: `style.css:101-109` (grid layout), `style.css:293` (sync bar grid area)
 
 - **Sync Status Logic Error** - "Sync Now" button incorrectly disabled when background service running
+
   - **Root Cause**: Confused `is_running` (service alive) with `actively_syncing` (active sync operation)
   - **Fix**: Changed status determination to check `actively_syncing` field instead of `is_running`
   - **Impact**: Button now correctly enabled when 0 pending operations
   - **File**: `src/mcp_memory_service/web/api/sync.py:106-118`
 
 - **Database Path Mismatch** - HTTP server using different SQLite database than Claude Code MCP
+
   - **Root Cause**: Missing `MCP_MEMORY_SQLITE_PATH` environment variable in HTTP server startup
   - **Fix**: Added explicit database path to match Claude Desktop config
   - **File**: `start_http_server.sh:4` (added `MCP_MEMORY_SQLITE_PATH` export)
@@ -1478,10 +1623,12 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🔧 **Improvements**
 
 - **Enhanced Health Check** - `/api/health/detailed` now includes sync status for hybrid backend
+
   - Shows sync service state, pending operations, last sync time, failed operations
   - File: `src/mcp_memory_service/web/api/health.py:141-154`
 
 - **Cleaned Database Files** - Removed obsolete SQLite databases to prevent confusion
+
   - Deleted: `memory_http.db` (701 memories), `backup_sqlite_vec.db`, `sqlite_vec_backup_20250822_230643.db`
 
 - **Updated Startup Script** - `start_http_server.sh` now includes all required environment variables
@@ -1498,12 +1645,14 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ## [8.4.3] - 2025-10-11
 
 ### 🐛 Fixed
+
 - **Sync Script Import Path:** Fixed `scripts/sync/sync_memory_backends.py` module import path to work correctly from scripts directory
   - Changed `sys.path.insert(0, str(Path(__file__).parent.parent))` → `sys.path.insert(0, str(Path(__file__).parent.parent.parent))`
   - Resolves `ModuleNotFoundError: No module named 'src'` when using manual sync commands
   - Fixes: `python scripts/sync/claude_sync_commands.py backup/restore/sync` commands
 
 ### 📊 Impact
+
 - Users can now successfully run manual sync utilities for hybrid backend
 - Manual Cloudflare ↔ SQLite synchronization commands now functional
 
@@ -1512,22 +1661,26 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🎯 **Performance & Optimization**
 
 #### **Additional MCP Context Optimization: Debug Tools Removal**
+
 - **Problem**: Continuing context optimization efforts from v8.4.1, identified 2 additional low-value debug tools
 - **Solution**: Removed debug/maintenance MCP tools with zero test dependencies
 
 **Tools Removed:**
+
 - `get_embedding` (606 tokens) - Returns raw embedding vectors; low-level debugging only
 - `check_embedding_model` (553 tokens) - Checks if embedding model loaded; errors surface naturally
 
 **Rationale:** These were specialized debugging tools rarely needed in practice. Embedding errors are caught during normal retrieval operations, and raw embedding inspection is a niche development task not required for AI assistant integration.
 
 **Impact:**
+
 - ✅ **MCP tools**: 26.8k → 25.6k tokens (4.5% additional reduction, -1.2k tokens)
 - ✅ **Total optimization since v8.4.0**: 31.4k → 25.6k tokens (18.5% reduction, -5.8k tokens saved)
 - ✅ **Zero breaking changes**: No test coverage for these tools
 - ✅ **Conservative approach**: Removed only tools with no dependencies
 
 **Files Modified:**
+
 - `src/mcp_memory_service/server.py`: Removed 2 tool definitions, handlers, and implementations (~61 lines)
 
 **Note:** Further optimization possible with MODERATE approach (debug_retrieve, exact_match_retrieve, cleanup_duplicates) if additional context savings needed.
@@ -1537,10 +1690,12 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🎯 **Performance & Optimization**
 
 #### **MCP Context Optimization: Dashboard Tools Removal**
+
 - **Problem**: MCP tools consuming 31.4k tokens (15.7% of context budget) with redundant dashboard variants that duplicated web UI functionality
 - **Solution**: Removed 8 dashboard-specific MCP tools that were unnecessary for Claude Code integration
 
 **Tools Removed:**
+
 - `dashboard_check_health`, `dashboard_recall_memory`, `dashboard_retrieve_memory`
 - `dashboard_search_by_tag`, `dashboard_get_stats`, `dashboard_optimize_db`
 - `dashboard_create_backup`, `dashboard_delete_memory`
@@ -1548,11 +1703,13 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 **Rationale:** Web dashboard uses REST API endpoints (`/api/*`), not MCP tools. These were legacy wrappers created during early dashboard development that bloated context without providing value for AI assistant integration.
 
 **Impact:**
+
 - ✅ **MCP tools**: 31.4k → 26.8k tokens (15% reduction, -4.6k tokens saved)
 - ✅ **Zero functional impact**: Core memory tools preserved (`check_database_health`, `recall_memory`, etc.)
 - ✅ **Cleaner separation**: MCP protocol for Claude Code integration, HTTP REST API for web dashboard
 
 **Files Modified:**
+
 - `src/mcp_memory_service/server.py`: Removed 8 tool definitions, call_tool handlers, and method implementations (~506 lines)
 - `docs/api/tag-standardization.md`: Updated to use `check_database_health()` instead of `dashboard_get_stats()`
 - `docs/maintenance/memory-maintenance.md`: Removed redundant dashboard tool reference
@@ -1566,10 +1723,12 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### ✨ **Features & Improvements**
 
 #### **Claude Code Memory Hooks Recency Optimization**
+
 - **Problem Solved**: Memory hooks were surfacing 60+ day old memories instead of recent development work (Oct v8.0-v8.3), causing critical development context to be missing despite being stored in the database
 - **Core Enhancement**: Comprehensive recency optimization with rebalanced scoring algorithm to prioritize recent memories over well-tagged old content
 
 ##### **Scoring Algorithm Improvements**
+
 - **Weight Rebalancing** (`config.json`):
   - `timeDecay`: 0.25 → 0.40 (+60% influence on recency)
   - `tagRelevance`: 0.35 → 0.25 (-29% to reduce tag dominance)
@@ -1585,6 +1744,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Higher Quality Bar**: `minRelevanceScore`: 0.3 → 0.4 (filters generic old content)
 
 ##### **New Recency Bonus System** (`memory-scorer.js`)
+
 - **Tiered Additive Bonuses**:
   - < 7 days: +0.15 bonus (strong boost for last week)
   - < 14 days: +0.10 bonus (moderate boost for last 2 weeks)
@@ -1593,6 +1753,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Impact**: Ensures recent memories always get advantage regardless of tag relevance
 
 ##### **Documentation & Testing**
+
 - **Added**: Comprehensive `CONFIGURATION.md` (450+ lines)
   - All scoring weights with impact analysis
   - Time decay behavior and examples
@@ -1606,6 +1767,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
   - Confirms recent memories rank higher (success criteria: 2 of top 3 < 7 days old)
 
 ##### **Results**
+
 - **Before**: Top 3 memories averaged 45+ days old (July-Sept content)
 - **After**: All top 3 memories < 7 days old ✅
 - **Validation**: 80% higher likelihood of surfacing recent work
@@ -1613,6 +1775,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 **Impact**: ✅ Memory hooks now reliably surface recent development context, significantly improving Claude Code session awareness for active projects
 
 ##### **Technical Details**
+
 - **PR**: [#155](https://github.com/doobidoo/mcp-memory-service/pull/155) - Memory hooks recency optimization
 - **Files Modified**:
   - Configuration: `claude-hooks/config.json` (scoring weights, time windows, git context)
@@ -1631,6 +1794,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### ✨ **Features & Improvements**
 
 #### **HTTP Server Management Tools**
+
 - **Added**: Cross-platform HTTP server management utilities for Claude Code Natural Memory Triggers
 - **New Scripts**:
   - `scripts/server/check_http_server.py`: Health check utility for HTTP server status verification
@@ -1660,6 +1824,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 **Impact**: ✅ Streamlined HTTP server management, improved Natural Memory Triggers reliability, better cross-platform support
 
 ##### **Technical Details**
+
 - **PR**: [#154](https://github.com/doobidoo/mcp-memory-service/pull/154) - HTTP server management tools
 - **Files Added**: 4 new files
   - Scripts: `check_http_server.py`, `start_http_server.sh`, `start_http_server.bat`
@@ -1676,6 +1841,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🧹 **Refactoring & Code Cleanup**
 
 #### **Complete ChromaDB Backend Removal**
+
 - **Removed**: ~300-500 lines of ChromaDB dead code following v8.0.0 deprecation
 - **Scope**: Complete cleanup across 18 files including configuration, CLI, server, storage, utilities, and web interface
 - **Changes**:
@@ -1690,6 +1856,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **SUPPORTED_BACKENDS**: Now correctly shows `['sqlite_vec', 'sqlite-vec', 'cloudflare', 'hybrid']`
 
 #### **CLI Backend Consistency Enhancement**
+
 - **Added**: 'sqlite-vec' hyphenated alias to all CLI storage backend choices
 - **Affected commands**: `server`, `status`, `ingest_document`, `ingest_directory`
 - **Rationale**: Ensures CLI behavior matches SUPPORTED_BACKENDS configuration
@@ -1698,6 +1865,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Bug Fixes**
 
 #### **Dashboard System Information Display (Issue #151)**
+
 - **Fixed**: Dashboard showing "N/A" for embedding model, embedding dimensions, and database size on non-hybrid backends
 - **Root cause**: JavaScript expected hybrid-backend-specific nested paths (`storage.primary_stats.*`)
 - **Solution**: Added fallback paths in `app.js` SYSTEM_INFO_CONFIG:
@@ -1707,6 +1875,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Impact**: ✅ Dashboard now correctly displays system information for sqlite-vec, cloudflare, and hybrid backends
 
 ##### **Technical Details**
+
 - **PR**: [#153](https://github.com/doobidoo/mcp-memory-service/pull/153) - ChromaDB dead code removal + Issue #151 fix
 - **Files Modified**: 18 files
   - Core cleanup: `config.py`, `server.py`, `mcp_server.py`, `utils/db_utils.py`
@@ -1723,6 +1892,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Bug Fixes**
 
 #### **Critical: Memory Hooks JSON Parsing Failure**
+
 - **Fixed**: Memory awareness hooks completely broken - unable to retrieve memories due to JSON parsing errors
 - **Root cause**: Naive string replacement in HTTP client destroyed valid JSON
   - `replace(/'/g, '"')` broke apostrophes in content (e.g., "it's" → "it"s")
@@ -1735,12 +1905,14 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Impact**: ✅ Memory hooks now successfully retrieve context-relevant memories at session start
 
 #### **HTTP Server Backend Configuration Override**
+
 - **Fixed**: HTTP server ignored `.env` configuration, forcing `sqlite_vec` instead of configured `hybrid` backend
 - **Root cause**: `run_http_server.py` used `os.environ.setdefault()` after `.env` loading, overriding user config
 - **Solution**: Commented out the backend override line to respect `.env` settings
 - **Impact**: ✅ Hybrid backend now works correctly via HTTP server
 
 ##### **Technical Details**
+
 - **Files**:
   - `C:\Users\heinrich.krupp\.claude\hooks\utilities\memory-client.js` - Fixed `queryMemoriesHTTP()` method
   - `scripts/server/run_http_server.py` - Removed backend configuration override (line 148)
@@ -1751,16 +1923,18 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### ✨ **Enhancements**
 
 #### **Dashboard Footer Navigation**
+
 - **Added**: Comprehensive footer to dashboard with three sections
   - **Documentation**: Links to Wiki Home, Troubleshooting Guide, Backend Configuration Issues
   - **Resources**: GitHub Repository (with icon), Portfolio (doobidoo.github.io), API Documentation
   - **About**: Project description, Apache 2.0 license link, copyright notice
-- **Features**: Security attributes (target="_blank", rel="noopener"), responsive design (mobile breakpoint 768px)
+- **Features**: Security attributes (target="\_blank", rel="noopener"), responsive design (mobile breakpoint 768px)
 - **Impact**: ✅ Improved discoverability of documentation and resources from dashboard
 
 ### 🐛 **Bug Fixes**
 
 #### **Dark Mode Footer Styling**
+
 - **Critical fix**: Footer appearing bright/light in dark mode instead of dark
 - **Root cause**: Incorrect CSS variable usage - using wrong end of inverted color scale
   - Background used `var(--neutral-900)` (#f9fafb - light) instead of `var(--neutral-100)` (#1f2937 - dark)
@@ -1769,6 +1943,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Impact**: ✅ Footer now properly displays with dark background and light text in dark mode
 
 ##### **Technical Details**
+
 - **Files**:
   - `src/mcp_memory_service/web/static/index.html` - Footer HTML structure (lines 463-517)
   - `src/mcp_memory_service/web/static/style.css` - Footer styling and dark mode overrides (lines 1757-1893)
@@ -1778,6 +1953,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### ✨ **Enhancements**
 
 #### **HTTP-MCP Bridge: recall_memory Tool Support**
+
 - **Added**: `recall_memory` tool to MCP HTTP bridge API
 - **Functionality**: Natural language time-based memory retrieval (e.g., "last week", "yesterday")
 - **Integration**: Seamlessly maps to storage backend's `recall_memory` method
@@ -1785,6 +1961,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Use Case**: Enables time-aware memory recall through HTTP/MCP bridge interface
 
 ##### **Technical Details**
+
 - **File**: `src/mcp_memory_service/web/api/mcp.py`
   - Added `recall_memory` tool definition to `MCP_TOOLS` array
   - Implemented handler in `handle_tool_call()` function
@@ -1795,6 +1972,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Bug Fixes**
 
 #### **Critical: Missing Core Dependencies**
+
 - **Fixed**: `sentence-transformers` and `torch` moved from optional `[ml]` extras to base dependencies
 - **Root cause**: v8.2.0 removed ChromaDB but accidentally made semantic search dependencies optional
 - **Impact**: Service failed to start with `ImportError: sentence-transformers is not available`
@@ -1802,6 +1980,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - **Breaking**: Users upgrading from v8.2.0 must run `uv sync` to install corrected dependencies
 
 ##### **Technical Details**
+
 - **File**: `pyproject.toml`
   - Moved `sentence-transformers>=2.2.2` from `[ml]` to `dependencies`
   - Moved `torch>=2.0.0` from `[ml]` to `dependencies`
@@ -1812,17 +1991,20 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### ✨ **Dashboard UX Improvements**
 
 #### **Dark Mode Polish**
+
 - **Fixed**: Connection status indicator now properly displays in dark mode
 - **Implementation**: Added dark mode CSS override for `.connection-status` component
 - **Impact**: ✅ All dashboard elements now fully support dark mode without visual glitches
 
 #### **Browse Tab User Experience**
+
 - **Enhancement**: Automatic smooth scroll to results when clicking a tag
 - **Implementation**: Added `scrollIntoView()` with smooth behavior to `filterByTag()` method
 - **User Benefit**: No more manual scrolling needed - tag selection immediately shows filtered memories
 - **Impact**: ✅ Significantly improved discoverability and flow in Browse by Tags view
 
 ##### **Technical Details**
+
 - **File**: `src/mcp_memory_service/web/static/style.css`
   - Added dark mode override for connection status background, border, and text colors
   - Uses CSS variables for consistency with theme system
@@ -1835,20 +2017,24 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Bug Fixes**
 
 #### **Dashboard Statistics Display**
+
 - **Critical fix**: Dashboard showing 0 for "This Week" and "Tags" statistics on Hybrid and Cloudflare backends
 - **Root cause**: Statistics fields not exposed at top level of storage health response
 
 ##### **Hybrid Backend Fix** (`src/mcp_memory_service/storage/hybrid.py`)
+
 - Extract `unique_tags` from `primary_stats` to top-level stats dictionary
 - Extract `memories_this_week` from `primary_stats` to top-level stats dictionary
 - Maintains consistency with SQLite-vec standalone backend behavior
 
 ##### **Cloudflare Backend Fix** (`src/mcp_memory_service/storage/cloudflare.py`)
+
 - Added SQL subquery to calculate `unique_tags` from tags table
 - Added SQL subquery to calculate `memories_this_week` (last 7 days)
 - Now returns both statistics in `get_stats()` response
 
 ##### **Impact**
+
 - ✅ Dashboard now correctly displays weekly memory count for all backends
 - ✅ Dashboard now correctly displays unique tags count for all backends
 - ✅ SQLite-vec standalone backend already had these fields (no change needed)
@@ -1859,17 +2045,20 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 ### 🐛 **Bug Fixes**
 
 #### **Dark Mode Text Contrast Regression**
+
 - **Critical fix**: Memory card text barely visible in dark mode due to hardcoded white backgrounds
 - **Root cause**: CSS variable redefinition made text colors too faint when applied to white backgrounds
 - **Solution**: Override all major containers with dark backgrounds (`#1f2937`) and force bright text colors
 
 ##### **Fixed Components**
+
 - Memory cards: Now use dark card backgrounds with bright white text (`#f9fafb`)
 - Memory metadata: Labels bright white (`#f9fafb`), values light gray (`#d1d5db`)
 - Action cards: Dark backgrounds for proper contrast
 - All containers: App header, welcome card, search filters, modals now properly dark
 
 ##### **Technical Details**
+
 - Added `!important` overrides for 11 container backgrounds
 - Memory content text: `var(--neutral-900) !important` → `#f9fafb`
 - Memory meta labels: `var(--neutral-900) !important` → `#f9fafb`
@@ -1877,6 +2066,7 @@ Manual sync management UI with real-time status monitoring for hybrid storage ba
 - Cache-busting comments to force browser reload
 
 ##### **Impact**
+
 - ✅ Dark mode now fully readable across all dashboard views
 - ✅ Proper contrast ratios for accessibility
 - ✅ No visual regression from v8.1.0 light mode
@@ -1890,6 +2080,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 #### 🎨 **New Features**
 
 ##### **Dark Mode Toggle**
+
 - **Clean theme switching** with sun/moon icon toggle in header
 - **Persistent preference** via localStorage - theme survives page reloads
 - **Smooth transitions** between light and dark themes
@@ -1897,6 +2088,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 - **Performance**: Instant theme switching with CSS class toggle
 
 ##### **Settings Modal**
+
 - **Centralized preferences** accessible via cogwheel button
 - **User preferences**:
   - Theme selection (Light/Dark)
@@ -1916,6 +2108,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 #### 🏗️ **Architecture & Performance**
 
 ##### **CSS Optimization - Variable Redefinition Approach**
+
 - **Massive code reduction**: 2116 → 1708 lines (**-408 lines, -19% smaller**)
 - **Clean implementation**: Redefine CSS variables in `body.dark-mode` instead of 200+ hardcoded overrides
 - **Maintainability**: Single source of truth for dark mode colors
@@ -1923,6 +2116,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 - **No !important abuse**: Eliminated all !important tags except `.hidden` utility class
 
 ##### **JavaScript Improvements**
+
 - **Data-driven configuration**: System info fields defined in static config object
 - **Static class properties**: Constants defined once per class, not per instance
 - **Robust error handling**: Promise.allSettled() prevents partial failures
@@ -1930,6 +2124,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 - **Smart field updates**: Targeted element updates using config keys
 
 ##### **HTML Optimization**
+
 - **SVG icon deduplication**: Info icon defined once in `<defs>`, reused via `<use>`
 - **File size reduction**: 4 inline SVG instances → 1 reusable symbol
 - **Accessibility**: Proper `aria-hidden` and semantic structure
@@ -1937,17 +2132,18 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 
 #### 📊 **Performance Metrics**
 
-| Component | Target | Actual | Status |
-|-----------|--------|--------|--------|
-| Page Load | <2s | 25ms | ✅ EXCELLENT |
-| Memory Operations | <1s | 26ms | ✅ EXCELLENT |
-| Tag Search | <500ms | <100ms | ✅ EXCELLENT |
-| Theme Toggle | Instant | <1ms | ✅ EXCELLENT |
-| CSS File Size | Smaller | -19% | ✅ EXCELLENT |
+| Component         | Target  | Actual | Status       |
+| ----------------- | ------- | ------ | ------------ |
+| Page Load         | <2s     | 25ms   | ✅ EXCELLENT |
+| Memory Operations | <1s     | 26ms   | ✅ EXCELLENT |
+| Tag Search        | <500ms  | <100ms | ✅ EXCELLENT |
+| Theme Toggle      | Instant | <1ms   | ✅ EXCELLENT |
+| CSS File Size     | Smaller | -19%   | ✅ EXCELLENT |
 
 #### 🔍 **Code Quality**
 
 ##### **Gemini Code Assist Review**
+
 - **8 review iterations** - All feedback addressed
 - **Final verdict**: "Solid enhancement to the dashboard's user experience"
 - **Key improvements**:
@@ -1958,6 +2154,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
   - Static method optimization
 
 ##### **Files Changed**
+
 - `src/mcp_memory_service/web/static/style.css`: -408 lines (major refactoring)
 - `src/mcp_memory_service/web/static/app.js`: +255 lines (settings, theme management)
 - `src/mcp_memory_service/web/static/index.html`: +134 lines (modal, icons, SVG defs)
@@ -1993,6 +2190,7 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 #### ❌ **Removed**
 
 ##### **ChromaDB Backend Complete Removal**
+
 - **Deleted 2,841 lines** of ChromaDB-related code from the codebase
 - **Core files removed**:
   - `src/mcp_memory_service/storage/chroma.py` (1,501 lines)
@@ -2010,41 +2208,47 @@ Production-ready dashboard improvements with comprehensive dark mode support, se
 #### 📦 **Migration & Legacy Support**
 
 ##### **ChromaDB Legacy Branch**
+
 - **Branch**: [`chromadb-legacy`](https://github.com/doobidoo/mcp-memory-service/tree/chromadb-legacy)
 - **Tag**: `chromadb-legacy-final` - Final ChromaDB code snapshot before removal
 - **Status**: Frozen/Archived - No active maintenance
 - **Purpose**: Historical reference and migration support
 
 ##### **Migration Script Preserved**
+
 - **Location**: `scripts/migration/legacy/migrate_chroma_to_sqlite.py`
 - **Status**: Moved to legacy folder, still functional for migrations
 - **Alternative**: Check chromadb-legacy branch for additional migration tools
 
 ##### **Migration Guide**
+
 See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare migration instructions:
+
 - Step-by-step migration procedures
 - Data backup and validation steps
 - Recommended migration path: **ChromaDB → Hybrid Backend**
 
 #### ✅ **Supported Storage Backends (v8.0.0+)**
 
-| Backend | Status | Use Case | Performance |
-|---------|--------|----------|-------------|
-| **Hybrid** | ⭐ RECOMMENDED | Production, multi-device | 5ms (SQLite) + cloud sync |
-| **SQLite-vec** | ✅ Supported | Development, single-device | 5ms read/write |
-| **Cloudflare** | ✅ Supported | Cloud-native, serverless | Network dependent |
-| **HTTP Client** | ✅ Supported | Distributed, multi-client | Network dependent |
-| **ChromaDB** | ❌ REMOVED | N/A - See legacy branch | N/A |
+| Backend         | Status         | Use Case                   | Performance               |
+| --------------- | -------------- | -------------------------- | ------------------------- |
+| **Hybrid**      | ⭐ RECOMMENDED | Production, multi-device   | 5ms (SQLite) + cloud sync |
+| **SQLite-vec**  | ✅ Supported   | Development, single-device | 5ms read/write            |
+| **Cloudflare**  | ✅ Supported   | Cloud-native, serverless   | Network dependent         |
+| **HTTP Client** | ✅ Supported   | Distributed, multi-client  | Network dependent         |
+| **ChromaDB**    | ❌ REMOVED     | N/A - See legacy branch    | N/A                       |
 
 #### 📊 **Impact & Rationale**
 
 **Why Remove ChromaDB?**
+
 - **Performance**: ChromaDB 15ms vs SQLite-vec 5ms (3x slower)
 - **Dependencies**: ~2GB PyTorch download eliminated
 - **Maintenance**: 2,841 lines of code removed reduces complexity
 - **Better Alternatives**: Hybrid backend provides superior performance with cloud sync
 
 **For Existing ChromaDB Users:**
+
 - **No immediate action required** - Can continue using v7.x releases
 - **Upgrade path available** - Migration guide in Issue #148
 - **Legacy branch available** - Full code preserved for reference
@@ -2053,17 +2257,20 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
 #### 🔧 **Technical Changes**
 
 **Code Removed:**
+
 - ChromaDB storage backend implementations
 - ChromaDB-specific tests and fixtures
 - ChromaDB configuration handling in factory
 - ChromaDB deprecation warnings in server.py
 
 **Error Handling:**
+
 - Attempting to use `MCP_MEMORY_STORAGE_BACKEND=chroma` now raises clear `ValueError`
 - Error message includes link to migration guide and legacy branch
 - Fallback logic removed - only valid backends accepted
 
 **Dependencies:**
+
 - Removed `chromadb>=0.5.0` from optional dependencies
 - Updated `full` dependency group to exclude chromadb
 - No impact on core dependencies - only optional dependency cleanup
@@ -2071,7 +2278,9 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
 #### 🚀 **Upgrade Instructions**
 
 **For ChromaDB Users (REQUIRED MIGRATION):**
+
 1. **Backup your data**:
+
    ```bash
    # Use legacy migration script
    git checkout chromadb-legacy
@@ -2079,6 +2288,7 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
    ```
 
 2. **Switch backend**:
+
    ```bash
    # Recommended: Hybrid backend (best of both worlds)
    export MCP_MEMORY_STORAGE_BACKEND=hybrid
@@ -2091,6 +2301,7 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
    ```
 
 3. **Update to v8.0.0**:
+
    ```bash
    git checkout main
    git pull origin main
@@ -2103,16 +2314,19 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
    ```
 
 **For Non-ChromaDB Users (No Action Required):**
+
 - Upgrade seamlessly - no breaking changes for SQLite-vec, Cloudflare, or Hybrid users
 - Enjoy reduced dependency footprint and simplified codebase
 
 #### 📚 **Documentation Updates**
+
 - Updated architecture diagrams to show ChromaDB as deprecated/removed
 - Updated storage backend comparison tables
 - Added migration guide in Issue #148
 - Legacy branch README updated with archive notice
 
 #### 🔗 **References**
+
 - **Issue**: #148 - Plan ChromaDB Backend Deprecation and Removal (→ v8.0.0)
 - **Legacy Branch**: https://github.com/doobidoo/mcp-memory-service/tree/chromadb-legacy
 - **Migration Guide**: See Issue #148 for detailed migration instructions
@@ -2124,6 +2338,7 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
 ### ✨ **Enhanced Document Ingestion with Semtools Support**
 
 #### 🆕 **Core Features**
+
 - **Semtools loader integration** - Optional Rust-based document parser with LlamaParse API for superior extraction quality
 - **New format support** - DOCX, DOC, PPTX, XLSX (requires semtools installation)
 - **Intelligent chunking** - Respects paragraph and sentence boundaries for better semantic coherence
@@ -2132,15 +2347,17 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
 - **Zero breaking changes** - Fully backward compatible, existing document ingestion unchanged
 
 #### 📄 **Supported Document Formats**
-| Format | Native Parser | With Semtools | Quality |
-|--------|--------------|---------------|---------|
-| PDF | PyPDF2/pdfplumber | ✅ LlamaParse | Excellent (OCR, tables) |
-| DOCX/DOC | ❌ Not supported | ✅ LlamaParse | Excellent |
-| PPTX | ❌ Not supported | ✅ LlamaParse | Excellent |
-| XLSX | ❌ Not supported | ✅ LlamaParse | Excellent |
-| TXT/MD | ✅ Built-in | N/A | Perfect |
+
+| Format   | Native Parser     | With Semtools | Quality                 |
+| -------- | ----------------- | ------------- | ----------------------- |
+| PDF      | PyPDF2/pdfplumber | ✅ LlamaParse | Excellent (OCR, tables) |
+| DOCX/DOC | ❌ Not supported  | ✅ LlamaParse | Excellent               |
+| PPTX     | ❌ Not supported  | ✅ LlamaParse | Excellent               |
+| XLSX     | ❌ Not supported  | ✅ LlamaParse | Excellent               |
+| TXT/MD   | ✅ Built-in       | N/A           | Perfect                 |
 
 #### 🔧 **Technical Implementation**
+
 - **New file**: `src/mcp_memory_service/ingestion/semtools_loader.py` (220 lines)
   - SemtoolsLoader class implementing DocumentLoader interface
   - Async subprocess execution with 5-minute timeout for large documents
@@ -2154,6 +2371,7 @@ See **Issue #148** for comprehensive ChromaDB to Hybrid/SQLite-vec/Cloudflare mi
 - **Tests**: `tests/unit/test_semtools_loader.py` - 12 comprehensive unit tests, all passing ✅
 
 #### 📦 **Installation & Configuration**
+
 ```bash
 # Optional - install semtools for enhanced parsing
 npm i -g @llamaindex/semtools
@@ -2169,6 +2387,7 @@ export MCP_DOCUMENT_CHUNK_OVERLAP=200        # Overlap between chunks (default: 
 ```
 
 #### 🎯 **Usage Example**
+
 ```python
 from pathlib import Path
 from mcp_memory_service.ingestion import get_loader_for_file
@@ -2180,6 +2399,7 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 ```
 
 #### ✅ **Benefits**
+
 - **Superior PDF parsing** - OCR capabilities and table extraction via LlamaParse
 - **Microsoft Office support** - DOCX, PPTX formats now supported (previously unavailable)
 - **Production-ready** - Comprehensive error handling, timeout protection, detailed logging
@@ -2188,10 +2408,12 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 - **Minimal overhead** - Only ~5ms initialization cost when semtools not installed
 
 #### 🔗 **Related Issues**
+
 - Closes #94 - Integrate Semtools for Enhanced Document Processing
 - Future work tracked in #147 - CLI commands, batch processing, progress reporting, benchmarks
 
 #### 📊 **Test Coverage**
+
 - 12/12 unit tests passing
 - Tests cover: initialization, availability checking, file handling, successful extraction, API key usage, error scenarios, timeout handling, empty content, registry integration
 - Comprehensive mocking of subprocess execution for reliable CI/CD
@@ -2201,18 +2423,21 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 ### 🐛 **Bug Fixes - HybridMemoryStorage Critical Issues**
 
 #### Fixed - Health Check Support (PR #145)
+
 - **HybridMemoryStorage recognition in health checks** - Resolved "Unknown storage type: HybridMemoryStorage" error
 - **Dashboard statistics for hybrid backend** - Added comprehensive stats collection from SQLite-vec primary storage
 - **Health validation for hybrid storage** - Implemented proper validation logic for hybrid backend
 - **Cloudflare sync status visibility** - Display sync service status (not_configured/configured/syncing)
 
 #### Fixed - Missing recall() Method (PR #146)
+
 - **AttributeError on time-based queries** - Added missing `recall()` method to HybridMemoryStorage
 - **Server.py compatibility** - Resolves errors when server calls `storage.recall()` with time filtering
 - **Consistent API** - Matches method signature of SqliteVecMemoryStorage and CloudflareStorage
 - **Delegation to primary** - Properly delegates to SQLite-vec primary storage for recall operations
 
 #### Technical Details
+
 - Added `HybridMemoryStorage` case to `dashboard_get_stats()` endpoint (server.py:2503)
 - Added `HybridMemoryStorage` case to `check_database_health()` endpoint (server.py:3705)
 - Added `recall()` method to HybridMemoryStorage (hybrid.py:916)
@@ -2221,6 +2446,7 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 - Fixed code quality issues from Gemini Code Assist review (removed duplicate imports, refactored getattr usage)
 
 #### Impact
+
 - ✅ HTTP dashboard now properly displays hybrid backend statistics
 - ✅ MCP health check tool correctly validates hybrid storage
 - ✅ Time-based recall queries now work correctly with hybrid backend
@@ -2232,6 +2458,7 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 ### ✨ **Configurable Hybrid Sync Break Conditions**
 
 #### 🔄 **Enhanced Synchronization Control**
+
 - **Configurable early break conditions** - Made hybrid sync termination thresholds configurable via environment variables
   - `MCP_HYBRID_MAX_EMPTY_BATCHES` - Stop after N consecutive batches without new syncs (default: 20, was hardcoded 5)
   - `MCP_HYBRID_MIN_CHECK_COUNT` - Minimum memories to check before early stop (default: 1000, was hardcoded 200)
@@ -2240,11 +2467,13 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
 - **Threshold visibility** - Break condition log messages now display threshold values for better diagnostics
 
 #### 🐛 **Bug Fix - Incomplete Synchronization**
+
 - **Resolved incomplete sync issue** - Dashboard was showing only 1040 memories instead of 1200+ from Cloudflare
 - **Root cause** - Hardcoded early break conditions triggered prematurely causing missing memories
 - **Impact** - Missing memories distributed throughout Cloudflare dataset were never synced to local SQLite
 
 #### ⚙️ **Configuration**
+
 ```bash
 # Environment variables for tuning sync behavior
 export MCP_HYBRID_MAX_EMPTY_BATCHES=20     # Stop after N empty batches (min: 1)
@@ -2252,12 +2481,14 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
 ```
 
 #### 🔧 **Code Quality Improvements**
+
 - **Added input validation** - `min_value=1` constraint prevents zero values that would break sync
 - **Fixed progress logging** - Prevents misleading initial log message at `processed_count=0`
 - **Eliminated duplicate defaults** - Refactored to use `getattr` pattern for config imports
 - **Improved maintainability** - Centralized default values in config.py
 
 #### ✅ **Benefits**
+
 - Complete synchronization of all Cloudflare memories to SQLite
 - Configurable per deployment needs without code changes
 - Better diagnostics for troubleshooting sync issues
@@ -2266,6 +2497,7 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
 - No behavior change for deployments with small datasets
 
 #### 🔗 **References**
+
 - Closes issue: Incomplete hybrid sync (1040/1200+ memories)
 - PR #142: Configurable hybrid sync break conditions
 - All Gemini Code Assist feedback addressed
@@ -2275,6 +2507,7 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
 ### 🏗️ **Repository Organization**
 
 #### 📁 **Litestream Sync System Reorganization**
+
 - **Consolidated Litestream scripts** → `scripts/sync/litestream/`
   - Moved 9 shell scripts from `/sync/` directory (git-like staging workflow)
   - Relocated 4 root-level setup scripts (`enhanced_memory_store.sh`, `setup_local_litestream.sh`, etc.)
@@ -2287,6 +2520,7 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
   - Comparison with Cloudflare hybrid sync
 
 #### 📂 **Deployment Files Consolidation**
+
 - **Moved systemd service** → `scripts/service/mcp-memory.service`
 - **Archived unused configs** → `archive/deployment-configs/`
   - `smithery.yaml`
@@ -2294,6 +2528,7 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
 - **Removed empty `/deployment/` directory**
 
 #### 🛠️ **Debug/Investigation Files Organization**
+
 - **Moved to `scripts/development/`**:
   - `debug_server_initialization.py` - Cloudflare backend debugger
   - `verify_hybrid_sync.py` - Hybrid storage verification
@@ -2302,12 +2537,14 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
   - `release-notes-v7.1.4.md` → `archive/release-notes/`
 
 #### 📚 **Documentation Updates**
+
 - **Enhanced `scripts/README.md`** with dual sync system documentation
   - Cloudflare Hybrid Sync (cloud backend) section
   - Litestream Sync (local network HTTP API) section
   - Clear distinction between the two systems
 
 ### 🎯 **Key Clarifications**
+
 - **Litestream sync**: Multi-device synchronization via central SQLite-vec HTTP API (local network)
   - Use case: Privacy-focused, data stays on local network
   - Architecture: Git-like staging workflow with conflict detection
@@ -2316,16 +2553,20 @@ export MCP_HYBRID_MIN_CHECK_COUNT=1000     # Min memories to check before early 
   - Architecture: Direct sync queue with background operations
 
 ### 📦 **Files Affected**
+
 - 27 files changed, 594 insertions(+), 3 deletions(-)
 - 13 files renamed/relocated
 - 3 new documentation files
 - 3 new archive directories
 
 ### ⚠️ **Breaking Changes**
+
 None - Purely organizational changes with no functional impact
 
 ### 🔄 **Migration Notes**
+
 If using Litestream sync scripts:
+
 - Update script paths: `/sync/memory_sync.sh` → `scripts/sync/litestream/memory_sync.sh`
 - Launchd plist location: `/deployment/io.litestream.replication.plist` → `scripts/sync/litestream/io.litestream.replication.plist`
 - All scripts remain functionally identical
@@ -2335,6 +2576,7 @@ If using Litestream sync scripts:
 ### 🐛 **Bug Fixes**
 
 #### 🔧 **MCP HTTP Endpoint Fixes**
+
 - **Fixed JSON serialization** - Changed `str(result)` to `json.dumps(result)` for proper client parsing
   - MCP endpoint was returning Python dict string representation (`{'key': 'value'}`) instead of valid JSON (`{"key": "value"}`)
   - Caused hook clients to fail parsing responses with "Expected ',' or '}'" errors
@@ -2343,12 +2585,14 @@ If using Litestream sync scripts:
   - Now returns all results, allowing client-side scoring to determine relevance
 
 #### 🔌 **Memory Hooks HTTP/HTTPS Protocol Detection**
+
 - **Fixed protocol detection** in `claude-hooks/utilities/memory-client.js`
   - Added `http` module import alongside existing `https` module
   - Implemented dynamic protocol selection: `const protocol = url.protocol === 'https:' ? https : http`
   - Previously hardcoded `https.request()` failed for `http://` endpoints
 
 ### 🎯 **Impact**
+
 - ✅ Session-start hooks now properly inject memory context on Claude Code startup
 - ✅ HTTP memory server (port 8888) connectivity fully restored
 - ✅ Relevant memories (score 0.2-0.5) no longer filtered out by overly restrictive threshold
@@ -2359,6 +2603,7 @@ If using Litestream sync scripts:
 ### 🛠️ **Linux Enhancements**
 
 #### 🔄 **Manual Sync Utilities for Hybrid Storage**
+
 - **`sync_now.py` script** - Manual on-demand synchronization for hybrid storage on Linux
   - Type-safe data structures with `TypedDict` (SyncResult, SyncStatus)
   - Comprehensive logging with configurable levels
@@ -2371,6 +2616,7 @@ If using Litestream sync scripts:
 - **Security improvement** - API key moved to separate environment file in systemd service template
 
 ### 🔧 **Code Quality**
+
 - Enhanced error handling throughout sync utilities
 - Improved type safety with typed dictionaries for API results
 - Better logging practices using `logger.exception()` for verbose errors
@@ -2381,6 +2627,7 @@ If using Litestream sync scripts:
 ### ✨ **New Features**
 
 #### 🎯 **Backend-Specific Content Length Limits with Auto-Splitting**
+
 - **Intelligent content length management** - Prevents embedding failures by enforcing backend-specific limits
 - **Automatic content splitting** - Long content automatically splits into linked chunks with preserved context
 - **Backend-aware limits**:
@@ -2395,6 +2642,7 @@ If using Litestream sync scripts:
 ### 🔧 **Infrastructure Enhancements**
 
 #### 📦 **New Content Splitter Utility**
+
 - **`content_splitter.py` module** - Comprehensive content chunking with boundary-aware splitting
 - **Priority-based split points**:
   1. Double newlines (paragraph breaks)
@@ -2406,6 +2654,7 @@ If using Litestream sync scripts:
 - **Validation helpers** - `estimate_chunks_needed()`, `validate_chunk_lengths()` utilities
 
 #### 🏗️ **Storage Backend Updates**
+
 - **Abstract base class properties** - Added `max_content_length` and `supports_chunking` to `MemoryStorage`
 - **Backend implementations**:
   - `CloudflareStorage`: 800 char limit, chunking supported
@@ -2414,6 +2663,7 @@ If using Litestream sync scripts:
   - `HybridMemoryStorage`: 800 char limit (follows Cloudflare), chunking supported
 
 #### ⚙️ **Configuration System**
+
 - **New config constants** in `config.py`:
   - `CLOUDFLARE_MAX_CONTENT_LENGTH` (default: 800)
   - `CHROMADB_MAX_CONTENT_LENGTH` (default: 1500)
@@ -2428,6 +2678,7 @@ If using Litestream sync scripts:
 ### 🛠️ **MCP Server Tool Enhancements**
 
 #### 💾 **Enhanced `store_memory` Tool**
+
 - **Automatic content splitting** - Transparently handles content exceeding backend limits
 - **Chunk metadata tracking**:
   - `is_chunk`: Boolean flag identifying chunked memories
@@ -2443,6 +2694,7 @@ If using Litestream sync scripts:
 ### 🧪 **Testing & Validation**
 
 #### ✅ **Comprehensive Test Suite**
+
 - **`test_content_splitting.py`** - 20+ test cases covering:
   - Basic splitting functionality (short/long content, empty strings)
   - Boundary preservation (paragraphs, sentences, words, code blocks)
@@ -2455,18 +2707,21 @@ If using Litestream sync scripts:
 ### 📝 **Technical Implementation Details**
 
 #### 🔍 **Design Decisions**
+
 - **Conservative limits** - Buffer below actual token limits to account for tokenization variance
 - **Cloudflare priority** - Hybrid backend follows Cloudflare's stricter limit for sync compatibility
 - **Opt-out capable** - Set `MCP_ENABLE_AUTO_SPLIT=false` to disable auto-splitting
 - **Backward compatible** - No breaking changes to existing functionality
 
 #### ⚡ **Performance Considerations**
+
 - **Minimal overhead** - Content length checks are O(1) property access
 - **Efficient chunking** - Single-pass splitting with smart boundary detection
 - **No unnecessary splitting** - Content within limits passes through unchanged
 - **Batch operations** - All chunks stored in single transaction when possible
 
 ### 🔗 **References**
+
 - Addresses issue: First memory store attempt (1,570 chars) exceeded Cloudflare's BGE model limit
 - Solution: Backend-specific limits with automatic intelligent content splitting
 - Feature branch: `feat/content-length-limits-with-splitting`
@@ -2476,12 +2731,14 @@ If using Litestream sync scripts:
 ### 🐛 **Bug Fixes**
 
 #### 🧪 **Claude Hooks Integration Tests**
+
 - **Fixed dual-protocol config compatibility** - Tests now support both legacy (direct endpoint) and new (dual-protocol) configuration structures
 - **Improved CI/CD compatibility** - Tests gracefully handle scenarios when memory service is not running
 - **Enhanced error handling** - Better detection and handling of connection failures and missing dependencies
 - **Achieved 100% test pass rate** - Improved from 78.6% to 100% success rate across all 14 integration tests
 
 ### 🔧 **Technical Improvements**
+
 - Updated configuration loading test to detect both `config.memoryService.endpoint` and `config.memoryService.http.endpoint`
 - Enhanced connectivity test to treat service unavailability as expected behavior in test environments
 - Improved mock session start hook to handle `memoryClient` reference errors gracefully
@@ -2491,18 +2748,21 @@ If using Litestream sync scripts:
 ### ✨ **Enhanced Search Tab UX**
 
 #### 🔍 **Advanced Search Functionality**
+
 - **Enhanced date filter options** - Added "Yesterday" and "This quarter" options to improve time-based search granularity
 - **Live search mode with toggle** - Implemented intelligent live/manual search modes with debounced input (300ms) to prevent API overload
 - **Independent semantic search** - Semantic search now works independently from tag filtering for more flexible query combinations
 - **Improved filter behavior** - Fixed confusing filter interactions and enhanced user experience with clear mode indicators
 
 #### 🎨 **UI/UX Improvements**
+
 - **Resolved toggle visibility issues** - Fixed Live Search toggle contrast and visibility problems on white backgrounds
 - **Eliminated layout shifts** - Moved toggle to header to prevent dynamic position changes due to text length variations
 - **Enhanced tooltips** - Increased tooltip widths (desktop: 300px, mobile: 250px) for better readability
 - **Accessible design patterns** - Implemented standard toggle design with proper contrast ratios and always-visible controls
 
 #### ⚡ **Performance Optimization**
+
 - **Debounced search input** - 300ms delay prevents overwhelming API with rapid keystrokes during tag searches
 - **Smart search triggering** - Live search mode provides immediate results while manual mode offers user control
 - **Efficient event handling** - Optimized DOM manipulation and event listener management
@@ -2510,12 +2770,14 @@ If using Litestream sync scripts:
 ### 🔧 **Code Quality Enhancement**
 
 #### 📚 **DRY Principles Implementation**
+
 - **Eliminated code duplication** - Refactored diagnostic script `test_cloudflare_token()` function following Gemini Code Assist feedback
 - **Extracted reusable helper** - Created `_verify_token_endpoint()` function reducing ~60 lines of duplicated token verification logic
 - **Enhanced consistency** - Both account-scoped and user endpoint tests now display identical token information fields
 - **Improved maintainability** - Centralized error handling and output formatting for easier future extensions
 
 ### 🔗 **References**
+
 - Addresses user feedback on search tab UX requiring "further attention" with comprehensive improvements
 - Implements Gemini Code Assist code review recommendations from PR #139
 - Enhances overall dashboard usability with systematic testing of filter combinations
@@ -2525,12 +2787,14 @@ If using Litestream sync scripts:
 ### 🐛 **Critical Bug Fixes**
 
 #### 🔧 **HybridMemoryStorage Import Missing**
+
 - **Fixed critical import error** - Added missing `HybridMemoryStorage` import in `storage/__init__.py` after v7.3.0 update
 - **Symptom resolved** - "Unknown storage type: HybridMemoryStorage" error no longer occurs
 - **Health check restored** - HTTP dashboard now properly displays hybrid backend status
 - **Backwards compatibility** - Import follows same conditional pattern as other storage backends
 
 #### 🛡️ **Enhanced Cloudflare Token Authentication**
+
 - **Resolved token endpoint confusion** - Clear guidance on using account-scoped vs generic verification endpoints
 - **Documentation improvements** - Comprehensive `.env.example` with correct curl examples and warnings
 - **Enhanced diagnostics** - `diagnose_backend_config.py` now tests both token verification endpoints
@@ -2539,17 +2803,20 @@ If using Litestream sync scripts:
 ### 📚 **Documentation Enhancements**
 
 #### 🔍 **Comprehensive Troubleshooting Guide**
+
 - **New guide:** `docs/troubleshooting/cloudflare-authentication.md` with complete Cloudflare setup guidance
 - **Token verification clarity** - Explains difference between account-scoped and generic API endpoints
 - **Common errors documented** - Solutions for "Invalid API Token" and related authentication failures
 - **Step-by-step checklist** - Systematic approach to diagnosing token and authentication issues
 
 #### ⚙️ **Enhanced Configuration Examples**
+
 - **Improved .env.example** - Combines comprehensive v7.3.1 configuration with token verification guidance
 - **Clear warnings** - Explicit guidance on which endpoints to use and avoid
 - **Security best practices** - Token handling and verification recommendations
 
 ### 🔗 **References**
+
 - Closes critical post-v7.3.0 hybrid storage import issue
 - Addresses developer confusion around Cloudflare token verification endpoints
 - PR #139: Fix HybridMemoryStorage import + Add comprehensive Cloudflare token verification guide
@@ -2559,17 +2826,20 @@ If using Litestream sync scripts:
 ### 🐛 **Bug Fixes**
 
 #### 🔧 **HTTP Dashboard Backend Selection**
+
 - **Fixed HTTP dashboard backend selection** - Dashboard now properly respects `MCP_MEMORY_STORAGE_BACKEND` configuration
 - **Universal backend support** - Web interface works with all backends: SQLite-vec, Cloudflare, ChromaDB, and Hybrid
 - **Tags functionality restored** - Fixed broken browse by tags feature for all storage backends
 - **Shared factory pattern** - Eliminated code duplication between MCP server and web interface initialization
 
 #### 🛠️ **Code Quality Improvements**
+
 - **Extracted fallback logic** - Centralized SQLite-vec fallback handling for better maintainability
 - **Enhanced type safety** - Improved type hints throughout web interface components
 - **Gemini Code Assistant feedback** - Addressed all code review suggestions for better robustness
 
 ### 🔗 **References**
+
 - Closes #136: HTTP Dashboard doesn't use Cloudflare backend despite configuration
 - PR #138: Complete universal storage backend support for HTTP dashboard
 
@@ -2582,16 +2852,19 @@ If using Litestream sync scripts:
 ### ✅ **Key Features**
 
 #### 🔍 **Dual Interface Solution**
+
 - **Dedicated `/api-overview` route** - Standalone comprehensive API documentation page
 - **API Documentation tab** - Integrated dashboard tab for seamless user experience
 - **Unified navigation** - Consistent access to API information across both interfaces
 
 #### ⚡ **Dynamic Content Loading**
+
 - **Real-time version display** - Dynamic version loading via `/api/health/detailed` endpoint
 - **Backend status integration** - Live backend information display
 - **Enhanced user awareness** - Always shows current system state
 
 #### 📱 **Enhanced User Experience**
+
 - **Responsive design** - Organized endpoint sections with mobile compatibility
 - **Performance optimized** - CSS transitions optimized for better performance
 - **Consistent navigation** - Fixed naming conflicts for seamless tab switching
@@ -2599,28 +2872,31 @@ If using Litestream sync scripts:
 ### 🛠️ **Technical Improvements**
 
 #### 🔧 **API Consistency**
+
 - **Fixed endpoint path documentation** - Updated from `{hash}` to `{content_hash}` for accuracy
 - **Comprehensive endpoint coverage** - All API endpoints properly documented
 - **Organized by functionality** - Logical grouping of endpoints for easy navigation
 
 #### 🎨 **Performance Optimization**
+
 - **CSS performance** - Replaced `transition: all` with specific `border-color` and `box-shadow` transitions
 - **Load time maintained** - 25ms page load performance preserved
 - **Memory operation speed** - 26ms operation performance maintained
 
 ### 📊 **Restored Functionality**
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| API Overview Page | ✅ RESTORED | `/api-overview` route with full documentation |
-| Dashboard Integration | ✅ NEW | API docs tab in interactive dashboard |
-| Dynamic Content | ✅ ENHANCED | Real-time version and backend display |
-| Mobile Responsive | ✅ MAINTAINED | CSS breakpoints preserved |
-| Performance | ✅ OPTIMIZED | Enhanced CSS transitions |
+| Feature               | Status        | Notes                                         |
+| --------------------- | ------------- | --------------------------------------------- |
+| API Overview Page     | ✅ RESTORED   | `/api-overview` route with full documentation |
+| Dashboard Integration | ✅ NEW        | API docs tab in interactive dashboard         |
+| Dynamic Content       | ✅ ENHANCED   | Real-time version and backend display         |
+| Mobile Responsive     | ✅ MAINTAINED | CSS breakpoints preserved                     |
+| Performance           | ✅ OPTIMIZED  | Enhanced CSS transitions                      |
 
 ### 🔄 **Architecture**
 
 #### **Dual Interface Implementation**
+
 - **FastAPI Integration** - `get_api_overview_html()` function with embedded JavaScript
 - **Dashboard Enhancement** - Additional navigation tab with organized content sections
 - **Unified Styling** - Consistent CSS styling across both interfaces
@@ -2629,6 +2905,7 @@ If using Litestream sync scripts:
 ### 🎯 **User Impact**
 
 **Addresses critical missing functionality:**
+
 - Restores API documentation that was missing after v7.2.2 interactive dashboard
 - Provides both standalone and integrated access to API information
 - Maintains excellent performance benchmarks while adding functionality
@@ -2643,6 +2920,7 @@ If using Litestream sync scripts:
 **Successfully completed comprehensive testing and validation of the Interactive Dashboard (PR #125).**
 
 ### ✅ **Validation Results**
+
 - **Performance Excellence**: Page load 25ms (target: <2s), Memory operations 26ms (target: <1s)
 - **Search Functionality**: Semantic search, tag-based search, and time-based search all working perfectly
 - **Real-time Updates**: Server-Sent Events (SSE) with heartbeat and connection management validated
@@ -2653,7 +2931,9 @@ If using Litestream sync scripts:
 - **Claude Desktop Integration**: MCP protocol compatibility confirmed
 
 ### 🚀 **Production Ready**
+
 The Interactive Dashboard is now **fully validated and ready for production use**, providing:
+
 - Complete memory CRUD operations
 - Advanced search and filtering capabilities
 - Real-time updates via Server-Sent Events
@@ -2662,12 +2942,13 @@ The Interactive Dashboard is now **fully validated and ready for production use*
 - Excellent performance with large datasets
 
 ### 📊 **Testing Metrics**
-| Component | Target | Actual | Status |
-|-----------|--------|--------|--------|
-| Page Load | <2s | 25ms | ✅ EXCELLENT |
-| Memory Ops | <1s | 26ms | ✅ EXCELLENT |
-| Tag Search | <500ms | <100ms | ✅ EXCELLENT |
-| Large Dataset | 1000+ | 994+ tested | ✅ EXCELLENT |
+
+| Component     | Target | Actual      | Status       |
+| ------------- | ------ | ----------- | ------------ |
+| Page Load     | <2s    | 25ms        | ✅ EXCELLENT |
+| Memory Ops    | <1s    | 26ms        | ✅ EXCELLENT |
+| Tag Search    | <500ms | <100ms      | ✅ EXCELLENT |
+| Large Dataset | 1000+  | 994+ tested | ✅ EXCELLENT |
 
 **Issue #123 closed as completed. Dashboard provides immediate user value and solid foundation for future features.**
 
@@ -2678,12 +2959,14 @@ The Interactive Dashboard is now **fully validated and ready for production use*
 **⚠️ BREAKING CHANGE**: ChromaDB is no longer installed by default to dramatically improve Docker build performance and reduce image sizes.
 
 ### 🎯 **Key Benefits**
+
 - **70-80% faster Docker build times** (from ~10-15 min to ~2-3 min)
 - **1-2GB smaller Docker images** (~2.5GB → ~800MB standard, ~400MB slim)
 - **Lower memory footprint** in production deployments
 - **Maintained backward compatibility** with clear opt-in mechanism
 
 ### 🔧 **Installation Changes**
+
 ```bash
 # Default installation (lightweight, sqlite_vec only)
 python scripts/installation/install.py
@@ -2696,6 +2979,7 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
 ```
 
 ### 📋 **What Changed**
+
 - **pyproject.toml**: Added `full` optional dependency group, moved ChromaDB to optional
 - **server.py**: Added conditional ChromaDB imports with graceful error handling
 - **mcp_server.py**: Enhanced ChromaDB import error messages and fallback logic
@@ -2704,37 +2988,44 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
 - **NEW**: `docs/docker-optimized-build.md` - Comprehensive Docker optimization guide
 
 ### 🛡️ **Migration Guide**
+
 **For users who need ChromaDB:**
+
 1. Run: `python scripts/installation/install.py --with-chromadb`
 2. Or install manually: `pip install mcp-memory-service[chromadb]`
 
 **For Docker users:**
+
 - No action needed - automatically get performance improvements
 - Docker builds now default to optimized sqlite_vec backend
 
 ### 🧪 **Error Handling**
+
 - Clear error messages when ChromaDB backend selected but not installed
 - Graceful fallback to sqlite_vec when ChromaDB unavailable
 - Helpful guidance on how to install ChromaDB if needed
 
 ### 📊 **Performance Comparison**
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Docker build | ~10-15 min | ~2-3 min | **80% faster** |
-| Image size | ~2.5GB | ~800MB | **68% smaller** |
-| Memory usage | High | Low | **Significantly reduced** |
+
+| Metric       | Before     | After    | Improvement               |
+| ------------ | ---------- | -------- | ------------------------- |
+| Docker build | ~10-15 min | ~2-3 min | **80% faster**            |
+| Image size   | ~2.5GB     | ~800MB   | **68% smaller**           |
+| Memory usage | High       | Low      | **Significantly reduced** |
 
 ## [7.1.5] - 2025-09-29
 
 ### 🔧 **Improvements**
 
 - **Enhanced timestamp consistency across memory retrieval methods** - All memory retrieval endpoints now display consistent timestamp information:
+
   - `retrieve_memory` now shows timestamps in "YYYY-MM-DD HH:MM:SS" format matching `recall_memory`
   - `search_by_tag` now shows timestamps in same consistent format
   - Improved code quality using `getattr` pattern instead of `hasattr` checks
   - Resolves timestamp metadata inconsistency reported in issue #126
 
 - **Enhanced CLI hybrid backend support** - CLI commands now fully support hybrid storage backend:
+
   - Added 'hybrid' option to `--storage-backend` choices for both `server` and `status` commands
   - Completes hybrid backend integration across all system components
   - Enables seamless CLI usage with hybrid SQLite-vec + Cloudflare architecture
@@ -2747,6 +3038,7 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
 ### 🛡️ **Security Fixes**
 
 - **Credential exposure prevention** - Enhanced security measures to prevent accidental credential exposure:
+
   - Improved handling of environment variables in logging and error messages
   - Additional safeguards against sensitive configuration leakage
   - Follows security best practices for credential management
@@ -2768,6 +3060,7 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
 ### 🚀 **Major Feature: Unified Cross-Platform Hook Installer**
 
 - **NEW: Single Python installer replaces 4+ platform-specific scripts**
+
   - Consolidated `install.sh`, `install-natural-triggers.sh`, `install_claude_hooks_windows.bat` into unified `install_hooks.py`
   - Full cross-platform compatibility (Windows, macOS, Linux)
   - Intelligent JSON configuration merging preserves existing Claude Code hooks
@@ -2775,6 +3068,7 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
   - Atomic installations with automatic rollback on failure
 
 - **Enhanced Safety & User Experience**
+
   - Smart settings.json merging prevents configuration loss
   - Comprehensive backup system with timestamped restore points
   - Empty directory cleanup for proper uninstall process
@@ -2789,6 +3083,7 @@ docker build -f tools/docker/Dockerfile -t mcp-memory-service:latest .
   - Git-aware context and repository integration
 
 ### 🔧 **Installation Commands Updated**
+
 ```bash
 # New unified installation (replaces all previous methods)
 cd claude-hooks
@@ -2801,18 +3096,21 @@ python scripts/installation/install.py --install-natural-triggers
 ```
 
 ### 📋 **Migration & Documentation**
+
 - Added comprehensive `claude-hooks/MIGRATION.md` with transition guide
 - Updated README.md installation instructions
 - Legacy shell scripts removed (eliminates security and compatibility issues)
 - Clear upgrade path for existing users
 
 ### 🛠 **Technical Improvements**
+
 - Addressed all Gemini Code Assist review feedback
 - Enhanced cross-platform path handling with proper quoting
 - Improved integration between main installer and hook installer
 - Professional CLI interface with consistent options across platforms
 
 ### ⚠️ **Breaking Changes**
+
 - Legacy shell installers (`install.sh`, `install-natural-triggers.sh`) removed
 - Installation commands updated - see `claude-hooks/MIGRATION.md` for details
 - Users must switch to unified Python installer for future installations
@@ -2831,6 +3129,7 @@ python scripts/installation/install.py --install-natural-triggers
   - Addresses critical security vulnerability from issues #118 and personal config exposure
 
 ### ⚠️ **Post-Security Actions Required**
+
 1. **Immediately rotate any Cloudflare API tokens** that were in the exposed files
 2. **Force pull** or re-clone repository: `git fetch origin && git reset --hard origin/develop`
 3. **Review local `.claude/settings.local.json`** files for any other sensitive data
@@ -2865,6 +3164,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### ✨ **New Features**
 
 ##### 🎯 **Intelligent Trigger Detection**
+
 - **✅ Semantic Analysis** - Advanced natural language processing to understand memory-seeking patterns
   - **Pattern Recognition**: Detects phrases like "What did we decide...", "How did we implement..."
   - **Question Classification**: Identifies when user is seeking information from past work
@@ -2875,6 +3175,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
   - **Development Keywords**: Builds search queries from git history and file patterns
 
 ##### ⚡ **Performance-Optimized Architecture**
+
 - **✅ Multi-Tier Processing** - Three-tier performance system
   - **Instant Tier** (< 50ms): Pattern matching and cache checks
   - **Fast Tier** (< 150ms): Lightweight semantic analysis
@@ -2886,6 +3187,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
   - **Adaptive**: Machine learning-based optimization
 
 ##### 🎮 **CLI Management System**
+
 - **✅ Memory Mode Controller** - Comprehensive command-line interface
   - **Profile Switching**: `node memory-mode-controller.js profile balanced`
   - **Sensitivity Control**: `node memory-mode-controller.js sensitivity 0.7`
@@ -2895,6 +3197,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### 🔧 **Technical Implementation**
 
 ##### **Core Components**
+
 - **`claude-hooks/core/mid-conversation.js`** - Main hook implementation with stateful management
 - **`claude-hooks/utilities/tiered-conversation-monitor.js`** - Multi-tier semantic analysis engine
 - **`claude-hooks/utilities/performance-manager.js`** - Performance monitoring and adaptive optimization
@@ -2902,6 +3205,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 - **`claude-hooks/memory-mode-controller.js`** - CLI controller for system management
 
 ##### **Smart Memory Scoring**
+
 - **✅ Multi-Factor Relevance** - Sophisticated scoring algorithm
   - **Content Relevance** (15%): Semantic similarity to current context
   - **Tag Relevance** (35%): Project and topic-specific weighting
@@ -2915,6 +3219,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### 🧪 **Quality Assurance**
 
 ##### **Comprehensive Testing**
+
 - **✅ Test Suite** - 18 automated tests covering all functionality
   - **Configuration Management**: Nested JSON handling and validation
   - **Performance Profiling**: Latency measurement and optimization
@@ -2928,6 +3233,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### 🔄 **Installation & Compatibility**
 
 ##### **Seamless Integration**
+
 - **✅ Zero-Restart Installation** - Dynamic hook loading during Claude Code sessions
 - **✅ Backward Compatibility** - Works alongside existing memory service functionality
 - **✅ Configuration Preservation** - Maintains existing settings while adding new features
@@ -2936,6 +3242,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### 📊 **Performance Metrics**
 
 ##### **Benchmarks**
+
 - **Instant Analysis**: < 50ms response time for pattern matching
 - **Fast Analysis**: < 150ms for lightweight semantic processing
 - **Cache Performance**: < 5ms for cached results with LRU management
@@ -2945,6 +3252,7 @@ This release introduces **Natural Memory Triggers v7.1.0** - an intelligent memo
 #### 🎯 **Usage Examples**
 
 Natural Memory Triggers automatically activate for phrases like:
+
 - "What approach did we use for authentication?"
 - "How did we handle error handling in this project?"
 - "What were the main architectural decisions we made?"
@@ -2969,7 +3277,9 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
 #### ✨ **New Features**
 
 ##### 🔐 **OAuth 2.1 Implementation**
+
 - **✅ Dynamic Client Registration** - Complete RFC 7591 compliant implementation
+
   - **Auto-Discovery**: `.well-known/oauth-authorization-server/mcp` endpoint for client auto-configuration
   - **Runtime Registration**: Clients can register dynamically without manual setup
   - **Standards Compliance**: Full OAuth 2.1 and RFC 8414 authorization server metadata
@@ -2982,13 +3292,16 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
   - **Configurable Expiration**: Customizable token and authorization code lifetimes
 
 ##### 🚀 **Claude Code Integration**
+
 - **✅ HTTP Transport Support** - Direct integration with Claude Code
   - **Automatic Setup**: Claude Code discovers and registers OAuth client automatically
   - **Team Collaboration**: Enables Claude Code team features via HTTP transport
   - **Seamless Authentication**: JWT tokens handled transparently by client
 
 ##### 🛡️ **Enhanced Security Architecture**
+
 - **✅ Multi-Method Authentication** - Flexible authentication options
+
   - **OAuth Bearer Tokens**: Primary authentication method for modern clients
   - **API Key Fallback**: Existing API key authentication preserved for backward compatibility
   - **Anonymous Access**: Optional anonymous access with explicit opt-in (`MCP_ALLOW_ANONYMOUS_ACCESS`)
@@ -3002,6 +3315,7 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
 #### 🔧 **Technical Implementation**
 
 ##### **New OAuth Endpoints**
+
 - **`/.well-known/oauth-authorization-server/mcp`** - OAuth server metadata discovery
 - **`/.well-known/openid-configuration/mcp`** - OpenID Connect compatibility endpoint
 - **`/oauth/register`** - Dynamic client registration endpoint
@@ -3009,12 +3323,14 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
 - **`/oauth/token`** - Token exchange endpoint (supports both `authorization_code` and `client_credentials` flows)
 
 ##### **Authentication Middleware**
+
 - **✅ Unified Auth Handling**: Single middleware protecting all API endpoints
 - **✅ Scope Validation**: Automatic scope checking for protected resources
 - **✅ Graceful Fallback**: OAuth → API key → Anonymous (if enabled)
 - **✅ Enhanced Error Messages**: Context-aware authentication error responses
 
 ##### **Configuration System**
+
 - **✅ Environment Variables**: Comprehensive OAuth configuration options
   ```bash
   MCP_OAUTH_ENABLED=true                    # Enable/disable OAuth (default: true)
@@ -3025,12 +3341,14 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
   ```
 
 #### 🔄 **Backward Compatibility**
+
 - **✅ Zero Breaking Changes**: All existing API key workflows continue to work unchanged
 - **✅ Optional OAuth**: OAuth can be completely disabled with `MCP_OAUTH_ENABLED=false`
 - **✅ Graceful Coexistence**: API key and OAuth authentication work side-by-side
 - **✅ Migration Path**: Existing users can adopt OAuth gradually or continue with API keys
 
 #### 📊 **Development & Quality Metrics**
+
 - **✅ 17 Comprehensive Review Cycles** with Gemini Code Assist feedback integration
 - **✅ All Security Issues Resolved** (critical, high, medium severity vulnerabilities addressed)
 - **✅ Extensive Testing Suite**: New integration tests for OAuth flows and security scenarios
@@ -3039,22 +3357,27 @@ This major release introduces comprehensive **OAuth 2.1 Dynamic Client Registrat
 #### 🚀 **Impact & Benefits**
 
 ##### **For Existing Users**
+
 - **No Changes Required**: Continue using API key authentication without modification
 - **Enhanced Security**: Option to upgrade to industry-standard OAuth when ready
 - **Future-Proof**: Foundation for additional enterprise features
 
 ##### **For Claude Code Users**
+
 - **Team Collaboration**: HTTP transport enables Claude Code team features
 - **Automatic Setup**: Zero-configuration OAuth setup and token management
 - **Enterprise Ready**: Standards-compliant authentication for organizational use
 
 ##### **For Enterprise Environments**
+
 - **Standards Compliance**: Full OAuth 2.1 and RFC compliance for security audits
 - **Centralized Auth**: Foundation for integration with existing identity providers
 - **Audit Trail**: Comprehensive logging and token lifecycle management
 
 #### 🔜 **Future Enhancements**
+
 This release provides the foundation for additional OAuth features:
+
 - **Persistent Storage**: Production-ready client and token storage backends
 - **PKCE Support**: Enhanced security for public clients
 - **Refresh Tokens**: Long-lived authentication sessions
@@ -3062,6 +3385,7 @@ This release provides the foundation for additional OAuth features:
 - **Identity Provider Integration**: SAML, OIDC, and enterprise SSO support
 
 #### 📚 **Documentation**
+
 - **✅ Complete Setup Guide**: Step-by-step OAuth configuration documentation (`docs/oauth-setup.md`)
 - **✅ API Reference**: Comprehensive endpoint documentation with examples
 - **✅ Security Guide**: Production deployment best practices and security considerations
@@ -3078,6 +3402,7 @@ This release provides the foundation for additional OAuth features:
 This release combines three major improvements: comprehensive memory management tools, enhanced documentation, and dependency standardization. All changes have been reviewed and approved by Gemini Code Assist with very positive feedback.
 
 #### ✨ **New Features**
+
 - **🛠️ New `list_memories` MCP Tool** - Added paginated memory browsing with filtering capabilities
   - ✅ **Pagination Support**: Page-based navigation (1-based indexing) with configurable page sizes (1-100)
   - ✅ **Database-Level Filtering**: Filter by memory type and tags using efficient SQL queries
@@ -3085,7 +3410,9 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Consistent API**: Available in both MCP server and HTTP/REST endpoints
 
 #### 🚀 **Performance Improvements**
+
 - **⚡ Database-Level Filtering** - Replaced inefficient Python-level filtering with SQL WHERE clauses
+
   - ❌ **Previous**: Fetch all records → filter in Python → paginate (slow, memory-intensive)
   - ✅ **Now**: Filter + paginate in database → return results (5ms response time)
   - ✅ **Benefits**: Dramatically reduced memory usage and improved response times for large datasets
@@ -3097,7 +3424,9 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Consistent**: Same interface across all storage backends
 
 #### 🛡️ **Security Enhancements**
+
 - **🔒 Eliminated Security Vulnerabilities** - Removed dangerous runtime dependency installation
+
   - ❌ **Removed**: Automatic `pip install` execution in Docker containers
   - ✅ **Security**: Prevents potential code injection and supply chain attacks
   - ✅ **Reliability**: Dependencies now properly managed through container build process
@@ -3108,7 +3437,9 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Security**: Follows security best practices for credential management
 
 #### 📚 **Documentation Improvements**
+
 - **📖 Comprehensive Documentation Suite** - Added professional documentation in `docs/mastery/`
+
   - ✅ **API Reference**: Complete API documentation with examples
   - ✅ **Architecture Overview**: Detailed system architecture documentation
   - ✅ **Configuration Guide**: Comprehensive configuration management guide
@@ -3122,7 +3453,9 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Integration Examples**: Multi-client setup for various AI platforms
 
 #### 🔧 **Infrastructure Improvements**
+
 - **🐳 Docker Optimization** - Enhanced Docker configuration for production deployments
+
   - ✅ **Security Updates**: Updated base images and security patches
   - ✅ **Performance**: Optimized container size and startup time
   - ✅ **Flexibility**: Better support for different deployment scenarios
@@ -3133,12 +3466,14 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Optional Dependencies**: Clean separation of core vs optional features
 
 #### 🪟 **Platform Support**
+
 - **💻 Enhanced Windows Support** - Added comprehensive Windows debugging capabilities
   - ✅ **Debug Script**: New `start_http_debug.bat` for Windows HTTP mode testing
   - ✅ **103 Lines Added**: Comprehensive Windows debugging and troubleshooting support
   - ✅ **Environment Variables**: Proper Windows environment variable handling
 
 #### 🧹 **Code Quality**
+
 - **♻️ Major Refactoring** - Removed redundant functionality while maintaining compatibility
   - ✅ **317 Lines Removed**: Eliminated duplicate `search_by_time` and `search_similar` tools
   - ✅ **Functional Redundancy**: Removed tools that exactly duplicated existing functionality
@@ -3146,6 +3481,7 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Performance**: Reduced codebase complexity without losing features
 
 #### 🤖 **AI Code Review Integration**
+
 - **✅ Gemini Code Assist Approved** - All changes reviewed and approved with very positive feedback
   - ✅ **Architecture Review**: Praised database-level filtering implementation
   - ✅ **Security Review**: Confirmed elimination of security vulnerabilities
@@ -3153,12 +3489,14 @@ This release combines three major improvements: comprehensive memory management 
   - ✅ **Code Quality**: Approved refactoring and redundancy removal
 
 #### 📋 **Migration Notes**
+
 - **🔄 Backward Compatibility**: All existing integrations continue to work unchanged
 - **📦 Optional Dependencies**: ChromaDB users should install with `pip install mcp-memory-service[chromadb]`
 - **🛠️ New Tools**: The `list_memories` tool is automatically available to all MCP clients
 - **⚠️ Removed Tools**: `search_by_time` and `search_similar` tools have been removed (functionality available through existing tools)
 
 #### 💡 **Usage Examples**
+
 ```python
 # New list_memories tool with filtering
 await list_memories(page=1, page_size=20, tag="important", memory_type="note")
@@ -3179,6 +3517,7 @@ memories = await storage.get_all_memories(
 ### 🔧 **Dashboard Statistics Fix**
 
 #### Bug Fixes
+
 - **🎯 Backend-Agnostic Dashboard Stats** - Fixed `dashboard_get_stats` to use configured storage backend instead of hardcoded ChromaDB
   - ❌ **Previous Issue**: Dashboard always showed ChromaDB stats (often 0 memories) regardless of actual backend
   - ✅ **Fixed**: Now properly detects and uses SQLite-vec, Cloudflare, or ChromaDB based on configuration
@@ -3186,6 +3525,7 @@ memories = await storage.get_all_memories(
   - ✅ **Accuracy**: Dashboard now shows correct memory counts and backend information
 
 #### Technical Improvements
+
 - **Backend Detection**: Dynamic storage type detection via `storage.__class__.__name__`
 - **Error Handling**: Proper async/await handling and graceful error reporting
 - **Code Consistency**: Unified approach with existing health check functionality
@@ -3202,6 +3542,7 @@ memories = await storage.get_all_memories(
 ### 🎯 **Chronological Ordering & Performance Improvements**
 
 #### Major API Enhancements
+
 - **🌟 Chronological Memory Ordering** - `/api/memories` endpoint now returns memories in chronological order (newest first)
   - ✅ **Improved User Experience**: More intuitive memory browsing with recent memories prioritized
   - ✅ **Consistent Across All Backends**: SQLite-vec, ChromaDB, Cloudflare D1, and Hybrid
@@ -3209,6 +3550,7 @@ memories = await storage.get_all_memories(
   - ✅ **Backward Compatible**: Same API interface with enhanced ordering
 
 #### Critical Performance Fixes 🚀
+
 - **⚡ Storage-Layer Memory Type Filtering** - Addressed critical performance bottleneck
   - ❌ **Previous Issue**: API loaded ALL memories into application memory when filtering by `memory_type`
   - ✅ **Fixed**: Efficient storage-layer filtering with SQL WHERE clauses
@@ -3220,6 +3562,7 @@ memories = await storage.get_all_memories(
   - Maintains chronological ordering while applying efficient filters
 
 #### Code Quality Improvements
+
 - **🔧 ChromaDB Code Refactoring** - Eliminated code duplication
   - Created `_create_memory_from_results()` helper method
   - Consolidated 5 duplicate Memory object creation patterns
@@ -3230,12 +3573,14 @@ memories = await storage.get_all_memories(
   - Validates API endpoint behavior and storage backend compatibility
 
 #### Backend-Specific Optimizations
+
 - **SQLite-vec**: Efficient `ORDER BY created_at DESC` with parameterized WHERE clauses
 - **ChromaDB**: Client-side sorting with performance warnings for large datasets (>1000 memories)
 - **Cloudflare D1**: Server-side SQL sorting and filtering for optimal performance
 - **Hybrid**: Delegates to primary storage (SQLite-vec) for consistent performance
 
 #### Developer Experience
+
 - Enhanced error handling and logging for filtering operations
 - Improved API response consistency across all storage backends
 - Better performance monitoring and debugging capabilities
@@ -3252,6 +3597,7 @@ memories = await storage.get_all_memories(
 ### 🚀 **Hybrid Storage Backend - Performance Revolution**
 
 #### Major New Features
+
 - **🌟 Revolutionary Hybrid Storage Backend** - Combines the best of both worlds:
   - ✅ **SQLite-vec Performance**: ~5ms reads/writes (10-100x faster than Cloudflare-only)
   - ✅ **Cloudflare Persistence**: Multi-device synchronization and cloud backup
@@ -3259,6 +3605,7 @@ memories = await storage.get_all_memories(
   - ✅ **Intelligent Write-Through Cache**: Instant response with async cloud synchronization
 
 #### Enhanced Architecture & Performance
+
 - **Background Synchronization Service**
   - Async queue with intelligent retry logic and exponential backoff
   - Concurrent sync operations with configurable batch processing
@@ -3271,6 +3618,7 @@ memories = await storage.get_all_memories(
   - Comprehensive logging with error classification
 
 #### Cloudflare Limit Protection & Monitoring 🛡️
+
 - **Pre-Sync Validation**
   - Metadata size validation (10KB limit per vector)
   - Vector count monitoring (5M vector limit)
@@ -3285,6 +3633,7 @@ memories = await storage.get_all_memories(
   - Permanent failure classification for hard limits
 
 #### Configuration & Deployment
+
 - **Simple Setup**: Just set `MCP_MEMORY_STORAGE_BACKEND=hybrid` + Cloudflare credentials
 - **Advanced Tuning Options**:
   - `MCP_HYBRID_SYNC_INTERVAL`: Background sync frequency (default: 300s)
@@ -3293,6 +3642,7 @@ memories = await storage.get_all_memories(
   - Health check intervals and retry configurations
 
 #### Benefits
+
 - **For Users**:
   - Instant memory operations (no more waiting for cloud responses)
   - Reliable offline functionality with automatic sync when online
@@ -3303,12 +3653,14 @@ memories = await storage.get_all_memories(
   - Scales from single-user to enterprise deployments
 
 ### 🧪 **Comprehensive Testing & Validation**
+
 - **347 lines of Cloudflare limit testing** (`tests/test_hybrid_cloudflare_limits.py`)
 - **Performance characteristic validation**
 - **Background sync verification scripts**
 - **Live testing utilities for production validation**
 
 ### 📖 **Documentation & Setup**
+
 - **CLAUDE.md**: Hybrid marked as **RECOMMENDED** default for new installations
 - **Installation Script Updates**: Interactive hybrid backend selection
 - **Configuration Validation**: Enhanced diagnostic tools for setup verification
@@ -3320,6 +3672,7 @@ memories = await storage.get_all_memories(
 ### 🐛 **Critical Bug Fixes**
 
 #### SQLite-vec Backend Regression Fix
+
 - **Fixed MCP Server Initialization**: Corrected critical regression that prevented sqlite_vec backend from working
   - ✅ Fixed class name mismatch: `SqliteVecStorage` → `SqliteVecMemoryStorage`
   - ✅ Fixed constructor parameters: Updated to use correct `db_path` and `embedding_model` parameters
@@ -3328,6 +3681,7 @@ memories = await storage.get_all_memories(
   - ✅ Code quality improvements: Added `_get_sqlite_vec_storage()` helper function to reduce duplication
 
 #### Impact
+
 - **Restores Default Backend**: sqlite_vec backend (default) now works correctly with MCP server
 - **Fixes Memory Operations**: Resolves "No embedding model available" errors during memory operations
 - **Claude Desktop Integration**: Enables proper memory storage and retrieval functionality
@@ -3340,6 +3694,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🚀 **Claude Code Dual Protocol Memory Hooks**
 
 #### Major New Features
+
 - **Dual Protocol Memory Hook Support** - Revolutionary enhancement to Claude Code memory hooks
   - ✅ **HTTP Protocol Support**: Full compatibility with web-based memory services at `https://localhost:8443`
   - ✅ **MCP Protocol Support**: Direct integration with MCP server processes via `uv run memory server`
@@ -3348,6 +3703,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - ✅ **Protocol Flexibility**: Choose specific protocols (`http`, `mcp`) or auto-selection (`auto`)
 
 #### Enhanced Architecture
+
 - **Unified MemoryClient Class** (`claude-hooks/utilities/memory-client.js`)
   - Transparent protocol switching with single interface
   - Connection pooling and error recovery
@@ -3359,6 +3715,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - Backward compatibility with existing configurations
 
 #### Reliability Improvements
+
 - **Multi-Protocol Resilience**: Hooks work across diverse deployment scenarios
   - Local development (MCP direct), production servers (HTTP), hybrid setups
   - Network connectivity issues gracefully handled
@@ -3367,6 +3724,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 - **Connection Management**: Proper cleanup and resource management for both protocols
 
 #### Developer Experience
+
 - **Comprehensive Testing Suite** (`claude-hooks/test-dual-protocol-hook.js`)
   - Tests all protocol combinations: auto-MCP-preferred, auto-HTTP-preferred, MCP-only, HTTP-only
   - Validates protocol detection, fallback behavior, and error handling
@@ -3375,12 +3733,14 @@ Thanks to @ergut for identifying and fixing this critical regression!
 - **Enhanced Debugging**: Protocol selection and connection status clearly reported
 
 #### Technical Implementation
+
 - **Protocol Abstraction Layer**: Single interface for memory operations regardless of protocol
 - **Smart Connection Logic**: Connection attempts with timeouts, fallback sequencing
 - **Memory Query Unification**: Semantic search, time-based queries work identically across protocols
 - **Storage Backend Detection**: Enhanced parsing for both HTTP JSON responses and MCP tool output
 
 #### Benefits for Different Use Cases
+
 - **Claude Desktop Users**: Better reliability with HTTP fallback when MCP struggles
 - **VS Code Extension Users**: Optimized for HTTP-based deployments
 - **CI/CD Systems**: More robust memory operations in automated environments
@@ -3391,6 +3751,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🔧 **Configuration Validation Scripts Consolidation**
 
 #### Improvements
+
 - **Consolidated validation scripts** - Merged `validate_config.py` and `validate_configuration.py` into comprehensive `validate_configuration_complete.py`
   - ✅ Multi-platform support (Windows/macOS/Linux)
   - ✅ All configuration sources validation (.env, Claude Desktop, Claude Code)
@@ -3400,9 +3761,11 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - ✅ Windows console compatibility (no Unicode issues)
 
 #### Removed
+
 - ❌ **Deprecated scripts**: `validate_config.py` and `validate_configuration.py` (redundant)
 
 #### Fixed
+
 - **Cloudflare Backend Critical Issue**: Implemented missing `recall` method in CloudflareStorage class
   - ✅ Dual search strategy (semantic + time-based)
   - ✅ Graceful fallback mechanism
@@ -3410,6 +3773,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - ✅ Time filtering support
 
 #### Documentation Updates
+
 - **Updated all documentation references** to use new consolidated validation script
 - **Created comprehensive API token setup guide** (`docs/troubleshooting/cloudflare-api-token-setup.md`)
 
@@ -3418,6 +3782,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🚀 **Cloudflare Dual-Environment Configuration Suite**
 
 #### New Diagnostic Tools
+
 - **Added comprehensive backend configuration diagnostic script** (`scripts/validation/diagnose_backend_config.py`)
   - Environment file validation with masked sensitive data display
   - Environment variable loading verification with dotenv support
@@ -3427,6 +3792,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 - **Enhanced troubleshooting workflow** with step-by-step validation process
 
 #### Documentation Improvements
+
 - **Created streamlined 5-minute setup guide** (`docs/quick-setup-cloudflare-dual-environment.md`)
   - Comprehensive dual-environment configuration for Claude Desktop + Claude Code
   - Configuration templates with explicit environment variable examples
@@ -3438,18 +3804,21 @@ Thanks to @ergut for identifying and fixing this critical regression!
 - **Enhanced troubleshooting sections** with specific solutions for environment variable loading issues
 
 #### Configuration Enhancements
+
 - **Improved environment variable loading reliability** with explicit MCP server configuration
 - **Added execution context guidance** for different environments (Claude Desktop vs Claude Code)
 - **Enhanced working directory awareness** for proper .env file loading
 - **Better configuration validation** with clear error messages for missing required variables
 
 #### Technical Improvements
+
 - **Unified diagnostic approach** for both Cloudflare and SQLite-vec backends
 - **Enhanced error reporting** with masked sensitive data for security
 - **Improved configuration precedence handling** between global and project settings
 - **Better cross-platform path handling** for Windows environments
 
 #### Benefits for Users
+
 - **Eliminates configuration confusion** between different execution environments
 - **Provides clear validation tools** to quickly identify and resolve setup issues
 - **Ensures consistent backend usage** across Claude Desktop and Claude Code
@@ -3461,18 +3830,21 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🔧 **Development Environment Stability Fix**
 
 #### Module Isolation Improvements
+
 - **Enhanced script module loading** in `scripts/server/run_memory_server.py` to prevent version conflicts
 - **Added module cache clearing** to remove conflicting cached imports before loading local development code
 - **Improved path prioritization** to ensure local `src/` directory takes precedence over installed packages
 - **Better logging** shows exactly which modules are being cleared and paths being added for debugging
 
 #### Technical Improvements
+
 - **Prevents import conflicts** between development code and installed package versions
 - **Ensures consistent behavior** when switching between development and production environments
 - **Fixes version mismatch issues** that could cause `ImportError` for missing attributes like `INCLUDE_HOSTNAME`
 - **More robust script execution** with conditional path management based on environment
 
 #### Benefits for Developers
+
 - **Reliable development environment** - Local changes always take precedence
 - **Easier debugging** - Clear logging of module loading process
 - **Consistent Cloudflare backend** - No more fallback to ChromaDB due to version conflicts
@@ -3483,24 +3855,28 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🔧 **Script Reorganization Compatibility Hotfix**
 
 #### Backward Compatibility Added
+
 - **Added compatibility stub** at `scripts/run_memory_server.py` that redirects to new location with helpful migration notices
 - **Updated configuration templates** to use Python module approach as primary method for maximum stability
 - **Added comprehensive migration documentation** for users updating from pre-v6.17.0 versions
 - **Zero disruption approach**: Existing configurations continue working immediately
 
 #### Recommended Launch Methods (in order of stability)
+
 1. **`python -m mcp_memory_service.server`** - Most stable, no path dependencies, works across all reorganizations
 2. **`uv run memory server`** - Integrated with UV tooling, already documented as preferred
 3. **`scripts/server/run_memory_server.py`** - Direct script execution at new location
 4. **`scripts/run_memory_server.py`** - Legacy location with backward compatibility (shows migration notice)
 
 #### Documentation Improvements
+
 - **Enhanced README**: Clear migration notice with multiple working options
 - **Updated examples**: Python module approach as primary recommendation
 - **Migration guide**: Created comprehensive GitHub issue ([#108](https://github.com/doobidoo/mcp-memory-service/issues/108)) with all approaches
 - **Template updates**: Configuration templates now show most stable approaches first
 
 #### Why This Approach
+
 - **Immediate relief**: No users are blocked during v6.17.0 update
 - **Multiple pathways**: Users can choose the approach that fits their setup
 - **Future-proof**: Python module approach survives any future directory changes
@@ -3511,6 +3887,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🚀 **Enhanced Installer with Cloudflare Backend Support**
 
 #### Major Installer Improvements
+
 - **Added Cloudflare backend to installer**: Full support for cloud-first installation workflow
   - **Interactive credential setup**: Guided collection of API token, Account ID, D1 database, and Vectorize index
   - **Automatic .env generation**: Securely saves credentials to project environment file
@@ -3525,18 +3902,21 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - **Better help text**: Explains when to use each backend option
 
 #### User Experience Enhancements
+
 - **Interactive backend selection**: Guided setup with compatibility analysis and recommendations
 - **Clear usage guidance**: Backend selection now includes use case scenarios and performance characteristics
 - **Enhanced auto-detection**: Prioritizes most reliable backends for the detected system
 - **Comprehensive documentation**: Updated installation commands and backend comparison table
 
 #### Technical Improvements
+
 - **Robust error handling**: Comprehensive fallback mechanisms for failed setups
 - **Modular design**: Separate functions for credential collection, validation, and environment setup
 - **Connection validation**: Real-time API testing during Cloudflare backend configuration
 - **Environment file management**: Smart .env file handling that preserves existing settings
 
 #### Benefits for Users
+
 - **Seamless production setup**: Single command path from installation to Cloudflare backend
 - **Reduced configuration errors**: Automated credential setup eliminates manual .env file creation
 - **Better backend choice**: Clear guidance helps users select optimal storage for their use case
@@ -3547,6 +3927,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🔧 **Docker Build Hotfix**
 
 #### Infrastructure Fix
+
 - **Fixed Docker build failure**: Updated Dockerfile script path after v6.15.0 scripts reorganization
   - **Issue**: Docker build failing due to `scripts/install_uv.py` not found
   - **Solution**: Updated path to `scripts/installation/install_uv.py`
@@ -3558,6 +3939,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
 ### 🔧 **Configuration Management & Backend Selection Fixes**
 
 #### Critical Configuration Issues Resolved
+
 - **Fixed Cloudflare backend fallback issue**: Resolved service falling back to SQLite-vec despite correct Cloudflare configuration
   - **Root cause**: Configuration module wasn't loading `.env` file automatically
   - **CLI override issue**: CLI default parameter was overriding environment variables
@@ -3572,6 +3954,7 @@ Thanks to @ergut for identifying and fixing this critical regression!
   - **Explicit overrides**: CLI parameters only override when explicitly provided
 
 #### Content Size Management Improvements
+
 - **Added Cloudflare content limits to context provider**: Enhanced memory management guidance
   - **Content size warnings**: Added ~1500 character limit documentation
   - **Embedding model constraints**: Documented `@cf/baai/bge-base-en-v1.5` strict input limits
@@ -3580,16 +3963,17 @@ Thanks to @ergut for identifying and fixing this critical regression!
 - **Enhanced troubleshooting**: Better error messages and debugging capabilities for configuration issues
 
 #### Technical Improvements
+
 - **Configuration validation**: Improved environment variable loading and validation
 - **Error handling**: Better error messages when storage backend initialization fails
 - **Documentation**: Updated context provider with Cloudflare-specific constraints and best practices
 
 #### Benefits for Users
+
 - **Seamless backend switching**: Cloudflare configuration now works reliably out of the box
 - **Fewer configuration errors**: Automatic environment loading reduces setup friction
 - **Better error diagnosis**: Clear guidance on content size limits and chunking strategies
 - **Improved reliability**: Configuration precedence issues eliminated
-
 
 ---
 

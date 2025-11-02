@@ -26,6 +26,7 @@ python install.py
 ```
 
 **Benefits of integrated setup:**
+
 - ✅ Automatic detection of Claude Desktop, VS Code, Continue, Cursor, and other MCP clients
 - ✅ Universal compatibility beyond just Claude applications
 - ✅ Zero manual configuration required
@@ -49,6 +50,7 @@ python install.py --storage-backend sqlite_vec --setup-multi-client
 The integrated setup automatically detects and configures:
 
 #### Automatically Configured
+
 - **Claude Desktop**: Updates `claude_desktop_config.json` with multi-client settings
 - **Continue IDE**: Modifies Continue configuration files
 - **VS Code MCP Extension**: Updates VS Code MCP settings
@@ -56,6 +58,7 @@ The integrated setup automatically detects and configures:
 - **Generic MCP Clients**: Updates `.mcp.json` and similar configuration files
 
 #### Manual Configuration Required
+
 - **Custom MCP implementations**: May require manual configuration file updates
 - **Enterprise MCP clients**: Check with your IT department for configuration requirements
 
@@ -68,11 +71,13 @@ For local networks with shared storage, multiple clients can access the same SQL
 ### Quick Setup
 
 1. **Run the setup script:**
+
    ```bash
    python setup_multi_client_complete.py
    ```
 
 2. **Configure shared database location:**
+
    ```bash
    # Path to the SQLite-vec database file (folder will be created if needed)
    export MCP_MEMORY_SQLITE_PATH="/shared/network/mcp_memory/memory.db"
@@ -96,16 +101,16 @@ For Claude Desktop on each client machine:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
-      "env": {
-        "MCP_MEMORY_SQLITE_PATH": "/shared/network/mcp_memory/memory.db",
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
+			"env": {
+				"MCP_MEMORY_SQLITE_PATH": "/shared/network/mcp_memory/memory.db",
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
@@ -153,6 +158,7 @@ For Claude Desktop on each client machine:
 ### Server Installation
 
 1. **Install on your server machine:**
+
    ```bash
    git clone https://github.com/doobidoo/mcp-memory-service.git
    cd mcp-memory-service
@@ -160,9 +166,10 @@ For Claude Desktop on each client machine:
    ```
 
 2. **Configure HTTP server:**
+
    ```bash
    export MCP_HTTP_HOST=0.0.0.0
-   export MCP_HTTP_PORT=8000
+   export MCP_HTTP_PORT=8001
    export MCP_API_KEY=your-secure-api-key
    ```
 
@@ -182,15 +189,15 @@ Option A — Direct Streamable HTTP (preferred when supported):
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "transport": "streamablehttp",
-      "url": "http://your-server:8000/mcp",
-      "headers": {
-        "Authorization": "Bearer your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"transport": "streamablehttp",
+			"url": "http://your-server:8001/mcp",
+			"headers": {
+				"Authorization": "Bearer your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
@@ -198,18 +205,15 @@ Option B — mcp-proxy bridge (works with any stdio-only client):
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "mcp-proxy",
-      "args": [
-        "http://your-server:8000/mcp",
-        "--transport=streamablehttp"
-      ],
-      "env": {
-        "API_ACCESS_TOKEN": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "mcp-proxy",
+			"args": ["http://your-server:8001/mcp", "--transport=streamablehttp"],
+			"env": {
+				"API_ACCESS_TOKEN": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
@@ -231,7 +235,7 @@ export MCP_SSL_KEY_FILE=/path/to/key.pem
 
 ```bash
 # Allow HTTP/HTTPS access (adjust port as needed)
-sudo ufw allow 8000/tcp
+sudo ufw allow 8001/tcp
 sudo ufw allow 8443/tcp  # For HTTPS
 ```
 
@@ -246,10 +250,10 @@ services:
   mcp-memory-service:
     build: .
     ports:
-      - "8000:8000"
+      - '8001:8001'
     environment:
       - MCP_HTTP_HOST=0.0.0.0
-      - MCP_HTTP_PORT=8000
+      - MCP_HTTP_PORT=8001
       - MCP_API_KEY=${MCP_API_KEY}
       - MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
     volumes:
@@ -274,27 +278,28 @@ Note: For the HTTP server interface, use `MCP_HTTP_HOST`, `MCP_HTTP_PORT`, and `
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MCP_HTTP_ENABLED` | `false` | Enable HTTP mode (FastAPI + Streamable HTTP) |
-| `MCP_HTTP_HOST` | `0.0.0.0` | HTTP server bind address |
-| `MCP_HTTP_PORT` | `8000` | HTTP server port |
-| `MCP_API_KEY` | `none` | API key for auth (sent as `Authorization: Bearer ...`) |
-| `MCP_HTTPS_ENABLED` | `false` | Enable HTTPS termination |
-| `MCP_SSL_CERT_FILE` | `none` | Path to TLS certificate |
-| `MCP_SSL_KEY_FILE` | `none` | Path to TLS private key |
-| `MCP_CORS_ORIGINS` | `*` | CSV list of allowed origins |
-| `MCP_SSE_HEARTBEAT` | `30` | SSE heartbeat interval (seconds) |
-| `MCP_MEMORY_STORAGE_BACKEND` | `sqlite_vec` | `sqlite_vec`, `chroma`, or `cloudflare` |
-| `MCP_MEMORY_SQLITE_PATH` | `<base>/sqlite_vec.db` | SQLite-vec database file path |
-| `MCP_MEMORY_SQLITEVEC_PATH` | `none` | Alternate var for SQLite path (if set, used) |
-| `MCP_MEMORY_SQLITE_PRAGMAS` | `none` | Override SQLite pragmas (e.g. `busy_timeout=15000,cache_size=20000`) |
-| `MCP_MDNS_ENABLED` | `true` | Enable mDNS advertising/discovery |
-| `MCP_MDNS_SERVICE_NAME` | `MCP Memory Service` | mDNS service name |
-| `MCP_MDNS_SERVICE_TYPE` | `_mcp-memory._tcp.local.` | mDNS service type |
-| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5` | mDNS discovery timeout (seconds) |
+| Variable                     | Default                   | Description                                                          |
+| ---------------------------- | ------------------------- | -------------------------------------------------------------------- |
+| `MCP_HTTP_ENABLED`           | `false`                   | Enable HTTP mode (FastAPI + Streamable HTTP)                         |
+| `MCP_HTTP_HOST`              | `0.0.0.0`                 | HTTP server bind address                                             |
+| `MCP_HTTP_PORT`              | `8001`                    | HTTP server port                                                     |
+| `MCP_API_KEY`                | `none`                    | API key for auth (sent as `Authorization: Bearer ...`)               |
+| `MCP_HTTPS_ENABLED`          | `false`                   | Enable HTTPS termination                                             |
+| `MCP_SSL_CERT_FILE`          | `none`                    | Path to TLS certificate                                              |
+| `MCP_SSL_KEY_FILE`           | `none`                    | Path to TLS private key                                              |
+| `MCP_CORS_ORIGINS`           | `*`                       | CSV list of allowed origins                                          |
+| `MCP_SSE_HEARTBEAT`          | `30`                      | SSE heartbeat interval (seconds)                                     |
+| `MCP_MEMORY_STORAGE_BACKEND` | `sqlite_vec`              | `sqlite_vec`, `chroma`, or `cloudflare`                              |
+| `MCP_MEMORY_SQLITE_PATH`     | `<base>/sqlite_vec.db`    | SQLite-vec database file path                                        |
+| `MCP_MEMORY_SQLITEVEC_PATH`  | `none`                    | Alternate var for SQLite path (if set, used)                         |
+| `MCP_MEMORY_SQLITE_PRAGMAS`  | `none`                    | Override SQLite pragmas (e.g. `busy_timeout=15000,cache_size=20000`) |
+| `MCP_MDNS_ENABLED`           | `true`                    | Enable mDNS advertising/discovery                                    |
+| `MCP_MDNS_SERVICE_NAME`      | `MCP Memory Service`      | mDNS service name                                                    |
+| `MCP_MDNS_SERVICE_TYPE`      | `_mcp-memory._tcp.local.` | mDNS service type                                                    |
+| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5`                       | mDNS discovery timeout (seconds)                                     |
 
 Deprecated (replaced):
+
 - `MCP_MEMORY_HTTP_HOST` → `MCP_HTTP_HOST`
 - `MCP_MEMORY_HTTP_PORT` → `MCP_HTTP_PORT`
 - `MCP_MEMORY_API_KEY` → `MCP_API_KEY` (server HTTP mode). Note: the standalone Memory MCP Bridge continues to use `MCP_MEMORY_API_KEY`.
@@ -345,6 +350,7 @@ export MCP_MEMORY_SQLITE_PRAGMAS="busy_timeout=15000,cache_size=20000"
 **Root Cause**: Default `busy_timeout=5000ms` (5 seconds) is too short when both HTTP server and MCP server access the same SQLite database. The fix increases timeout to 15 seconds and cache to 20,000 pages.
 
 **Additional checks** (if issue persists):
+
 ```bash
 # Verify WAL mode is enabled (should be default)
 sqlite3 /path/to/memory.db "PRAGMA journal_mode;"
@@ -363,7 +369,7 @@ chmod 666 /path/to/memory.db-shm 2>/dev/null || true
 
 ```bash
 # Test server connectivity
-curl http://your-server:8000/health
+curl http://your-server:8001/health
 
 # Check firewall rules
 sudo ufw status
@@ -404,10 +410,10 @@ conn and conn.close()
 
 ```bash
 # For HTTP server deployment
-curl http://your-server:8000/stats
+curl http://your-server:8001/stats
 
 # Check active connections
-netstat -an | grep :8000
+netstat -an | grep :8001
 ```
 
 ## Migration from Single-Client
@@ -415,11 +421,13 @@ netstat -an | grep :8000
 ### Upgrading Existing Installation
 
 1. **Backup existing data:**
+
    ```bash
    python scripts/backup_memories.py
    ```
 
 2. **Run multi-client setup:**
+
    ```bash
    python install.py --setup-multi-client --migrate-existing
    ```
@@ -446,9 +454,10 @@ python scripts/migrate_to_multi_client.py \
 
 ## Client Setup Recipes (Codex, Cursor, Qwen, Gemini)
 
-This section provides practical, copy-pasteable setups for popular MCP clients. Use Streamable HTTP at `http://<host>:8000/mcp` when supported, or bridge via `mcp-proxy` for stdio-only clients.
+This section provides practical, copy-pasteable setups for popular MCP clients. Use Streamable HTTP at `http://<host>:8001/mcp` when supported, or bridge via `mcp-proxy` for stdio-only clients.
 
 Important:
+
 - Server API key: set `MCP_API_KEY` on the server. Clients must send `Authorization: Bearer <MCP_API_KEY>`.
 - Our MCP endpoint is Streamable HTTP at `/mcp` (not the SSE events feed at `/api/events`).
 
@@ -456,33 +465,33 @@ Important:
 
 Codex does not natively support HTTP transport. Use `mcp-proxy` to bridge stdio ⇄ Streamable HTTP.
 
-1) Install mcp-proxy
+1. Install mcp-proxy
+
 ```bash
 pipx install mcp-proxy  # or: uv tool install mcp-proxy
 ```
 
-2) Update Codex MCP config (see Codex docs for exact file location):
+2. Update Codex MCP config (see Codex docs for exact file location):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "mcp-proxy",
-      "args": [
-        "http://your-server:8000/mcp",
-        "--transport=streamablehttp"
-      ],
-      "env": {
-        "API_ACCESS_TOKEN": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "mcp-proxy",
+			"args": ["http://your-server:8001/mcp", "--transport=streamablehttp"],
+			"env": {
+				"API_ACCESS_TOKEN": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
 Reference template: `examples/codex-mcp-config.json` in this repository.
 
 Notes:
-- Replace `your-server` and `your-secure-api-key` accordingly. For local testing use `http://127.0.0.1:8000/mcp`.
+
+- Replace `your-server` and `your-secure-api-key` accordingly. For local testing use `http://127.0.0.1:8001/mcp`.
 - Alternatively pass headers explicitly: `"args": ["http://.../mcp", "--transport=streamablehttp", "--headers", "Authorization", "Bearer your-secure-api-key"]`.
 
 ### Cursor
@@ -490,48 +499,48 @@ Notes:
 Pick one of these depending on your deployment:
 
 - Option A — Local stdio (single machine):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
 - Option B — Remote central server via mcp-proxy (recommended for multi-client):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "mcp-proxy",
-      "args": [
-        "http://your-server:8000/mcp",
-        "--transport=streamablehttp"
-      ],
-      "env": {
-        "API_ACCESS_TOKEN": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "mcp-proxy",
+			"args": ["http://your-server:8001/mcp", "--transport=streamablehttp"],
+			"env": {
+				"API_ACCESS_TOKEN": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
 - Option C — Direct Streamable HTTP (if your Cursor version supports it):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "transport": "streamablehttp",
-      "url": "http://your-server:8000/mcp",
-      "headers": { "Authorization": "Bearer your-secure-api-key" }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"transport": "streamablehttp",
+			"url": "http://your-server:8001/mcp",
+			"headers": { "Authorization": "Bearer your-secure-api-key" }
+		}
+	}
 }
 ```
 
@@ -541,52 +550,49 @@ Qwen clients that support MCP can connect either directly via Streamable HTTP or
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "mcp-proxy",
-      "args": [
-        "http://your-server:8000/mcp",
-        "--transport=streamablehttp"
-      ],
-      "env": { "API_ACCESS_TOKEN": "your-secure-api-key" }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "mcp-proxy",
+			"args": ["http://your-server:8001/mcp", "--transport=streamablehttp"],
+			"env": { "API_ACCESS_TOKEN": "your-secure-api-key" }
+		}
+	}
 }
 ```
 
 Tips:
-- Some Qwen distributions expose MCP configuration in a UI. Map fields as: transport = Streamable HTTP, URL = `http://<host>:8000/mcp`, header `Authorization: Bearer <key>`.
+
+- Some Qwen distributions expose MCP configuration in a UI. Map fields as: transport = Streamable HTTP, URL = `http://<host>:8001/mcp`, header `Authorization: Bearer <key>`.
 
 ### Gemini
 
 Gemini-based IDE integrations (e.g., Gemini Code Assist in VS Code/JetBrains) typically support MCP via a config file or UI. Use either direct Streamable HTTP or `mcp-proxy`:
 
 - Direct Streamable HTTP (when supported):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "transport": "streamablehttp",
-      "url": "https://your-server:8443/mcp",
-      "headers": { "Authorization": "Bearer your-secure-api-key" }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"transport": "streamablehttp",
+			"url": "https://your-server:8443/mcp",
+			"headers": { "Authorization": "Bearer your-secure-api-key" }
+		}
+	}
 }
 ```
 
 - Via mcp-proxy (works everywhere):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "mcp-proxy",
-      "args": [
-        "https://your-server:8443/mcp",
-        "--transport=streamablehttp"
-      ],
-      "env": { "API_ACCESS_TOKEN": "your-secure-api-key" }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "mcp-proxy",
+			"args": ["https://your-server:8443/mcp", "--transport=streamablehttp"],
+			"env": { "API_ACCESS_TOKEN": "your-secure-api-key" }
+		}
+	}
 }
 ```
 
@@ -595,7 +601,8 @@ If your Gemini client expects a command-only entry, prefer the `mcp-proxy` form.
 ---
 
 Troubleshooting client connections:
+
 - Ensure you’re using `/mcp` (Streamable HTTP), not `/api/events` (SSE).
 - Verify server exports `MCP_API_KEY` and clients send `Authorization: Bearer ...`.
-- For remote setups, test reachability: `curl -i http://your-server:8000/api/health`.
+- For remote setups, test reachability: `curl -i http://your-server:8001/api/health`.
 - If a client doesn’t support Streamable HTTP, use `mcp-proxy`.

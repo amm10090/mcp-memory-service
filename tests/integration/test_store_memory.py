@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""
-Test script to store a memory in the MCP Memory Service.
-"""
+"""Utility helpers for manual memory storage smoke testing."""
 import asyncio
 import json
 import os
-import sys
 
-# Import MCP client
-try:
-    from mcp import Client
+import pytest
+
+# Import MCP client with backward compatibility across package versions.
+try:  # MCP <= 0.1.0
+    from mcp import Client  # type: ignore
 except ImportError:
-    print("MCP client not found. Install with: pip install mcp")
-    sys.exit(1)
+    try:  # MCP >= 0.2.0 exposes the client in the submodule
+        from mcp.client import Client  # type: ignore
+    except ImportError as exc:  # pragma: no cover - environment-dependent
+        pytest.skip(
+            f"MCP client library not available ({exc}). Install with 'pip install mcp'.",
+            allow_module_level=True,
+        )
 
 async def store_memory():
     """Store a test memory."""

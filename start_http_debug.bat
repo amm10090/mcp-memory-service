@@ -50,7 +50,7 @@ if %errorlevel% neq 0 (
 REM Set environment variables for HTTP mode
 set MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 set MCP_HTTP_ENABLED=true
-set MCP_HTTP_PORT=8000
+set MCP_HTTP_PORT=8001
 set MCP_HTTPS_ENABLED=false
 set MCP_MDNS_ENABLED=true
 set MCP_MDNS_SERVICE_NAME=MCP-Memory-Service-Debug
