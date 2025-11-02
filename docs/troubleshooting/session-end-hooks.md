@@ -1,382 +1,168 @@
-# SessionEnd Hook Troubleshooting Guide
+# SessionEnd Hook 故障排查指南
 
-## Overview
+## 概览
 
-SessionEnd hooks automatically consolidate conversation outcomes when you exit Claude Code. However, many users are confused about **when these hooks actually fire** and why memories might not be created as expected.
-
-This guide clarifies the session lifecycle and common troubleshooting scenarios.
+SessionEnd Hook 会在退出 Claude Code 会话时自动整合对话结论。但许多用户对 **何时触发** 以及 **为何未生成记忆** 感到困惑。本文旨在澄清会话生命周期并给出常见问题排查方案。
 
 ---
 
-## Critical Concept: Session Lifecycle
+## 关键概念：会话生命周期
 
-Claude Code distinguishes between **session pause/suspend** and **session termination**:
+Claude Code 区分 **暂停/挂起** 与 **终止**：
 
-| User Action | Session State | Hook Triggered | Memory Created? |
-|-------------|---------------|----------------|-----------------|
-| **Ctrl+C (once)** | Interrupt input | None | ❌ No |
-| **Ctrl+C (twice)** | Suspend session | None | ❌ No |
-| **Resume session** | Continue existing | `SessionStart:resume` | ❌ No (loads existing) |
-| **`/exit` command** | Terminate | `SessionEnd` | ✅ **Yes** |
-| **Close terminal** | Terminate | `SessionEnd` | ✅ **Yes** |
-| **Kill process** | May terminate | `SessionEnd` (if graceful) | ⚠️ Maybe |
+| 用户操作 | 会话状态 | 触发 Hook | 是否创建记忆 |
+| --- | --- | --- | --- |
+| **Ctrl+C（一次）** | 中断输入 | 无 | ❌ 否 |
+| **Ctrl+C（两次）** | 挂起会话 | 无 | ❌ 否 |
+| **恢复会话** | 继续已有会话 | `SessionStart:resume` | ❌ 否 |
+| **`/exit` 命令** | 终止会话 | `SessionEnd` | ✅ 是 |
+| **关闭终端窗口** | 终止会话 | `SessionEnd` | ✅ 是 |
+| **Kill 进程** | 可能终止 | 若能优雅退出则触发 | ⚠️ 不确定 |
 
-### Key Takeaway
-
-**Ctrl+C does NOT trigger SessionEnd hooks.** It suspends the session, which you can later resume. Only actual session termination (e.g., `/exit`) triggers SessionEnd.
+> **结论**：**Ctrl+C 不会触发 SessionEnd Hook**，它只是在挂起当前会话。只有真正终止（如 `/exit`）才会触发并写入记忆。
 
 ---
 
-## Common Issue: "My Session Didn't Create a Memory"
+## 常见问题：未生成 Session 记忆
 
-### Symptom
+### 症状
 
-You exited Claude Code with Ctrl+C (twice), resumed later, and noticed no `session-consolidation` memory was created for your previous session.
+使用 Ctrl+C 退出并稍后恢复，发现没有生成 `session-consolidation` 记忆。
 
-### Root Cause
+### 原因
 
-**Ctrl+C suspends the session rather than ending it.** When you resume with `SessionStart:resume`, the session continues from where you left off - no SessionEnd hook fires.
+Ctrl+C 只是挂起会话，并未结束；恢复时会触发 `SessionStart:resume`，表示继续已有会话，因此不会执行 SessionEnd。
 
-### Evidence
+### 解决
 
-When you resume a session, you'll see:
-```
-SessionStart:resume hook success
-```
-
-This confirms you **resumed** an existing session, not started a new one.
-
-### Solution
-
-**Always use `/exit` to properly terminate sessions** if you want SessionEnd memories created:
+希望记录会话总结时，请使用 `/exit`：
 
 ```bash
-# In Claude Code prompt:
 /exit
 ```
 
-This triggers graceful shutdown and SessionEnd hook execution.
+此操作会优雅终止会话并执行 SessionEnd Hook。
 
 ---
 
-## Common Issue: Connection Failures
+## 常见问题：连接失败
 
-### Symptom
+### 症状
 
-During SessionStart, you see:
+SessionStart 时出现：
 ```
 ⚠️ Memory Connection → Failed to connect using any available protocol
 💾 Storage → 💾 Unknown Storage (http://127.0.0.1:8000)
 ```
 
-### Root Cause
+### 原因
 
-**HTTP/HTTPS protocol mismatch** between hook configuration and memory service.
+Hook 配置的协议与服务器实际协议不匹配，例如服务器启用 HTTPS，而 Hook 使用 HTTP。
 
-**Example**:
-- **Server running**: `https://localhost:8000` (HTTPS)
-- **Hook configured**: `http://127.0.0.1:8000` (HTTP)
+### 排查
 
-### Diagnosis
+1. **查看服务器协议**：
+   ```bash
+   systemctl --user status mcp-memory-http.service
+   # 查看日志是否显示 https:// 或 http://
+   curl -sk "https://localhost:8000/api/health"
+   ```
 
-Check your server protocol:
-```bash
-# Check server status
-systemctl --user status mcp-memory-http.service
-# Look for: "Uvicorn running on https://0.0.0.0:8000" or "http://..."
+2. **检查 Hook 配置**：
+   ```bash
+   grep endpoint ~/.claude/hooks/config.json
+   # 确保与实际协议一致
+   ```
 
-# Or test connection
-curl -sk "https://localhost:8000/api/health"  # HTTPS
-curl -s "http://127.0.0.1:8000/api/health"    # HTTP
-```
+### 解决
 
-Check your hook configuration:
-```bash
-grep endpoint ~/.claude/hooks/config.json
-# Should show: "endpoint": "https://localhost:8000"
-```
-
-### Solution
-
-Update `~/.claude/hooks/config.json` to match server protocol:
+将 `~/.claude/hooks/config.json` 中的 `endpoint` 调整为正确的协议：
 
 ```json
 {
   "memoryService": {
     "http": {
-      "endpoint": "https://localhost:8000",  // Match your server
-      "apiKey": "your-api-key-here"
+      "endpoint": "https://localhost:8000",
+      "apiKey": "your-api-key"
     }
   }
 }
 ```
 
-**No restart required** - hooks reload config on next execution.
+无需重启，Hook 下次运行会自动应用新配置。
 
 ---
 
-## SessionEnd Requirements
+## SessionEnd 触发后的必要条件
 
-Even if SessionEnd fires correctly, memory creation requires:
+即便 SessionEnd 成功触发，记忆生成仍需要满足：
 
-### 1. Minimum Session Length
-- Default: **100+ characters** total conversation
-- Configurable: `sessionAnalysis.minSessionLength` in `config.json`
-- Reason: Prevents noise from trivial sessions
+1. **会话长度 ≥ 100 字符**（默认，可在 `config.json` 的 `sessionAnalysis.minSessionLength` 中调整）；
+2. **分析置信度 > 0.1**（对话内容需足够具体，否则视为无效）；
+3. **已开启会话整合**：
+   ```json
+   {
+     "memoryService": {
+       "enableSessionConsolidation": true
+     }
+   }
+   ```
 
-### 2. Minimum Confidence Score
-- Default: **> 0.1** (10% confidence)
-- Based on conversation analysis quality
-- Low confidence = session too generic to extract insights
+### 提取内容包括
 
-### 3. Session Consolidation Enabled
-```json
-{
-  "memoryService": {
-    "enableSessionConsolidation": true  // Must be true
-  }
-}
-```
+- **Topics**：例如 “implementation”、“debugging”；
+- **Decisions**：如 “decided to”、“chose to”；
+- **Insights**：如 “learned that”、“realized”；
+- **Code Changes**：如 “implemented”、“refactored”；
+- **Next Steps**：如 “next we need”、“TODO”。
 
-### What Gets Extracted
-
-SessionEnd analyzes your conversation to extract:
-
-- **Topics**: Keywords like "implementation", "debugging", "architecture", "performance"
-- **Decisions**: Phrases like "decided to", "will use", "chose to", "going with"
-- **Insights**: Phrases like "learned that", "discovered", "realized"
-- **Code Changes**: Phrases like "implemented", "created", "refactored"
-- **Next Steps**: Phrases like "next we need", "TODO", "remaining"
-
-If conversation lacks these patterns, confidence will be low and memory won't be created.
+若对话中缺少这些模式，则置信度可能过低而导致不生成记忆。
 
 ---
 
-## Verification & Debugging
+## 验证与调试
 
-### 1. Check Recent Session Memories
+### 1. 检查近期 Session 记忆
 
 ```bash
-# Search for recent session consolidation memories
 curl -sk "https://localhost:8000/api/search/by-tag" \
   -H "Content-Type: application/json" \
   -d '{"tags": ["session-consolidation"], "limit": 5}' | \
   python -m json.tool | grep created_at_iso
 ```
 
-Look for recent timestamps (today/yesterday).
+确认最近是否存在新记录。
 
-### 2. Test SessionEnd Hook Manually
+### 2. 手动触发 Hook
 
 ```bash
-# Run hook with test conversation
 node ~/.claude/hooks/core/session-end.js
 ```
 
-Check output for:
+期望输出：
 - `[Memory Hook] Session ending - consolidating outcomes...`
-- `[Memory Hook] Session analysis: X topics, Y decisions, confidence: Z%`
+- `[Memory Hook] Session analysis: ...`
 - `[Memory Hook] Session consolidation stored successfully`
 
-### 3. Verify Connection
+### 3. 检查配置
 
 ```bash
-# Test server health
 curl -sk "https://localhost:8000/api/health"
-
-# Check config matches
 grep endpoint ~/.claude/hooks/config.json
 ```
 
-### 4. Check SessionEnd Configuration
+---
+
+## 其他注意事项
+
+- 为避免误挂起，可在惯用流程中使用 `/exit`；
+- 若在多终端/多客户端场景，确认所有客户端的 Hook 配置一致；
+- 在记录高价值会话前，可手动执行 `memory` 工具进行存储，以防因条件不满足而遗漏。
+
+---
+
+如需进一步排查，可查看主仓库 `README`、`CLAUDE.md` 或执行诊断脚本：
 
 ```bash
-# Verify SessionEnd hook is configured
-grep -A 10 "SessionEnd" ~/.claude/settings.json
-
-# Should show:
-# "SessionEnd": [
-#   {
-#     "hooks": [
-#       {
-#         "type": "command",
-#         "command": "node \"/home/user/.claude/hooks/core/session-end.js\"",
-#         "timeout": 15
-#       }
-#     ]
-#   }
-# ]
+python scripts/validation/diagnose_backend_config.py
 ```
-
----
-
-## Quick Diagnosis Checklist
-
-Use this checklist when SessionEnd memories aren't being created:
-
-- [ ] **Did I use `/exit`** or just Ctrl+C?
-  - **Fix**: Use `/exit` command for proper termination
-
-- [ ] **Does `config.json` endpoint match server protocol?**
-  - **Check**: HTTP vs HTTPS in both config and server
-  - **Fix**: Update endpoint in `~/.claude/hooks/config.json`
-
-- [ ] **Is the memory service running?**
-  - **Check**: `curl https://localhost:8000/api/health`
-  - **Fix**: Start server with `systemctl --user start mcp-memory-http.service`
-
-- [ ] **Was conversation meaningful?**
-  - **Check**: Total length > 100 characters
-  - **Fix**: Have longer conversations with decisions/insights
-
-- [ ] **Is session consolidation enabled?**
-  - **Check**: `enableSessionConsolidation: true` in config
-  - **Fix**: Update `~/.claude/hooks/config.json`
-
-- [ ] **Is SessionEnd hook installed?**
-  - **Check**: `grep SessionEnd ~/.claude/settings.json`
-  - **Fix**: Run `cd claude-hooks && python install_hooks.py --all`
-
----
-
-## Best Practices
-
-### For Reliable Memory Consolidation
-
-1. **Always use `/exit`** when you want session memories created
-2. **Avoid Ctrl+C for final exit** - Use it only for interrupts/corrections
-3. **Have meaningful conversations** - Include decisions, insights, plans
-4. **Verify endpoint configuration** - HTTP vs HTTPS must match
-5. **Check session memories periodically** - Confirm system is working
-
-### For Debugging
-
-1. **Check recent memories** - Look for session-consolidation tag
-2. **Test hook manually** - Run `session-end.js` directly
-3. **Verify connection** - Test health endpoint
-4. **Read hook logs** - Look for error messages in terminal
-5. **Consult session requirements** - Length, confidence, enabled settings
-
----
-
-## Technical Details
-
-### SessionEnd Hook Implementation
-
-**File**: `~/.claude/hooks/core/session-end.js`
-
-**Key Code Sections**:
-- **Lines 298-365**: Main `onSessionEnd()` function
-- **Line 316**: Minimum session length check (100 chars)
-- **Line 329**: Minimum confidence check (0.1)
-- **Line 305**: Session consolidation enabled check
-- **Lines 213-293**: `storeSessionMemory()` - HTTP API call
-
-### Configuration Structure
-
-**File**: `~/.claude/hooks/config.json`
-
-```json
-{
-  "memoryService": {
-    "protocol": "auto",
-    "preferredProtocol": "http",
-    "http": {
-      "endpoint": "https://localhost:8000",  // Must match server
-      "apiKey": "your-api-key",
-      "healthCheckTimeout": 3000
-    },
-    "enableSessionConsolidation": true
-  },
-  "sessionAnalysis": {
-    "extractTopics": true,
-    "extractDecisions": true,
-    "extractInsights": true,
-    "extractCodeChanges": true,
-    "extractNextSteps": true,
-    "minSessionLength": 100,
-    "minConfidence": 0.1
-  }
-}
-```
-
-### Hook Settings
-
-**File**: `~/.claude/settings.json`
-
-```json
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/home/user/.claude/hooks/core/session-end.js\"",
-            "timeout": 15  // 15 seconds (vs 10s for SessionStart)
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
----
-
-## Related Documentation
-
-- **Hook Installation**: `claude-hooks/README.md`
-- **Configuration Guide**: `claude-hooks/CONFIGURATION.md`
-- **HTTP Server Management**: `docs/http-server-management.md`
-- **General Troubleshooting**: `docs/troubleshooting/general.md`
-- **SessionStart Windows Bug**: `claude-hooks/WINDOWS-SESSIONSTART-BUG.md`
-
----
-
-## Common Questions
-
-### Q: Why didn't my session create a memory even though I used `/exit`?
-
-**A**: Check these conditions:
-1. Conversation was too short (< 100 chars)
-2. Conversation lacked decision/insight patterns (low confidence)
-3. Connection to memory service failed (check endpoint)
-4. Session consolidation disabled in config
-
-### Q: Does Ctrl+C ever trigger SessionEnd?
-
-**A**: No. Ctrl+C sends SIGINT which interrupts/suspends but doesn't terminate the session. Use `/exit` for proper termination.
-
-### Q: Can I test if SessionEnd will work before exiting?
-
-**A**: Yes:
-```bash
-node ~/.claude/hooks/core/session-end.js
-```
-
-This runs the hook with a test conversation and shows what would happen.
-
-### Q: How do I see all my session consolidation memories?
-
-**A**:
-```bash
-curl -sk "https://localhost:8000/api/search/by-tag" \
-  -H "Content-Type: application/json" \
-  -d '{"tags": ["session-consolidation"]}' | \
-  python -m json.tool
-```
-
-### Q: What's the difference between SessionStart and SessionEnd hooks?
-
-**A**:
-- **SessionStart**: Loads and injects memory context at session start
-- **SessionEnd**: Analyzes and stores session outcomes at session end
-- Both can have connection issues (check endpoint configuration)
-- SessionStart has timeout issues on Windows (Ctrl+C hang bug)
-
----
-
-**Last Updated**: 2025-11-01
-**Applies to**: v8.15.1+
-**Author**: Community Documentation

@@ -1,34 +1,34 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with this MCP Memory Service repository.
+本文档为 Claude Code（claude.ai/code）在 MCP Memory Service 仓库中工作时提供操作指南与项目约定。
 
-> **📝 Personal Customizations**: You can create `CLAUDE.local.md` (gitignored) for personal notes, custom workflows, or environment-specific instructions. This file contains shared project conventions.
+> **📝 个性化配置**：欢迎创建被 `.gitignore` 忽略的 `CLAUDE.local.md`，用于记录个人习惯、定制流程或特定环境说明。本主文件仅存放团队共享的规范。
 
-> **Note**: Comprehensive project context has been stored in memory with tags `claude-code-reference`. Use memory retrieval to access detailed information during development.
+> **提示**：完整项目上下文已存入记忆库，并以 `claude-code-reference` 标签归档。开发过程中可随时检索相关记忆以获得详细背景。
 
-## Overview
+## 概览
 
-MCP Memory Service is a Model Context Protocol server providing semantic memory and persistent storage for Claude Desktop with SQLite-vec, Cloudflare, and Hybrid storage backends.
+MCP Memory Service 是一款模型上下文协议（Model Context Protocol，简称 MCP）服务器，为 Claude Desktop 提供语义记忆与持久化存储。系统支持 SQLite-vec、Cloudflare 以及混合后端模式。
 
-> **🚨 v8.13.3**: **MCP Tools Restored** - CRITICAL patch fixing v8.12.0 regression that broke all MCP memory operations. Transform MemoryService responses to proper MCP TypedDict format. Requires MCP server restart (/mcp command) to load fix.
+> **🚨 v8.13.3**：**MCP 工具恢复** —— 修复 v8.12.0 回归导致的记忆操作中断，将 MemoryService 响应转换为规范的 MCP `TypedDict`。更新后请执行 `/mcp` 重新加载服务器。
+>
+> **🔄 v8.13.2**：**同步脚本恢复** —— 解决 `store_memory` API 迁移引发的后端同步失败，改用 `storage.store()` 正确创建 Memory 对象。
+>
+> **🔧 v8.13.1**：**并发访问修复** —— 零数据库锁回归；在打开数据库前设置连接超时，并跳过已初始化数据库的 DDL。
+>
+> **📊 v8.13.0**：**HTTP 集成测试** —— 32 个端到端测试覆盖启动验证、依赖注入、存储接口兼容性，防止生产回归。
+>
+> **🧠 v8.5.1**：**动态记忆权重调节** —— 根据记忆年龄与 git 活动自动调整权重，避免陈旧记忆主导上下文。
+>
+> **🆕 v8.4.0**：**记忆钩子时效优化** —— 最近 7 天的开发活动自动浮现，上下文准确率提升 80%。
+>
+> **🎉 v8.3.1**：**HTTP 服务管理** —— 跨平台自启脚本与健康检查，便于自然记忆触发器接入。
+>
+> **🧠 v7.1.0**：新增 **自然记忆触发器**，自动检索记忆，触发准确率超过 85%，支持多层性能优化。
+>
+> **🚀 v7.0.0**：支持 **OAuth 2.1 动态客户端注册** 与 **双协议记忆钩子**，可自动侦测 HTTP/MCP 协议。
 
-> **🔄 v8.13.2**: **Sync Script Restored** - Fixed broken backend synchronization (store_memory API migration). Proper Memory object creation with storage.store() method.
-
-> **🔧 v8.13.1**: **Concurrent Access Fix** - Zero database locks restored. Connection timeout now set BEFORE opening database, detects already-initialized database to skip DDL operations.
-
-> **📊 v8.13.0**: **HTTP Integration Tests** - 32 comprehensive tests prevent production bugs. Server startup validation, dependency injection tests, storage interface compatibility checks.
-
-> **🧠 v8.5.1**: **Dynamic Memory Weight Adjustment** - Intelligent auto-calibration prevents stale memories from dominating context! Automatically detects memory age vs git activity mismatches and adapts weights/boosts accordingly. No more manual config tweaks!
-
-> **🆕 v8.4.0**: **Memory Hooks Recency Optimization** - Recent memory prioritization with 80% better context accuracy. Comprehensive scoring rebalancing ensures development work from the last 7 days surfaces automatically!
-
-> **🎉 v8.3.1**: **HTTP Server Management** - Cross-platform auto-start scripts and health check utilities for seamless Natural Memory Triggers integration!
-
-> **🧠 v7.1.0**: Now features **Natural Memory Triggers** with intelligent automatic memory retrieval, 85%+ trigger accuracy, and multi-tier performance optimization!
-
-> **🚀 v7.0.0**: Features **OAuth 2.1 Dynamic Client Registration** and **Dual Protocol Memory Hooks** for Claude Code with automatic HTTP/MCP protocol detection.
-
-## Essential Commands
+## 常用命令
 
 ```bash
 # Setup & Development
@@ -104,44 +104,36 @@ time curl -s "http://127.0.0.1:8001/" > /dev/null     # Dashboard page load perf
 # 4. All storage backends have compatible interfaces
 ```
 
-## Architecture
+> 以上命令与注释保持英文原样，避免执行歧义。以下文本提供中文解读。
 
-**Core Components:**
+## 架构
 
-- **Server Layer**: MCP protocol implementation with async handlers and global caches (`src/mcp_memory_service/server.py`)
-- **Storage Backends**: SQLite-Vec (fast local, 5ms reads), Cloudflare (edge distribution), Hybrid (SQLite+Cloudflare sync)
-- **Web Interface**: FastAPI dashboard at `http://127.0.0.1:8001/` (HTTP) or `https://localhost:8443/` (HTTPS) with REST API
-- **Document Ingestion**: Pluggable loaders for PDF, DOCX, PPTX, text with semtools support
-- **Dual Protocol Memory Hooks** 🆕: Advanced Claude Code integration with HTTP + MCP support
-  - **HTTP Protocol**: Web-based memory service connection (`https://localhost:8443/api/*`)
-  - **MCP Protocol**: Direct server process communication (`uv run memory server`)
-  - **Smart Auto-Detection**: MCP preferred → HTTP fallback → Environment detection
-  - **Unified Interface**: Transparent protocol switching via `MemoryClient` wrapper
+**核心组成：**
 
-**Key Design Patterns:**
+- **服务器层**：`src/mcp_memory_service/server.py` 实现 MCP 协议，包含异步处理器与全局缓存。
+- **存储后端**：SQLite-vec（本地 5ms 级读取）、Cloudflare（边缘分发）、Hybrid（SQLite + Cloudflare 同步）。
+- **Web 界面**：基于 FastAPI 的控制台，HTTP 端口 `http://127.0.0.1:8001/`，HTTPS 端口 `https://localhost:8443/`，并提供 REST API。
+- **文档入库**：可插拔加载器支持 PDF、DOCX、PPTX、文本，亦可选用 semtools 增强解析。
+- **双协议记忆钩子** 🆕：提供 HTTP + MCP 自动侦测与切换。
+  - **HTTP 模式**：通过 `https://localhost:8443/api/*` 访问 Web 服务。
+  - **MCP 模式**：使用 `uv run memory server` 直接通信。
+  - **智能检测**：MCP 优先 → HTTP 回退 → 根据环境自动选择。
+  - **统一接口**：`MemoryClient` 封装协议切换，对上层透明。
 
-- Async/await for all I/O operations
-- Type safety with Python 3.10+ hints
-- Platform detection for hardware optimization (CUDA, MPS, DirectML, ROCm)
-- Global model and embedding caches for performance
-- **Protocol Abstraction** 🆕: Single interface for multi-protocol memory operations
+## 文档入库（v7.6.0+）📄
 
-## Document Ingestion (v7.6.0+) 📄
+增强型解析框架，结合 semtools 提升精度。
 
-**Enhanced document parsing** with optional semtools integration for superior quality extraction.
+### 支持格式
 
-### Supported Formats
+| 格式 | 内置解析器 | Semtools | 质量 |
+| --- | --- | --- | --- |
+| PDF | PyPDF2/pdfplumber | ✅ LlamaParse | 优秀（含 OCR/表格） |
+| DOCX | ❌ 不支持 | ✅ LlamaParse | 优秀 |
+| PPTX | ❌ 不支持 | ✅ LlamaParse | 优秀 |
+| TXT/MD | ✅ 内置 | N/A | 完美 |
 
-| Format | Native Parser     | With Semtools | Quality                 |
-| ------ | ----------------- | ------------- | ----------------------- |
-| PDF    | PyPDF2/pdfplumber | ✅ LlamaParse | Excellent (OCR, tables) |
-| DOCX   | ❌ Not supported  | ✅ LlamaParse | Excellent               |
-| PPTX   | ❌ Not supported  | ✅ LlamaParse | Excellent               |
-| TXT/MD | ✅ Built-in       | N/A           | Perfect                 |
-
-### Semtools Integration (Optional)
-
-Install [semtools](https://github.com/run-llama/semtools) for enhanced document parsing:
+### Semtools 集成（可选）
 
 ```bash
 # Install via npm (recommended)
@@ -154,7 +146,7 @@ cargo install semtools
 export LLAMAPARSE_API_KEY="your-api-key"
 ```
 
-### Configuration
+### 配置
 
 ```bash
 # Document chunking settings
@@ -165,7 +157,7 @@ export MCP_DOCUMENT_CHUNK_OVERLAP=200        # Overlap between chunks
 export LLAMAPARSE_API_KEY="llx-..."
 ```
 
-### Usage Examples
+### 使用示例
 
 ```bash
 # Ingest a single document
@@ -182,37 +174,37 @@ async for chunk in loader.extract_chunks(Path("document.pdf")):
     await store_memory(chunk.content, tags=["doc"])
 ```
 
-### Features
+### 主要特性
 
-- ✅ **Automatic format detection** - Selects best loader for each file
-- ✅ **Intelligent chunking** - Respects paragraph/sentence boundaries
-- ✅ **Metadata enrichment** - Preserves file info, extraction method, page numbers
-- ✅ **Graceful fallback** - Uses native parsers if semtools unavailable
-- ✅ **Progress tracking** - Reports chunks processed during ingestion
+- ✅ 自动格式检测，择优选用加载器。
+- ✅ 智能分块，遵循段落/句子边界。
+- ✅ 元数据增强，保留文件信息、解析方式与页码。
+- ✅ 优雅回退，缺少 semtools 时自动使用内置解析。
+- ✅ 进度追踪，实时报告处理进度。
 
-## Interactive Dashboard (v7.2.2+) 🎉
+## 交互式控制面板（v7.2.2+）🎉
 
-**Production-ready web interface** providing complete memory management capabilities with excellent performance.
+生产级 Web 控制台，性能经过全面验证。
 
-### ✅ **Core Features**
+### ✅ 核心功能
 
-- **Complete CRUD Operations**: Create, read, update, delete memories with intuitive UI
-- **Advanced Search**: Semantic search, tag-based filtering, and time-based queries
-- **Real-time Updates**: Server-Sent Events (SSE) with 30-second heartbeat for live dashboard updates
-- **Mobile Responsive**: CSS breakpoints for mobile (768px) and tablet (1024px) devices
-- **Security**: XSS protection via `escapeHtml()` function throughout frontend
-- **OAuth Integration**: Seamless conditional loading for both enabled/disabled OAuth modes
+- **完整 CRUD**：界面化创建、读取、更新、删除记忆。
+- **高级搜索**：支持语义检索、标签过滤、时间范围查询。
+- **实时更新**：Server-Sent Events（SSE）心跳 30 秒一次。
+- **移动兼容**：针对 768px 与 1024px 断点优化。
+- **安全防护**：前端统一使用 `escapeHtml()` 抵御 XSS。
+- **OAuth 集成**：根据启用状态动态加载模块。
 
-### 📊 **Performance Benchmarks** (Validated v7.2.2)
+### 📊 性能基准（v7.2.2 实测）
 
-| Component         | Target | Actual      | Status       |
-| ----------------- | ------ | ----------- | ------------ |
-| Page Load         | <2s    | 25ms        | ✅ EXCELLENT |
-| Memory Operations | <1s    | 26ms        | ✅ EXCELLENT |
-| Tag Search        | <500ms | <100ms      | ✅ EXCELLENT |
-| Large Dataset     | 1000+  | 994+ tested | ✅ EXCELLENT |
+| 组件 | 目标 | 实测 | 状态 |
+| --- | --- | --- | --- |
+| 页面加载 | <2s | 25ms | ✅ 极佳 |
+| 记忆操作 | <1s | 26ms | ✅ 极佳 |
+| 标签检索 | <500ms | <100ms | ✅ 极佳 |
+| 大数据集 | 1000+ | 已测 994+ | ✅ 极佳 |
 
-### 🔍 **Search API Endpoints**
+### 🔍 搜索 API 端点
 
 ```bash
 # Semantic search (similarity-based)
@@ -228,19 +220,17 @@ POST /api/search/by-time
 {"query": "last week", "n_results": 10}
 ```
 
-### 🎯 **Usage**
+### 🎯 使用方式
 
-- **Dashboard Access**:
-  - HTTP mode (default): `http://127.0.0.1:8001/`
-  - HTTPS mode (when enabled): `https://localhost:8443/`
-- **API Base**: `/api/` for programmatic access
-- **SSE Events**: `/api/events` for real-time updates
-- **Server Ports**: Same port for both HTTP/HTTPS API and MCP protocol (default: 8001)
-- **File Structure**: `src/mcp_memory_service/web/static/` (index.html, app.js, style.css)
+- **面板入口**：HTTP 默认 `http://127.0.0.1:8001/`，启用 HTTPS 后 `https://localhost:8443/`。
+- **API 基准路径**：`/api/`。
+- **SSE 事件源**：`/api/events`。
+- **端口复用**：HTTP/HTTPS API 与 MCP 协议使用同一端口（默认 8001）。
+- **静态资源**：`src/mcp_memory_service/web/static/`（index.html、app.js、style.css）。
 
-## Environment Variables
+## 环境变量
 
-**Essential Configuration:**
+**核心配置：**
 
 ```bash
 # Storage Backend (Hybrid is RECOMMENDED for production)
@@ -258,21 +248,18 @@ export MCP_HTTPS_ENABLED=true                 # Enable HTTPS (production)
 export MCP_API_KEY="$(openssl rand -base64 32)" # Generate secure API key
 ```
 
-**Configuration Precedence:** Environment variables > .env file > Global Claude Config > defaults
+- **优先级**：环境变量 > `.env` > Claude 全局配置 > 默认值。
+- **自动加载（v6.16.0+）**：服务会读取 `.env` 并遵循优先级，CLI 默认值不再覆盖环境设置。
+- **注意事项**：使用 hybrid/cloudflare 后端时务必设置 Cloudflare 凭据；若健康检查显示 `sqlite-vec`，说明配置未生效。
+- **平台支持**：macOS（MPS/CPU）、Windows（CUDA/DirectML/CPU）、Linux（CUDA/ROCm/CPU）。
 
-**✅ Automatic Configuration Loading (v6.16.0+):** The service now automatically loads `.env` files and respects environment variable precedence. CLI defaults no longer override environment configuration.
+## Claude Code 钩子配置 🆕
 
-**⚠️ Important:** When using hybrid or cloudflare backends, ensure Cloudflare credentials are properly configured. If health checks show "sqlite-vec" when you expect "cloudflare" or "hybrid", this indicates a configuration issue that needs to be resolved.
+> **🚨 Windows 重要提示**：`matchers: ["*"]` 的 SessionStart 钩子会让 Claude Code 在 Windows 上无限挂起（Issue #160）。请禁用该钩子或改用 UserPromptSubmit，详见后文。
 
-**Platform Support:** macOS (MPS/CPU), Windows (CUDA/DirectML/CPU), Linux (CUDA/ROCm/CPU)
+### 自然记忆触发器 v7.1.0
 
-## Claude Code Hooks Configuration 🆕
-
-> **🚨 CRITICAL - Windows Users**: SessionStart hooks with `matchers: ["*"]` cause Claude Code to hang indefinitely on Windows. This is a confirmed bug (#160). **Workaround**: Disable SessionStart hooks or use UserPromptSubmit hooks instead. See [Windows SessionStart Hook Issue](#windows-sessionstart-hook-issue) below.
-
-### Natural Memory Triggers v7.1.0 (Latest)
-
-**Intelligent automatic memory retrieval** with advanced semantic analysis and multi-tier performance optimization:
+智能语义检索与多档性能调节：
 
 ```bash
 # Installation (Zero-restart required)
@@ -281,18 +268,19 @@ cd claude-hooks && python install_hooks.py --natural-triggers
 # CLI Management
 node ~/.claude/hooks/memory-mode-controller.js status
 node ~/.claude/hooks/memory-mode-controller.js profile balanced
-node ~/.claude/hooks/memory-mode-controller.js sensitivity 0.6
+node ~/.claude/hooks/memory-mode-controller.js sensitivity 0.7
+node ~/.claude/hooks/test-natural-triggers.js
 ```
 
-**Key Features:**
+**主要能力：**
 
-- ✅ **85%+ trigger accuracy** for memory-seeking pattern detection
-- ✅ **Multi-tier processing**: 50ms instant → 150ms fast → 500ms intensive
-- ✅ **CLI management system** for real-time configuration without restart
-- ✅ **Git-aware context** integration for enhanced memory relevance
-- ✅ **Adaptive learning** based on user preferences and usage patterns
+- ✅ 触发准确率超过 85%。
+- ✅ 三层处理：50ms 即时 → 150ms 快速 → 500ms 深度。
+- ✅ CLI 管理支持实时热调。
+- ✅ Git 感知增强上下文相关性。
+- ✅ 根据使用偏好自适应调整。
 
-**Configuration (`~/.claude/hooks/config.json`):**
+**配置文件（`~/.claude/hooks/config.json`）：**
 
 ```json
 {
@@ -310,16 +298,16 @@ node ~/.claude/hooks/memory-mode-controller.js sensitivity 0.6
 }
 ```
 
-**Performance Profiles:**
+**性能档位：**
 
-- `speed_focused`: <100ms, instant tier only - minimal memory awareness for speed
-- `balanced`: <200ms, instant + fast tiers - optimal for general development (recommended)
-- `memory_aware`: <500ms, all tiers - maximum context awareness for complex work
-- `adaptive`: Dynamic adjustment based on usage patterns and user feedback
+- `speed_focused`：<100ms，仅即时层，追求极致速度。
+- `balanced`：<200ms，即时 + 快速层，推荐默认。
+- `memory_aware`：<500ms，全层开启，适合复杂任务。
+- `adaptive`：依据使用模式与反馈自动调节。
 
-### Context-Provider Integration 🆕
+### 上下文提供器集成 🆕
 
-**Rule-based context management** that complements Natural Memory Triggers with structured, project-specific patterns:
+规则驱动的上下文管理体系，与自然触发器互补：
 
 ```bash
 # Context-Provider Commands
@@ -328,67 +316,61 @@ mcp context status                             # Check session initialization st
 mcp context optimize                           # Get optimization suggestions
 ```
 
-#### **Available Contexts:**
+#### 可用上下文
 
-**1. Python MCP Memory Service Context** (`python_mcp_memory`)
+**1. Python MCP Memory Service 上下文（`python_mcp_memory`）**
 
-- Project-specific patterns for FastAPI, MCP protocol, and storage backends
-- Auto-store: MCP protocol changes, backend configs, performance optimizations
-- Auto-retrieve: Troubleshooting, setup queries, implementation examples
-- Smart tagging: Auto-detects tools (fastapi, cloudflare, sqlite-vec, hybrid, etc.)
+- 聚焦 FastAPI、MCP 协议、存储后端模式。
+- 自动存储：协议调整、后端配置、性能优化等关键事件。
+- 自动检索：排障、搭建、实现范例。
+- 智能标签：自动识别 fastapi、cloudflare、sqlite-vec、hybrid 等术语。
 
-**2. Release Workflow Context** 🆕 (`mcp_memory_release_workflow`)
+**2. Release Workflow 上下文 🆕（`mcp_memory_release_workflow`）**
 
-- **PR Review Cycle**: Iterative Gemini Code Assist workflow (Fix → Comment → /gemini review → Wait 1min → Repeat)
-- **Version Management**: Three-file procedure (**init**.py → pyproject.toml → uv lock)
-- **CHANGELOG Management**: Format guidelines, conflict resolution (combine PR entries)
-- **Documentation Matrix**: When to use CHANGELOG vs Wiki vs CLAUDE.md vs code comments
-- **Release Procedure**: Merge → Tag → Push → Verify workflows (Docker Publish, Publish and Test, HTTP-MCP Bridge)
-- **Issue Management** 🆕: Auto-tracking, post-release workflow, smart closing comments
-  - **Auto-Detection**: Tracks "fixes #", "closes #", "resolves #" patterns in PRs
-  - **Post-Release Workflow**: Retrieves issues from release, suggests closures with context
-  - **Smart Comments**: Auto-generates closing comments with PR links, CHANGELOG entries, wiki references
-  - **Triage Intelligence**: Auto-categorizes issues (bug, feature, docs, performance) based on patterns
+- **PR 评审循环**：Gemini Code Assist 工作流（修复 → 评论 → `/gemini review` → 等待 → 重复）。
+- **版本管理**：同步更新 `__init__.py`、`pyproject.toml`、`uv.lock`。
+- **CHANGELOG 流程**：格式规范、冲突合并指南。
+- **文档矩阵**：明确何时更新 CHANGELOG、Wiki、CLAUDE.md 及代码注释。
+- **发布流程**：合并 → 打标签 → 推送 → 校验（Docker Publish、Publish and Test、HTTP-MCP Bridge）。
+- **Issue 管理** 🆕：自动跟踪 `fixes #`、`closes #`、`resolves #`，并生成上下文完整的关闭评论与分类。
 
-**Auto-Store Patterns:**
+**自动存储模式**：
 
-- **Technical**: `MCP protocol`, `tool handler`, `storage backend switch`, `25ms page load`, `embedding cache`
-- **Configuration**: `cloudflare configuration`, `hybrid backend setup`, `oauth integration`
-- **Release Workflow** 🆕: `merged PR`, `gemini review`, `created tag`, `CHANGELOG conflict`, `version bump`
-- **Documentation** 🆕: `updated CHANGELOG`, `wiki page created`, `CLAUDE.md updated`
-- **Issue Tracking** 🆕: `fixes #`, `closes #`, `resolves #`, `created issue`, `closed issue #`
+- **技术**：`MCP protocol`、`tool handler`、`storage backend switch`、`25ms page load`、`embedding cache`。
+- **配置**：`cloudflare configuration`、`hybrid backend setup`、`oauth integration`。
+- **发布** 🆕：`merged PR`、`gemini review`、`created tag`、`CHANGELOG conflict`、`version bump`。
+- **文档** 🆕：`updated CHANGELOG`、`wiki page created`、`CLAUDE.md updated`。
+- **Issue** 🆕：`fixes #`、`closed issue #` 等模式自动识别。
 
-**Auto-Retrieve Patterns:**
+**自动检索模式**：
 
-- **Troubleshooting**: `cloudflare backend error`, `MCP client connection`, `storage backend failed`
-- **Setup**: `backend configuration`, `environment setup`, `claude desktop config`
-- **Development**: `MCP handler example`, `API endpoint pattern`, `async error handling`
-- **Release Workflow** 🆕: `how to release`, `PR workflow`, `gemini iteration`, `version bump procedure`, `where to document`
-- **Issue Management** 🆕: `review open issues`, `what issues fixed`, `can we close`, `issue status`, `which issues resolved`
+- **排障**：`cloudflare backend error`、`MCP client connection`、`storage backend failed`。
+- **配置**：`backend configuration`、`environment setup`、`claude desktop config`。
+- **开发**：`MCP handler example`、`API endpoint pattern`、`async error handling`。
+- **发布** 🆕：`how to release`、`PR workflow`、`version bump procedure`、`where to document`。
+- **Issue 管理** 🆕：`review open issues`、`issue status`、`which issues resolved`。
 
-**Documentation Decision Matrix:**
-| Change Type | CHANGELOG | CLAUDE.md | Wiki | Code Comments |
-|-------------|-----------|-----------|------|---------------|
-| Bug fix | ✅ Always | If affects workflow | If complex | ✅ Non-obvious |
-| New feature | ✅ Always | If adds commands | ✅ Major features | ✅ API changes |
-| Performance | ✅ Always | If measurable | If >20% improvement | Rationale |
-| Config change | ✅ Always | ✅ User-facing | If requires migration | Validation logic |
-| Troubleshooting | In notes | If common | ✅ Detailed guide | For maintainers |
+**文档决策矩阵：**
 
-**Integration Benefits:**
+| 变更类型 | CHANGELOG | CLAUDE.md | Wiki | 代码注释 |
+| --- | --- | --- | --- | --- |
+| Bug 修复 | ✅ 必写 | 影响工作流时 | 复杂或需长期引用 | ✅ 解释非显然逻辑 |
+| 新功能 | ✅ 必写 | 新增命令/流程 | ✅ 重大功能 | ✅ API 变化 |
+| 性能优化 | ✅ 必写 | 需说明指标 | >20% 提升时 | 说明原因 |
+| 配置变更 | ✅ 必写 | ✅ 用户可见 | 涉及迁移时 | 校验逻辑 |
+| 故障排查 | 视情况 | 常见问题时 | ✅ 详细步骤 | 供维护查看 |
 
-- **Structured Memory Management**: Rule-based triggers complement AI-based Natural Memory Triggers
-- **Project-Specific Intelligence**: Captures MCP Memory Service-specific terminology and workflows
-- **Enhanced Git Workflow**: Automatic semantic commit formatting and branch naming conventions
-- **Release Automation** 🆕: Never miss version bumps, CHANGELOG updates, or workflow verification
-- **Knowledge Retention** 🆕: Capture what works/doesn't work in PR review cycles
-- **Intelligent Issue Management** 🆕: Auto-track issue-PR relationships, suggest closures after releases, generate smart closing comments
-- **Post-Release Efficiency** 🆕: Automated checklist retrieves related issues, suggests verification steps, includes all context
-- **Zero Performance Impact**: Lightweight rule processing with minimal overhead
+**集成收益：**
 
-### Dual Protocol Memory Hooks (Legacy)
+- 结构化规则与 AI 触发协同管理记忆。
+- 捕捉项目专属术语与协作流程。
+- 规范提交信息、分支命名与迭代节奏。
+- 发布流程自动化，避免遗忘版本号或 CHANGELOG。
+- 积累 PR 评审经验与问题记录。
+- Issue 自动回收并生成上下文完整的关闭说明。
+- 轻量级规则执行，对性能影响极小。
 
-**Dual Protocol Memory Hooks** (v7.0.0+) provide intelligent memory awareness with automatic protocol detection:
+### 双协议记忆钩子（传统）
 
 ```json
 {
@@ -412,46 +394,39 @@ mcp context optimize                           # Get optimization suggestions
 }
 ```
 
-**Protocol Options:**
+**协议选项：**
 
-- `"auto"`: Smart detection (MCP → HTTP → Environment fallback)
-- `"http"`: HTTP-only mode (web server at localhost:8443)
-- `"mcp"`: MCP-only mode (direct server process)
+- `"auto"`：优先 MCP，其次 HTTP，再根据环境回退。
+- `"http"`：仅使用 HTTP（`https://localhost:8443`）。
+- `"mcp"`：仅使用 MCP 进程直连。
 
-**Benefits:**
+**优势：**可靠性提升、性能可调、灵活适配本地或远程部署，并兼容旧版配置。
 
-- **Reliability**: Multiple connection methods ensure hooks always work
-- **Performance**: MCP direct for speed, HTTP for stability
-- **Flexibility**: Works with local development or remote deployments
-- **Compatibility**: Full backward compatibility with existing configurations
+## 存储后端
 
-## Storage Backends
+| 后端 | 性能 | 适用场景 | 安装方式 |
+| --- | --- | --- | --- |
+| **Hybrid** ⚡ | **5ms 读取** | **🌟 生产推荐** | `install.py --storage-backend hybrid` |
+| **Cloudflare** ☁️ | 取决于网络 | 纯云端部署 | `install.py --storage-backend cloudflare` |
+| **SQLite-Vec** 🪶 | 5ms 读取 | 本地单用户/开发环境 | `install.py --storage-backend sqlite_vec` |
 
-| Backend           | Performance         | Use Case                        | Installation                              |
-| ----------------- | ------------------- | ------------------------------- | ----------------------------------------- |
-| **Hybrid** ⚡     | **Fast (5ms read)** | **🌟 Production (Recommended)** | `install.py --storage-backend hybrid`     |
-| **Cloudflare** ☁️ | Network dependent   | Cloud-only deployment           | `install.py --storage-backend cloudflare` |
-| **SQLite-Vec** 🪶 | Fast (5ms read)     | Development, single-user local  | `install.py --storage-backend sqlite_vec` |
+### ⚠️ 数据库锁防护（v8.9.0+）
 
-### ⚠️ **Database Lock Prevention (v8.9.0+)**
+为 `.env` 添加 `MCP_MEMORY_SQLITE_PRAGMAS` 后，**必须重启所有服务**：
 
-**CRITICAL**: After adding `MCP_MEMORY_SQLITE_PRAGMAS` to `.env`, you **MUST restart all servers**:
+- HTTP 服务器：`kill <PID>` 后使用 `uv run python scripts/server/run_http_server.py` 重启。
+- MCP 服务器：在 Claude Code 中运行 `/mcp` 重新连接，或重启 Claude Desktop。
+- 验证方法：日志中应出现 `Custom pragma from env: busy_timeout=15000`。
 
-- HTTP server: `kill <PID>` then restart with `uv run python scripts/server/run_http_server.py`
-- MCP servers: Use `/mcp` in Claude Code to reconnect, or restart Claude Desktop
-- Verify: Check logs for `Custom pragma from env: busy_timeout=15000`
+SQLite pragma **针对连接生效**，不会全局持久化。长时间运行的服务若未重启不会读取新配置。
 
-SQLite pragmas are **per-connection**, not global. Long-running servers (days/weeks old) won't pick up new `.env` settings automatically.
+**缺少 pragma 的症状**：
 
-**Symptoms of missing pragmas**:
+- 仍出现 “database is locked”。
+- `PRAGMA busy_timeout` 返回 `0` 而非 `15000`。
+- HTTP 与 MCP 并发访问失败。
 
-- "database is locked" errors despite v8.9.0+ installation
-- `PRAGMA busy_timeout` returns `0` instead of `15000`
-- Concurrent HTTP + MCP access fails
-
-### 🚀 **Hybrid Backend (v6.21.0+) - RECOMMENDED**
-
-The **Hybrid backend** provides the best of both worlds - **SQLite-vec speed with Cloudflare persistence**:
+### 🚀 混合后端（v6.21.0+ 推荐）
 
 ```bash
 # Enable hybrid backend
@@ -469,218 +444,197 @@ export CLOUDFLARE_D1_DATABASE_ID="your-d1-id"
 export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 ```
 
-**Key Benefits:**
+**优势**：
 
-- ✅ **5ms read/write performance** (SQLite-vec speed)
-- ✅ **Zero user-facing latency** - Cloud sync happens in background
-- ✅ **Multi-device synchronization** - Access memories everywhere
-- ✅ **Graceful offline operation** - Works without internet, syncs when available
-- ✅ **Automatic failover** - Falls back to SQLite-only if Cloudflare unavailable
+- ✅ SQLite-vec 速度，读写约 5ms。
+- ✅ 后台同步，用户无感延迟。
+- ✅ 多设备共享，同步自动完成。
+- ✅ 离线时优雅降级，恢复后自动同步。
+- ✅ Cloudflare 不可用时自动退回 SQLite。
 
-**Architecture:**
+**架构概览**：
 
-- **Primary Storage**: SQLite-vec (all user operations)
-- **Secondary Storage**: Cloudflare (background sync)
-- **Background Service**: Async queue with retry logic and health monitoring
+- 主存储：SQLite-vec 处理全部实时请求。
+- 次存储：Cloudflare 负责后台同步与持久化。
+- 后台服务：异步队列 + 重试逻辑 + 健康监控。
 
-**v6.16.0+ Installer Enhancements:**
+**安装程序（v6.16.0+）增强**：交互式后端选择、自动生成 `.env` 与凭据校验、安装期即验证连接、出错时优雅回退本地模式。
 
-- **Interactive backend selection** with usage-based recommendations
-- **Automatic Cloudflare credential setup** and `.env` file generation
-- **Connection testing** during installation to validate configuration
-- **Graceful fallbacks** from cloud to local backends if setup fails
+## 开发指南
 
-## Development Guidelines
+### 🧠 记忆与文档
 
-### 🧠 **Memory & Documentation**
+- 使用 `claude /memory-store` 记录决策，系统会自动处理重复（基于内容哈希）。
+- 时间解析支持自然语言（例如 “yesterday”“last week”）。
+- 提交信息建议使用语义化格式，方便版本管理。
 
-- Use `claude /memory-store` to capture decisions during development
-- Memory operations handle duplicates via content hashing
-- Time parsing supports natural language ("yesterday", "last week")
-- Use semantic commit messages for version management
+#### 记忆类型分类（2025 年 11 月更新）
 
-#### **Memory Type Taxonomy** (Updated Nov 2025)
-Database consolidated from 342 fragmented types to 128 organized types. Use these **24 core types** for all new memories:
+数据库已由 342 个碎片类型整合为 128 个规范类型，请使用以下 24 个核心类型：
 
-**Content Types:**
-- `note` - General notes, observations, summaries
-- `reference` - Reference materials, knowledge base entries
-- `document` - Formal documents, code snippets
-- `guide` - How-to guides, tutorials, troubleshooting guides
+**内容类**：
+- `note` —— 一般备注、总结。
+- `reference` —— 参考资料、知识库条目。
+- `document` —— 正式文档、代码片段。
+- `guide` —— 指南、教程、故障排查步骤。
 
-**Activity Types:**
-- `session` - Work sessions, development sessions
-- `implementation` - Implementation work, integrations
-- `analysis` - Analysis, reports, investigations
-- `troubleshooting` - Problem-solving, debugging
-- `test` - Testing activities, validation
+**活动类**：
+- `session` —— 工作/开发会话。
+- `implementation` —— 实现、集成任务。
+- `analysis` —— 分析、调查、报告。
+- `troubleshooting` —— 调试与修复。
+- `test` —— 测试与验证。
 
-**Artifact Types:**
-- `fix` - Bug fixes, corrections
-- `feature` - New features, enhancements
-- `release` - Releases, release notes
-- `deployment` - Deployments, deployment records
+**成果类**：
+- `fix` —— 缺陷修复。
+- `feature` —— 新功能或增强。
+- `release` —— 版本发布与说明。
+- `deployment` —— 部署记录。
 
-**Progress Types:**
-- `milestone` - Milestones, completions, achievements
-- `status` - Status updates, progress reports
+**进度类**：
+- `milestone` —— 里程碑、阶段成果。
+- `status` —— 状态更新。
+- `todo` —— 待办事项。
+- `decision` —— 决策结论。
 
-**Infrastructure Types:**
-- `configuration` - Configurations, setups, settings
-- `infrastructure` - Infrastructure changes, system updates
-- `process` - Processes, workflows, procedures
-- `security` - Security-related memories
-- `architecture` - Architecture decisions, design patterns
+**支持类**：
+- `workflow` —— 流程与最佳实践。
+- `config` —— 配置说明。
+- `hook` —— 钩子或自动化。
+- `issue` —— 问题追踪与处理。
+- `insight` —— 经验或洞察。
+- `performance` —— 性能优化记录。
+- `security` —— 安全事项。
 
-**Other Types:**
-- `documentation` - Documentation artifacts
-- `solution` - Solutions, resolutions
-- `achievement` - Accomplishments, successes
+### 🏗️ 架构与测试
 
-**Usage Notes:**
-- Avoid creating new type variations (e.g., use `fix` not `bug-fix`, `bugfix`, `technical-fix`)
-- Avoid redundant prefixes (e.g., use `solution` not `technical-solution`, `project-solution`)
-- Run `python scripts/maintenance/consolidate_memory_types.py --dry-run` to preview type cleanup
+- 重要改动需覆盖单元测试与集成测试，尤其是存储接口与网络层。
+- 运行 `pytest` 并关注并发访问相关测试。
+- 通过 `uv run memory server --http` 验证 HTTP 服务器启动与健康检查。
+- 对变更后的 hooks、CLI 命令执行端到端测试。
 
-### 🏗️ **Architecture & Testing**
+### 🚀 版本管理最佳实践
 
-- Storage backends must implement abstract base class
-- All features require corresponding tests
-- **Comprehensive UI Testing**: Validate performance benchmarks (page load <2s, operations <1s)
-- **Security Validation**: Verify XSS protection, input validation, and OAuth integration
-- **Mobile Testing**: Confirm responsive design at 768px and 1024px breakpoints
+- 版本号需同步更新 `src/mcp_memory_service/__init__.py`、`pyproject.toml`、`uv.lock`。
+- CHANGELOG 条目需包含日期、版本号、类别（Added/Fixed/etc）。
+- 发布前确认：Docker Publish、Publish and Test、HTTP-MCP Bridge 三个工作流均通过。
+- 使用 `git tag` 创建版本标签，并推送远程。
 
-### 🚀 **Version Management Best Practices**
+### 🔧 配置与部署
 
-- Document major milestones in CHANGELOG.md with performance metrics
-- Create descriptive git tags for releases (`git tag -a v7.2.2 -m "description"`)
-- Sync develop/main branches after releases
-- Update version in both `__init__.py` and `pyproject.toml`
+- 使用 `python scripts/validation/verify_environment.py` 校验环境。
+- Hybrid/Cloudflare 模式需配置环境变量并运行 `python scripts/validation/diagnose_backend_config.py`。
+- Linux 建议使用 systemd 管理 HTTP 服务（`scripts/service/install_http_service.sh`）。
+- Windows 可用 `start_http_server.bat` 或 `start_http_debug.bat` 调试。
 
-### 🔧 **Configuration & Deployment**
+## 关键端点
 
-- Run `python scripts/validation/validate_configuration_complete.py` when troubleshooting setup issues
-- Use sync utilities for hybrid Cloudflare/SQLite deployments
-- Test both OAuth enabled/disabled modes for web interface
-- Validate search endpoints: semantic (`/api/search`), tag (`/api/search/by-tag`), time (`/api/search/by-time`)
+### 🌐 Web 界面
 
-## Key Endpoints
+- 健康检查：`GET /api/health`
+- 仪表板：`GET /`
+- SSE 流：`GET /api/events`
 
-### 🌐 **Web Interface**
+### 📋 记忆管理
 
-- **Dashboard**:
-  - HTTP mode (default): `http://127.0.0.1:8001/`
-  - HTTPS mode (when enabled): `https://localhost:8443/`
-- **Health Check**: `/api/health` - Server status and version
-- **SSE Events**: `/api/events` - Real-time updates via Server-Sent Events
+- 创建记忆：`POST /api/memories`
+- 获取详情：`GET /api/memories/{id}`
+- 更新记忆：`PUT /api/memories/{id}`
+- 删除记忆：`DELETE /api/memories/{id}`
 
-### 📋 **Memory Management**
+### 🔍 搜索 API
 
-- **CRUD Operations**: `/api/memories` - Create, read, update, delete memories
-- **Memory Details**: `/api/memories/{hash}` - Get specific memory by content hash
-- **Tags**: `/api/tags` - Get all available tags with counts
+- 语义搜索：`POST /api/search`
+- 标签搜索：`POST /api/search/by-tag`
+- 时间搜索：`POST /api/search/by-time`
 
-### 🔍 **Search APIs**
+### 📚 文档相关
 
-- **Semantic Search**: `POST /api/search` - Similarity-based search
-- **Tag Search**: `POST /api/search/by-tag` - Filter by specific tags
-- **Time Search**: `POST /api/search/by-time` - Natural language time queries
-- **Similar**: `GET /api/search/similar/{hash}` - Find memories similar to given hash
+- 入库任务：`POST /api/documents`
+- 入库状态：`GET /api/documents/{id}`
+- 文档列表：`GET /api/documents`
 
-### 📚 **Documentation**
-
-- **Wiki**: `https://github.com/doobidoo/mcp-memory-service/wiki`
-- **API Reference**: Available in dashboard at `/api/docs` (when enabled)
-
-## Configuration Management
-
-**Validation & Troubleshooting:**
+## 配置管理
 
 ```bash
 python scripts/validation/validate_configuration_complete.py  # Comprehensive configuration validation
 ```
 
-**Single Source of Truth:**
+**单一可信配置源：**
 
-- **Global Configuration**: `~/.claude.json` (authoritative for all projects)
-- **Project Environment**: `.env` file (Cloudflare credentials only)
-- **No Local Overrides**: Project `.mcp.json` should NOT contain memory server config
+- **全局配置**：`~/.claude.json`（所有项目共享的权威来源）。
+- **项目环境**：`.env`（通常只存放 Cloudflare 凭据）。
+- **禁止本地覆盖**：项目根目录下的 `.mcp.json` 不应写入记忆服务器配置。
 
-**Common Configuration Issues (Pre-v6.16.0):**
+**常见配置问题（v6.16.0 之前）：**
 
-- **✅ FIXED**: CLI defaults overriding environment variables
-- **✅ FIXED**: Manual .env file loading required
-- **Multiple Backends**: Conflicting SQLite/Cloudflare configurations
-- **Credential Conflicts**: Old macOS paths or missing Cloudflare credentials
-- **Cache Issues**: Restart Claude Code to refresh MCP connections
+- ✅ 已修复：CLI 默认值覆盖环境变量。
+- ✅ 已修复：需手动加载 `.env`。
+- ⚠️ 多后端冲突：SQLite/Cloudflare 配置混搭。
+- ⚠️ 凭据冲突：旧路径或缺失 Cloudflare 信息。
+- ⚠️ 缓存问题：需重启 Claude Code 以刷新 MCP 连接。
 
-**v6.16.0+ Configuration Benefits:**
+**v6.16.0+ 配置优势：**自动加载 `.env`、严格遵循优先级、并提供更清晰的错误信息。
 
-- **Automatic .env loading**: No manual configuration required
-- **Proper precedence**: Environment variables respected over CLI defaults
-- **Better error messages**: Clear indication of configuration loading issues
+**Cloudflare 后端排障：**
 
-**Cloudflare Backend Troubleshooting:**
+- 查看 Claude Desktop 日志中的关键标记：
+  - 🚀 SERVER INIT —— 服务器主初始化流程。
+  - ☁️ Cloudflare 专属初始化步骤。
+  - ✅ 每个阶段的成功标记。
+  - ❌ 具体错误堆栈。
+  - 🔍 存储类型校验，用于确认最终后端。
+- 常见现象：
+  - 静默回退到 SQLite-vec：通常因初始化超时或 API 错误，应检查日志。
+  - 配置校验：启动阶段会打印环境变量。
+  - 网络超时：增强的错误信息会指出具体 Cloudflare API 失败点。
 
-- **Enhanced Initialization Logging**: Look for these indicators in Claude Desktop logs:
-  - 🚀 SERVER INIT: Main server initialization flow
-  - ☁️ Cloudflare-specific initialization steps
-  - ✅ Success markers for each phase
-  - ❌ Error details with full tracebacks
-  - 🔍 Storage type verification (confirms final backend)
-- **Common Issues**:
-  - Silent fallback to SQLite-vec: Check logs for eager initialization timeout or API errors
-  - Configuration validation: Environment variables are logged during startup
-  - Network timeouts: Enhanced error messages show specific Cloudflare API failures
-
-**Dual Environment Setup (Claude Desktop + Claude Code):**
+**双环境设置（Claude Desktop + Claude Code）：**
 
 ```bash
-# Quick setup for both environments - see docs/quick-setup-cloudflare-dual-environment.md
+# 快速检查组合环境，详见 docs/quick-setup-cloudflare-dual-environment.md
 python scripts/validation/diagnose_backend_config.py  # Validate Cloudflare configuration
 claude mcp list                             # Check Claude Code MCP servers
 ```
 
-**Troubleshooting Health Check Showing Wrong Backend:**
+**健康检查显示错误后端时：**
 
 ```bash
-# If health check shows "sqlite-vec" instead of "cloudflare":
-python scripts/validation/diagnose_backend_config.py  # Check configuration
-claude mcp remove memory && claude mcp add memory python -e MCP_MEMORY_STORAGE_BACKEND=cloudflare -e CLOUDFLARE_API_TOKEN=your-token -- -m mcp_memory_service.server
+# 若期望 cloudflare/hybrid 却显示 sqlite-vec
+python scripts/validation/diagnose_backend_config.py
+claude mcp remove memory && claude mcp add memory \
+  python -e MCP_MEMORY_STORAGE_BACKEND=cloudflare \
+         -e CLOUDFLARE_API_TOKEN=your-token -- -m mcp_memory_service.server
 ```
 
-**Troubleshooting Hooks Not Retrieving Memories:**
+**Hook 未能检索记忆时：**
 
 ```bash
-# Check if HTTP server is running
+# 检查 HTTP 服务是否运行
 systemctl --user status mcp-memory-http.service  # Linux
-# or
-uv run python scripts/server/check_http_server.py  # All platforms
+# 或
+uv run python scripts/server/check_http_server.py
 
-# Verify hooks endpoint matches server port
+# 确认 hooks 配置的端口
 cat ~/.claude/hooks/config.json | grep endpoint
-# Should show: http://127.0.0.1:8001 (not 8889 or other port)
-
-# See detailed guide: docs/http-server-management.md
+# 预期返回 http://127.0.0.1:8001（避免使用 8889 等端口）
 ```
 
-**⚠️ CRITICAL: Hook Configuration Synchronization**
+### ⚠️ Hook 配置同步
 
-When configuring Claude Code hooks, **all HTTP endpoints MUST use the same port** across configuration files:
+所有配置文件中的 HTTP 端点必须一致：
 
-**Configuration Files to Check:**
+1. `~/.claude/hooks/config.json`（默认端口 8001）。
+2. `scripts/server/run_http_server.py` 中的 HTTP 服务器端口。
+3. 仪表板端口：HTTP 8001，HTTPS 8443。
 
-1. **`~/.claude/hooks/config.json`** - Line 7: `"endpoint": "http://127.0.0.1:8001"`
-2. **HTTP Server** - Default port: `8001` (check `scripts/server/run_http_server.py`)
-3. **Dashboard/Web Interface** - Separate port: `8001` (HTTP) or `8443` (HTTPS)
+**常见错误：**
 
-**Common Mistakes:**
+- 端口不一致（配置文件写 8889，服务实际使用 8001）。
+- 将仪表板端口（8001/8443）误用为 API 端口。
+- `settings.json` 与 hooks 配置端口不同。
 
-- ❌ Port mismatch (config.json shows 8889 but server runs on 8001)
-- ❌ Using dashboard port (8001/8443) instead of API server port (8001)
-- ❌ Different ports in `settings.json` MCP server env vs hooks config
-
-**Quick Verification:**
+**快速核查：**
 
 ```bash
 # Windows
@@ -689,272 +643,190 @@ netstat -ano | findstr "8001"
 # Linux/macOS
 lsof -i :8001
 
-# Check hooks config
 grep endpoint ~/.claude/hooks/config.json
 ```
 
-**Symptoms of Port Mismatch:**
+若端口不匹配，将导致 SessionStart 挂起、启动无响应或日志出现连接超时。
 
-- SessionStart hook hangs/times out
-- Claude Code becomes unresponsive on startup
-- Hooks show "connection timeout" in logs
-- No memories injected despite hook firing
+### PR 合并后仍出现模式校验错误
 
-**Troubleshooting Schema Validation Errors After PR Merges:**
+**现象**：合并更改工具 Schema 的 PR 后仍出现 `Input validation error`。
 
-**Symptom**: After merging a PR that changes tool schemas, you still see validation errors like:
+**根因**：MCP 客户端会缓存工具 Schema；若 MCP 服务器未重启，仍会发布旧 Schema。
 
-```
-Input validation error: 'value' is not of type 'expected_type'
-```
-
-**Root Cause**: MCP clients (like Claude Code) cache tool schemas when they first connect. Even after:
-
-- ✅ PR is merged
-- ✅ Git pull completes
-- ✅ Code is updated
-- ❌ **MCP server process is still running old code**
-
-The old MCP server continues advertising the old schema, and the client validates against this cached schema.
-
-**Diagnosis**:
+**排查步骤：**
 
 ```bash
-# 1. Check when PR was merged
+# 1. 查看 PR 合并时间
 gh pr view <PR_NUMBER> --json mergedAt,title
 
-# 2. Check when MCP server process started
+# 2. 查看服务器进程启动时间
 ps aux | grep "memory.*server" | grep -v grep
 
-# 3. If server started BEFORE merge time, it's running old code
+# 3. 若进程早于合并时间，说明仍运行旧代码
 ```
 
-**Solution**:
+**解决方案：**
 
 ```bash
-# In Claude Code, reconnect MCP:
-/mcp
+/mcp  # 在 Claude Code 中重连 MCP
+# 会终止旧进程、启动最新代码、重新获取 Schema 并清理缓存
 
-# This will:
-# 1. Terminate old MCP server process
-# 2. Start new MCP server with latest code
-# 3. Re-fetch updated tool schemas
-# 4. Clear client-side schema cache
-
-# For HTTP server (separate from MCP):
+# HTTP 服务需单独重启：
 systemctl --user restart mcp-memory-http.service
 ```
 
-**Example**: PR #162 (comma-separated tags fix)
+**案例**：PR #162 解决逗号分隔标签问题，但旧服务器仍缓存旧 Schema，需 `/mcp` 重连。
 
-- Merged: Oct 20, 2025 17:22 UTC
-- Error persisted: "Input validation error: 'tag1,tag2' is not of type 'array'"
-- Server process: Started Oct 21 10:43 (before git pull)
-- Fix: `/mcp` command to reconnect with new schema
+更多细节参见 `docs/troubleshooting/pr162-schema-caching-issue.md`。
 
-**See**: `docs/troubleshooting/pr162-schema-caching-issue.md` for detailed analysis
-
-**Emergency Debugging:**
+### 紧急排障工具
 
 ```bash
-/mcp                                         # Check active MCP servers in Claude
-python scripts/validation/diagnose_backend_config.py  # Run configuration validation
-rm -f .mcp.json                             # Remove conflicting local MCP config
-python debug_server_initialization.py       # Test initialization flows (v6.15.1+)
-tail -50 ~/Library/Logs/Claude/mcp-server-memory.log | grep -E "(🚀|☁️|✅|❌)" # View enhanced logs
+/mcp                                         # 查看当前连接的 MCP 服务器
+python scripts/validation/diagnose_backend_config.py  # 环境自检
+rm -f .mcp.json                             # 移除冲突的本地配置
+python debug_server_initialization.py       # 测试初始化流程（v6.15.1+）
+tail -50 ~/Library/Logs/Claude/mcp-server-memory.log | \
+  grep -E "(🚀|☁️|✅|❌)"  # 解析增强日志
 ```
 
-**⚠️ Accidental Database Creation:**
+### ⚠️ 意外生成数据库
 
-If you find a `data/memory.db` file in your project directory:
+若发现项目目录下出现 `data/memory.db`：
 
-- This is **not** the configured database location
-- It may be created accidentally by tools running in the project directory
-- Safe to delete: `rm -rf data/` (already in `.gitignore`)
-- Configured location: `~/Library/Application Support/mcp-memory/sqlite_vec.db` (macOS)
-- Verify: `curl http://localhost:8001/api/health` should show correct memory count
+- 并非配置中的数据库位置（可能是外部工具创建）。
+- 可安全删除：`rm -rf data/`（该目录已忽略）。
+- 正确位置：macOS 默认 `~/Library/Application Support/mcp-memory/sqlite_vec.db`。
+- 可通过 `curl http://localhost:8001/api/health` 验证实际使用的后端与记录数。
 
-### SessionEnd Hook Troubleshooting
+### SessionEnd 钩子故障排查
 
-**Common Confusion**: Many users expect SessionEnd hooks to fire when they press Ctrl+C twice, but this is **not** how Claude Code works.
+**常见误解**：按下 Ctrl+C 并不会触发 SessionEnd。Claude Code 仅在会话真正结束时调用该钩子。
 
-#### 🔍 When SessionEnd Hooks Actually Trigger
+#### 🔍 SessionEnd 实际触发场景
 
-**SessionEnd fires ONLY on actual session termination**:
-- ✅ `/exit` command - Graceful session termination
-- ✅ Terminal/window close - Process termination
-- ✅ Normal Claude Code exit - Graceful shutdown
+- ✅ `/exit` 命令：正常终止会话。
+- ✅ 关闭终端/窗口：进程结束。
+- ✅ 正常退出 Claude Code：会话优雅关闭。
+- ❌ Ctrl+C（一次）：仅中断输入。
+- ❌ Ctrl+C（两次）：挂起会话，稍后恢复仍视作继续。
 
-**SessionEnd does NOT fire on**:
-- ❌ Ctrl+C (once) - Interrupts input only
-- ❌ Ctrl+C (twice) - Suspends session
-- ❌ Session resume - Continues existing session (fires `SessionStart:resume` instead)
+> 若恢复后看到 `SessionStart:resume hook success`，说明会话仅被暂停，没有触发 SessionEnd。
 
-**Key Insight**: When you press Ctrl+C twice and later resume, you see:
-```
-SessionStart:resume hook success
-```
-This confirms you **resumed** an existing session - no SessionEnd was triggered.
+#### 🐛 常见问题：未生成 `session-consolidation` 记忆
 
-#### 🐛 Common Issue: "My Session Didn't Create a Memory"
+- **症状**：使用 Ctrl+C 退出并稍后恢复，未看到对应记忆。
+- **原因**：Ctrl+C 只是暂停，未结束会话。
+- **解决办法**：希望生成记忆时请使用 `/exit` 正常结束。
 
-**Symptom**: You exited Claude Code with Ctrl+C, resumed later, but no `session-consolidation` memory exists.
+#### 🔌 常见问题：连接失败
 
-**Root Cause**: Ctrl+C **suspends** the session, it doesn't **end** it. Only `/exit` or terminal close triggers SessionEnd.
-
-**Solution**: Always use `/exit` to properly terminate sessions if you want memories created.
-
-#### 🔌 Common Issue: Connection Failures
-
-**Symptom**:
-```
-⚠️ Memory Connection → Failed to connect using any available protocol
-💾 Storage → 💾 Unknown Storage (http://127.0.0.1:8000)
-```
-
-**Root Cause**: HTTP/HTTPS protocol mismatch between hook config and server.
-
-**Diagnosis**:
-```bash
-# Check server protocol
-systemctl --user status mcp-memory-http.service
-# Look for: "Uvicorn running on https://..." or "http://..."
-
-# Check hook config
-grep endpoint ~/.claude/hooks/config.json
-```
-
-**Solution**: Update `~/.claude/hooks/config.json` to match server:
-```json
-{
-  "memoryService": {
-    "http": {
-      "endpoint": "https://localhost:8000",  // Match your server protocol
-      "apiKey": "your-api-key"
+- **症状**：日志显示
+  ```
+  ⚠️ Memory Connection → Failed to connect using any available protocol
+  💾 Storage → 💾 Unknown Storage (http://127.0.0.1:8000)
+  ```
+- **原因**：Hook 配置的协议与服务器不一致。
+- **排查**：
+  ```bash
+  systemctl --user status mcp-memory-http.service  # 查看服务器协议
+  grep endpoint ~/.claude/hooks/config.json        # 检查端点
+  ```
+- **修复**：更新 `~/.claude/hooks/config.json`，确保 `endpoint` 与服务器协议一致，例如：
+  ```json
+  {
+    "memoryService": {
+      "http": {
+        "endpoint": "https://localhost:8000",
+        "apiKey": "your-api-key"
+      }
     }
   }
-}
-```
+  ```
 
-#### 📋 SessionEnd Memory Requirements
+#### 📋 SessionEnd 记忆生成条件
 
-Even if SessionEnd fires, memory creation requires:
-1. **Minimum session length**: 100+ characters (configurable)
-2. **Minimum confidence**: > 0.1 from conversation analysis
-3. **Session consolidation enabled**: `enableSessionConsolidation: true` in config
+1. 会话文本长度 ≥100 字符（可配置）。
+2. 置信度 >0.1。
+3. 已启用 `enableSessionConsolidation: true`。
 
-**What gets extracted**:
-- Topics (implementation, debugging, architecture, etc.)
-- Decisions ("decided to", "will use", "chose to")
-- Insights ("learned that", "discovered", "realized")
-- Code changes ("implemented", "created", "refactored")
-- Next steps ("next we need", "TODO", "remaining")
+**提取内容包括**：主题、决策、洞察、代码变更、下一步计划等。
 
-#### 🔧 Quick Verification
+#### 🔧 快速验证
 
 ```bash
-# Check recent session memories
+# 检索最近的会话整合记忆
 curl -sk "https://localhost:8000/api/search/by-tag" \
   -H "Content-Type: application/json" \
   -d '{"tags": ["session-consolidation"], "limit": 5}' | \
   python -m json.tool | grep created_at_iso
 
-# Test SessionEnd hook manually
+# 手动触发 SessionEnd 钩子
 node ~/.claude/hooks/core/session-end.js
 
-# Verify connection
+# 检查服务健康度
 curl -sk "https://localhost:8000/api/health"
 ```
 
-**Detailed Guide**: See `docs/troubleshooting/session-end-hooks.md` for comprehensive troubleshooting steps, diagnosis checklist, and technical details.
+更多诊断步骤参见 `docs/troubleshooting/session-end-hooks.md`。
 
-### Windows SessionStart Hook Issue
+### Windows SessionStart 钩子问题
 
-**🚨 CRITICAL BUG**: SessionStart hooks with `matchers: ["*"]` cause Claude Code to hang indefinitely on Windows.
+**🚨 严重缺陷**：`matchers: ["*"]` 的 SessionStart 钩子会导致 Claude Code 在 Windows 上无限挂起。
 
-**Issue**: [#160](https://github.com/doobidoo/mcp-memory-service/issues/160)
+- **问题编号**：[Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160)
+- **表现**：启动即无响应，钩子执行但进程不退出，需强制关闭终端。
+- **根因**：Windows 子进程管理存在缺陷，Node.js 钩子即使调用 `process.exit(0)` 仍可能保留句柄。
+- **无效尝试**：重复 `process.exit(0)`、`finally` 强制退出、最小化脚本、批处理包装、增大超时等。
 
-**Symptoms**:
+**推荐替代方案**：
 
-- Claude Code becomes completely unresponsive when starting
-- Hook executes but process never terminates
-- Cannot enter prompts or cancel with Ctrl+C
-- Must force-close terminal to exit
+1. **手动命令 `/session-start`**（推荐）
+   ```bash
+   claude /session-start
+   ```
+   - 功能等同自动 SessionStart。
+   - 跨平台可用。
+   - 安装程序会在 Windows 默认跳过自动配置。
+   - 详见 `claude_commands/session-start.md`。
 
-**Root Cause**:
-Windows-specific subprocess management issue. Even with `process.exit(0)`, Node.js subprocesses with open connections (HTTP client, etc.) don't close all file descriptors properly on Windows, causing the parent process (Claude Code) to wait indefinitely.
+2. **禁用 SessionStart 钩子**：
+   ```json
+   {
+   	"hooks": {
+   		"SessionStart": []
+   	}
+   }
+   ```
 
-**Tested Solutions** (None worked on Windows):
+3. **改用 UserPromptSubmit 钩子**：
+   ```json
+   {
+   	"hooks": {
+   		"UserPromptSubmit": [
+   			{
+   				"matchers": ["*"],
+   				"hooks": [
+   					{
+   						"type": "command",
+   						"command": "node ~/.claude/hooks/core/mid-conversation.js",
+   						"timeout": 8
+   					}
+   				]
+   			}
+   		]
+   	}
+   }
+   ```
 
-- ❌ Multiple `process.exit(0)` calls
-- ❌ `.finally()` blocks with forced exit
-- ❌ Minimal hook (just print + exit)
-- ❌ Windows batch wrapper with forced exit
-- ❌ Increased timeouts (no timeout enforcement occurs)
+4. **手动执行脚本**（高级）：`node C:\Users\username\.claude\hooks\core\session-start.js`
 
-**Workarounds**:
-
-1. **Use `/session-start` slash command** (recommended):
-
-```bash
-claude /session-start
-```
-
-- Provides same functionality as automatic SessionStart hook
-- Works on all platforms (Windows, macOS, Linux)
-- Safe manual alternative - no configuration changes needed
-- Installer automatically skips SessionStart configuration on Windows
-- See: `claude_commands/session-start.md` for full documentation
-
-2. **Disable SessionStart hooks** (if manually configured):
-
-```json
-{
-	"hooks": {
-		"SessionStart": []
-	}
-}
-```
-
-3. **Use UserPromptSubmit hooks instead** (these work on Windows):
-
-```json
-{
-	"hooks": {
-		"UserPromptSubmit": [
-			{
-				"matchers": ["*"],
-				"hooks": [
-					{
-						"type": "command",
-						"command": "node ~/.claude/hooks/core/mid-conversation.js",
-						"timeout": 8
-					}
-				]
-			}
-		]
-	}
-}
-```
-
-4. **Manual hook invocation** (advanced):
-
-```bash
-node C:\Users\username\.claude\hooks\core\session-start.js
-```
-
-**Platform Status**:
-
-- macOS: Works correctly ✅
-- Linux: Works correctly ✅ (assumed)
-- Windows: Fatal hang ❌
-
-**Impact**: Critical for Windows users. SessionStart hooks are completely unusable until Claude Code fixes subprocess management on Windows.
+**平台状态**：macOS ✅，Linux ✅，Windows ❌，在官方修复前需使用以上替代方案。
 
 ---
 
-> **For detailed troubleshooting, architecture, and deployment guides:**
->
-> - **Backend Configuration Issues**: See [Wiki Troubleshooting Guide](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING#backend-configuration-issues) for comprehensive solutions to missing memories, environment variable issues, Cloudflare auth, hooks timeouts, and more
-> - **Historical Context**: Retrieve memories tagged with `claude-code-reference`
-> - **Quick Diagnostic**: Run `python scripts/validation/diagnose_backend_config.py`
+> 如需更多架构、部署与排障信息：
+> - **后端配置问题**：参阅 [Wiki Troubleshooting Guide](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING#backend-configuration-issues)。
+> - **历史上下文**：检索带 `claude-code-reference` 标签的记忆。
+> - **快速自检**：执行 `python scripts/validation/diagnose_backend_config.py`。

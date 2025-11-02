@@ -1,18 +1,21 @@
-# MCP Protocol Enhancements Guide
+# MCP 协议增强功能指南
 
-This guide covers the enhanced MCP (Model Context Protocol) features introduced in v4.1.0, including Resources, Prompts, and Progress Tracking.
+本文介绍自 v4.1.0 起新增的 MCP（Model Context Protocol）能力，包括资源访问、引导式提示与进度跟踪。
 
-## Table of Contents
-- [Enhanced Resources](#enhanced-resources)
-- [Guided Prompts](#guided-prompts)
-- [Progress Tracking](#progress-tracking)
-- [Integration Examples](#integration-examples)
+## 目录
+- [增强型资源](#增强型资源)
+- [引导式提示](#引导式提示)
+- [进度跟踪](#进度跟踪)
+- [集成示例](#集成示例)
+- [最佳实践](#最佳实践)
+- [兼容性](#兼容性)
+- [延伸阅读](#延伸阅读)
 
-## Enhanced Resources
+## 增强型资源
 
-The MCP Memory Service now exposes memory collections through URI-based resources, allowing clients to access structured data directly.
+MCP Memory Service 现已通过 URI 形式暴露记忆集合，客户端可直接读取结构化数据。
 
-### Available Resources
+### 可用资源
 
 #### 1. Memory Statistics
 ```
@@ -20,7 +23,7 @@ URI: memory://stats
 Returns: JSON object with database statistics
 ```
 
-Example response:
+示例响应：
 ```json
 {
   "total_memories": 1234,
@@ -37,7 +40,7 @@ URI: memory://tags
 Returns: List of all unique tags in the database
 ```
 
-Example response:
+示例响应：
 ```json
 {
   "tags": ["work", "personal", "learning", "project-x", "meeting-notes"],
@@ -52,7 +55,7 @@ Parameters: n = number of memories to retrieve
 Returns: N most recent memories
 ```
 
-Example: `memory://recent/10` returns the 10 most recent memories.
+示例：`memory://recent/10` 返回最近 10 条记忆。
 
 #### 4. Memories by Tag
 ```
@@ -61,7 +64,7 @@ Parameters: tagname = specific tag to filter by
 Returns: All memories with the specified tag
 ```
 
-Example: `memory://tag/learning` returns all memories tagged with "learning".
+示例：`memory://tag/learning` 返回所有带有 “learning” 标签的记忆。
 
 #### 5. Dynamic Search
 ```
@@ -70,11 +73,11 @@ Parameters: query = search query
 Returns: Search results matching the query
 ```
 
-Example: `memory://search/python%20programming` searches for memories about Python programming.
+示例：`memory://search/python%20programming` 搜索与 Python 编程相关的记忆。
 
-### Resource Templates
+### 资源模板
 
-The service provides templates for dynamic resource access:
+服务端提供资源模板，便于动态生成 URI：
 
 ```json
 [
@@ -96,20 +99,20 @@ The service provides templates for dynamic resource access:
 ]
 ```
 
-## Guided Prompts
+## 引导式提示
 
-Interactive workflows guide users through common memory operations with structured inputs and outputs.
+交互式工作流可为常见的记忆操作提供结构化输入与输出。
 
-### Available Prompts
+### 可用提示
 
 #### 1. Memory Review
-Review and organize memories from a specific time period.
+针对指定时间段回顾并整理记忆。
 
-**Arguments:**
-- `time_period` (required): Time period to review (e.g., "last week", "yesterday")
-- `focus_area` (optional): Area to focus on (e.g., "work", "personal")
+**参数：**
+- `time_period`（必填）：时间范围，如 “last week”“yesterday”。
+- `focus_area`（选填）：关注领域，如 “work”“personal”。
 
-**Example:**
+**示例：**
 ```json
 {
   "name": "memory_review",
@@ -121,13 +124,13 @@ Review and organize memories from a specific time period.
 ```
 
 #### 2. Memory Analysis
-Analyze patterns and themes in stored memories.
+分析记忆中的模式与主题。
 
-**Arguments:**
-- `tags` (optional): Comma-separated tags to analyze
-- `time_range` (optional): Time range for analysis (e.g., "last month")
+**参数：**
+- `tags`（选填）：逗号分隔的标签列表。
+- `time_range`（选填）：分析的时间范围，如 “last month”。
 
-**Example:**
+**示例：**
 ```json
 {
   "name": "memory_analysis",
@@ -139,13 +142,13 @@ Analyze patterns and themes in stored memories.
 ```
 
 #### 3. Knowledge Export
-Export memories in various formats.
+以多种格式导出记忆。
 
-**Arguments:**
-- `format` (required): Export format ("json", "markdown", "text")
-- `filter` (optional): Filter criteria (tags or search query)
+**参数：**
+- `format`（必填）：导出格式（`json`、`markdown`、`text`）。
+- `filter`（选填）：过滤条件（标签或搜索语句）。
 
-**Example:**
+**示例：**
 ```json
 {
   "name": "knowledge_export",
@@ -157,13 +160,13 @@ Export memories in various formats.
 ```
 
 #### 4. Memory Cleanup
-Identify and remove duplicate or outdated memories.
+识别并清理重复或过期记忆。
 
-**Arguments:**
-- `older_than` (optional): Remove memories older than specified period
-- `similarity_threshold` (optional): Threshold for duplicate detection (0.0-1.0)
+**参数：**
+- `older_than`（选填）：删除早于指定时间的记忆。
+- `similarity_threshold`（选填）：重复检测阈值（0.0-1.0）。
 
-**Example:**
+**示例：**
 ```json
 {
   "name": "memory_cleanup",
@@ -175,14 +178,14 @@ Identify and remove duplicate or outdated memories.
 ```
 
 #### 5. Learning Session
-Store structured learning notes with automatic categorization.
+以结构化方式记录学习笔记并自动分类。
 
-**Arguments:**
-- `topic` (required): Learning topic or subject
-- `key_points` (required): Comma-separated key points learned
-- `questions` (optional): Questions for further study
+**参数：**
+- `topic`（必填）：学习主题。
+- `key_points`（必填）：逗号分隔的要点。
+- `questions`（选填）：后续要研究的问题。
 
-**Example:**
+**示例：**
 ```json
 {
   "name": "learning_session",
@@ -194,14 +197,14 @@ Store structured learning notes with automatic categorization.
 }
 ```
 
-## Progress Tracking
+## 进度跟踪
 
-Long-running operations now provide real-time progress updates through the MCP notification system.
+对于耗时操作，服务会通过 MCP 通知系统实时推送进度。
 
-### Operations with Progress Tracking
+### 支持进度跟踪的操作
 
-#### 1. Bulk Deletion (`delete_by_tags`)
-Provides step-by-step progress when deleting memories by tags:
+#### 1. 批量删除（`delete_by_tags`）
+会输出逐步进度信息：
 
 ```
 0% - Starting deletion of memories with tags: [tag1, tag2]
@@ -211,17 +214,17 @@ Provides step-by-step progress when deleting memories by tags:
 100% - Deletion completed: Successfully deleted 45 memories
 ```
 
-### Operation IDs
+### 操作 ID
 
-Each long-running operation receives a unique ID for tracking:
+每个长时任务都会生成唯一 ID：
 
 ```
 Operation ID: delete_by_tags_a1b2c3d4
 ```
 
-### Progress Notification Structure
+### 进度通知结构
 
-Progress notifications follow the MCP protocol:
+通知遵循 MCP 协议格式：
 
 ```json
 {
@@ -231,9 +234,9 @@ Progress notifications follow the MCP protocol:
 }
 ```
 
-## Integration Examples
+## 集成示例
 
-### Accessing Resources in Claude Code
+### 在 Claude Code 中访问资源
 
 ```python
 # List available resources
@@ -244,7 +247,7 @@ stats = await mcp_client.read_resource("memory://stats")
 recent = await mcp_client.read_resource("memory://recent/20")
 ```
 
-### Using Prompts
+### 调用引导式提示
 
 ```python
 # Execute a memory review prompt
@@ -257,7 +260,7 @@ result = await mcp_client.get_prompt(
 )
 ```
 
-### Tracking Progress
+### 跟踪操作进度
 
 ```python
 # Start operation and track progress
@@ -270,19 +273,19 @@ operation = await mcp_client.call_tool(
 # Monitor via operation_id in the response
 ```
 
-## Best Practices
+## 最佳实践
 
-1. **Resources**: Use resources for read-only access to memory data
-2. **Prompts**: Use prompts for interactive, guided workflows
-3. **Progress Tracking**: Monitor operation IDs for long-running tasks
-4. **Error Handling**: All operations return structured error messages
-5. **Performance**: Resources are optimized for quick access
+1. **资源**：用于只读场景快速获取记忆数据。
+2. **引导式提示**：适合需要交互式输入/输出的工作流。
+3. **进度跟踪**：处理耗时任务时持续监听操作 ID。
+4. **错误处理**：所有操作都会返回结构化错误，便于定位问题。
+5. **性能**：资源接口经过优化，可快速响应。
 
-## Compatibility
+## 兼容性
 
-These enhancements maintain full backward compatibility with existing MCP clients while providing richer functionality for clients that support the extended features.
+所有增强功能与现有 MCP 客户端保持完全兼容；若客户端支持扩展能力，可获取更丰富的体验。
 
-## Further Reading
+## 延伸阅读
 
 - [MCP Specification](https://modelcontextprotocol.info/specification/2024-11-05/)
 - [Memory Service API Documentation](../api/README.md)

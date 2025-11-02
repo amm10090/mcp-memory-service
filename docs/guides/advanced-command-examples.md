@@ -1,23 +1,23 @@
-# Advanced Claude Code Commands - Real-World Examples
+# 高级 Claude Code 命令实战示例
 
-This guide showcases advanced usage patterns and real-world workflows using MCP Memory Service Claude Code commands.
+本指南展示如何利用 MCP Memory Service 的 Claude Code 命令，构建高级使用模式与现实工作流。
 
-## Table of Contents
-- [Development Workflows](#development-workflows)
-- [Project Management](#project-management)
-- [Learning & Knowledge Management](#learning--knowledge-management)
-- [Team Collaboration](#team-collaboration)
-- [Debugging & Troubleshooting](#debugging--troubleshooting)
-- [Advanced Search Techniques](#advanced-search-techniques)
-- [Automation & Scripting](#automation--scripting)
+## 目录
+- [开发工作流](#开发工作流)
+- [项目管理](#项目管理)
+- [学习与知识管理](#学习与知识管理)
+- [团队协作](#团队协作)
+- [调试与故障排查](#调试与故障排查)
+- [高级搜索技巧](#高级搜索技巧)
+- [自动化与脚本](#自动化与脚本)
 
 ---
 
-## Development Workflows
+## 开发工作流
 
-### Full-Stack Development Session
+### 全栈开发会话
 
-**Scenario**: Working on a web application with authentication
+**场景**：构建带有认证能力的 Web 应用
 
 ```bash
 # Start development session with context capture
@@ -49,9 +49,9 @@ claude /memory-context --summary "Completed OAuth integration - ready for testin
   --include-files --include-commits
 ```
 
-### Bug Fixing Workflow
+### 缺陷修复流程
 
-**Scenario**: Tracking and resolving a complex bug
+**场景**：追踪并解决复杂缺陷
 
 ```bash
 # Store bug discovery
@@ -78,9 +78,9 @@ claude /memory-store --tags "reference,stripe,best-practice" \
 claude /memory-search --tags "bug,stripe" "rate limiting payment"
 ```
 
-### Code Review & Refactoring
+### 代码评审与重构
 
-**Scenario**: Systematic code improvement process
+**场景**：系统化的代码优化流程
 
 ```bash
 # Store code review insights
@@ -105,11 +105,11 @@ claude /memory-recall "what performance improvements did we make this month?"
 
 ---
 
-## Project Management
+## 项目管理
 
-### Sprint Planning & Tracking
+### Sprint 规划与追踪
 
-**Scenario**: Agile development with memory-enhanced tracking
+**场景**：借助记忆增强的敏捷开发流程
 
 ```bash
 # Start of sprint
@@ -140,9 +140,9 @@ claude /memory-search --tags "retrospective" --limit 5
 claude /memory-recall "what patterns do we see in our sprint blockers?"
 ```
 
-### Feature Development Lifecycle
+### 功能开发生命周期
 
-**Scenario**: End-to-end feature development tracking
+**场景**：全流程跟踪功能交付
 
 ```bash
 # Feature inception
@@ -179,11 +179,11 @@ claude /memory-search --tags "feature,user-profiles" --limit 20
 
 ---
 
-## Learning & Knowledge Management
+## 学习与知识管理
 
-### Technology Research & Evaluation
+### 技术调研与评估
 
-**Scenario**: Evaluating new technologies for adoption
+**场景**：评估新技术是否适合引入
 
 ```bash
 # Research session start
@@ -198,346 +198,159 @@ claude /memory-store --tags "research,graphql,cons" \
 
 # Store comparison data
 claude /memory-store --tags "research,performance,comparison" \
-  "Performance test: GraphQL 340ms avg, REST 280ms avg for mobile app typical queries"
+  "GraphQL latency vs REST benchmark data: GraphQL median 120ms vs REST 95ms"
 
-# Store team feedback
-claude /memory-store --tags "research,team-feedback,graphql" \
-  "Team survey: 60% excited about GraphQL, 30% prefer REST familiarity, 10% neutral"
+# Decision making
+claude /memory-store --tags "research,decision" --type "decision" \
+  "Decision: Maintain REST for core API, pilot GraphQL for analytics dashboards"
 
-# Store decision and rationale
-claude /memory-store --tags "decision,architecture,graphql" --type "decision" \
-  "Decision: Adopt GraphQL for new features, maintain REST for existing APIs during 6-month transition"
-
-# Create reference documentation
-claude /memory-store --tags "reference,graphql,implementation" \
-  "GraphQL implementation guide: Use Apollo Server, implement DataLoader for N+1 prevention"
-
-# Later research sessions
-claude /memory-recall "what did we learn about GraphQL performance last month?"
-claude /memory-search --tags "research,comparison" "technology evaluation"
+# Later reference
+claude /memory-search --tags "research,graphql"
 ```
 
-### Personal Learning Journal
+### 学习笔记与知识库建设
 
-**Scenario**: Building a personal knowledge base
+**场景**：构建个人/团队知识库
 
 ```bash
-# Daily learning capture
-claude /memory-store --tags "learning,javascript,async" \
-  "Learned: Promise.allSettled() waits for all promises unlike Promise.all() which fails fast"
+# Capture learning topics
+claude /memory-store --tags "learning,pytorch" \
+  "Lesson: PyTorch Lightning simplifies training loops with Trainer class"
 
-claude /memory-store --tags "learning,css,flexbox" \
-  "CSS trick: flex-grow: 1 on middle item makes it expand to fill available space"
+# Store tutorials or resources
+claude /memory-store --tags "resource,redis" --type "reference" \
+  "Redis cluster tutorial: https://developer.redis.com/howtos/cluster-tutorial/"
 
-# Code snippets and examples
-claude /memory-store --tags "snippet,react,custom-hook" --type "reference" \
-  "Custom hook pattern: useLocalStorage - encapsulates localStorage with React state sync"
+# Track learning progress
+claude /memory-store --tags "learning,progress" --type "task" \
+  "Goal: Complete Redis cluster certification - in progress"
 
-# Book and article insights
-claude /memory-store --tags "book,clean-code,insight" \
-  "Clean Code principle: Functions should do one thing well - if function has 'and' in description, split it"
-
-# Conference and talk notes
-claude /memory-store --tags "conference,react-conf,2024" \
-  "React Conf 2024: New concurrent features in React 18.3, Server Components adoption patterns"
-
-# Weekly knowledge review
-claude /memory-recall "what did I learn about React this week?"
-claude /memory-search --tags "learning,javascript" --limit 10
-
-# Monthly learning patterns
-claude /memory-search --tags "learning" --since "last month"
+# Summarize key takeaways
+claude /memory-context --summary "Finished Redis cluster deep dive" --include-files
 ```
 
 ---
 
-## Team Collaboration
+## 团队协作
 
-### Cross-Team Communication
+### 会议与决策记录
 
-**Scenario**: Working with multiple teams on shared systems
+**场景**：实时记录会议要点与行动项
 
 ```bash
-# Store cross-team decisions
-claude /memory-store --tags "team,frontend,backend,api-contract" --type "decision" \
-  "API contract agreed: User service will return ISO 8601 timestamps, frontend will handle timezone conversion"
+# Start meeting capture
+claude /memory-context --summary "Weekly architecture sync - 2024-03-15"
 
-# Store meeting outcomes
-claude /memory-store --tags "meeting,security-team,compliance" \
-  "Security review outcome: Authentication service approved for production with rate limiting requirement"
+# Log discussion points
+claude /memory-store --tags "meeting,architecture" --type "meeting" \
+  "Discussed microservices migration plan - need phased rollout"
 
-# Store shared resource information
-claude /memory-store --tags "shared,database,access" --type "reference" \
-  "Shared analytics DB access: Use service account sa-analytics@company.com, read-only access"
+# Track action items
+claude /memory-store --tags "meeting,action-item" --type "task" \
+  "Action: Prepare migration risk assessment by next Monday"
 
-# Track dependencies and blockers
-claude /memory-store --tags "dependency,infrastructure,blocker" --type "task" \
-  "Blocked on infrastructure team: Need production K8s namespace for user-service deployment"
-
-# Store team contact information
-claude /memory-store --tags "team,contacts,infrastructure" --type "reference" --private \
-  "Infrastructure team: Primary contact Alex Chen (alex@company.com), escalation Sarah Kim (sarah@company.com)"
-
-# Regular cross-team syncs
-claude /memory-recall "what dependencies do we have on the infrastructure team?"
-claude /memory-search --tags "team,backend" "shared decisions"
+# Capture decisions
+claude /memory-store --tags "meeting,decision" --type "decision" \
+  "Decision: Adopt service mesh for zero-downtime deployment"
 ```
 
-### Code Handoff & Documentation
+### 交接与值守
 
-**Scenario**: Preparing code handoff to another developer
+**场景**：记录轮班、值守时的关键信息
 
 ```bash
-# Store system overview for handoff
-claude /memory-store --tags "handoff,system-overview,payment-service" \
-  "Payment service architecture: Express.js API, PostgreSQL DB, Redis cache, Stripe integration"
+# Start shift log
+claude /memory-store --tags "oncall,shift" --type "status" \
+  "On-call shift started: Monitoring services A, B, C"
 
-# Document key implementation details
-claude /memory-store --tags "handoff,implementation,payment-service" \
-  "Key files: server.js (main app), routes/payments.js (API endpoints), services/stripe.js (integration logic)"
+# Record incidents
+claude /memory-store --tags "oncall,incident" \
+  "Incident #423 resolved - root cause: database connection pool exhaustion"
 
-# Store operational knowledge
-claude /memory-store --tags "handoff,operations,payment-service" \
-  "Monitoring: Grafana dashboard 'Payment Service', alerts on Slack #payments-alerts channel"
-
-# Document gotchas and edge cases
-claude /memory-store --tags "handoff,gotchas,payment-service" \
-  "Known issues: Webhook retries can cause duplicate processing - check payment_id before processing"
-
-# Store testing information
-claude /memory-store --tags "handoff,testing,payment-service" \
-  "Testing: npm test (unit), npm run test:integration, Stripe test cards in test-data.md"
-
-# Create comprehensive handoff package
-claude /memory-search --tags "handoff,payment-service" --export
+# Transfer shift knowledge
+claude /memory-context --summary "Shift handoff notes" --include-logs
 ```
 
 ---
 
-## Debugging & Troubleshooting
+## 调试与故障排查
 
-### Production Issue Investigation
+### 快速定位问题
 
-**Scenario**: Investigating and resolving production incidents
+**场景**：利用记忆查询追踪历史问题与解决方案
 
 ```bash
-# Store incident details
-claude /memory-store --tags "incident,p1,database,performance" --type "task" \
-  "P1 Incident: Database connection timeouts causing 504 errors, affecting 15% of users"
-
-# Store investigation timeline
-claude /memory-store --tags "incident,investigation,timeline" \
-  "10:15 AM - First reports of timeouts, 10:22 AM - Confirmed DB connection pool exhaustion"
-
-# Store root cause analysis
-claude /memory-store --tags "incident,root-cause,connection-pool" \
-  "Root cause: Connection pool size (10) insufficient for increased traffic, no connection recycling"
-
-# Store immediate fixes applied
-claude /memory-store --tags "incident,fix,immediate" \
-  "Immediate fix: Increased connection pool to 50, enabled connection recycling, deployed at 11:30 AM"
-
-# Store monitoring improvements
-claude /memory-store --tags "incident,monitoring,improvement" \
-  "Added monitoring: DB connection pool utilization alerts at 80% threshold"
-
-# Store prevention measures
-claude /memory-store --tags "incident,prevention,long-term" --type "task" \
-  "Long-term prevention: Implement connection pool auto-scaling, add load testing to CI/CD"
-
-# Post-incident review
-claude /memory-store --tags "incident,postmortem,lessons" \
-  "Lessons learned: Need proactive monitoring of resource utilization, not just error rates"
-
-# Search for similar incidents
-claude /memory-search --tags "incident,database" "connection timeout"
+claude /memory-search --tags "incident,timeout" --limit 5
+claude /memory-recall "How did we fix the API timeout in January?"
 ```
 
-### Performance Optimization Tracking
-
-**Scenario**: Systematic performance improvement initiative
+### 复盘与改进
 
 ```bash
-# Baseline measurements
-claude /memory-store --tags "performance,baseline,api-response" \
-  "Baseline metrics: API avg response time 850ms, p99 2.1s, DB query avg 340ms"
+# Store post-mortem summary
+claude /memory-store --tags "postmortem,api" --type "analysis" \
+  "API outage postmortem: Root cause was expired TLS certificate - implemented automated renewal"
 
-# Store optimization experiments
-claude /memory-store --tags "performance,experiment,caching" \
-  "Experiment 1: Added Redis caching for user profiles - 30% response time improvement"
-
-claude /memory-store --tags "performance,experiment,database" \
-  "Experiment 2: Optimized N+1 queries in posts endpoint - 45% DB query time reduction"
-
-# Track measurement methodology
-claude /memory-store --tags "performance,methodology,testing" \
-  "Load testing setup: k6 script, 100 VU, 5min ramp-up, 10min steady state, production-like data"
-
-# Store optimization results
-claude /memory-store --tags "performance,results,final" \
-  "Final metrics: API avg response time 420ms (51% improvement), p99 980ms (53% improvement)"
-
-# Document optimization techniques
-claude /memory-store --tags "performance,techniques,reference" --type "reference" \
-  "Optimization techniques applied: Redis caching, query optimization, connection pooling, response compression"
-
-# Performance trend analysis  
-claude /memory-recall "what performance improvements did we achieve this quarter?"
+# Track follow-up tasks
+claude /memory-store --tags "postmortem,follow-up" --type "task" \
+  "TODO: Add TLS expiry monitoring alert"
 ```
 
 ---
 
-## Advanced Search Techniques
+## 高级搜索技巧
 
-### Complex Query Patterns
-
-**Scenario**: Advanced search strategies for large knowledge bases
+### 标签与关键字组合
 
 ```bash
-# Multi-tag searches with boolean logic
-claude /memory-search --tags "architecture,database" --content "performance"
-# Finds memories tagged with both architecture AND database, containing performance-related content
-
-# Time-constrained searches
-claude /memory-search --tags "bug,critical" --since "last week" --limit 20
-# Recent critical bugs only
-
-# Project-specific technical searches
-claude /memory-search --project "user-service" --type "decision" --content "authentication"
-# Architecture decisions about authentication in specific project
-
-# Minimum relevance threshold searches
-claude /memory-search --min-score 0.8 "microservices communication patterns"
-# Only highly relevant results about microservices communication
-
-# Comprehensive metadata searches
-claude /memory-search --include-metadata --tags "api,design" --export
-# Full metadata export for API design memories
+# Filter by tags and keywords
+claude /memory-search --tags "architecture,decision" "microservices rollout"
 ```
 
-### Research and Analysis Queries
-
-**Scenario**: Analyzing patterns and trends in stored knowledge
+### 时间范围查询
 
 ```bash
-# Trend analysis across time periods
-claude /memory-recall "what architectural decisions did we make in Q1?"
-claude /memory-recall "what architectural decisions did we make in Q2?"
-# Compare decision patterns across quarters
+# Time-based search
+claude /memory-search --tags "retrospective" --since "2024-01-01" --until "2024-03-31"
+claude /memory-recall "what retrospectives did we complete last month?"
+```
 
-# Technology adoption tracking
-claude /memory-search --tags "adoption" --content "react"
-claude /memory-search --tags "adoption" --content "vue"
-# Compare technology adoption discussions
+### 内容类型筛选
 
-# Problem pattern identification
-claude /memory-search --tags "bug,database" --limit 50
-# Identify common database-related issues
-
-# Team learning velocity analysis
-claude /memory-search --tags "learning" --since "last month"
-# Recent learning activities
-
-# Decision outcome tracking
-claude /memory-search --tags "decision" --content "outcome"
-# Find decisions with documented outcomes
+```bash
+claude /memory-search --type "decision"
+claude /memory-search --type "task" --limit 10
 ```
 
 ---
 
-## Automation & Scripting
+## 自动化与脚本
 
-### Automated Memory Capture
-
-**Scenario**: Scripting common memory operations
+### Shell 脚本集成
 
 ```bash
-# Daily standup automation
-#!/bin/bash
-# daily-standup.sh
-DATE=$(date +"%Y-%m-%d")
-echo "What did you accomplish yesterday?" | read YESTERDAY
-echo "What are you working on today?" | read TODAY
-echo "Any blockers?" | read BLOCKERS
+#!/usr/bin/env bash
 
-claude /memory-store --tags "standup,daily,$DATE" \
-  "Yesterday: $YESTERDAY. Today: $TODAY. Blockers: $BLOCKERS"
-
-# Git commit message enhancement
-#!/bin/bash
-# enhanced-commit.sh
-COMMIT_MSG="$1"
-BRANCH=$(git branch --show-current)
-FILES=$(git diff --name-only --cached)
-
-claude /memory-store --tags "commit,$BRANCH,development" \
-  "Commit: $COMMIT_MSG. Files: $FILES. Branch: $BRANCH"
-
-git commit -m "$COMMIT_MSG"
-
-# End-of-day summary
-#!/bin/bash
-# eod-summary.sh
-claude /memory-context --summary "End of day summary - $(date +%Y-%m-%d)" \
-  --include-files --include-commits
+summary="$(git log -1 --pretty=%B)"
+claude /memory-store --tags "git,commit" --type "implementation" \
+  "Latest commit: $summary"
 ```
 
-### Batch Operations and Analysis
-
-**Scenario**: Processing multiple memories for analysis
+### CI/CD 记录
 
 ```bash
-# Export all architectural decisions for documentation
-claude /memory-search --tags "architecture,decision" --limit 100 --export
-# Creates exportable report of all architectural decisions
+# Capture deployment context
+claude /memory-store --tags "ci,deployment" --type "status" \
+  "Deployed version 3.2.1 to production - passed all smoke tests"
+```
 
-# Weekly learning summary
-claude /memory-search --tags "learning" --since "last week" --export
-# Export week's learning for review
+### 自动化报告
 
-# Project retrospective data gathering
-claude /memory-search --project "user-service" --tags "bug,issue" --export
-claude /memory-search --project "user-service" --tags "success,milestone" --export
-# Gather both problems and successes for retrospective
-
-# Technical debt analysis
-claude /memory-search --tags "technical-debt,todo" --include-metadata --export
-# Comprehensive technical debt report
-
-# Performance trend analysis
-claude /memory-search --tags "performance,metrics" --limit 50 --export
-# Historical performance data for trend analysis
+```bash
+# Generate weekly summary
+claude /memory-recall "summaries for last week" --limit 7
 ```
 
 ---
 
-## Best Practices Summary
-
-### Effective Tagging Strategies
-- **Hierarchical tags**: Use `team`, `team-frontend`, `team-frontend-react`
-- **Temporal tags**: Include sprint numbers, quarters, years
-- **Context tags**: Project names, feature names, team names
-- **Type tags**: `decision`, `bug`, `learning`, `reference`, `todo`
-- **Priority tags**: `critical`, `important`, `nice-to-have`
-
-### Content Organization
-- **Specific titles**: Instead of "Fixed bug", use "Fixed payment timeout bug in Stripe integration"
-- **Context inclusion**: Always include relevant project and time context
-- **Outcome documentation**: Store not just decisions but their outcomes
-- **Link related memories**: Reference related decisions and implementations
-
-### Search Optimization
-- **Use multiple search strategies**: Combine tags, content, and time-based searches
-- **Iterate searches**: Start broad, then narrow down with additional filters
-- **Export important results**: Save comprehensive analyses for documentation
-- **Regular reviews**: Weekly/monthly searches to identify patterns
-
-### Workflow Integration
-- **Start sessions with context**: Use `/memory-context` to set session scope
-- **Real-time capture**: Store decisions and insights as they happen
-- **End sessions with summary**: Capture session outcomes and next steps
-- **Regular retrospectives**: Use search to analyze patterns and improvements
-
----
-
-**These advanced patterns will transform your development workflow with persistent, searchable memory that grows with your expertise!** 🚀
+通过以上示例，你可以将 MCP Memory Service 与 Claude Code 命令组合应用到日常开发、管理与协作场景中，沉淀结构化知识并快速复用历史经验。EOF

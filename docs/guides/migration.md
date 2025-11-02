@@ -1,73 +1,65 @@
-# ChromaDB to SQLite-vec Migration Guide
+# ChromaDB 迁移至 SQLite-vec 指南
 
-This guide walks you through migrating your existing ChromaDB memories to the new SQLite-vec backend.
+本文将指导你把既有的 ChromaDB 记忆数据迁移到全新的 SQLite-vec 后端。
 
-> **⚠️ Important Update (v5.0.1):** We've identified and fixed critical migration issues. If you experienced problems with v5.0.0 migration, please use the enhanced migration script or update to v5.0.1.
+> **⚠️ 重要更新（v5.0.1）**：我们已修复 v5.0.0 迁移脚本中的关键问题。如在 v5.0.0 遇到故障，请使用增强迁移脚本或升级至 v5.0.1 版本。
 
-## Why Migrate?
+## 为什么要迁移？
 
-SQLite-vec offers several advantages over ChromaDB for the MCP Memory Service:
+与 ChromaDB 相比，SQLite-vec 在 MCP Memory Service 场景下具备以下优势：
 
-- **Lightweight**: Single file database, no external dependencies
-- **Faster startup**: No collection initialization overhead
-- **Better performance**: Optimized for small to medium datasets
-- **Simpler deployment**: No persistence directory management
-- **Cross-platform**: Works consistently across all platforms
-- **HTTP/SSE support**: New web interface only works with SQLite-vec
+- **更轻量**：单文件数据库，无外部依赖；
+- **更快启动**：无需初始化集合，冷启动时间短；
+- **更好的性能**：针对中小规模数据进行优化；
+- **部署更简单**：不再维护持久化目录；
+- **跨平台一致**：在不同操作系统上表现稳定；
+- **HTTP/SSE 支持**：新 Web 控制台仅兼容 SQLite-vec。
 
-## Migration Methods
+## 迁移方式
 
-### Method 1: Automated Migration Script (Recommended)
-
-Use the provided migration script for a safe, automated migration:
+### 方法一：自动迁移脚本（推荐）
 
 ```bash
-# Run the migration script
+# 运行迁移脚本
 python scripts/migrate_chroma_to_sqlite.py
 ```
 
-The script will:
+脚本将：
 
-- ✅ Check your existing ChromaDB data
-- ✅ Count all memories to migrate
-- ✅ Ask for confirmation before proceeding
-- ✅ Migrate memories in batches with progress tracking
-- ✅ Skip duplicates if running multiple times
-- ✅ Verify migration completed successfully
-- ✅ Provide next steps
+- ✅ 检查现有 ChromaDB 数据；
+- ✅ 统计待迁移的记忆数量；
+- ✅ 迁移前提示确认；
+- ✅ 分批迁移并显示进度；
+- ✅ 多次运行时跳过重复数据；
+- ✅ 验证迁移结果；
+- ✅ 提示后续操作。
 
-### Method 2: Manual Configuration Switch
+### 方法二：手动切换配置
 
-If you want to start fresh with SQLite-vec (losing existing memories):
+若希望直接启用 SQLite-vec 并重新开始（注意：旧记忆不会自动迁移）：
 
 ```bash
-# Set the storage backend to SQLite-vec
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
-
-# Optionally set custom database path
-export MCP_MEMORY_SQLITE_PATH=/path/to/your/memory.db
-
-# Restart MCP Memory Service
+export MCP_MEMORY_SQLITE_PATH=/path/to/your/memory.db  # 可选
+# 重启 MCP Memory Service
 ```
 
-## Step-by-Step Migration
+## 逐步迁移流程
 
-### 1. Backup Your Data (Optional but Recommended)
+### 1. 备份数据（强烈推荐）
 
 ```bash
-# Create a backup of your ChromaDB data
 cp -r ~/.mcp_memory_chroma ~/.mcp_memory_chroma_backup
 ```
 
-### 2. Run Migration Script
+### 2. 执行迁移脚本
 
 ```bash
 cd /path/to/mcp-memory-service
 python scripts/migrate_chroma_to_sqlite.py
 ```
 
-**Example Output:**
-
+**示例输出：**
 ```
 🚀 MCP Memory Service - ChromaDB to SQLite-vec Migration
 ============================================================
@@ -102,65 +94,47 @@ Failed migrations:        0
 Migration duration:       45.32 seconds
 ```
 
-### 3. Update Configuration
-
-After successful migration, update your environment:
+### 3. 更新配置
 
 ```bash
-# Switch to SQLite-vec backend
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
-
-# Set the database path (use the path shown in migration output)
 export MCP_MEMORY_SQLITE_PATH=/path/to/memory_migrated.db
 ```
 
-**For permanent configuration, add to your shell profile:**
-
+**永久化配置（示例）：**
 ```bash
-# Add to ~/.bashrc, ~/.zshrc, or ~/.profile
 echo 'export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec' >> ~/.bashrc
 echo 'export MCP_MEMORY_SQLITE_PATH=/path/to/memory_migrated.db' >> ~/.bashrc
 ```
 
-### 4. Restart and Test
+### 4. 重启并验证
 
 ```bash
-# If using Claude Desktop, restart Claude Desktop application
-# If using MCP server directly, restart the server
-
-# Test that migration worked
+# 重启 Claude Desktop 或 MCP 服务器
 python scripts/verify_environment.py
 ```
 
-### 5. Enable HTTP/SSE Interface (Optional)
-
-To use the new web interface:
+### 5. （可选）启用 HTTP/SSE 控制台
 
 ```bash
-# Enable HTTP server
 export MCP_HTTP_ENABLED=true
 export MCP_HTTP_PORT=8001
-
-# Start HTTP server
 python scripts/run_http_server.py
-
-# Open browser to http://localhost:8001
+# 浏览器访问 http://localhost:8001
 ```
 
-## Configuration Reference
+## 配置参考
 
-### Environment Variables
+### 环境变量
 
-| Variable                     | Description                                | Default                       |
-| ---------------------------- | ------------------------------------------ | ----------------------------- |
-| `MCP_MEMORY_STORAGE_BACKEND` | Storage backend (`chroma` or `sqlite_vec`) | `chroma`                      |
-| `MCP_MEMORY_SQLITE_PATH`     | SQLite-vec database file path              | `~/.mcp_memory/sqlite_vec.db` |
-| `MCP_HTTP_ENABLED`           | Enable HTTP/SSE interface                  | `false`                       |
-| `MCP_HTTP_PORT`              | HTTP server port                           | `8001`                        |
+| 变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `MCP_MEMORY_STORAGE_BACKEND` | 存储后端（`chroma` 或 `sqlite_vec`） | `chroma` |
+| `MCP_MEMORY_SQLITE_PATH` | SQLite-vec 数据库路径 | `~/.mcp_memory/sqlite_vec.db` |
+| `MCP_HTTP_ENABLED` | 是否启用 HTTP/SSE | `false` |
+| `MCP_HTTP_PORT` | HTTP 端口 | `8001` |
 
-### Claude Desktop Configuration
-
-Update your `claude_desktop_config.json`:
+### Claude Desktop 配置示例
 
 ```json
 {
@@ -177,229 +151,143 @@ Update your `claude_desktop_config.json`:
 }
 ```
 
-## Troubleshooting
+## 故障排查
 
-### Common Migration Issues (v5.0.0)
+### v5.0.0 常见问题
 
-> **If you're experiencing issues with v5.0.0 migration, please use the enhanced migration script:**
->
+> 如遇到 v5.0.0 的迁移问题，请使用增强脚本：
 > ```bash
 > python scripts/migrate_v5_enhanced.py --help
 > ```
 
-#### Issue 1: Custom Data Locations Not Recognized
-
-**Problem:** Migration script uses hardcoded paths and ignores custom ChromaDB locations.
-
-**Solution:**
+#### 问题 1：自定义数据路径未被识别
 
 ```bash
-# Specify custom paths explicitly
 python scripts/migrate_chroma_to_sqlite.py \
   --chroma-path /your/custom/chroma/path \
   --sqlite-path /your/custom/sqlite.db
 
-# Or use environment variables
 export MCP_MEMORY_CHROMA_PATH=/your/custom/chroma/path
 export MCP_MEMORY_SQLITE_PATH=/your/custom/sqlite.db
 python scripts/migrate_chroma_to_sqlite.py
 ```
 
-#### Issue 2: Content Hash Errors
+#### 问题 2：`content_hash` 相关报错
 
-**Problem:** Migration fails with "NOT NULL constraint failed: memories.content_hash"
+- 出现 “NOT NULL constraint failed: memories.content_hash”；
+- 请升级至 v5.0.1，并使用增强迁移脚本。
 
-**Solution:** This has been fixed in v5.0.1. The migration script now generates proper SHA256 hashes. If you encounter this:
+#### 问题 3：标签格式被破坏
 
-1. Update to latest version: `git pull`
-2. Use the enhanced migration script: `python scripts/migrate_v5_enhanced.py`
+- 标签迁移后呈现 `['tag1','tag2']`；
+- 使用增强脚本中的标签校验修复：
+  ```bash
+  python scripts/validate_migration.py /path/to/sqlite.db
+  python scripts/migrate_v5_enhanced.py --force
+  ```
 
-#### Issue 3: Malformed Tags (60% Corruption)
+#### 问题 4：迁移似乎卡住
 
-**Problem:** Tags become corrupted during migration, appearing as `['tag1', 'tag2']` instead of `tag1,tag2`
+- 使用详尽模式和批量参数：
+  ```bash
+  pip install tqdm
+  python scripts/migrate_v5_enhanced.py --verbose --batch-size 10
+  ```
 
-**Solution:** The enhanced migration script includes tag validation and correction:
-
-```bash
-# Validate existing migration
-python scripts/validate_migration.py /path/to/sqlite.db
-
-# Re-migrate with fix
-python scripts/migrate_v5_enhanced.py --force
-```
-
-#### Issue 4: Migration Hangs
-
-**Problem:** Migration appears to hang with no progress indication
-
-**Solution:** Use verbose mode and batch size control:
+#### 问题 5：依赖冲突
 
 ```bash
-# Run with progress indicators
-pip install tqdm  # For progress bars
-python scripts/migrate_v5_enhanced.py --verbose --batch-size 10
-```
-
-#### Issue 5: Dependency Conflicts
-
-**Problem:** SSL certificate errors, version conflicts with ChromaDB/sentence-transformers
-
-**Solution:**
-
-```bash
-# Clean install dependencies
 pip uninstall chromadb sentence-transformers -y
 pip install --upgrade chromadb sentence-transformers
-
-# If SSL issues persist
 export REQUESTS_CA_BUNDLE=""
 export SSL_CERT_FILE=""
 ```
 
-### Validation and Recovery
+### 校验与恢复
 
-#### Validate Your Migration
-
-After migration, always validate the data:
+#### 迁移后校验
 
 ```bash
-# Basic validation
 python scripts/validate_migration.py
-
-# Compare with original ChromaDB
 python scripts/validate_migration.py --compare --chroma-path ~/.mcp_memory_chroma
 ```
 
-#### Recovery Options
-
-If migration failed or corrupted data:
-
-1. **Restore from backup:**
-
-   ```bash
-   # If you created a backup
-   python scripts/restore_memories.py migration_backup.json
-   ```
-
-2. **Rollback to ChromaDB:**
-
-   ```bash
-   # Temporarily switch back
-   export MCP_MEMORY_STORAGE_BACKEND=chroma
-   # Your ChromaDB data is unchanged
-   ```
-
-3. **Re-migrate with enhanced script:**
-
-   ```bash
-   # Clean the target database
-   rm /path/to/sqlite_vec.db
-
-   # Use enhanced migration
-   python scripts/migrate_v5_enhanced.py \
-     --chroma-path /path/to/chroma \
-     --sqlite-path /path/to/new.db \
-     --backup backup.json
-   ```
-
-### Getting Help
-
-If you continue to experience issues:
-
-1. **Check logs:** Add `--verbose` flag for detailed output
-2. **Validate data:** Use `scripts/validate_migration.py`
-3. **Report issues:** [GitHub Issues](https://github.com/doobidoo/mcp-memory-service/issues)
-4. **Emergency rollback:** Your ChromaDB data remains untouched
-
-### Migration Best Practices
-
-1. **Always backup first:**
-
-   ```bash
-   cp -r ~/.mcp_memory_chroma ~/.mcp_memory_chroma_backup
-   ```
-
-2. **Test with dry-run:**
-
-   ```bash
-   python scripts/migrate_v5_enhanced.py --dry-run
-   ```
-
-3. **Validate after migration:**
-
-   ```bash
-   python scripts/validate_migration.py
-   ```
-
-4. **Keep ChromaDB data until confirmed:**
-   - Don't delete ChromaDB data immediately
-   - Test the migrated database thoroughly
-   - Keep backups for at least a week
-
-**"Migration verification failed"**
-
-- Some memories may have failed to migrate
-- Check error summary in migration output
-- Consider re-running migration
-
-### Runtime Issues
-
-**"Storage backend not found"**
-
-- Ensure `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`
-- Check that SQLite-vec dependencies are installed
-
-**"Database file not found"**
-
-- Verify `MCP_MEMORY_SQLITE_PATH` points to migrated database
-- Check file permissions
-
-### Performance Comparison
-
-| Aspect       | ChromaDB                 | SQLite-vec                |
-| ------------ | ------------------------ | ------------------------- |
-| Startup time | ~2-3 seconds             | ~0.5 seconds              |
-| Memory usage | ~100-200MB               | ~20-50MB                  |
-| Storage      | Directory + files        | Single file               |
-| Dependencies | chromadb, sqlite         | sqlite-vec only           |
-| Scalability  | Better for >10k memories | Optimal for <10k memories |
-
-## Rollback Plan
-
-If you need to switch back to ChromaDB:
+#### 恢复选项
 
 ```bash
-# Switch back to ChromaDB
-export MCP_MEMORY_STORAGE_BACKEND=chroma
-unset MCP_MEMORY_SQLITE_PATH
+# 从备份恢复
+python scripts/restore_memories.py migration_backup.json
 
-# Restart MCP Memory Service
+# 临时回退到 ChromaDB
+export MCP_MEMORY_STORAGE_BACKEND=chroma
+
+# 清理目标库并重跑增强脚本
+rm /path/to/sqlite_vec.db
+python scripts/migrate_v5_enhanced.py \
+  --chroma-path /path/to/chroma \
+  --sqlite-path /path/to/new.db \
+  --backup backup.json
 ```
 
-Your original ChromaDB data remains unchanged during migration.
+### 获取帮助
 
-## Next Steps
+1. 使用 `--verbose` 查看详细日志；
+2. 运行 `scripts/validate_migration.py` 检查数据；
+3. 在 [GitHub Issues](https://github.com/doobidoo/mcp-memory-service/issues) 反馈问题；
+4. 如需应急回退，可直接恢复到 ChromaDB，原数据不会被修改。
 
-After successful migration:
+### 迁移最佳实践
 
-1. ✅ Test memory operations (store, retrieve, search)
-2. ✅ Try the HTTP/SSE interface for real-time updates
-3. ✅ Update any scripts or tools that reference storage paths
-4. ✅ Consider backing up your new SQLite-vec database regularly
-5. ✅ Remove old ChromaDB data after confirming migration success
+1. **务必先备份**：`cp -r ~/.mcp_memory_chroma ~/.mcp_memory_chroma_backup`
+2. **先执行 Dry-run**：`python scripts/migrate_v5_enhanced.py --dry-run`
+3. **迁移后立刻校验**：`python scripts/validate_migration.py`
+4. **保留 ChromaDB 数据**：至少保留一周，确认无误再删除。
 
-## Support
+出现 “Migration verification failed” 表示部分记忆未成功迁移，可根据报告重新执行。
 
-If you encounter issues:
+### 运行时常见问题
 
-1. Check the migration output and error messages
-2. Verify environment variables are set correctly
-3. Test with a small subset of data first
-4. Review logs for detailed error information
+- **“Storage backend not found”**：确认 `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`，并安装 SQLite-vec 依赖；
+- **“Database file not found”**：检查 `MCP_MEMORY_SQLITE_PATH` 路径与文件权限。
 
-The migration preserves all your data including:
+### 性能对比
 
-- Memory content and metadata
-- Tags and timestamps
-- Content hashes (for deduplication)
-- Semantic embeddings (regenerated with same model)
+| 指标 | ChromaDB | SQLite-vec |
+| --- | --- | --- |
+| 启动耗时 | 约 2-3 秒 | 约 0.5 秒 |
+| 内存占用 | 约 100-200MB | 约 20-50MB |
+| 存储结构 | 目录 + 多文件 | 单个文件 |
+| 依赖 | chromadb、sqlite 等 | 仅 sqlite-vec |
+| 扩展能力 | 更适合 >10k 记忆 | 最优于 <10k 规模 |
+
+## 回退方案
+
+```bash
+export MCP_MEMORY_STORAGE_BACKEND=chroma
+unset MCP_MEMORY_SQLITE_PATH
+# 重启服务
+```
+
+原始 ChromaDB 数据在迁移过程中保持不变。
+
+## 后续步骤
+
+1. ✅ 测试存储、检索、搜索操作；
+2. ✅ 尝试 HTTP/SSE 控制台；
+3. ✅ 更新脚本或工具中的路径引用；
+4. ✅ 定期备份新的 SQLite-vec 数据库；
+5. ✅ 确认成功后再删除旧 ChromaDB 数据。
+
+## 支持
+
+- 检查迁移日志与错误提示；
+- 确认环境变量配置正确；
+- 建议先用小数据集演练；
+- 参考日志定位问题。
+
+迁移后将保留全部数据，包括：
+
+- 记忆内容与元数据；
+- 标签与时间戳；
+- 内容哈希（用于去重）；
+- 语义向量（将按同一模型重新生成）。

@@ -10,91 +10,91 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [8.16.1] - 2025-11-02
 
-### Fixed
-- **Critical Bug**: Fixed `KeyError: 'message'` in MCP server handler (`server.py:2118`)
-  - **Issue**: [#198](https://github.com/doobidoo/mcp-memory-service/issues/198)
-  - **Root Cause**: `handle_store_memory()` attempted to access non-existent `result["message"]` key
-  - **Impact**: All memory store operations via MCP `server.py` handler failed completely
-  - **Fix**: Properly handle `MemoryService.store_memory()` response format:
-    - Success (single): `{"success": True, "memory": {...}}`
-    - Success (chunked): `{"success": True, "memories": [...], "total_chunks": N}`
-    - Failure: `{"success": False, "error": "..."}`
-  - **Response Messages**: Now include truncated content hash for verification
-  - **Related**: This was part of issue #197 where async/await bug was fixed in v8.16.0, but this response format bug was missed
+### 修复
+- **严重缺陷**：修正 MCP 服务器处理器（`server.py:2118`）中的 `KeyError: 'message'`。
+  - **关联问题**：[ #198 ](https://github.com/doobidoo/mcp-memory-service/issues/198)
+  - **根因**：`handle_store_memory()` 访问了并不存在的 `result["message"]` 键。
+  - **影响**：通过 MCP `server.py` 处理器执行的所有记忆写入完全失败。
+  - **修复**：按照 `MemoryService.store_memory()` 的真实返回格式处理：
+    - 单条成功：`{"success": True, "memory": {...}}`
+    - 分块成功：`{"success": True, "memories": [...], "total_chunks": N}`
+    - 失败：`{"success": False, "error": "..."}`
+  - **响应消息**：新增截断后的内容哈希，便于校验。
+  - **相关**：与 #197 同系列问题；v8.16.0 修复了 async/await 缺陷，但遗漏了响应格式错误。
 
-### Added
-- **Integration Tests**: New test suite for MCP handler methods (`tests/integration/test_mcp_handlers.py`)
-  - **Coverage**: 11 test cases for `handle_store_memory()`, `handle_retrieve_memory()`, `handle_search_by_tag()`
-  - **Regression Tests**: Specific tests for issue #198 to prevent future KeyError bugs
-  - **Test Scenarios**: Success, chunked response, error handling, edge cases
-  - **Purpose**: Prevent similar bugs in future releases
+### 新增
+- **集成测试**：新增 MCP 处理器测试套件（`tests/integration/test_mcp_handlers.py`）。
+  - **覆盖范围**：`handle_store_memory()`、`handle_retrieve_memory()`、`handle_search_by_tag()` 共 11 个用例。
+  - **回归测试**：针对 issue #198 编写专门用例，防止 KeyError 再现。
+  - **测试场景**：成功、分块返回、错误处理、边界情况。
+  - **目标**：避免后续版本再次出现同类缺陷。
 
-### Technical Details
-- **Affected Handler**: Only `handle_store_memory()` was affected by this bug
-- **Fixed Code Pattern**: Matches the correct pattern used in `mcp_server.py:182-205`
-- **Backward Compatibility**: No breaking changes, only fixes broken functionality
+### 技术说明
+- **受影响处理器**：仅 `handle_store_memory()`。
+- **修复方式**：对齐 `mcp_server.py:182-205` 中的正确实现模式。
+- **兼容性**：无破坏性变更，仅修复已损坏的功能。
 
 ## [8.16.0] - 2025-11-01
 
-### Added
-- **Memory Type Consolidation Tool** 🆕 - Professional-grade database maintenance for type taxonomy cleanup
-  - **Script**: `scripts/maintenance/consolidate_memory_types.py` (v1.0.0)
-  - **Configuration**: `scripts/maintenance/consolidation_mappings.json` (168 predefined mappings)
-  - **Performance**: ~5 seconds for 1,000 memory updates
-  - **Safety Features**:
-    - ✅ Automatic timestamped backups before execution
-    - ✅ Dry-run mode for safe preview
-    - ✅ Transaction safety (atomic with rollback)
-    - ✅ Database lock detection
-    - ✅ HTTP server status warnings
-    - ✅ Disk space verification
-    - ✅ Backup integrity validation
-  - **Consolidates**: 341 fragmented types → 24 core taxonomy types
-  - **Real-world test**: 1,049 memories updated in 5s (59% of database)
-  - **Type reduction**: 342 → 128 unique types (63% reduction)
-  - **Zero data loss**: Only type reassignments, preserves all content
+### 新增
+- **记忆类型整合工具** 🆕 —— 面向专业运维的类型治理方案。
+  - **脚本**：`scripts/maintenance/consolidate_memory_types.py`（v1.0.0）。
+  - **配置**：`scripts/maintenance/consolidation_mappings.json`（预置 168 条映射）。
+  - **性能**：处理 1,000 条记忆约需 5 秒。
+  - **安全特性**：
+    - ✅ 执行前自动生成带时间戳的备份。
+    - ✅ Dry-run 安全预览。
+    - ✅ 事务保护（支持回滚）。
+    - ✅ 数据库锁检测。
+    - ✅ HTTP 服务器状态预警。
+    - ✅ 磁盘空间校验。
+    - ✅ 备份完整性验证。
+  - **整合效果**：341 个碎片类型 → 24 个核心类目。
+  - **实战案例**：1,049 条记忆在 5 秒内完成整合（占数据库 59%）。
+  - **类型数减少**：342 → 128（降低 63%）。
+  - **数据安全**：仅重新归类，不触及内容。
 
-- **Standardized Memory Type Taxonomy** - 24 core types organized into 5 categories
-  - **Content Types** (4): note, reference, document, guide
-  - **Activity Types** (5): session, implementation, analysis, troubleshooting, test
-  - **Artifact Types** (4): fix, feature, release, deployment
-  - **Progress Types** (2): milestone, status
-  - **Infrastructure Types** (5): configuration, infrastructure, process, security, architecture
-  - **Other Types** (4): documentation, solution, achievement, technical
-  - **Purpose**: Prevents future type fragmentation
-  - **Benefits**: Improved query efficiency, consistent naming, better semantic grouping
+- **标准化记忆类型体系** —— 24 个核心类型划分 5 大类。
+  - **内容类**（4 个）：note、reference、document、guide。
+  - **活动类**（5 个）：session、implementation、analysis、troubleshooting、test。
+  - **产出类**（4 个）：fix、feature、release、deployment。
+  - **进度类**（2 个）：milestone、status。
+  - **基础设施类**（5 个）：configuration、infrastructure、process、security、architecture。
+  - **其他类**（4 个）：documentation、solution、achievement、technical。
+  - **目标**：避免类型再次碎片化。
+  - **收益**：查询更高效、命名更统一、语义聚类更准确。
 
-### Changed
-- **CLAUDE.md** - Added Memory Type Taxonomy section to Development Guidelines
-  - Documents 24 core types with clear usage guidelines
-  - Provides examples of what to avoid (bug-fix vs fix, technical-* prefixes)
-  - Added consolidation commands to Essential Commands section
-  - Includes best practices for maintaining type consistency
+### 变更
+- **CLAUDE.md** —— 在开发指南中新增记忆类型分类章节。
+  - 明确 24 个核心类型的使用准则。
+  - 补充“应避免”的示例（如 bug-fix vs fix、technical-* 前缀）。
+  - 在常用命令中加入整合脚本相关命令。
+  - 总结保持类型一致性的最佳实践。
 
-### Documentation
-- **Comprehensive Maintenance Documentation**
-  - Updated `scripts/maintenance/README.md` with consolidation tool guide
-  - Added to Quick Reference table with performance metrics
-  - Detailed usage instructions with safety prerequisites
-  - Recovery procedures for backup restoration
-  - Maintenance schedule recommendations (monthly dry-run checks)
-  - **Real-world example**: Production consolidation results from Nov 2025
+### 文档
+- **维护文档全面更新**：
+  - `scripts/maintenance/README.md` 增补整合工具指南。
+  - Quick Reference 表新增性能指标摘要。
+  - 详细说明安全前置条件与操作步骤。
+  - 提供备份恢复流程。
+  - 建议维护节奏（每月 Dry-run）。
+  - **实战案例**：记录 2025 年 11 月线上整合结果。
 
-### Technical Details
-- **Consolidation Mappings**:
-  - NULL/empty → `note` (609 memories in real test)
-  - Milestone/completion variants → `milestone` (21 source types → 60 memories)
-  - Session variants → `session` (8 source types → 37 memories)
-  - Technical-* prefix removal → base types (62 memories)
-  - Project-* prefix removal → base types (67 memories)
-  - Fix/bug variants → `fix` (8 source types → 28 memories)
-  - See `consolidation_mappings.json` for complete mapping list (168 rules)
+### 技术细节
+- **映射规则示例**：
+  - NULL/空值 → `note`（实测 609 条）。
+  - milestone/完成类变体 → `milestone`（21 种源类型 → 60 条）。
+  - session 变体 → `session`（8 种源类型 → 37 条）。
+  - technical-* 前缀移除 → 基础类型（62 条）。
+  - project-* 前缀移除 → 基础类型（67 条）。
+  - fix/bug 变体 → `fix`（8 种源类型 → 28 条）。
+  - 更多规则见 `consolidation_mappings.json`（共 168 条）。
 
-### Notes
-- **Customizable**: Edit `consolidation_mappings.json` to customize behavior
-- **Idempotent**: Safe to run multiple times with same mappings
-- **Platform support**: Linux, macOS, Windows (disk space check requires statvfs)
-- **Recommended schedule**: Run --dry-run monthly, execute when types exceed 150
+### 备注
+- **可定制**：可编辑 `consolidation_mappings.json` 自定义行为。
+- **幂等性**：重复执行不会产生副作用。
+- **平台支持**：Linux、macOS、Windows（磁盘空间检测依赖 statvfs）。
+- **建议频率**：每月运行 `--dry-run`，当类型数量超过 150 时执行正式整合。
 
 ## [8.15.1] - 2025-10-31
 

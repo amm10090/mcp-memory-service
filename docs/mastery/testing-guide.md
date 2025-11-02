@@ -1,35 +1,35 @@
-# MCP Memory Service — Testing Guide
+# MCP Memory Service — 测试指南
 
-This guide explains how to run, understand, and extend the test suites.
+本文介绍如何运行、理解与扩展测试套件。
 
-## Prerequisites
+## 前置条件
 
-- Python ≥ 3.10 (3.12 recommended; 3.13 may lack prebuilt `sqlite-vec` wheels).
-- Install dependencies (uv recommended):
-  - `uv sync` (respects `pyproject.toml` and `uv.lock`), or
-  - `pip install -e .` plus extras as needed.
-- For SQLite-vec tests:
-  - `sqlite-vec` and `sentence-transformers`/`torch` should be installed.
-  - On some OS/Python combinations, sqlite extension loading must be supported (see Troubleshooting).
+- Python ≥ 3.10（推荐 3.12；3.13 可能缺少预编译的 `sqlite-vec` wheel）；
+- 安装依赖（推荐 uv）：
+  - `uv sync`（遵循 `pyproject.toml` 与 `uv.lock`），或
+  - `pip install -e .` 并按需安装附加包；
+- 若需运行 SQLite-vec 相关测试：
+  - 需预装 `sqlite-vec` 与 `sentence-transformers`/`torch`；
+  - 某些 OS/Python 组合需要支持加载 sqlite 扩展（见 Troubleshooting）。
 
-## Test Layout
+## 测试结构
 
-- `tests/README.md`: overview.
-- Categories:
-  - Unit: `tests/unit/` (e.g., tags, mdns, cloudflare stubs).
-  - Integration: `tests/integration/` (cross-component flows).
-  - Performance: `tests/performance/`.
-  - Backend-specific: top-level tests like `test_sqlite_vec_storage.py`, `test_time_parser.py`, `test_memory_ops.py`.
+- `tests/README.md`：整体概览；
+- 目录划分：
+  - 单元测试：`tests/unit/`（例如标签、mDNS、Cloudflare stub 等）；
+  - 集成测试：`tests/integration/`（跨组件流程）；
+  - 性能测试：`tests/performance/`；
+  - 后端专项：如 `test_sqlite_vec_storage.py`、`test_time_parser.py`、`test_memory_ops.py` 等顶层脚本。
 
-## Running Tests
+## 执行方式
 
-Run all:
+运行全部测试：
 
 ```
 pytest
 ```
 
-Category:
+按类别运行：
 
 ```
 pytest tests/unit/
@@ -37,60 +37,59 @@ pytest tests/integration/
 pytest tests/performance/
 ```
 
-Single file or test:
+单个文件/测试：
 
 ```
 pytest tests/test_sqlite_vec_storage.py::TestSqliteVecStorage::test_store_memory -q
 ```
 
-With uv:
+结合 uv：
 
 ```
 uv run pytest -q
 ```
 
-## Important Behaviors and Skips
+## 关键行为与跳过策略
 
-- SQLite-vec tests are marked to skip when `sqlite-vec` is unavailable:
-  - See `pytestmark = pytest.mark.skipif(not SQLITE_VEC_AVAILABLE, ...)` in `tests/test_sqlite_vec_storage.py`.
-- Some tests simulate no-embedding scenarios by patching `SENTENCE_TRANSFORMERS_AVAILABLE=False` to validate fallback code paths.
-- Temp directories isolate database files; connections are closed in teardown.
+- SQLite-vec 测试在 `sqlite-vec` 不可用时会自动跳过：
+  - 参见 `tests/test_sqlite_vec_storage.py` 中的 `pytestmark = pytest.mark.skipif(...)`；
+- 部分测试通过将 `SENTENCE_TRANSFORMERS_AVAILABLE=False` 来模拟无嵌入模型场景，以验证回退逻辑；
+- 测试使用临时目录隔离数据库文件，清理阶段会关闭连接。
 
-## Coverage of Key Areas
+## 覆盖的核心领域
 
-- Storage CRUD and vector search (`test_sqlite_vec_storage.py`).
-- Time parsing and timestamp recall (`test_time_parser.py`, `test_timestamp_recall.py`).
-- Tag and metadata semantics (`test_tag_storage.py`, `unit/test_tags.py`).
-- Health checks and database init (`test_database.py`).
-- Cloudflare adapters have unit-level coverage stubbing network (`unit/test_cloudflare_storage.py`).
+- 存储 CRUD 与向量检索（`test_sqlite_vec_storage.py`）；
+- 时间解析与时间戳回溯（`test_time_parser.py`、`test_timestamp_recall.py`）；
+- 标签与元数据语义（`test_tag_storage.py`、`unit/test_tags.py`）；
+- 健康检查与数据库初始化（`test_database.py`）；
+- Cloudflare 适配器通过单元测试模拟网络行为（`unit/test_cloudflare_storage.py`）。
 
-## Writing New Tests
+## 编写新增测试
 
-- Prefer async `pytest.mark.asyncio` for storage APIs.
-- Use `tempfile.mkdtemp()` for per-test DB paths.
-- Use `src.mcp_memory_service.models.memory.Memory` and `generate_content_hash` helpers.
-- For backend-specific behavior, keep tests colocated with backend tests and gate with availability flags.
-- For MCP tool surface tests, prefer FastMCP server (`mcp_server.py`) in isolated processes or with `lifespan` context.
+- 对于存储 API，优先使用 `pytest.mark.asyncio`；
+- 每个测试使用 `tempfile.mkdtemp()` 创建独立数据库路径；
+- 利用 `src.mcp_memory_service.models.memory.Memory` 与 `generate_content_hash` 辅助函数；
+- 后端特定行为的测试，应与对应后端测试文件放在一起，并通过可用性标志控制执行；
+- 若测试 MCP 工具接口，推荐在独立进程或 `lifespan` 上下文中使用 FastMCP 服务器（`mcp_server.py`）。
 
-## Local MCP/Service Tests
+## 本地 MCP/服务验证
 
-Run stdio server:
+Stdio 服务器：
 
 ```
 uv run memory server
 ```
 
-Run FastMCP HTTP server:
+FastMCP HTTP 服务器：
 
 ```
 uv run mcp-memory-server
 ```
 
-Use any MCP client (Claude Desktop/Code) and exercise tools: store, retrieve, search_by_tag, delete, health.
+使用任意 MCP 客户端（Claude Desktop/Code），依次调用 `store`、`retrieve`、`search_by_tag`、`delete`、`health` 等工具即可完成手动验证。
 
-## Debugging and Logs
+## 调试与日志
 
-- Set `LOG_LEVEL=INFO` for more verbosity.
-- For Claude Desktop: stdout is suppressed to preserve JSON; inspect stderr/warnings. LM Studio prints diagnostics to stdout.
-- Common sqlite-vec errors print actionable remediation (see Troubleshooting).
-
+- 设置 `LOG_LEVEL=INFO` 以获取更多日志；
+- Claude Desktop 环境下 stdout 会被抑制以保持 JSON 传输干净，可查看 stderr / warning；LM Studio 会在 stdout 输出更详细诊断信息；
+- 常见 sqlite-vec 错误会附带处理建议，可参考 Troubleshooting 章节。

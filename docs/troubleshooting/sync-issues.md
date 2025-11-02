@@ -1,563 +1,261 @@
-# Distributed Sync Troubleshooting Guide
+# 分布式同步故障排查指南
 
-This guide helps diagnose and resolve common issues with the distributed memory synchronization system in MCP Memory Service v6.3.0+.
+本指南针对 MCP Memory Service v6.3.0+ 的分布式记忆同步系统，介绍常见问题与解决方案。
 
-## Table of Contents
+## 目录
+- [诊断命令](#诊断命令)
+- [网络连接问题](#网络连接问题)
+- [数据库问题](#数据库问题)
+- [同步冲突](#同步冲突)
+- [服务相关问题](#服务相关问题)
+- [性能问题](#性能问题)
+- [恢复流程](#恢复流程)
+- [日志与监控](#日志与监控)
+- [获取支持](#获取支持)
 
-- [Diagnostic Commands](#diagnostic-commands)
-- [Network Connectivity Issues](#network-connectivity-issues)
-- [Database Problems](#database-problems)
-- [Sync Conflicts](#sync-conflicts)
-- [Service Issues](#service-issues)
-- [Performance Problems](#performance-problems)
-- [Recovery Procedures](#recovery-procedures)
+## 诊断命令
 
-## Diagnostic Commands
+在排查具体问题前，可先收集基础信息：
 
-Before troubleshooting specific issues, use these commands to gather information:
-
-### System Status Check
+### 系统状态
 
 ```bash
-# Overall sync system health
+# 同步系统概览
 ./sync/memory_sync.sh status
 
-# Detailed system information
+# 系统详细信息
 ./sync/memory_sync.sh system-info
 
-# Full diagnostic report
+# 生成完整诊断报告
 ./sync/memory_sync.sh diagnose
 ```
 
-### Component Testing
+### 组件测试
 
 ```bash
-# Test individual components
-./sync/memory_sync.sh test-connectivity    # Network tests
-./sync/memory_sync.sh test-database       # Database integrity
-./sync/memory_sync.sh test-sync           # Sync functionality
-./sync/memory_sync.sh test-all            # Complete test suite
+./sync/memory_sync.sh test-connectivity    # 网络连通性
+./sync/memory_sync.sh test-database       # 数据库完整性
+./sync/memory_sync.sh test-sync           # 同步功能
+./sync/memory_sync.sh test-all            # 全套测试
 ```
 
-### Enable Debug Mode
+### 开启调试模式
 
 ```bash
-# Enable verbose logging
 export SYNC_DEBUG=1
 export SYNC_VERBOSE=1
-
-# Run commands with detailed output
 ./sync/memory_sync.sh sync
 ```
 
-## Network Connectivity Issues
+## 网络连接问题
 
-### Problem: Cannot Connect to Remote Server
+### 无法连接远程服务器
 
-**Symptoms:**
+**症状**：连接超时、提示 “Remote server unreachable”、同步立即失败。
 
-- Connection timeout errors
-- "Remote server unreachable" messages
-- Sync operations fail immediately
-
-**Diagnostic Steps:**
+**排查**：
 
 ```bash
-# Test basic network connectivity
 ping your-remote-server
-
-# Test specific port
 telnet your-remote-server 8443
-
-# Test HTTP/HTTPS endpoint
 curl -v -k https://your-remote-server:8443/api/health
 ```
 
-**Solutions:**
+**解决方案**：
 
-#### DNS Resolution Issues
+- **DNS 问题**：尝试使用 IP；如需，可在 `/etc/hosts` 中添加映射；
+- **防火墙/端口**：确认端口开放，或改用 HTTP（8001）测试；
+- **SSL/TLS**：使用 `-k` 忽略（仅测试），或检查证书信息。
 
-```bash
-# Try with IP address instead of hostname
-export REMOTE_MEMORY_HOST="your-server-ip"
-./sync/memory_sync.sh status
+### API 鉴权失败
 
-# Add to /etc/hosts if DNS fails
-echo "your-server-ip your-remote-server" | sudo tee -a /etc/hosts
-```
-
-#### Firewall/Port Issues
+**症状**：返回 401、提示 API key 无效。
 
 ```bash
-# Check if port is open
-nmap -p 8443 your-remote-server
-
-# Test alternative ports
-export REMOTE_MEMORY_PORT="8001"  # Try HTTP port
-export REMOTE_MEMORY_PROTOCOL="http"
-```
-
-#### SSL/TLS Certificate Issues
-
-```bash
-# Bypass SSL verification (testing only)
 curl -k https://your-remote-server:8443/api/health
-
-# Check certificate details
-openssl s_client -connect your-remote-server:8443 -servername your-remote-server
-```
-
-### Problem: API Authentication Failures
-
-**Symptoms:**
-
-- 401 Unauthorized errors
-- "Invalid API key" messages
-- Authentication required warnings
-
-**Solutions:**
-
-```bash
-# Check if API key is required
-curl -k https://your-remote-server:8443/api/health
-
-# Set API key if required
 export REMOTE_MEMORY_API_KEY="your-api-key"
-
-# Test with API key
-curl -k -H "Authorization: Bearer your-api-key" \
-  https://your-remote-server:8443/api/health
+curl -k -H "Authorization: Bearer your-api-key" https://...
 ```
 
-### Problem: Slow Network Performance
+### 网络性能缓慢
 
-**Symptoms:**
+**症状**：同步耗时长，频繁超时。
 
-- Sync operations taking too long
-- Timeout errors during large syncs
-- Network latency warnings
-
-**Solutions:**
+**解决方案**：
 
 ```bash
-# Reduce batch size
 export SYNC_BATCH_SIZE=25
-
-# Increase timeout values
 export SYNC_TIMEOUT=60
 export SYNC_RETRY_ATTEMPTS=5
-
-# Test network performance
 ./sync/memory_sync.sh benchmark-network
 ```
 
-## Database Problems
+## 数据库问题
 
-### Problem: Staging Database Corruption
+### 暂存库损坏
 
-**Symptoms:**
-
-- "Database is locked" errors
-- SQLite integrity check failures
-- Corrupt database warnings
-
-**Diagnostic Steps:**
+**症状**：提示 `database is locked`、完整性检查失败、出现损坏警告。
 
 ```bash
-# Check database integrity
 sqlite3 ~/.mcp_memory_staging/staging.db "PRAGMA integrity_check;"
-
-# Check for database locks
 lsof ~/.mcp_memory_staging/staging.db
-
-# View database schema
-sqlite3 ~/.mcp_memory_staging/staging.db ".schema"
 ```
 
-**Recovery Procedures:**
+**恢复**：
 
 ```bash
-# Backup current database
 cp ~/.mcp_memory_staging/staging.db ~/.mcp_memory_staging/staging.db.backup
-
-# Attempt repair
 sqlite3 ~/.mcp_memory_staging/staging.db ".recover" > recovered.sql
 rm ~/.mcp_memory_staging/staging.db
 sqlite3 ~/.mcp_memory_staging/staging.db < recovered.sql
-
-# If repair fails, reinitialize
+# 或全量重建
 rm ~/.mcp_memory_staging/staging.db
 ./sync/memory_sync.sh init
 ```
 
-### Problem: Database Version Mismatch
-
-**Symptoms:**
-
-- Schema incompatibility errors
-- "Database version not supported" messages
-- Migration failures
-
-**Solutions:**
+### 数据库版本不兼容
 
 ```bash
-# Check database version
 sqlite3 ~/.mcp_memory_staging/staging.db "PRAGMA user_version;"
-
-# Upgrade database schema
 ./sync/memory_sync.sh upgrade-db
-
-# Force schema recreation
 ./sync/memory_sync.sh init --force-schema
 ```
 
-### Problem: Insufficient Disk Space
-
-**Symptoms:**
-
-- "No space left on device" errors
-- Database write failures
-- Sync operations abort
-
-**Solutions:**
+### 磁盘空间不足
 
 ```bash
-# Check disk space
 df -h ~/.mcp_memory_staging/
-
-# Clean up old logs
 find ~/.mcp_memory_staging/ -name "*.log.*" -mtime +30 -delete
-
-# Compact databases
 ./sync/memory_sync.sh optimize
 ```
 
-## Sync Conflicts
+## 同步冲突
 
-### Problem: Content Hash Conflicts
+### 内容哈希冲突
 
-**Symptoms:**
-
-- "Duplicate content detected" warnings
-- Sync operations skip memories
-- Hash mismatch errors
-
-**Understanding:**
-Content hash conflicts occur when the same memory content exists in both local staging and remote databases but with different metadata or timestamps.
-
-**Resolution Strategies:**
+**症状**：提示重复内容、同步跳过记忆、哈希不一致。
 
 ```bash
-# View conflict details
 ./sync/memory_sync.sh show-conflicts
-
-# Auto-resolve using merge strategy
 export SYNC_CONFLICT_RESOLUTION="merge"
 ./sync/memory_sync.sh sync
-
-# Manual conflict resolution
 ./sync/memory_sync.sh resolve-conflicts --interactive
 ```
 
-### Problem: Tag Conflicts
-
-**Symptoms:**
-
-- Memories with same content but different tags
-- Tag merge warnings
-- Inconsistent tag application
-
-**Solutions:**
+### 标签冲突
 
 ```bash
-# Configure tag merging behavior
-export TAG_MERGE_STRATEGY="union"  # union, intersection, local, remote
-
-# Manual tag resolution
-./sync/memory_sync.sh resolve-tags --memory-hash "abc123..."
-
-# Bulk tag cleanup
+export TAG_MERGE_STRATEGY="union"  # union/intersection/local/remote
+./sync/memory_sync.sh resolve-tags --memory-hash "abc123"
 ./sync/memory_sync.sh cleanup-tags
 ```
 
-### Problem: Timestamp Conflicts
-
-**Symptoms:**
-
-- Memories appear out of chronological order
-- "Future timestamp" warnings
-- Time synchronization issues
-
-**Solutions:**
+### 时间戳冲突
 
 ```bash
-# Check system time synchronization
-timedatectl status  # Linux
-sntp -sS time.apple.com  # macOS
-
-# Force timestamp update during sync
+timedatectl status  # 或 macOS: sntp -sS time.apple.com
 ./sync/memory_sync.sh sync --update-timestamps
-
-# Configure timestamp handling
-export SYNC_TIMESTAMP_STRATEGY="newest"  # newest, oldest, local, remote
+export SYNC_TIMESTAMP_STRATEGY="newest"
 ```
 
-## Service Issues
+## 服务相关问题
 
-### Problem: Service Won't Start
-
-**Symptoms:**
-
-- systemctl/launchctl start fails
-- Service immediately exits
-- "Service failed to start" errors
-
-**Diagnostic Steps:**
+### 服务无法启动
 
 ```bash
-# Check service status
 ./sync/memory_sync.sh status-service
-
-# View service logs
 ./sync/memory_sync.sh logs
-
-# Test service configuration
 ./sync/memory_sync.sh test-service-config
 ```
 
-**Linux (systemd) Solutions:**
+- systemd 下：`systemctl --user daemon-reload`、查看 `journalctl --user -u mcp-memory-sync`；
+- macOS LaunchAgent：重新 load plist 并查看日志。
+
+### 服务内存泄漏
 
 ```bash
-# Check service file
-cat ~/.config/systemd/user/mcp-memory-sync.service
-
-# Reload systemd
-systemctl --user daemon-reload
-
-# Check for permission issues
-systemctl --user status mcp-memory-sync
-
-# View detailed logs
-journalctl --user -u mcp-memory-sync -n 50
-```
-
-**macOS (LaunchAgent) Solutions:**
-
-```bash
-# Check plist file
-cat ~/Library/LaunchAgents/com.mcp.memory.sync.plist
-
-# Unload and reload
-launchctl unload ~/Library/LaunchAgents/com.mcp.memory.sync.plist
-launchctl load ~/Library/LaunchAgents/com.mcp.memory.sync.plist
-
-# Check logs
-tail -f ~/Library/Logs/mcp-memory-sync.log
-```
-
-### Problem: Service Memory Leaks
-
-**Symptoms:**
-
-- Increasing memory usage over time
-- System becomes slow
-- Out of memory errors
-
-**Solutions:**
-
-```bash
-# Monitor memory usage
 ./sync/memory_sync.sh monitor-resources
-
-# Restart service periodically
 ./sync/memory_sync.sh install-service --restart-interval daily
-
-# Optimize memory usage
 export SYNC_MEMORY_LIMIT="100MB"
 ./sync/memory_sync.sh restart-service
 ```
 
-## Performance Problems
+## 性能问题
 
-### Problem: Slow Sync Operations
-
-**Symptoms:**
-
-- Sync takes several minutes
-- High CPU usage during sync
-- Network timeouts
-
-**Optimization Strategies:**
+### 同步速度慢
 
 ```bash
-# Reduce batch size for large datasets
 export SYNC_BATCH_SIZE=25
-
-# Enable parallel processing
 export SYNC_PARALLEL_JOBS=4
-
-# Optimize database operations
 ./sync/memory_sync.sh optimize
-
-# Profile sync performance
 ./sync/memory_sync.sh profile-sync
 ```
 
-### Problem: High Resource Usage
-
-**Symptoms:**
-
-- High CPU usage
-- Excessive disk I/O
-- Memory consumption warnings
-
-**Solutions:**
+### 资源占用高
 
 ```bash
-# Set resource limits
-export SYNC_CPU_LIMIT=50      # Percentage
-export SYNC_MEMORY_LIMIT=200  # MB
-export SYNC_IO_PRIORITY=3     # Lower priority
-
-# Use nice/ionice for background sync
+export SYNC_CPU_LIMIT=50
+export SYNC_MEMORY_LIMIT=200
+export SYNC_IO_PRIORITY=3
 nice -n 10 ionice -c 3 ./sync/memory_sync.sh sync
-
-# Schedule sync during off-hours
-crontab -e
-# Change from: */15 * * * *
-# To: 0 2,6,10,14,18,22 * * *
+# 调整 cron 计划，避开高峰
 ```
 
-## Recovery Procedures
+## 恢复流程
 
-### Complete System Reset
-
-If all else fails, perform a complete reset:
+### 完全重置
 
 ```bash
-# 1. Stop all sync services
 ./sync/memory_sync.sh stop-service
-
-# 2. Backup important data
 cp -r ~/.mcp_memory_staging ~/.mcp_memory_staging.backup
-
-# 3. Remove sync system
 ./sync/memory_sync.sh uninstall --remove-data
-
-# 4. Reinstall from scratch
 ./sync/memory_sync.sh install
-
-# 5. Restore configuration
 ./sync/memory_sync.sh init
 ```
 
-### Disaster Recovery
-
-For complete system failure:
+### 灾备
 
 ```bash
-# 1. Recover from Litestream backup (if configured)
 litestream restore -o recovered_sqlite_vec.db /backup/path
-
-# 2. Restore staging database from backup
 cp ~/.mcp_memory_staging.backup/staging.db ~/.mcp_memory_staging/
-
-# 3. Force sync from remote
 ./sync/memory_sync.sh pull --force
-
-# 4. Verify data integrity
 ./sync/memory_sync.sh verify-integrity
 ```
 
-### Data Migration
-
-To migrate to a different server:
+### 数据迁移
 
 ```bash
-# 1. Export all local data
 ./sync/memory_sync.sh export --format json --output backup.json
-
-# 2. Update configuration for new server
 export REMOTE_MEMORY_HOST="new-server.local"
-
-# 3. Import data to new server
 ./sync/memory_sync.sh import --input backup.json
-
-# 4. Verify migration
 ./sync/memory_sync.sh status
 ```
 
-## Logging and Monitoring
+## 日志与监控
 
-### Log File Locations
+- 同步日志：`~/.mcp_memory_staging/sync.log`
+- 错误日志：`~/.mcp_memory_staging/error.log`
+- 服务日志：取决于系统（journalctl/Console.app 等）
 
-- **Sync logs**: `~/.mcp_memory_staging/sync.log`
-- **Error logs**: `~/.mcp_memory_staging/error.log`
-- **Service logs**: System-dependent (journalctl, Console.app, Event Viewer)
-- **Debug logs**: `~/.mcp_memory_staging/debug.log` (when SYNC_DEBUG=1)
-
-### Log Analysis
+常用命令：
 
 ```bash
-# View recent sync activity
 tail -f ~/.mcp_memory_staging/sync.log
-
-# Find sync errors
 grep -i error ~/.mcp_memory_staging/sync.log | tail -10
-
-# Analyze sync performance
-grep "sync completed" ~/.mcp_memory_staging/sync.log | \
-  awk '{print $(NF-1)}' | sort -n
-
-# Count sync operations
+grep "sync completed" ~/.mcp_memory_staging/sync.log | awk '{print $(NF-1)}' | sort -n
 grep -c "sync started" ~/.mcp_memory_staging/sync.log
 ```
 
-### Monitoring Setup
+可编写简易监控脚本，如每日健康检查、性能告警等。
 
-Create monitoring scripts:
-
-```bash
-# Health check script
-#!/bin/bash
-if ! ./sync/memory_sync.sh status | grep -q "healthy"; then
-  echo "Sync system unhealthy" | mail -s "MCP Sync Alert" admin@example.com
-fi
-
-# Performance monitoring
-#!/bin/bash
-SYNC_TIME=$(./sync/memory_sync.sh sync --dry-run 2>&1 | grep "would take" | awk '{print $3}')
-if [ "$SYNC_TIME" -gt 300 ]; then
-  echo "Sync taking too long: ${SYNC_TIME}s" | mail -s "MCP Sync Performance" admin@example.com
-fi
-```
-
-## Getting Additional Help
-
-### Support Information Generation
+## 获取支持
 
 ```bash
-# Generate comprehensive support report
 ./sync/memory_sync.sh support-report > support_info.txt
-
-# Include anonymized memory samples
 ./sync/memory_sync.sh support-report --include-samples >> support_info.txt
 ```
 
-### Community Resources
+- GitHub Issues、文档与 Wiki 提供最新信息；
+- 如遇生产级故障，请附上日志、配置等详细资料提交 Issue，并标记紧急程度。
 
-- **GitHub Issues**: Report bugs and request features
-- **Documentation**: Check latest docs for updates
-- **Wiki**: Community troubleshooting tips
-- **Discussions**: Ask questions and share solutions
-
-### Emergency Contacts
-
-For critical production issues:
-
-1. Check the GitHub issues for similar problems
-2. Create a detailed bug report with support information
-3. Tag the issue as "urgent" if it affects production systems
-4. Include logs, configuration, and system information
-
-Remember: The sync system is designed to be resilient. Most issues can be resolved by understanding the specific error messages and following the appropriate recovery procedures outlined in this guide.
+同步系统具备较强的容错能力，大多数问题可按对应步骤恢复。EOF
