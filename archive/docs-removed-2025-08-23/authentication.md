@@ -27,6 +27,7 @@ unset MCP_API_KEY
 #### Recommended Methods
 
 **1. OpenSSL (recommended)**
+
 ```bash
 # Generate a 32-byte base64 encoded key
 openssl rand -base64 32
@@ -39,6 +40,7 @@ openssl rand -base64 48  # 48-byte key for extra security
 ```
 
 **2. Python**
+
 ```python
 import secrets
 import base64
@@ -49,6 +51,7 @@ print(f"MCP_API_KEY={key}")
 ```
 
 **3. Node.js**
+
 ```javascript
 const crypto = require('crypto');
 
@@ -84,11 +87,13 @@ python install_service.py
 After installation, you can find your API key in several ways:
 
 **1. Service Status Command**
+
 ```bash
 python install_service.py --status
 ```
 
 **2. Configuration File**
+
 ```bash
 # Linux/macOS
 cat ~/.mcp_memory_service/service_config.json
@@ -98,6 +103,7 @@ type %USERPROFILE%\.mcp_memory_service\service_config.json
 ```
 
 **3. Service Definition File**
+
 ```bash
 # Linux (systemd)
 cat /etc/systemd/system/mcp-memory.service
@@ -119,77 +125,79 @@ Configure Claude Desktop to use API key authentication:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_HTTP_ENDPOINT": "https://your-server:8000/api",
-        "MCP_MEMORY_API_KEY": "your-actual-api-key-here",
-        "MCP_MEMORY_AUTO_DISCOVER": "false"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_HTTP_ENDPOINT": "https://your-server:8001/api",
+				"MCP_MEMORY_API_KEY": "your-actual-api-key-here",
+				"MCP_MEMORY_AUTO_DISCOVER": "false"
+			}
+		}
+	}
 }
 ```
 
 ### Web Applications
 
 **JavaScript/TypeScript Example:**
+
 ```javascript
 class MCPMemoryClient {
-  constructor(endpoint, apiKey) {
-    this.endpoint = endpoint;
-    this.apiKey = apiKey;
-  }
+	constructor(endpoint, apiKey) {
+		this.endpoint = endpoint;
+		this.apiKey = apiKey;
+	}
 
-  async storeMemory(content, tags = []) {
-    const response = await fetch(`${this.endpoint}/memories`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ content, tags })
-    });
+	async storeMemory(content, tags = []) {
+		const response = await fetch(`${this.endpoint}/memories`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${this.apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ content, tags }),
+		});
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
 
-    return response.json();
-  }
+		return response.json();
+	}
 
-  async retrieveMemories(query) {
-    const response = await fetch(`${this.endpoint}/memories/search`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query })
-    });
+	async retrieveMemories(query) {
+		const response = await fetch(`${this.endpoint}/memories/search`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${this.apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ query }),
+		});
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
 
-    return response.json();
-  }
+		return response.json();
+	}
 }
 
 // Usage
 const client = new MCPMemoryClient(
-  'https://memory.local:8000/api',
-  process.env.MCP_API_KEY
+	'https://memory.local:8001/api',
+	process.env.MCP_API_KEY
 );
 ```
 
 ### cURL Examples
 
 **Store Memory:**
+
 ```bash
-curl -X POST https://memory.local:8000/api/memories \
+curl -X POST https://memory.local:8001/api/memories \
   -H "Authorization: Bearer $MCP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,8 +208,9 @@ curl -X POST https://memory.local:8000/api/memories \
 ```
 
 **Retrieve Memories:**
+
 ```bash
-curl -X POST https://memory.local:8000/api/memories/search \
+curl -X POST https://memory.local:8001/api/memories/search \
   -H "Authorization: Bearer $MCP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -211,9 +220,10 @@ curl -X POST https://memory.local:8000/api/memories/search \
 ```
 
 **Health Check:**
+
 ```bash
 curl -H "Authorization: Bearer $MCP_API_KEY" \
-  https://memory.local:8000/api/health
+  https://memory.local:8001/api/health
 ```
 
 ## Security Best Practices
@@ -235,12 +245,14 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 ### Key Distribution
 
 **DO:**
+
 - Use secure channels for key distribution (encrypted messaging, secrets management)
 - Store keys in secure configuration management systems
 - Use different keys for different services/environments
 - Document key ownership and rotation procedures
 
 **DON'T:**
+
 - Share keys via email, chat, or version control
 - Use the same key across multiple environments
 - Store keys in plain text files or databases
@@ -251,28 +263,32 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 ### For Service Installations
 
 1. **Stop the service:**
+
    ```bash
    python install_service.py --stop
    ```
 
 2. **Generate new key:**
+
    ```bash
    NEW_API_KEY=$(openssl rand -base64 32)
    echo "New API Key: $NEW_API_KEY"
    ```
 
 3. **Update service configuration:**
+
    ```bash
    # Linux (edit systemd service file)
    sudo nano /etc/systemd/system/mcp-memory.service
    # Find: Environment=MCP_API_KEY=old-key-here
    # Replace with: Environment=MCP_API_KEY=new-key-here
-   
+
    # Reload systemd
    sudo systemctl daemon-reload
    ```
 
 4. **Update client configurations:**
+
    - Update Claude Desktop config
    - Update application environment variables
    - Update any scripts or automation
@@ -285,11 +301,13 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 ### For Manual Deployments
 
 1. **Update environment variable:**
+
    ```bash
    export MCP_API_KEY="new-secure-api-key-here"
    ```
 
 2. **Restart the server:**
+
    ```bash
    # Stop current server (Ctrl+C or kill process)
    # Start new server
@@ -299,7 +317,7 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 3. **Test with new key:**
    ```bash
    curl -H "Authorization: Bearer $MCP_API_KEY" \
-     http://localhost:8000/api/health
+     http://localhost:8001/api/health
    ```
 
 ## Troubleshooting
@@ -309,30 +327,34 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 #### 401 Unauthorized
 
 **Symptoms:**
+
 ```json
 {
-  "error": "Unauthorized",
-  "message": "Missing or invalid API key"
+	"error": "Unauthorized",
+	"message": "Missing or invalid API key"
 }
 ```
 
 **Causes & Solutions:**
+
 1. **Missing Authorization header**
+
    ```bash
    # Wrong: No auth header
-   curl http://localhost:8000/api/memories
-   
+   curl http://localhost:8001/api/memories
+
    # Correct: Include auth header
-   curl -H "Authorization: Bearer $MCP_API_KEY" http://localhost:8000/api/memories
+   curl -H "Authorization: Bearer $MCP_API_KEY" http://localhost:8001/api/memories
    ```
 
 2. **Incorrect header format**
+
    ```bash
    # Wrong: Missing "Bearer " prefix
-   curl -H "Authorization: $MCP_API_KEY" http://localhost:8000/api/memories
-   
+   curl -H "Authorization: $MCP_API_KEY" http://localhost:8001/api/memories
+
    # Correct: Include "Bearer " prefix
-   curl -H "Authorization: Bearer $MCP_API_KEY" http://localhost:8000/api/memories
+   curl -H "Authorization: Bearer $MCP_API_KEY" http://localhost:8001/api/memories
    ```
 
 3. **Wrong API key**
@@ -344,14 +366,16 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 #### 403 Forbidden
 
 **Symptoms:**
+
 ```json
 {
-  "error": "Forbidden",
-  "message": "Invalid API key"
+	"error": "Forbidden",
+	"message": "Invalid API key"
 }
 ```
 
 **Solutions:**
+
 1. Verify the API key matches the server configuration
 2. Check for whitespace or encoding issues in the key
 3. Ensure the key hasn't been rotated on the server
@@ -359,9 +383,10 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 #### Connection Refused / Network Errors
 
 **Check server status:**
+
 ```bash
 # Verify server is running
-curl -v http://localhost:8000/api/health
+curl -v http://localhost:8001/api/health
 
 # Check service status
 python install_service.py --status
@@ -382,7 +407,7 @@ Create a simple test script:
 # test-api-key.sh
 
 API_KEY="${MCP_API_KEY:-your-test-key-here}"
-ENDPOINT="${MCP_ENDPOINT:-http://localhost:8000/api}"
+ENDPOINT="${MCP_ENDPOINT:-http://localhost:8001/api}"
 
 echo "Testing API key authentication..."
 echo "Endpoint: $ENDPOINT"
@@ -419,6 +444,7 @@ python scripts/run_http_server.py
 ```
 
 Debug logs will show:
+
 - Incoming request headers
 - Authentication attempts
 - API key validation results
@@ -436,7 +462,7 @@ Debug logs will show:
 For production systems requiring zero downtime:
 
 1. **Multiple Keys**: Implement support for multiple valid keys
-2. **Staged Rollout**: 
+2. **Staged Rollout**:
    - Add new key to server (both keys valid)
    - Update all clients to use new key
    - Remove old key from server

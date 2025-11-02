@@ -9,11 +9,11 @@ services:
     build:
       context: ../..
       dockerfile: tools/docker/Dockerfile
-    
+
     # Required for MCP protocol communication
     stdin_open: true
     tty: true
-    
+
     volumes:
       # Single data directory for all storage
       - ./data:/app/data
@@ -21,21 +21,35 @@ services:
       # Model cache (prevents re-downloading models on each restart)
       # Uncomment the following line to persist Hugging Face models
       # - ${HOME}/.cache/huggingface:/root/.cache/huggingface
-    
+
     environment:
       # Mode selection
       - MCP_MODE=mcp
-      
+
       # Storage configuration
-      - MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
-      - MCP_MEMORY_SQLITE_PATH=/app/data/sqlite_vec.db
-      - MCP_MEMORY_BACKUPS_PATH=/app/data/backups
-      
+      # Storage configuration
+      - MCP_MEMORY_STORAGE_BACKEND=cloudflare
+      - CLOUDFLARE_API_TOKEN=8hsVk6pEey-6qEy-DPJowSlYMSk0-pq_ARNrcGnk
+      - CLOUDFLARE_ACCOUNT_ID=198ba79e8177dcc4ca65de919cbfc722
+      - CLOUDFLARE_D1_DATABASE_ID=2bb9ef18-9e17-4356-abe8-fadb3be4df59
+      - CLOUDFLARE_VECTORIZE_INDEX=tutorial-index
+      # HTTP configuration
+      - MCP_HTTP_PORT=8001
+      - MCP_HTTP_HOST=0.0.0.0
+      - MCP_HTTP_ENABLED=true
+      # Authentication configuration
+      - MCP_OAUTH_ENABLED=true
+
+      - MCP_OAUTH_ISSUER=http://localhost:8001 # Match server port
+      - MCP_HTTPS_ENABLED=false # Optional for localhost
+      - MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES=10
+
       # Performance tuning
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - MAX_RESULTS_PER_QUERY=10
       - SIMILARITY_THRESHOLD=0.7
-      
+
       # Python configuration
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app/src
@@ -43,8 +57,8 @@ services:
       # Offline mode (uncomment if models are pre-cached and network is restricted)
       # - HF_HUB_OFFLINE=1
       # - TRANSFORMERS_OFFLINE=1
-    
+
     # Use the unified entrypoint
-    entrypoint: ["/usr/local/bin/docker-entrypoint-unified.sh"]
-    
+    entrypoint: ['/usr/local/bin/docker-entrypoint-unified.sh']
+
     restart: unless-stopped

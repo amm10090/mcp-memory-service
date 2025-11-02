@@ -3,6 +3,7 @@
 This guide helps diagnose and resolve common issues with the distributed memory synchronization system in MCP Memory Service v6.3.0+.
 
 ## Table of Contents
+
 - [Diagnostic Commands](#diagnostic-commands)
 - [Network Connectivity Issues](#network-connectivity-issues)
 - [Database Problems](#database-problems)
@@ -16,6 +17,7 @@ This guide helps diagnose and resolve common issues with the distributed memory 
 Before troubleshooting specific issues, use these commands to gather information:
 
 ### System Status Check
+
 ```bash
 # Overall sync system health
 ./sync/memory_sync.sh status
@@ -28,6 +30,7 @@ Before troubleshooting specific issues, use these commands to gather information
 ```
 
 ### Component Testing
+
 ```bash
 # Test individual components
 ./sync/memory_sync.sh test-connectivity    # Network tests
@@ -37,6 +40,7 @@ Before troubleshooting specific issues, use these commands to gather information
 ```
 
 ### Enable Debug Mode
+
 ```bash
 # Enable verbose logging
 export SYNC_DEBUG=1
@@ -51,11 +55,13 @@ export SYNC_VERBOSE=1
 ### Problem: Cannot Connect to Remote Server
 
 **Symptoms:**
+
 - Connection timeout errors
 - "Remote server unreachable" messages
 - Sync operations fail immediately
 
 **Diagnostic Steps:**
+
 ```bash
 # Test basic network connectivity
 ping your-remote-server
@@ -70,6 +76,7 @@ curl -v -k https://your-remote-server:8443/api/health
 **Solutions:**
 
 #### DNS Resolution Issues
+
 ```bash
 # Try with IP address instead of hostname
 export REMOTE_MEMORY_HOST="your-server-ip"
@@ -80,16 +87,18 @@ echo "your-server-ip your-remote-server" | sudo tee -a /etc/hosts
 ```
 
 #### Firewall/Port Issues
+
 ```bash
 # Check if port is open
 nmap -p 8443 your-remote-server
 
 # Test alternative ports
-export REMOTE_MEMORY_PORT="8000"  # Try HTTP port
+export REMOTE_MEMORY_PORT="8001"  # Try HTTP port
 export REMOTE_MEMORY_PROTOCOL="http"
 ```
 
 #### SSL/TLS Certificate Issues
+
 ```bash
 # Bypass SSL verification (testing only)
 curl -k https://your-remote-server:8443/api/health
@@ -101,11 +110,13 @@ openssl s_client -connect your-remote-server:8443 -servername your-remote-server
 ### Problem: API Authentication Failures
 
 **Symptoms:**
+
 - 401 Unauthorized errors
 - "Invalid API key" messages
 - Authentication required warnings
 
 **Solutions:**
+
 ```bash
 # Check if API key is required
 curl -k https://your-remote-server:8443/api/health
@@ -121,11 +132,13 @@ curl -k -H "Authorization: Bearer your-api-key" \
 ### Problem: Slow Network Performance
 
 **Symptoms:**
+
 - Sync operations taking too long
 - Timeout errors during large syncs
 - Network latency warnings
 
 **Solutions:**
+
 ```bash
 # Reduce batch size
 export SYNC_BATCH_SIZE=25
@@ -143,11 +156,13 @@ export SYNC_RETRY_ATTEMPTS=5
 ### Problem: Staging Database Corruption
 
 **Symptoms:**
+
 - "Database is locked" errors
 - SQLite integrity check failures
 - Corrupt database warnings
 
 **Diagnostic Steps:**
+
 ```bash
 # Check database integrity
 sqlite3 ~/.mcp_memory_staging/staging.db "PRAGMA integrity_check;"
@@ -160,6 +175,7 @@ sqlite3 ~/.mcp_memory_staging/staging.db ".schema"
 ```
 
 **Recovery Procedures:**
+
 ```bash
 # Backup current database
 cp ~/.mcp_memory_staging/staging.db ~/.mcp_memory_staging/staging.db.backup
@@ -177,11 +193,13 @@ rm ~/.mcp_memory_staging/staging.db
 ### Problem: Database Version Mismatch
 
 **Symptoms:**
+
 - Schema incompatibility errors
 - "Database version not supported" messages
 - Migration failures
 
 **Solutions:**
+
 ```bash
 # Check database version
 sqlite3 ~/.mcp_memory_staging/staging.db "PRAGMA user_version;"
@@ -196,11 +214,13 @@ sqlite3 ~/.mcp_memory_staging/staging.db "PRAGMA user_version;"
 ### Problem: Insufficient Disk Space
 
 **Symptoms:**
+
 - "No space left on device" errors
 - Database write failures
 - Sync operations abort
 
 **Solutions:**
+
 ```bash
 # Check disk space
 df -h ~/.mcp_memory_staging/
@@ -217,6 +237,7 @@ find ~/.mcp_memory_staging/ -name "*.log.*" -mtime +30 -delete
 ### Problem: Content Hash Conflicts
 
 **Symptoms:**
+
 - "Duplicate content detected" warnings
 - Sync operations skip memories
 - Hash mismatch errors
@@ -225,6 +246,7 @@ find ~/.mcp_memory_staging/ -name "*.log.*" -mtime +30 -delete
 Content hash conflicts occur when the same memory content exists in both local staging and remote databases but with different metadata or timestamps.
 
 **Resolution Strategies:**
+
 ```bash
 # View conflict details
 ./sync/memory_sync.sh show-conflicts
@@ -240,11 +262,13 @@ export SYNC_CONFLICT_RESOLUTION="merge"
 ### Problem: Tag Conflicts
 
 **Symptoms:**
+
 - Memories with same content but different tags
 - Tag merge warnings
 - Inconsistent tag application
 
 **Solutions:**
+
 ```bash
 # Configure tag merging behavior
 export TAG_MERGE_STRATEGY="union"  # union, intersection, local, remote
@@ -259,11 +283,13 @@ export TAG_MERGE_STRATEGY="union"  # union, intersection, local, remote
 ### Problem: Timestamp Conflicts
 
 **Symptoms:**
+
 - Memories appear out of chronological order
 - "Future timestamp" warnings
 - Time synchronization issues
 
 **Solutions:**
+
 ```bash
 # Check system time synchronization
 timedatectl status  # Linux
@@ -281,11 +307,13 @@ export SYNC_TIMESTAMP_STRATEGY="newest"  # newest, oldest, local, remote
 ### Problem: Service Won't Start
 
 **Symptoms:**
+
 - systemctl/launchctl start fails
 - Service immediately exits
 - "Service failed to start" errors
 
 **Diagnostic Steps:**
+
 ```bash
 # Check service status
 ./sync/memory_sync.sh status-service
@@ -298,6 +326,7 @@ export SYNC_TIMESTAMP_STRATEGY="newest"  # newest, oldest, local, remote
 ```
 
 **Linux (systemd) Solutions:**
+
 ```bash
 # Check service file
 cat ~/.config/systemd/user/mcp-memory-sync.service
@@ -313,6 +342,7 @@ journalctl --user -u mcp-memory-sync -n 50
 ```
 
 **macOS (LaunchAgent) Solutions:**
+
 ```bash
 # Check plist file
 cat ~/Library/LaunchAgents/com.mcp.memory.sync.plist
@@ -328,11 +358,13 @@ tail -f ~/Library/Logs/mcp-memory-sync.log
 ### Problem: Service Memory Leaks
 
 **Symptoms:**
+
 - Increasing memory usage over time
 - System becomes slow
 - Out of memory errors
 
 **Solutions:**
+
 ```bash
 # Monitor memory usage
 ./sync/memory_sync.sh monitor-resources
@@ -350,11 +382,13 @@ export SYNC_MEMORY_LIMIT="100MB"
 ### Problem: Slow Sync Operations
 
 **Symptoms:**
+
 - Sync takes several minutes
 - High CPU usage during sync
 - Network timeouts
 
 **Optimization Strategies:**
+
 ```bash
 # Reduce batch size for large datasets
 export SYNC_BATCH_SIZE=25
@@ -372,11 +406,13 @@ export SYNC_PARALLEL_JOBS=4
 ### Problem: High Resource Usage
 
 **Symptoms:**
+
 - High CPU usage
 - Excessive disk I/O
 - Memory consumption warnings
 
 **Solutions:**
+
 ```bash
 # Set resource limits
 export SYNC_CPU_LIMIT=50      # Percentage
@@ -518,6 +554,7 @@ fi
 ### Emergency Contacts
 
 For critical production issues:
+
 1. Check the GitHub issues for similar problems
 2. Create a detailed bug report with support information
 3. Tag the issue as "urgent" if it affects production systems

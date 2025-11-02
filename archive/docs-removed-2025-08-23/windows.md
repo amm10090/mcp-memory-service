@@ -23,6 +23,7 @@ python install.py --windows
 ```
 
 The installer automatically:
+
 - Detects CUDA availability
 - Installs the correct PyTorch version
 - Configures Windows-specific settings
@@ -80,6 +81,7 @@ python scripts/install_windows.py
 ```
 
 This script handles:
+
 1. CUDA detection and appropriate PyTorch installation
 2. Resolving common Windows dependency conflicts
 3. Setting up Windows-specific environment variables
@@ -143,6 +145,7 @@ python src\mcp_memory_service\server.py
 ### Windows Configuration File Location
 
 Claude Desktop configuration is typically located at:
+
 ```
 %APPDATA%\Claude\claude_desktop_config.json
 ```
@@ -153,17 +156,19 @@ Claude Desktop configuration is typically located at:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["C:\\path\\to\\mcp-memory-service\\src\\mcp_memory_service\\server.py"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "chromadb",
-        "MCP_MEMORY_USE_CUDA": "true",
-        "PATH": "C:\\path\\to\\mcp-memory-service\\venv\\Scripts;%PATH%"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": [
+				"C:\\path\\to\\mcp-memory-service\\src\\mcp_memory_service\\server.py"
+			],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "chromadb",
+				"MCP_MEMORY_USE_CUDA": "true",
+				"PATH": "C:\\path\\to\\mcp-memory-service\\venv\\Scripts;%PATH%"
+			}
+		}
+	}
 }
 ```
 
@@ -171,17 +176,19 @@ Claude Desktop configuration is typically located at:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["C:\\path\\to\\mcp-memory-service\\src\\mcp_memory_service\\server.py"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "MCP_MEMORY_CPU_ONLY": "true",
-        "PATH": "C:\\path\\to\\mcp-memory-service\\venv\\Scripts;%PATH%"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": [
+				"C:\\path\\to\\mcp-memory-service\\src\\mcp_memory_service\\server.py"
+			],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"MCP_MEMORY_CPU_ONLY": "true",
+				"PATH": "C:\\path\\to\\mcp-memory-service\\venv\\Scripts;%PATH%"
+			}
+		}
+	}
 }
 ```
 
@@ -189,11 +196,11 @@ Claude Desktop configuration is typically located at:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "C:\\path\\to\\mcp-memory-service\\scripts\\run\\run-with-uv.bat"
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "C:\\path\\to\\mcp-memory-service\\scripts\\run\\run-with-uv.bat"
+		}
+	}
 }
 ```
 
@@ -222,6 +229,7 @@ pip install torch-directml
 ```
 
 Configure for DirectML:
+
 ```powershell
 $env:MCP_MEMORY_USE_DIRECTML = "true"
 $env:MCP_MEMORY_DEVICE = "dml"
@@ -268,6 +276,7 @@ schtasks /delete /tn "MCP Memory Service" /f
 **Symptom**: Installation fails with "path too long" errors
 
 **Solution**: Enable long path support:
+
 ```powershell
 # Run as Administrator
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
@@ -275,12 +284,14 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 
 #### 2. Visual Studio Build Tools Missing
 
-**Symptom**: 
+**Symptom**:
+
 ```
 Microsoft Visual C++ 14.0 is required
 ```
 
 **Solution**: Install Visual Studio Build Tools:
+
 ```powershell
 # Download and install from:
 # https://visualstudio.microsoft.com/visual-cpp-build-tools/
@@ -294,6 +305,7 @@ winget install Microsoft.VisualStudio.2022.BuildTools
 **Symptom**: PyTorch CUDA installation issues
 
 **Solution**: Match PyTorch CUDA version to your installed CUDA:
+
 ```powershell
 # Check CUDA version
 nvcc --version
@@ -311,6 +323,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 **Symptom**: Access denied errors when installing or running
 
 **Solution**: Run PowerShell as Administrator and check folder permissions:
+
 ```powershell
 # Check current user permissions
 whoami /groups
@@ -325,6 +338,7 @@ icacls "C:\path\to\mcp-memory-service" /grant "$env:USERNAME:(F)" /t
 **Symptom**: Installation files deleted or blocked
 
 **Solution**: Add exclusions to Windows Defender:
+
 ```powershell
 # Add folder exclusion (run as Administrator)
 Add-MpPreference -ExclusionPath "C:\path\to\mcp-memory-service"
@@ -377,7 +391,7 @@ python -c "import chromadb; print('ChromaDB: OK')" # or sqlite_vec
 Get-NetFirewallRule -DisplayName "*Python*" | Format-Table
 
 # Test network connectivity (if using HTTP mode)
-Test-NetConnection -ComputerName localhost -Port 8000
+Test-NetConnection -ComputerName localhost -Port 8001
 ```
 
 ### Performance Optimization
@@ -480,7 +494,7 @@ cd mcp-memory-service
 docker build -f Dockerfile.windows -t mcp-memory-service-windows .
 
 # Run container
-docker run -p 8000:8000 mcp-memory-service-windows
+docker run -p 8001:8001 mcp-memory-service-windows
 ```
 
 ## Related Documentation

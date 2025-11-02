@@ -15,7 +15,7 @@ export MCP_HTTPS_ENABLED=true
 export MCP_MDNS_SERVICE_NAME="MCP Memory"
 export MCP_HTTP_ENABLED=true
 export MCP_HTTP_HOST=0.0.0.0
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 export MCP_API_KEY=mcp-0b1ccbde2197a08dcb12d41af4044be6
 

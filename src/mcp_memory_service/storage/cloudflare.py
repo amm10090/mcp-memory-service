@@ -943,6 +943,46 @@ class CloudflareStorage(MemoryStorage):
                 "error": str(e)
             }
     
+    async def get_all_tags_with_counts(self) -> List[Dict[str, Any]]:
+        """Get all tags along with their usage counts."""
+        try:
+            sql = """
+                SELECT
+                    tags.name AS tag,
+                    COUNT(memory_tags.memory_id) AS count
+                FROM tags
+                LEFT JOIN memory_tags ON tags.id = memory_tags.tag_id
+                GROUP BY tags.id, tags.name
+                ORDER BY count DESC, tag ASC
+            """
+
+            payload = {"sql": sql}
+            response = await self._retry_request("POST", f"{self.d1_url}/query", json=payload)
+            result = response.json()
+
+            rows = result.get("result", [])
+            if not result.get("success") or not rows:
+                return []
+
+            tag_rows = rows[0].get("results", [])
+            tags_with_counts: List[Dict[str, Any]] = []
+            for row in tag_rows or []:
+                tag_name = row.get("tag") or row.get("name")
+                if not tag_name:
+                    continue
+                count_value = row.get("count", 0)
+                try:
+                    count_int = int(count_value)
+                except (TypeError, ValueError):
+                    count_int = 0
+                tags_with_counts.append({"tag": tag_name, "count": count_int})
+
+            return tags_with_counts
+
+        except Exception as e:
+            logger.error(f"Failed to get tags with counts: {e}")
+            raise
+
     async def get_all_tags(self) -> List[str]:
         """Get all unique tags in the storage."""
         try:

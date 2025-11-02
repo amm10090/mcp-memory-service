@@ -29,7 +29,7 @@ class OAuthServerMetadata(BaseModel):
     registration_endpoint: str = Field(..., description="Dynamic registration endpoint URL")
 
     grant_types_supported: List[str] = Field(
-        default=["authorization_code", "client_credentials"],
+        default=["authorization_code", "client_credentials", "refresh_token"],
         description="Supported OAuth 2.1 grant types"
     )
     response_types_supported: List[str] = Field(
@@ -40,8 +40,12 @@ class OAuthServerMetadata(BaseModel):
         default=["client_secret_basic", "client_secret_post"],
         description="Supported client authentication methods"
     )
+    code_challenge_methods_supported: Optional[List[str]] = Field(
+        default=["S256", "plain"],
+        description="Supported PKCE code challenge methods"
+    )
     scopes_supported: Optional[List[str]] = Field(
-        default=["read", "write"],
+        default=["read", "write", "offline_access"],
         description="Supported OAuth scopes"
     )
     id_token_signing_alg_values_supported: Optional[List[str]] = Field(
@@ -62,7 +66,7 @@ class ClientRegistrationRequest(BaseModel):
         description="Client authentication method for the token endpoint"
     )
     grant_types: Optional[List[str]] = Field(
-        default=["authorization_code"],
+        default=["authorization_code", "refresh_token"],
         description="Array of OAuth 2.0 grant type strings"
     )
     response_types: Optional[List[str]] = Field(
@@ -81,6 +85,10 @@ class ClientRegistrationRequest(BaseModel):
         default=None,
         description="String containing a space-separated list of scope values"
     )
+    code_challenge_methods: Optional[List[str]] = Field(
+        default=None,
+        description="PKCE code challenge methods the client supports"
+    )
 
 
 class ClientRegistrationResponse(BaseModel):
@@ -96,7 +104,7 @@ class ClientRegistrationResponse(BaseModel):
         description="Array of redirection URI strings for use in redirect-based flows"
     )
     grant_types: List[str] = Field(
-        default=["authorization_code"],
+        default=["authorization_code", "refresh_token"],
         description="Array of OAuth 2.0 grant type strings"
     )
     response_types: List[str] = Field(
@@ -111,6 +119,10 @@ class ClientRegistrationResponse(BaseModel):
         default=None,
         description="Human-readable string name of the client"
     )
+    code_challenge_methods: List[str] = Field(
+        default=["S256"],
+        description="PKCE code challenge methods registered for the client"
+    )
 
 
 class AuthorizationRequest(BaseModel):
@@ -121,6 +133,8 @@ class AuthorizationRequest(BaseModel):
     redirect_uri: Optional[HttpUrl] = Field(default=None, description="Redirection URI")
     scope: Optional[str] = Field(default=None, description="Requested scope")
     state: Optional[str] = Field(default=None, description="Opaque value for CSRF protection")
+    code_challenge: Optional[str] = Field(default=None, description="PKCE code challenge")
+    code_challenge_method: Optional[str] = Field(default=None, description="PKCE code challenge method")
 
 
 class TokenRequest(BaseModel):
@@ -131,6 +145,8 @@ class TokenRequest(BaseModel):
     redirect_uri: Optional[HttpUrl] = Field(default=None, description="Redirection URI")
     client_id: Optional[str] = Field(default=None, description="OAuth client identifier")
     client_secret: Optional[str] = Field(default=None, description="OAuth client secret")
+    refresh_token: Optional[str] = Field(default=None, description="Refresh token value")
+    code_verifier: Optional[str] = Field(default=None, description="PKCE code verifier")
 
 
 class TokenResponse(BaseModel):
@@ -140,6 +156,7 @@ class TokenResponse(BaseModel):
     token_type: str = Field(default="Bearer", description="Token type")
     expires_in: Optional[int] = Field(default=3600, description="Access token lifetime in seconds")
     scope: Optional[str] = Field(default=None, description="Granted scope")
+    refresh_token: Optional[str] = Field(default=None, description="OAuth 2.0 refresh token")
 
 
 class OAuthError(BaseModel):
@@ -163,10 +180,11 @@ class RegisteredClient(BaseModel):
     client_id: str
     client_secret: str
     redirect_uris: List[str] = []
-    grant_types: List[str] = ["authorization_code"]
+    grant_types: List[str] = ["authorization_code", "refresh_token"]
     response_types: List[str] = ["code"]
     token_endpoint_auth_method: str = "client_secret_basic"
     client_name: Optional[str] = None
+    code_challenge_methods: List[str] = ["S256"]
     created_at: float  # Unix timestamp
 
     class Config:

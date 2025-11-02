@@ -47,33 +47,33 @@ def test_imports():
         ServiceAdvertiser, ServiceDiscovery, DiscoveryListener, ServiceDetails
     )
     from mcp_memory_service.discovery.client import DiscoveryClient, HealthStatus
-    
+
     # Test ServiceDetails creation
     service_info = Mock()
     details = ServiceDetails(
         name="Test Service",
         host="192.168.1.100",
-        port=8000,
+        port=8001,
         https=False,
         api_version="2.1.0",
         requires_auth=True,
         service_info=service_info
     )
-    
-    assert details.url == "http://192.168.1.100:8000"
-    assert details.api_url == "http://192.168.1.100:8000/api"
+
+    assert details.url == "http://192.168.1.100:8001"
+    assert details.api_url == "http://192.168.1.100:8001/api"
 
 def test_service_advertiser_init():
     """Test ServiceAdvertiser initialization."""
     from mcp_memory_service.discovery.mdns_service import ServiceAdvertiser
-    
+
     # Test default initialization
     advertiser = ServiceAdvertiser()
     assert advertiser.service_name == "MCP Memory Service"
     assert advertiser.service_type == "_mcp-memory._tcp.local."
-    assert advertiser.port == 8000
+    assert advertiser.port == 8001
     assert advertiser._registered is False
-    
+
     # Test custom initialization
     custom_advertiser = ServiceAdvertiser(
         service_name="Custom Service",
@@ -87,22 +87,22 @@ def test_service_advertiser_init():
 async def test_service_advertiser_start_stop():
     """Test ServiceAdvertiser start/stop with mocks."""
     from mcp_memory_service.discovery.mdns_service import ServiceAdvertiser
-    
+
     with patch('mcp_memory_service.discovery.mdns_service.AsyncZeroconf') as mock_zeroconf_class:
         mock_zeroconf = AsyncMock()
         mock_zeroconf_class.return_value = mock_zeroconf
-        
+
         advertiser = ServiceAdvertiser()
-        
+
         with patch.object(advertiser, '_create_service_info') as mock_create_info:
             mock_service_info = Mock()
             mock_create_info.return_value = mock_service_info
-            
+
             # Test start
             result = await advertiser.start()
             assert result is True
             assert advertiser._registered is True
-            
+
             # Test stop
             await advertiser.stop()
             assert advertiser._registered is False
@@ -110,7 +110,7 @@ async def test_service_advertiser_start_stop():
 def test_service_discovery_init():
     """Test ServiceDiscovery initialization."""
     from mcp_memory_service.discovery.mdns_service import ServiceDiscovery
-    
+
     discovery = ServiceDiscovery()
     assert discovery.service_type == "_mcp-memory._tcp.local."
     assert discovery.discovery_timeout == 5
@@ -119,22 +119,22 @@ def test_service_discovery_init():
 async def test_service_discovery_operations():
     """Test ServiceDiscovery operations with mocks."""
     from mcp_memory_service.discovery.mdns_service import ServiceDiscovery, ServiceDetails
-    
+
     with patch('mcp_memory_service.discovery.mdns_service.AsyncZeroconf'), \
          patch('mcp_memory_service.discovery.mdns_service.AsyncServiceBrowser'):
-        
+
         discovery = ServiceDiscovery(discovery_timeout=1)
-        
+
         # Test get_discovered_services with no listener
         services = discovery.get_discovered_services()
         assert len(services) == 0
-        
+
         # Test with mock listener
         mock_listener = Mock()
         mock_service = ServiceDetails(
             name="Test Service",
             host="192.168.1.100",
-            port=8000,
+            port=8001,
             https=False,
             api_version="2.1.0",
             requires_auth=False,
@@ -142,7 +142,7 @@ async def test_service_discovery_operations():
         )
         mock_listener.services = {"test": mock_service}
         discovery._listener = mock_listener
-        
+
         services = discovery.get_discovered_services()
         assert len(services) == 1
         assert services[0] == mock_service
@@ -150,12 +150,12 @@ async def test_service_discovery_operations():
 def test_discovery_listener():
     """Test DiscoveryListener functionality."""
     from mcp_memory_service.discovery.mdns_service import DiscoveryListener
-    
+
     # Test initialization
     listener = DiscoveryListener()
     assert listener.callback is None
     assert len(listener.services) == 0
-    
+
     # Test with callback
     callback = Mock()
     listener_with_callback = DiscoveryListener(callback)
@@ -164,10 +164,10 @@ def test_discovery_listener():
 def test_discovery_client_init():
     """Test DiscoveryClient initialization."""
     from mcp_memory_service.discovery.client import DiscoveryClient
-    
+
     client = DiscoveryClient()
     assert client.discovery_timeout == 5
-    
+
     custom_client = DiscoveryClient(discovery_timeout=10)
     assert custom_client.discovery_timeout == 10
 
@@ -175,20 +175,20 @@ async def test_discovery_client_operations():
     """Test DiscoveryClient operations with mocks."""
     from mcp_memory_service.discovery.client import DiscoveryClient, HealthStatus
     from mcp_memory_service.discovery.mdns_service import ServiceDetails
-    
+
     client = DiscoveryClient()
-    
+
     # Test discover_services
     mock_service = ServiceDetails(
         name="Test Service",
         host="192.168.1.100",
-        port=8000,
+        port=8001,
         https=False,
         api_version="2.1.0",
         requires_auth=False,
         service_info=Mock()
     )
-    
+
     with patch.object(client._discovery, 'discover_services', return_value=[mock_service]):
         services = await client.discover_services()
         assert len(services) == 1
@@ -197,7 +197,7 @@ async def test_discovery_client_operations():
 def test_health_status():
     """Test HealthStatus dataclass."""
     from mcp_memory_service.discovery.client import HealthStatus
-    
+
     health = HealthStatus(
         healthy=True,
         status='ok',
@@ -205,7 +205,7 @@ def test_health_status():
         statistics={'memory_count': 100},
         response_time_ms=50.0
     )
-    
+
     assert health.healthy is True
     assert health.status == 'ok'
     assert health.backend == 'sqlite_vec'
@@ -214,21 +214,21 @@ def test_health_status():
 def test_service_details_properties():
     """Test ServiceDetails URL properties."""
     from mcp_memory_service.discovery.mdns_service import ServiceDetails
-    
+
     # Test HTTP service
     http_service = ServiceDetails(
         name="HTTP Service",
         host="192.168.1.100",
-        port=8000,
+        port=8001,
         https=False,
         api_version="2.1.0",
         requires_auth=False,
         service_info=Mock()
     )
-    
-    assert http_service.url == "http://192.168.1.100:8000"
-    assert http_service.api_url == "http://192.168.1.100:8000/api"
-    
+
+    assert http_service.url == "http://192.168.1.100:8001"
+    assert http_service.api_url == "http://192.168.1.100:8001/api"
+
     # Test HTTPS service
     https_service = ServiceDetails(
         name="HTTPS Service",
@@ -239,7 +239,7 @@ def test_service_details_properties():
         requires_auth=True,
         service_info=Mock()
     )
-    
+
     assert https_service.url == "https://192.168.1.100:8443"
     assert https_service.api_url == "https://192.168.1.100:8443/api"
 
@@ -247,7 +247,7 @@ def main():
     """Run all tests."""
     print("🔧 MCP Memory Service - mDNS Unit Tests")
     print("=" * 50)
-    
+
     tests = [
         (test_imports, "Import mDNS modules"),
         (test_service_advertiser_init, "ServiceAdvertiser initialization"),
@@ -260,17 +260,17 @@ def main():
         (test_health_status, "HealthStatus dataclass"),
         (test_service_details_properties, "ServiceDetails properties"),
     ]
-    
+
     passed = 0
     total = len(tests)
-    
+
     for test_func, test_name in tests:
         if run_test(test_func, test_name):
             passed += 1
-    
+
     print("\n" + "=" * 50)
     print(f"Results: {passed}/{total} tests passed")
-    
+
     if passed == total:
         print("🎉 All mDNS unit tests passed!")
         return 0

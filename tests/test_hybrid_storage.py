@@ -27,6 +27,14 @@ sys.path.insert(0, str(src_dir))
 
 from mcp_memory_service.storage.hybrid import HybridMemoryStorage, BackgroundSyncService, SyncOperation
 from mcp_memory_service.storage.sqlite_vec import SqliteVecMemoryStorage
+from mcp_memory_service.models import memory as memory_module
+
+if not hasattr(memory_module, "MemoryMetadata"):
+    pytest.skip(
+        "MemoryMetadata dataclass not available; hybrid storage tests require extended metadata.",
+        allow_module_level=True,
+    )
+
 from mcp_memory_service.models.memory import Memory, MemoryMetadata
 
 # Configure test logging

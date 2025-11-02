@@ -26,6 +26,7 @@ python install.py --ubuntu
 ```
 
 The installer automatically:
+
 - Detects Ubuntu version and architecture
 - Installs system dependencies
 - Configures optimal storage backend
@@ -143,7 +144,7 @@ export MKL_NUM_THREADS=$(nproc)
 ```bash
 # Server-specific settings
 export MCP_MEMORY_HTTP_HOST=0.0.0.0
-export MCP_MEMORY_HTTP_PORT=8000
+export MCP_MEMORY_HTTP_PORT=8001
 export MCP_MEMORY_LOG_LEVEL=INFO
 export MCP_MEMORY_SERVER_MODE=true
 ```
@@ -205,11 +206,11 @@ services:
   mcp-memory-service:
     build: .
     ports:
-      - "8000:8000"
+      - '8001:8001'
     environment:
       - MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
       - MCP_MEMORY_HTTP_HOST=0.0.0.0
-      - MCP_MEMORY_HTTP_PORT=8000
+      - MCP_MEMORY_HTTP_PORT=8001
     volumes:
       - ./data:/app/data
       - /etc/localtime:/etc/localtime:ro
@@ -245,16 +246,16 @@ Claude Desktop configuration location: `~/.config/Claude/claude_desktop_config.j
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "python",
-      "args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "PATH": "/path/to/mcp-memory-service/venv/bin:/usr/bin:/bin"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "python",
+			"args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"PATH": "/path/to/mcp-memory-service/venv/bin:/usr/bin:/bin"
+			}
+		}
+	}
 }
 ```
 
@@ -278,15 +279,15 @@ sudo apt install -y code
 
 ```json
 {
-  "mcp.servers": {
-    "memory": {
-      "command": "python",
-      "args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcp.servers": {
+		"memory": {
+			"command": "python",
+			"args": ["/path/to/mcp-memory-service/src/mcp_memory_service/server.py"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
@@ -305,12 +306,12 @@ server {
     server_name your-domain.com;
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8001;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
-        
+
         # SSE support
         proxy_buffering off;
         proxy_cache off;
@@ -346,7 +347,7 @@ sudo certbot --nginx -d your-domain.com
 sudo ufw enable
 sudo ufw allow ssh
 sudo ufw allow 'Nginx Full'
-sudo ufw allow 8000  # If accessing directly
+sudo ufw allow 8001  # If accessing directly
 
 # Check status
 sudo ufw status
@@ -429,6 +430,7 @@ sudo logrotate -d /etc/logrotate.d/mcp-memory
 **Symptom**: Wrong Python version or missing python3.11
 
 **Solution**:
+
 ```bash
 # Add deadsnakes PPA for newer Python versions
 sudo add-apt-repository ppa:deadsnakes/ppa
@@ -444,6 +446,7 @@ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 
 **Symptom**: Permission denied errors
 
 **Solution**:
+
 ```bash
 # Fix file permissions
 chmod +x scripts/*.sh
@@ -461,6 +464,7 @@ exec bash
 **Symptom**: CUDA not detected or driver conflicts
 
 **Solution**:
+
 ```bash
 # Check CUDA installation
 nvidia-smi
@@ -481,6 +485,7 @@ python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
 **Symptom**: SQLite-vec fails to install or import
 
 **Solution**:
+
 ```bash
 # Install system SQLite development headers
 sudo apt install -y libsqlite3-dev
@@ -498,6 +503,7 @@ python -c "import sqlite_vec; print('SQLite-vec installed successfully')"
 **Symptom**: Systemd service fails to start
 
 **Solution**:
+
 ```bash
 # Check service status and logs
 sudo systemctl status mcp-memory.service
@@ -555,7 +561,7 @@ print(f'CUDA available: {torch.cuda.is_available()}')
 python scripts/verify_environment.py
 
 # Test HTTP server (if configured)
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # Check database access
 python -c "

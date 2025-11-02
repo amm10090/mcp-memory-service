@@ -15,17 +15,17 @@ The new dashboard includes:
 
 ## Access URLs
 
-- Dashboard: http://localhost:8000
-- mDNS: http://mcp-memory-service.local:8000  
-- API Docs: http://localhost:8000/api/docs
-- ReDoc: http://localhost:8000/api/redoc
+- Dashboard: http://localhost:8001
+- mDNS: http://mcp-memory-service.local:8001
+- API Docs: http://localhost:8001/api/docs
+- ReDoc: http://localhost:8001/api/redoc
 
 ## Screenshot Instructions
 
 To capture the dashboard:
 
 1. Ensure the HTTP server is running
-2. Open browser to http://localhost:8000
+2. Open browser to http://localhost:8001
 3. Wait for stats to load (shows actual memory count)
 4. Take full-page screenshot
 5. Save as `dashboard-v3.3.0.png` in this directory

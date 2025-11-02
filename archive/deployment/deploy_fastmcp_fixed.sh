@@ -31,5 +31,5 @@ sudo journalctl -u mcp-memory -n 10 --no-pager
 
 echo ""
 echo "✅ FastMCP Server deployment complete!"
-echo "🔗 Native MCP Protocol should be available on port 8000"
+echo "🔗 Native MCP Protocol should be available on port 8001"
 echo "📋 Monitor logs: sudo journalctl -u mcp-memory -f"

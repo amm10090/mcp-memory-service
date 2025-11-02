@@ -5,6 +5,7 @@ This guide provides instructions for installing MCP Memory Service as a native s
 ## Overview
 
 The MCP Memory Service can be installed as a system service to:
+
 - Start automatically on boot/login
 - Run in the background without a terminal window
 - Restart automatically if it crashes
@@ -29,6 +30,7 @@ python install_service.py
 ```
 
 The installer will:
+
 1. Detect your operating system
 2. Check dependencies
 3. Generate a secure API key
@@ -68,6 +70,7 @@ python scripts/install_windows_service.py
 ```
 
 This creates a Windows Service that:
+
 - Runs under the current user account
 - Starts automatically on system boot
 - Can be managed via Services console or `net` commands
@@ -108,6 +111,7 @@ python scripts/install_macos_service.py
 ```
 
 This creates a LaunchAgent/LaunchDaemon that:
+
 - Runs on login (user) or boot (system)
 - Restarts automatically if it crashes
 - Integrates with macOS launchd system
@@ -150,6 +154,7 @@ python scripts/install_linux_service.py
 ```
 
 This creates a systemd service that:
+
 - Runs on login (user) or boot (system)
 - Integrates with systemd and journald
 - Supports automatic restart and resource limits
@@ -181,6 +186,7 @@ sudo journalctl -u mcp-memory -f
 ### Service Configuration
 
 All platforms store configuration in:
+
 - **Config directory**: `~/.mcp_memory_service/`
 - **Config file**: `~/.mcp_memory_service/service_config.json`
 - **Log directory**: `~/.mcp_memory_service/logs/`
@@ -188,9 +194,10 @@ All platforms store configuration in:
 ### Environment Variables
 
 The service inherits these environment variables:
+
 - `MCP_MEMORY_STORAGE_BACKEND`: Storage backend (default: `sqlite_vec`)
 - `MCP_HTTP_ENABLED`: Enable HTTP interface (default: `true`)
-- `MCP_HTTP_PORT`: HTTP port (default: `8000`)
+- `MCP_HTTP_PORT`: HTTP port (default: `8001`)
 - `MCP_HTTPS_ENABLED`: Enable HTTPS (default: `true`)
 - `MCP_MDNS_ENABLED`: Enable mDNS discovery (default: `true`)
 - `MCP_CONSOLIDATION_ENABLED`: Enable memory consolidation (default: `true`)
@@ -226,35 +233,39 @@ openssl rand -hex 32
 To change your API key after installation:
 
 1. **Stop the service**:
+
    ```bash
    python install_service.py --stop
    ```
 
 2. **Edit the service configuration**:
+
    - **Linux**: Edit `/etc/systemd/system/mcp-memory.service` or `~/.config/systemd/user/mcp-memory.service`
    - **macOS**: Edit `~/Library/LaunchAgents/com.mcp.memory-service.plist`
    - **Windows**: Use `sc config` or Services Manager
 
 3. **Update the environment variable**:
+
    ```bash
    # Find the line with MCP_API_KEY and replace the value
    Environment=MCP_API_KEY=your-new-api-key-here
    ```
 
 4. **Reload and restart the service**:
+
    ```bash
    # Linux (system service)
    sudo systemctl daemon-reload
    sudo systemctl restart mcp-memory
-   
+
    # Linux (user service)
    systemctl --user daemon-reload
    systemctl --user restart mcp-memory
-   
+
    # macOS
    launchctl unload ~/Library/LaunchAgents/com.mcp.memory-service.plist
    launchctl load ~/Library/LaunchAgents/com.mcp.memory-service.plist
-   
+
    # Or use the installer
    python install_service.py --restart
    ```
@@ -269,11 +280,13 @@ To change your API key after installation:
 ## User vs System Services
 
 ### User Services
+
 - **Pros**: No admin privileges required, runs in user context
 - **Cons**: Only runs when user is logged in
 - **Best for**: Desktop systems, development
 
 ### System Services
+
 - **Pros**: Runs independently of user login, available to all users
 - **Cons**: Requires admin privileges, runs as specific user
 - **Best for**: Servers, shared systems
@@ -283,11 +296,13 @@ To change your API key after installation:
 ### Service Won't Start
 
 1. **Check dependencies**:
+
    ```bash
    python scripts/verify_environment.py
    ```
 
 2. **Check logs**:
+
    - Windows: Event Viewer → Windows Logs → Application
    - macOS: Console.app or `~/.mcp_memory_service/logs/`
    - Linux: `journalctl -u mcp-memory` or `journalctl --user -u mcp-memory`
@@ -305,7 +320,8 @@ To change your API key after installation:
 
 ### Port Already in Use
 
-If port 8000 is already in use:
+If port 8001 is already in use:
+
 1. Change the port in environment variables
 2. Reinstall the service
 3. Or stop the conflicting service
@@ -343,6 +359,7 @@ For multiple instances, you can modify the service name in the platform-specific
 ### Custom Startup Commands
 
 Edit the service configuration after installation:
+
 1. Stop the service
 2. Edit `~/.mcp_memory_service/service_config.json`
 3. Modify the `command` array
@@ -354,14 +371,14 @@ After service installation, update your Claude Desktop configuration:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "url": "http://localhost:8000/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY_HERE"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"url": "http://localhost:8001/mcp",
+			"headers": {
+				"Authorization": "Bearer YOUR_API_KEY_HERE"
+			}
+		}
+	}
 }
 ```
 
@@ -377,6 +394,7 @@ Replace `YOUR_API_KEY_HERE` with the API key from the installation.
 ## Getting Help
 
 If you encounter issues:
+
 1. Check the troubleshooting section above
 2. Review platform-specific documentation in `docs/platforms/`
 3. Check logs for detailed error messages

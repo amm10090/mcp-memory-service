@@ -3,7 +3,8 @@ Integration tests for concurrent MCP client access to SQLite-vec backend.
 """
 
 import pytest
-import pytest_asyncio
+
+pytest_asyncio = pytest.importorskip("pytest_asyncio")
 import asyncio
 import tempfile
 import os

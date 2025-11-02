@@ -7,14 +7,23 @@ through token acquisition and API access.
 """
 
 import asyncio
+import base64
+import hashlib
 import json
+import secrets
 import sys
 from typing import Optional
 
 import httpx
+import pytest
 
 
-async def test_oauth_endpoints(base_url: str = "http://localhost:8000") -> bool:
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+@pytest.mark.anyio("asyncio")
+async def test_oauth_endpoints(base_url: str = "http://localhost:8001") -> bool:
     """
     Test OAuth 2.1 endpoints for basic functionality.
 
@@ -51,8 +60,9 @@ async def test_oauth_endpoints(base_url: str = "http://localhost:8000") -> bool:
             registration_data = {
                 "client_name": "Test Client",
                 "redirect_uris": ["https://example.com/callback"],
-                "grant_types": ["authorization_code"],
-                "response_types": ["code"]
+                "grant_types": ["authorization_code", "refresh_token"],
+                "response_types": ["code"],
+                "code_challenge_methods": ["S256"]
             }
 
             response = await client.post(
@@ -79,12 +89,19 @@ async def test_oauth_endpoints(base_url: str = "http://localhost:8000") -> bool:
             # Test 3: Authorization Endpoint (expect redirect)
             print("\n3. Testing Authorization Endpoint...")
 
+            code_verifier = secrets.token_urlsafe(64)
+            code_challenge = base64.urlsafe_b64encode(
+                hashlib.sha256(code_verifier.encode("ascii")).digest()
+            ).decode("ascii").rstrip("=")
+
             auth_url = f"{base_url}/oauth/authorize"
             auth_params = {
                 "response_type": "code",
                 "client_id": client_id,
                 "redirect_uri": "https://example.com/callback",
-                "state": "test_state_123"
+                "state": "test_state_123",
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256"
             }
 
             response = await client.get(auth_url, params=auth_params, follow_redirects=False)
@@ -121,7 +138,8 @@ async def test_oauth_endpoints(base_url: str = "http://localhost:8000") -> bool:
                 "code": auth_code,
                 "redirect_uri": "https://example.com/callback",
                 "client_id": client_id,
-                "client_secret": client_secret
+                "client_secret": client_secret,
+                "code_verifier": code_verifier
             }
 
             response = await client.post(
@@ -146,8 +164,55 @@ async def test_oauth_endpoints(base_url: str = "http://localhost:8000") -> bool:
             print(f"   📋 Token type: {token_response.get('token_type')}")
             print(f"   📋 Expires in: {token_response.get('expires_in')} seconds")
 
-            # Test 5: Protected Resource Access
-            print("\n5. Testing Protected API Endpoints...")
+            refresh_token_value = token_response.get("refresh_token")
+
+            if not refresh_token_value:
+                print(f"   ❌ No refresh token in response")
+                return False
+
+            print(f"   ✅ Refresh token issued")
+
+            # Test 5: Refresh Token Flow
+            print("\n5. Testing Refresh Token Flow...")
+
+            refresh_payload = {
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token_value,
+                "client_id": client_id,
+                "client_secret": client_secret
+            }
+
+            response = await client.post(
+                f"{base_url}/oauth/token",
+                data=refresh_payload,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+
+            if response.status_code != 200:
+                print(f"   ❌ Refresh token request failed: {response.status_code}")
+                print(f"   Response: {response.text}")
+                return False
+
+            refresh_response = response.json()
+            refreshed_access_token = refresh_response.get("access_token")
+            rotated_refresh_token = refresh_response.get("refresh_token")
+
+            if not refreshed_access_token:
+                print(f"   ❌ No access token in refresh response")
+                return False
+
+            if not rotated_refresh_token:
+                print(f"   ❌ No refresh token returned after rotation")
+                return False
+
+            if refreshed_access_token == access_token:
+                print(f"   ⚠️  New access token matches previous token (rotation recommended)")
+
+            print(f"   ✅ Refresh token flow successful")
+            access_token = refreshed_access_token
+
+            # Test 6: Protected Resource Access
+            print("\n6. Testing Protected API Endpoints...")
 
             headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -196,7 +261,7 @@ async def main():
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
     else:
-        base_url = "http://localhost:8000"
+        base_url = "http://localhost:8001"
 
     print("OAuth 2.1 Dynamic Client Registration Test")
     print("==========================================")

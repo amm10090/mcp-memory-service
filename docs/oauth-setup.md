@@ -38,20 +38,20 @@ uv run memory server --http
 
 ```bash
 # Test the OAuth implementation
-python tests/integration/test_oauth_flow.py http://localhost:8000
+python tests/integration/test_oauth_flow.py http://localhost:8001
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MCP_OAUTH_ENABLED` | `true` | Enable/disable OAuth 2.1 endpoints |
-| `MCP_OAUTH_SECRET_KEY` | Auto-generated | JWT signing key (set for persistence) |
-| `MCP_OAUTH_ISSUER` | Auto-detected | OAuth issuer URL |
-| `MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | Access token lifetime |
-| `MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES` | `10` | Authorization code lifetime |
+| Variable                                      | Default        | Description                           |
+| --------------------------------------------- | -------------- | ------------------------------------- |
+| `MCP_OAUTH_ENABLED`                           | `true`         | Enable/disable OAuth 2.1 endpoints    |
+| `MCP_OAUTH_SECRET_KEY`                        | Auto-generated | JWT signing key (set for persistence) |
+| `MCP_OAUTH_ISSUER`                            | Auto-detected  | OAuth issuer URL                      |
+| `MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES`       | `60`           | Access token lifetime                 |
+| `MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES` | `10`           | Authorization code lifetime           |
 
 ### Example Configuration
 
@@ -64,7 +64,7 @@ export MCP_HTTPS_ENABLED=true
 
 # Development configuration
 export MCP_OAUTH_ENABLED=true
-export MCP_OAUTH_ISSUER="http://localhost:8000"  # Match server port
+export MCP_OAUTH_ISSUER="http://localhost:8001"  # Match server port
 ```
 
 ## OAuth Endpoints
@@ -105,10 +105,10 @@ If needed, you can manually configure Claude Code:
   "memoryService": {
     "protocol": "http",
     "http": {
-      "endpoint": "http://localhost:8000",  # Use actual server endpoint
+      "endpoint": "http://localhost:8001",  # Use actual server endpoint
       "oauth": {
         "enabled": true,
-        "discoveryUrl": "http://localhost:8000/.well-known/oauth-authorization-server/mcp"
+        "discoveryUrl": "http://localhost:8001/.well-known/oauth-authorization-server/mcp"
       }
     }
   }
@@ -127,7 +127,7 @@ export ACCESS_TOKEN="your-jwt-access-token"
 
 # Use Bearer token for API requests
 curl -H "Authorization: Bearer $ACCESS_TOKEN" \
-     http://localhost:8000/api/memories
+     http://localhost:8001/api/memories
 ```
 
 ### Scope-Based Authorization
@@ -146,7 +146,7 @@ API key authentication continues to work:
 # Legacy API key authentication
 export MCP_API_KEY="your-api-key"
 curl -H "Authorization: Bearer $MCP_API_KEY" \
-     http://localhost:8000/api/memories
+     http://localhost:8001/api/memories
 ```
 
 ## Security Considerations
@@ -173,15 +173,18 @@ The implementation follows OAuth 2.1 security requirements:
 ### Common Issues
 
 **OAuth endpoints return 404**:
+
 - Ensure `MCP_OAUTH_ENABLED=true`
 - Restart the server after configuration changes
 
 **Claude Code connection fails**:
+
 - Check HTTPS configuration for production
 - Verify OAuth discovery endpoint responds correctly
 - Check server logs for OAuth errors
 
 **Invalid token errors**:
+
 - Verify `MCP_OAUTH_SECRET_KEY` is consistent
 - Check token expiration times
 - Ensure proper JWT format
@@ -190,10 +193,10 @@ The implementation follows OAuth 2.1 security requirements:
 
 ```bash
 # Test OAuth discovery
-curl http://localhost:8000/.well-known/oauth-authorization-server/mcp
+curl http://localhost:8001/.well-known/oauth-authorization-server/mcp
 
 # Test client registration
-curl -X POST http://localhost:8000/oauth/register \
+curl -X POST http://localhost:8001/oauth/register \
      -H "Content-Type: application/json" \
      -d '{"client_name": "Test Client"}'
 
@@ -207,11 +210,11 @@ tail -f logs/mcp-memory-service.log | grep -i oauth
 
 ```json
 {
-  "client_name": "My Application",
-  "redirect_uris": ["https://myapp.com/callback"],
-  "grant_types": ["authorization_code"],
-  "response_types": ["code"],
-  "scope": "read write"
+	"client_name": "My Application",
+	"redirect_uris": ["https://myapp.com/callback"],
+	"grant_types": ["authorization_code"],
+	"response_types": ["code"],
+	"scope": "read write"
 }
 ```
 
@@ -219,12 +222,12 @@ tail -f logs/mcp-memory-service.log | grep -i oauth
 
 ```json
 {
-  "client_id": "mcp_client_abc123",
-  "client_secret": "secret_xyz789",
-  "redirect_uris": ["https://myapp.com/callback"],
-  "grant_types": ["authorization_code"],
-  "response_types": ["code"],
-  "token_endpoint_auth_method": "client_secret_basic"
+	"client_id": "mcp_client_abc123",
+	"client_secret": "secret_xyz789",
+	"redirect_uris": ["https://myapp.com/callback"],
+	"grant_types": ["authorization_code"],
+	"response_types": ["code"],
+	"token_endpoint_auth_method": "client_secret_basic"
 }
 ```
 
@@ -232,10 +235,10 @@ tail -f logs/mcp-memory-service.log | grep -i oauth
 
 ```json
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "scope": "read write"
+	"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "read write"
 }
 ```
 

@@ -19,14 +19,14 @@ import requests
 import json
 import time
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 def test_memory_crud():
     """Test the complete CRUD workflow for memories."""
-    
+
     print("Testing Memory CRUD Operations")
     print("=" * 40)
-    
+
     # Test 1: Health check
     print("\n[1] Health check...")
     try:
@@ -39,7 +39,7 @@ def test_memory_crud():
     except Exception as e:
         print(f"[FAIL] Cannot connect: {e}")
         return
-    
+
     # Test 2: Store memory
     print("\n[2] Storing memory...")
     test_memory = {
@@ -48,7 +48,7 @@ def test_memory_crud():
         "memory_type": "test",
         "metadata": {"timestamp": time.time()}
     }
-    
+
     try:
         resp = requests.post(
             f"{BASE_URL}/api/memories",
@@ -56,7 +56,7 @@ def test_memory_crud():
             headers={"Content-Type": "application/json"},
             timeout=10
         )
-        
+
         if resp.status_code == 200:
             result = resp.json()
             if result["success"]:
@@ -72,7 +72,7 @@ def test_memory_crud():
     except Exception as e:
         print(f"[FAIL] Storage error: {e}")
         return
-    
+
     # Test 3: List memories
     print("\n[3] Listing memories...")
     try:
@@ -85,7 +85,7 @@ def test_memory_crud():
             print(f"[FAIL] Listing failed: {resp.status_code}")
     except Exception as e:
         print(f"[FAIL] Listing error: {e}")
-    
+
     # Test 4: Delete memory
     print("\n[4] Deleting memory...")
     try:
@@ -100,7 +100,7 @@ def test_memory_crud():
             print(f"[FAIL] Deletion failed: {resp.status_code}")
     except Exception as e:
         print(f"[FAIL] Deletion error: {e}")
-    
+
     print("\n" + "=" * 40)
     print("CRUD testing completed!")
 

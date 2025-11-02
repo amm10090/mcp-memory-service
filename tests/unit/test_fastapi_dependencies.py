@@ -10,7 +10,8 @@ was evaluated at import time when _storage was None.
 """
 
 import pytest
-import pytest_asyncio
+
+pytest_asyncio = pytest.importorskip("pytest_asyncio")
 import asyncio
 import tempfile
 import os

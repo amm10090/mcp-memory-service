@@ -1,7 +1,7 @@
 # HTTP/SSE + SQLite-vec Implementation Plan
 
-**Date**: 2025-07-25  
-**Status**: Extracted from previous planning session  
+**Date**: 2025-07-25
+**Status**: Extracted from previous planning session
 **Context**: Issue #57 - Add HTTP/SSE interface to MCP Memory Service
 
 ## Executive Summary
@@ -11,6 +11,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 ## Key Architectural Decision
 
 **Combine HTTP/SSE with sqlite-vec backend** instead of ChromaDB for:
+
 - Simplified deployment (single file database)
 - Better performance (10x faster operations)
 - Edge-ready deployment (Cloudflare Workers, Vercel)
@@ -20,6 +21,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 ## Implementation Phases
 
 ### Phase 1: Foundation (Week 1)
+
 - ✅ Create feature branch from sqlite-vec-backend
 - ✅ Create PROJECT_STATUS.md tracking file
 - [ ] Validate sqlite-vec functionality
@@ -27,6 +29,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 - [ ] Set up development environment
 
 ### Phase 2: HTTP Implementation (Week 2)
+
 - [ ] Create web server structure
 - [ ] Implement health check endpoint
 - [ ] Add memory CRUD endpoints
@@ -34,6 +37,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 - [ ] OpenAPI documentation
 
 ### Phase 3: SSE Implementation (Week 3)
+
 - [ ] Design SSE event architecture
 - [ ] Implement SQLite triggers
 - [ ] Create /events endpoint
@@ -41,6 +45,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 - [ ] Real-time update testing
 
 ### Phase 4: Dashboard (Week 4)
+
 - [ ] Minimal UI design (vanilla JS)
 - [ ] Memory visualization
 - [ ] SSE connection handling
@@ -50,6 +55,7 @@ Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memor
 ## Technical Architecture
 
 ### Directory Structure
+
 ```
 src/mcp_memory_service/
 ├── web/
@@ -71,11 +77,13 @@ src/mcp_memory_service/
 ```
 
 ### Server Modes
+
 1. **MCP Mode**: Original stdio protocol (unchanged)
 2. **HTTP Mode**: FastAPI server with SSE
 3. **Hybrid Mode**: Both protocols simultaneously
 
 ### SSE Events
+
 - `memory_stored`: New memory added
 - `memory_deleted`: Memory removed
 - `search_completed`: Search results ready
@@ -83,6 +91,7 @@ src/mcp_memory_service/
 - `health_update`: System status changes
 
 ### API Endpoints
+
 - `GET /api/health` - Health check
 - `GET /api/memories` - List memories (paginated)
 - `POST /api/memories` - Store new memory
@@ -94,6 +103,7 @@ src/mcp_memory_service/
 - `GET /events` - SSE endpoint
 
 ## Dependencies to Add
+
 ```
 fastapi>=0.115.0
 uvicorn>=0.30.0
@@ -103,10 +113,11 @@ aiofiles>=23.2.1
 ```
 
 ## Configuration
+
 ```python
 # New environment variables
 HTTP_ENABLED = 'MCP_HTTP_ENABLED'
-HTTP_PORT = 'MCP_HTTP_PORT' (default: 8000)
+HTTP_PORT = 'MCP_HTTP_PORT' (default: 8001)
 HTTP_HOST = 'MCP_HTTP_HOST' (default: 0.0.0.0)
 CORS_ORIGINS = 'MCP_CORS_ORIGINS'
 SSE_HEARTBEAT_INTERVAL = 'MCP_SSE_HEARTBEAT' (default: 30s)
@@ -114,12 +125,14 @@ API_KEY = 'MCP_API_KEY' (optional auth)
 ```
 
 ## Performance Targets
+
 - Memory storage: <50ms (vs ChromaDB ~500ms)
 - Search response: <100ms for 1M memories
 - SSE latency: <10ms from write to event
 - Startup time: <1s (vs ChromaDB 5-10s)
 
 ## Testing Strategy
+
 - Unit tests for all HTTP endpoints
 - Integration tests for SSE connections
 - Performance benchmarks vs ChromaDB
@@ -127,6 +140,7 @@ API_KEY = 'MCP_API_KEY' (optional auth)
 - Edge deployment validation
 
 ## Security Considerations
+
 - Optional API key authentication
 - CORS configuration
 - Rate limiting
@@ -134,11 +148,13 @@ API_KEY = 'MCP_API_KEY' (optional auth)
 - SSL/TLS documentation
 
 ## Migration Path
+
 - Existing MCP users: No changes required
 - ChromaDB users: Migration script provided
 - New users: SQLite-vec as default for HTTP mode
 
 ## Benefits
+
 - **Simplicity**: Single file database, no external services
 - **Performance**: Orders of magnitude faster
 - **Portability**: Runs anywhere Python runs
@@ -148,12 +164,14 @@ API_KEY = 'MCP_API_KEY' (optional auth)
 - **Edge-ready**: Deploy to CDN edge locations
 
 ## Future Possibilities
+
 - Distributed SQLite with Litestream replication
 - Cloudflare Workers deployment with D1
 - Offline-first PWA with WASM SQLite
 - Federation between multiple instances
 
 ## Success Metrics
+
 - HTTP endpoints respond within performance targets
 - SSE connections maintain real-time updates <10ms
 - Dashboard provides intuitive memory management

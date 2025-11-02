@@ -7,6 +7,7 @@ The MCP Memory Service FastAPI server v4.0.0-alpha.1 implements the official MCP
 ## Current Status
 
 ### ✅ Working MCP Clients
+
 - **Standard MCP Libraries**: Python `mcp` package, JavaScript MCP SDK
 - **Claude Desktop**: Works with proper MCP configuration
 - **Custom MCP Clients**: Any client implementing standard MCP protocol
@@ -17,19 +18,22 @@ The MCP Memory Service FastAPI server v4.0.0-alpha.1 implements the official MCP
 **Problem**: Claude Code's SSE client has specific header and protocol requirements that don't match the FastMCP server implementation.
 
 **Technical Details**:
+
 - FastMCP server requires `Accept: application/json, text/event-stream` headers
 - Claude Code's SSE client doesn't send the required header combination
 - Server correctly rejects invalid SSE connections with proper error messages
 
 **Error Symptoms**:
+
 ```bash
 claude mcp list
-# Output: memory: http://10.0.1.30:8000/mcp (SSE) - ✗ Failed to connect
+# Output: memory: http://10.0.1.30:8001/mcp (SSE) - ✗ Failed to connect
 ```
 
 ## Workarounds for Claude Code Users
 
 ### Option 1: Use HTTP Dashboard
+
 ```bash
 # Access memory service via web interface
 open http://memory.local:8080/
@@ -41,6 +45,7 @@ curl -X POST http://memory.local:8080/api/memories \
 ```
 
 ### Option 2: Use Claude Commands (Recommended)
+
 ```bash
 # Install Claude Code commands (bypass MCP entirely)
 python install.py --install-claude-commands
@@ -52,6 +57,7 @@ claude /memory-search --tags "project,architecture"
 ```
 
 ### Option 3: Use Alternative MCP Client
+
 ```python
 # Python example with standard MCP client
 import asyncio
@@ -67,16 +73,18 @@ async def test_memory():
 ## Technical Investigation Results
 
 ### Server Verification ✅
+
 ```bash
 # Server correctly implements MCP protocol
 curl -H "Accept: text/event-stream, application/json" \
      -H "Content-Type: application/json" \
-     -X POST http://memory.local:8000/mcp \
+     -X POST http://memory.local:8001/mcp \
      -d '{"jsonrpc":"2.0","id":"test","method":"tools/list","params":{}}'
 # Result: 200 OK, SSE stream established
 ```
 
 ### Claude Code Client Issue ❌
+
 ```bash
 # Claude Code client fails header negotiation
 # Missing required Accept header combination
@@ -86,16 +94,19 @@ curl -H "Accept: text/event-stream, application/json" \
 ## Development Roadmap
 
 ### Short Term (Next Release)
+
 - [ ] Investigate Claude Code's exact SSE client requirements
 - [ ] Consider server-side compatibility layer
 - [ ] Expand client compatibility testing
 
-### Medium Term 
+### Medium Term
+
 - [ ] Custom SSE implementation for Claude Code compatibility
 - [ ] Alternative transport protocols (WebSocket, HTTP long-polling)
 - [ ] Client library development
 
 ### Long Term
+
 - [ ] Collaborate with Claude Code team on SSE standardization
 - [ ] MCP protocol enhancement proposals
 - [ ] Universal client compatibility layer
@@ -103,6 +114,7 @@ curl -H "Accept: text/event-stream, application/json" \
 ## Conclusion
 
 The FastAPI MCP migration successfully achieved its primary goals:
+
 - ✅ SSL connectivity issues resolved
 - ✅ Standard MCP protocol compliance
 - ✅ Production-ready architecture

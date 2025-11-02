@@ -48,6 +48,7 @@ MCP Memory Service provides several deployment options to support multiple clien
 ### Server Installation
 
 1. **Install on your server machine:**
+
 ```bash
 git clone https://github.com/doobidoo/mcp-memory-service.git
 cd mcp-memory-service
@@ -61,12 +62,13 @@ python install.py --server-mode --enable-http-api
 ```
 
 2. **Configure server settings:**
+
 ```bash
 # Allow external connections
 export MCP_HTTP_HOST=0.0.0.0
 
 # Set custom port (optional)
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 
 # Enable CORS for web clients (optional)
 export MCP_CORS_ORIGINS="*"
@@ -79,14 +81,16 @@ export MCP_MEMORY_SQLITE_PATH="/path/to/shared/memory.db"
 ```
 
 3. **Start the server:**
+
 ```bash
 python scripts/run_http_server.py
 ```
 
 The server will be available at:
-- **API Documentation**: `http://your-server:8000/api/docs`
-- **Web Dashboard**: `http://your-server:8000/`
-- **SSE Endpoint**: `http://your-server:8000/api/events/stream`
+
+- **API Documentation**: `http://your-server:8001/api/docs`
+- **Web Dashboard**: `http://your-server:8001/`
+- **SSE Endpoint**: `http://your-server:8001/api/events/stream`
 
 ### Client Configuration
 
@@ -101,12 +105,12 @@ Configure each client to use the HTTP server instead of local MCP:
       "command": "node",
       "args": ["-e", "
         const http = require('http');
-        const url = 'http://your-server:8000/api';
+        const url = 'http://your-server:8001/api';
         // HTTP-to-MCP bridge implementation
         // (See examples/http-mcp-bridge.js)
       "],
       "env": {
-        "MCP_MEMORY_HTTP_ENDPOINT": "http://your-server:8000/api",
+        "MCP_MEMORY_HTTP_ENDPOINT": "http://your-server:8001/api",
         "MCP_MEMORY_API_KEY": "your-secure-api-key"
       }
     }
@@ -118,28 +122,30 @@ Configure each client to use the HTTP server instead of local MCP:
 
 ```javascript
 // Connect to the HTTP API
-const apiBase = 'http://your-server:8000/api';
+const apiBase = 'http://your-server:8001/api';
 const apiKey = 'your-secure-api-key';
 
 // Store memory
 const response = await fetch(`${apiBase}/memories`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${apiKey}`
-  },
-  body: JSON.stringify({
-    content: 'Memory content',
-    tags: ['tag1', 'tag2'],
-    memory_type: 'note'
-  })
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+		Authorization: `Bearer ${apiKey}`,
+	},
+	body: JSON.stringify({
+		content: 'Memory content',
+		tags: ['tag1', 'tag2'],
+		memory_type: 'note',
+	}),
 });
 
 // Real-time updates via SSE
-const eventSource = new EventSource(`${apiBase}/events/stream?api_key=${apiKey}`);
+const eventSource = new EventSource(
+	`${apiBase}/events/stream?api_key=${apiKey}`
+);
 eventSource.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Memory update:', data);
+	const data = JSON.parse(event.data);
+	console.log('Memory update:', data);
 };
 ```
 
@@ -148,11 +154,13 @@ eventSource.onmessage = (event) => {
 #### Monitoring
 
 Check server health:
+
 ```bash
-curl http://your-server:8000/api/health
+curl http://your-server:8001/api/health
 ```
 
 View server logs:
+
 ```bash
 # Server logs include all client operations
 tail -f /var/log/mcp-memory-service.log
@@ -162,15 +170,15 @@ tail -f /var/log/mcp-memory-service.log
 
 ```bash
 # Backup database
-curl -X POST http://your-server:8000/api/admin/backup \
+curl -X POST http://your-server:8001/api/admin/backup \
   -H "Authorization: Bearer your-api-key"
 
 # List backups
-curl http://your-server:8000/api/admin/backups \
+curl http://your-server:8001/api/admin/backups \
   -H "Authorization: Bearer your-api-key"
 
 # Restore from backup
-curl -X POST http://your-server:8000/api/admin/restore \
+curl -X POST http://your-server:8001/api/admin/restore \
   -H "Authorization: Bearer your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"backup_id": "backup-timestamp"}'
@@ -193,6 +201,7 @@ curl -X POST http://your-server:8000/api/admin/restore \
 ### Setup
 
 1. **Install on shared storage location:**
+
 ```bash
 # Install to shared network drive
 export MCP_MEMORY_SQLITE_PATH="/shared/network/drive/memory.db"
@@ -200,18 +209,19 @@ python install.py --storage-backend sqlite_vec
 ```
 
 2. **Configure all clients to use the same database:**
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_SQLITE_PATH": "/shared/network/drive/memory.db",
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_SQLITE_PATH": "/shared/network/drive/memory.db",
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
@@ -325,9 +335,9 @@ export MCP_SSL_KEY_FILE="/path/to/key.pem"            # Custom private key (opti
 #### Server Output with mDNS
 
 ```
-Starting MCP Memory Service HTTPS server on 0.0.0.0:8000
-Dashboard: https://localhost:8000
-API Docs: https://localhost:8000/api/docs
+Starting MCP Memory Service HTTPS server on 0.0.0.0:8001
+Dashboard: https://localhost:8001
+API Docs: https://localhost:8001/api/docs
 SSL Certificate: /tmp/mcp-memory-certs/cert.pem
 SSL Key: /tmp/mcp-memory-certs/key.pem
 NOTE: Browsers may show security warnings for self-signed certificates
@@ -343,17 +353,17 @@ Press Ctrl+C to stop
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_AUTO_DISCOVER": "true",
-        "MCP_MEMORY_PREFER_HTTPS": "true",
-        "MCP_MEMORY_API_KEY": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_AUTO_DISCOVER": "true",
+				"MCP_MEMORY_PREFER_HTTPS": "true",
+				"MCP_MEMORY_API_KEY": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
@@ -361,18 +371,18 @@ Press Ctrl+C to stop
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_AUTO_DISCOVER": "true",
-        "MCP_MEMORY_HTTP_ENDPOINT": "https://backup-server:8000/api",
-        "MCP_MEMORY_PREFER_HTTPS": "true",
-        "MCP_MEMORY_API_KEY": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_AUTO_DISCOVER": "true",
+				"MCP_MEMORY_HTTP_ENDPOINT": "https://backup-server:8001/api",
+				"MCP_MEMORY_PREFER_HTTPS": "true",
+				"MCP_MEMORY_API_KEY": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
@@ -391,8 +401,8 @@ MCP_MEMORY_API_KEY="your-api-key"          # API key for authentication
 ```
 MCP HTTP Bridge starting...
 Attempting to discover MCP Memory Service via mDNS...
-Discovered service: https://192.168.1.100:8000/api
-Endpoint: https://192.168.1.100:8000/api
+Discovered service: https://192.168.1.100:8001/api
+Endpoint: https://192.168.1.100:8001/api
 API Key: [SET]
 Auto-discovery: ENABLED
 Prefer HTTPS: YES
@@ -472,6 +482,7 @@ python scripts/run_http_server.py
 #### Common Issues
 
 **Q: No services discovered**
+
 ```bash
 # Check if mDNS is enabled on server
 grep "mDNS service advertisement" server.log
@@ -484,6 +495,7 @@ sudo ufw status | grep 5353
 ```
 
 **Q: Discovery timeout**
+
 ```bash
 # Increase discovery timeout
 export MCP_MDNS_DISCOVERY_TIMEOUT=10
@@ -493,13 +505,14 @@ export MCP_MDNS_DISCOVERY_TIMEOUT=10
 ```
 
 **Q: Client prefers wrong service**
+
 ```bash
 # Force HTTPS preference
 export MCP_MEMORY_PREFER_HTTPS=true
 
 # Or disable auto-discovery and use manual endpoint
 export MCP_MEMORY_AUTO_DISCOVER=false
-export MCP_MEMORY_HTTP_ENDPOINT="https://preferred-server:8000/api"
+export MCP_MEMORY_HTTP_ENDPOINT="https://preferred-server:8001/api"
 ```
 
 #### Debug Mode
@@ -530,10 +543,10 @@ COPY . .
 RUN python install.py --server-mode --enable-http-api
 
 # Expose both HTTP and HTTPS ports
-EXPOSE 8000 8443
+EXPOSE 8001 8443
 
 ENV MCP_HTTP_HOST=0.0.0.0
-ENV MCP_HTTP_PORT=8000
+ENV MCP_HTTP_PORT=8001
 ENV MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 ENV MCP_MDNS_ENABLED=true
 ENV MCP_HTTPS_ENABLED=false
@@ -542,14 +555,16 @@ CMD ["python", "scripts/run_http_server.py"]
 ```
 
 #### Basic HTTP with mDNS:
+
 ```bash
 docker build -t mcp-memory-service .
-docker run -p 8000:8000 -v ./data:/app/data mcp-memory-service
+docker run -p 8001:8001 -v ./data:/app/data mcp-memory-service
 ```
 
 #### HTTPS with mDNS:
+
 ```bash
-docker run -p 8000:8000 \
+docker run -p 8001:8001 \
   -v ./data:/app/data \
   -e MCP_HTTPS_ENABLED=true \
   -e MCP_MDNS_ENABLED=true \
@@ -557,8 +572,9 @@ docker run -p 8000:8000 \
 ```
 
 #### Production with Custom Certificates:
+
 ```bash
-docker run -p 8000:8000 \
+docker run -p 8001:8001 \
   -v ./data:/app/data \
   -v ./certs:/app/certs \
   -e MCP_HTTPS_ENABLED=true \
@@ -570,6 +586,7 @@ docker run -p 8000:8000 \
 ```
 
 **Note**: For mDNS to work with Docker, you may need to use `--network host` mode on Linux:
+
 ```bash
 docker run --network host \
   -v ./data:/app/data \
@@ -612,7 +629,7 @@ Type=simple
 User=mcp-memory
 WorkingDirectory=/opt/mcp-memory-service
 Environment=MCP_HTTP_HOST=0.0.0.0
-Environment=MCP_HTTP_PORT=8000
+Environment=MCP_HTTP_PORT=8001
 Environment=MCP_API_KEY=your-secure-key
 Environment=MCP_MEMORY_SQLITE_PATH=/opt/mcp-memory/memory.db
 ExecStart=/opt/mcp-memory-service/venv/bin/python scripts/run_http_server.py
@@ -624,6 +641,7 @@ WantedBy=multi-user.target
 ```
 
 Enable and start:
+
 ```bash
 sudo systemctl enable mcp-memory
 sudo systemctl start mcp-memory
@@ -654,14 +672,14 @@ All HTTP requests must include the API key in the Authorization header:
 
 ```bash
 # Store memory with API key
-curl -X POST http://your-server:8000/api/memories \
+curl -X POST http://your-server:8001/api/memories \
   -H "Authorization: Bearer $MCP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"content": "test memory", "tags": ["test"]}'
 
 # Retrieve memories with API key
 curl -H "Authorization: Bearer $MCP_API_KEY" \
-  http://your-server:8000/api/memories
+  http://your-server:8001/api/memories
 ```
 
 #### Client Configuration with API Keys
@@ -669,26 +687,28 @@ curl -H "Authorization: Bearer $MCP_API_KEY" \
 Ensure all clients are configured with the same API key:
 
 **JavaScript/Web Clients:**
+
 ```javascript
 const headers = {
-  'Authorization': `Bearer ${process.env.MCP_API_KEY}`,
-  'Content-Type': 'application/json'
+	Authorization: `Bearer ${process.env.MCP_API_KEY}`,
+	'Content-Type': 'application/json',
 };
 ```
 
 **Claude Desktop Configuration:**
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_HTTP_ENDPOINT": "http://your-server:8000/api",
-        "MCP_MEMORY_API_KEY": "your-actual-api-key-here"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_HTTP_ENDPOINT": "http://your-server:8001/api",
+				"MCP_MEMORY_API_KEY": "your-actual-api-key-here"
+			}
+		}
+	}
 }
 ```
 
@@ -706,16 +726,17 @@ const headers = {
 
 ```bash
 # 401 Unauthorized - Missing or invalid API key
-curl -v http://your-server:8000/api/memories  # No auth header
+curl -v http://your-server:8001/api/memories  # No auth header
 
 # 403 Forbidden - API key provided but incorrect
-curl -H "Authorization: Bearer wrong-key" http://your-server:8000/api/memories
+curl -H "Authorization: Bearer wrong-key" http://your-server:8001/api/memories
 
 # Success - Correct API key format
-curl -H "Authorization: Bearer $MCP_API_KEY" http://your-server:8000/api/memories
+curl -H "Authorization: Bearer $MCP_API_KEY" http://your-server:8001/api/memories
 ```
 
 **Server Logs for Debugging:**
+
 - Check server logs for authentication failures
 - Verify the API key is properly set in server environment
 - Ensure clients are sending the correct Authorization header format
@@ -737,16 +758,18 @@ curl -H "Authorization: Bearer $MCP_API_KEY" http://your-server:8000/api/memorie
 ### Common Issues
 
 **Q: Server not accessible from other machines**
+
 ```bash
 # Check if server is binding to all interfaces
 export MCP_HTTP_HOST=0.0.0.0  # Not 127.0.0.1 or localhost
 
 # Check firewall
-sudo ufw allow 8000  # Ubuntu
-firewall-cmd --add-port=8000/tcp  # CentOS/RHEL
+sudo ufw allow 8001  # Ubuntu
+firewall-cmd --add-port=8001/tcp  # CentOS/RHEL
 ```
 
 **Q: CORS errors in web browsers**
+
 ```bash
 # Allow all origins (development only)
 export MCP_CORS_ORIGINS="*"
@@ -756,6 +779,7 @@ export MCP_CORS_ORIGINS="https://yourdomain.com,https://app.yourdomain.com"
 ```
 
 **Q: Database locked errors**
+
 ```bash
 # Check database permissions
 ls -la /path/to/memory.db
@@ -769,6 +793,7 @@ sqlite3 /path/to/memory.db "PRAGMA journal_mode;"
 ```
 
 **Q: Performance issues with many clients**
+
 ```bash
 # Increase SQLite cache size
 export MCP_MEMORY_SQLITE_PRAGMAS="cache_size=20000,temp_store=MEMORY"
@@ -798,7 +823,7 @@ ulimit -n 4096
 # Use production ASGI server
 pip install gunicorn
 gunicorn -w 4 -k uvicorn.workers.UvicornWorker \
-  --bind 0.0.0.0:8000 \
+  --bind 0.0.0.0:8001 \
   mcp_memory_service.web.app:app
 ```
 
@@ -808,7 +833,7 @@ The **Centralized HTTP/SSE Server** approach is the recommended solution for mul
 
 - **Reliable concurrency** without file locking issues
 - **Real-time synchronization** across all clients
-- **Cloud deployment flexibility** 
+- **Cloud deployment flexibility**
 - **Professional scalability** for team environments
 
 For local networks with trusted users, **Shared File Access** can work with careful coordination, but the HTTP server approach is more robust and future-proof.

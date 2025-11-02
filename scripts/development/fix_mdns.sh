@@ -32,7 +32,7 @@ echo "Testing memory.local resolution:"
 avahi-resolve-host-name memory.local
 echo ""
 echo "Testing HTTPS access:"
-curl -k -s https://memory.local:8000/api/health --connect-timeout 5 || echo "HTTPS test failed"
+curl -k -s https://memory.local:8001/api/health --connect-timeout 5 || echo "HTTPS test failed"
 
 echo ""
 echo "=== Fix Complete ==="

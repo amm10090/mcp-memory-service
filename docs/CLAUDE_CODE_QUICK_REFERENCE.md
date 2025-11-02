@@ -6,14 +6,14 @@
 
 ## 🎯 Essential Keybindings
 
-| Key | Action | Use Case |
-|-----|--------|----------|
-| `Shift+Tab` | Auto-accept edits | Fast iteration on suggested changes |
-| `Esc` | Cancel operation | Stop unwanted actions |
-| `Ctrl+R` | Verbose output | Debug when things go wrong |
-| `#` | Create memory | Store important decisions |
-| `@` | Add to context | Include files/dirs (`@src/`, `@tests/`) |
-| `!` | Bash mode | Quick shell commands |
+| Key         | Action            | Use Case                                |
+| ----------- | ----------------- | --------------------------------------- |
+| `Shift+Tab` | Auto-accept edits | Fast iteration on suggested changes     |
+| `Esc`       | Cancel operation  | Stop unwanted actions                   |
+| `Ctrl+R`    | Verbose output    | Debug when things go wrong              |
+| `#`         | Create memory     | Store important decisions               |
+| `@`         | Add to context    | Include files/dirs (`@src/`, `@tests/`) |
+| `!`         | Bash mode         | Quick shell commands                    |
 
 ---
 
@@ -81,14 +81,14 @@ python scripts/sync/sync_memory_backends.py --direction bidirectional
 
 ### Key Files to Add
 
-| Purpose | Files to Include |
-|---------|-----------------|
-| **Storage backends** | `@src/mcp_memory_service/storage/` |
-| **MCP protocol** | `@src/mcp_memory_service/server.py` |
-| **Web interface** | `@src/mcp_memory_service/web/` |
-| **Configuration** | `@.env.example`, `@src/mcp_memory_service/config.py` |
-| **Tests** | `@tests/test_*.py` |
-| **Scripts** | `@scripts/server/`, `@scripts/sync/` |
+| Purpose              | Files to Include                                     |
+| -------------------- | ---------------------------------------------------- |
+| **Storage backends** | `@src/mcp_memory_service/storage/`                   |
+| **MCP protocol**     | `@src/mcp_memory_service/server.py`                  |
+| **Web interface**    | `@src/mcp_memory_service/web/`                       |
+| **Configuration**    | `@.env.example`, `@src/mcp_memory_service/config.py` |
+| **Tests**            | `@tests/test_*.py`                                   |
+| **Scripts**          | `@scripts/server/`, `@scripts/sync/`                 |
 
 ### Common Debugging Patterns
 
@@ -116,11 +116,11 @@ python scripts/sync/sync_memory_backends.py --status
 
 ### Storage Backends
 
-| Backend | Performance | Use Case | Config Variable |
-|---------|-------------|----------|-----------------|
-| **Hybrid** ⭐ | 5ms read | Production (recommended) | `MCP_MEMORY_STORAGE_BACKEND=hybrid` |
-| **SQLite-vec** | 5ms read | Development, single-user | `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec` |
-| **Cloudflare** | Network-dependent | Legacy cloud-only | `MCP_MEMORY_STORAGE_BACKEND=cloudflare` |
+| Backend        | Performance       | Use Case                 | Config Variable                         |
+| -------------- | ----------------- | ------------------------ | --------------------------------------- |
+| **Hybrid** ⭐  | 5ms read          | Production (recommended) | `MCP_MEMORY_STORAGE_BACKEND=hybrid`     |
+| **SQLite-vec** | 5ms read          | Development, single-user | `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec` |
+| **Cloudflare** | Network-dependent | Legacy cloud-only        | `MCP_MEMORY_STORAGE_BACKEND=cloudflare` |
 
 ### Key Directories
 
@@ -176,24 +176,28 @@ MCP_API_KEY=your-generated-key
 ## 🐛 Troubleshooting Checklist
 
 ### HTTP Server Issues
+
 - [ ] Check if server is running: `python scripts/server/check_http_server.py -v`
 - [ ] Review logs: `@http_server.log`
 - [ ] Restart server: `scripts/server/start_http_server.bat`
-- [ ] Verify port 8000 is free: `netstat -ano | findstr :8000`
+- [ ] Verify port 8001 is free: `netstat -ano | findstr :8001`
 
 ### Backend Configuration Issues
+
 - [ ] Run diagnostic: `python scripts/validation/diagnose_backend_config.py`
 - [ ] Check `.env` file exists and has correct values
 - [ ] Verify Cloudflare credentials are valid
 - [ ] Confirm environment variables loaded: check server startup logs
 
 ### Missing Memories
+
 - [ ] Check sync status: `python scripts/sync/sync_memory_backends.py --status`
 - [ ] Compare memory counts: Cloudflare vs SQLite
 - [ ] Run manual sync: `python scripts/sync/sync_memory_backends.py --dry-run`
 - [ ] Check for duplicates: Look for content hash matches
 
 ### Performance Issues
+
 - [ ] Verify backend: Hybrid should show ~5ms read times
 - [ ] Check disk space: Litestream requires adequate space
 - [ ] Monitor background sync: Check `http_server.log` for sync logs

@@ -5,6 +5,7 @@ This guide covers the automatic service discovery feature introduced in MCP Memo
 ## Overview
 
 mDNS service discovery allows MCP Memory Service instances to:
+
 - **Automatically advertise** themselves on the local network
 - **Auto-discover** available services without manual configuration
 - **Prioritize secure connections** (HTTPS over HTTP)
@@ -33,17 +34,17 @@ python scripts/run_http_server.py
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_AUTO_DISCOVER": "true",
-        "MCP_MEMORY_PREFER_HTTPS": "true",
-        "MCP_MEMORY_API_KEY": "your-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_AUTO_DISCOVER": "true",
+				"MCP_MEMORY_PREFER_HTTPS": "true",
+				"MCP_MEMORY_API_KEY": "your-api-key"
+			}
+		}
+	}
 }
 ```
 
@@ -53,21 +54,21 @@ That's it! The client will automatically find and connect to available services.
 
 ### Server Configuration
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `MCP_MDNS_ENABLED` | `true` | Enable/disable mDNS advertisement |
-| `MCP_MDNS_SERVICE_NAME` | `"MCP Memory Service"` | Display name for the service |
-| `MCP_MDNS_SERVICE_TYPE` | `"_mcp-memory._tcp.local."` | RFC-compliant service type |
-| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5` | Discovery timeout in seconds |
+| Environment Variable         | Default                     | Description                       |
+| ---------------------------- | --------------------------- | --------------------------------- |
+| `MCP_MDNS_ENABLED`           | `true`                      | Enable/disable mDNS advertisement |
+| `MCP_MDNS_SERVICE_NAME`      | `"MCP Memory Service"`      | Display name for the service      |
+| `MCP_MDNS_SERVICE_TYPE`      | `"_mcp-memory._tcp.local."` | RFC-compliant service type        |
+| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5`                         | Discovery timeout in seconds      |
 
 ### Client Configuration
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
+| Environment Variable       | Default | Description                        |
+| -------------------------- | ------- | ---------------------------------- |
 | `MCP_MEMORY_AUTO_DISCOVER` | `false` | Enable automatic service discovery |
-| `MCP_MEMORY_PREFER_HTTPS` | `true` | Prefer HTTPS services over HTTP |
-| `MCP_HTTP_ENDPOINT` | (none) | Manual fallback endpoint |
-| `MCP_MEMORY_API_KEY` | (none) | API key for authentication |
+| `MCP_MEMORY_PREFER_HTTPS`  | `true`  | Prefer HTTPS services over HTTP    |
+| `MCP_HTTP_ENDPOINT`        | (none)  | Manual fallback endpoint           |
+| `MCP_MEMORY_API_KEY`       | (none)  | API key for authentication         |
 
 ## HTTPS Integration
 
@@ -81,11 +82,12 @@ python scripts/run_http_server.py
 ```
 
 Output:
+
 ```
 Generating self-signed certificate for HTTPS...
 Generated self-signed certificate: /tmp/mcp-memory-certs/cert.pem
 WARNING: This is a development certificate. Use proper certificates in production.
-Starting MCP Memory Service HTTPS server on 0.0.0.0:8000
+Starting MCP Memory Service HTTPS server on 0.0.0.0:8001
 mDNS service advertisement started
 ```
 
@@ -117,6 +119,7 @@ python scripts/run_http_server.py
 ### Server Advertisement
 
 The server advertises with the following metadata:
+
 - **Service Type**: `_mcp-memory._tcp.local.`
 - **Properties**:
   - `api_version`: Server version
@@ -145,6 +148,7 @@ sudo iptables -A INPUT -p udp --dport 5353 -j ACCEPT
 ### Network Topology
 
 mDNS works on:
+
 - ✅ Local Area Networks (LAN)
 - ✅ WiFi networks
 - ✅ VPN networks (if multicast is supported)
@@ -158,19 +162,23 @@ mDNS works on:
 #### No Services Discovered
 
 **Symptoms:**
+
 ```
 Attempting to discover MCP Memory Service via mDNS...
 No MCP Memory Services discovered
-Using default endpoint: http://localhost:8000/api
+Using default endpoint: http://localhost:8001/api
 ```
 
 **Solutions:**
+
 1. Verify server is running with mDNS enabled:
+
    ```bash
    grep "mDNS service advertisement started" server.log
    ```
 
 2. Check network connectivity:
+
    ```bash
    ping 224.0.0.251  # mDNS multicast address
    ```
@@ -183,12 +191,15 @@ Using default endpoint: http://localhost:8000/api
 #### Discovery Timeout
 
 **Symptoms:**
+
 ```
 Discovery failed: Request timeout
 ```
 
 **Solutions:**
+
 1. Increase discovery timeout:
+
    ```bash
    export MCP_MDNS_DISCOVERY_TIMEOUT=10
    ```
@@ -202,7 +213,9 @@ Discovery failed: Request timeout
 Client connects to HTTP instead of HTTPS service.
 
 **Solutions:**
+
 1. Force HTTPS preference (client bridge):
+
    ```bash
    export MCP_MEMORY_PREFER_HTTPS=true
    ```
@@ -210,7 +223,7 @@ Client connects to HTTP instead of HTTPS service.
 2. Use manual endpoint override (client bridge):
    ```bash
    export MCP_MEMORY_AUTO_DISCOVER=false
-   export MCP_HTTP_ENDPOINT="https://preferred-server:8000/api"
+   export MCP_HTTP_ENDPOINT="https://preferred-server:8001/api"
    ```
 
 ### Debug Mode
@@ -218,12 +231,14 @@ Client connects to HTTP instead of HTTPS service.
 Enable detailed logging:
 
 **Server:**
+
 ```bash
 export LOG_LEVEL=DEBUG
 python scripts/run_http_server.py
 ```
 
 **Client:**
+
 ```bash
 # Redirect stderr to see discovery details
 node examples/http-mcp-bridge.js 2>discovery.log
@@ -234,6 +249,7 @@ node examples/http-mcp-bridge.js 2>discovery.log
 Test mDNS discovery manually:
 
 **macOS:**
+
 ```bash
 # Browse for services
 dns-sd -B _mcp-memory._tcp
@@ -243,6 +259,7 @@ dns-sd -L "MCP Memory Service" _mcp-memory._tcp
 ```
 
 **Linux:**
+
 ```bash
 # Browse for services
 avahi-browse -t _mcp-memory._tcp
@@ -260,7 +277,7 @@ Deploy multiple services with different names:
 ```bash
 # Development server
 export MCP_MDNS_SERVICE_NAME="Dev Memory Service"
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 python scripts/run_http_server.py &
 
 # Staging server
@@ -274,6 +291,7 @@ Clients will discover both and can select based on preferences.
 ### Load Balancing
 
 With multiple identical services, clients automatically distribute load by:
+
 1. Health check response times
 2. Connection success rates
 3. Round-robin selection among healthy services
@@ -289,7 +307,7 @@ from mcp_memory_service.discovery import DiscoveryClient
 async def monitor_services():
     client = DiscoveryClient()
     services = await client.find_services_with_health()
-    
+
     for service, health in services:
         print(f"Service: {service.name} at {service.url}")
         print(f"Health: {'✅' if health.healthy else '❌'}")
@@ -360,7 +378,7 @@ services:
   mcp-memory:
     build: .
     ports:
-      - "8000:8000"
+      - '8001:8001'
     environment:
       - MCP_HTTPS_ENABLED=true
       - MCP_MDNS_ENABLED=true
@@ -391,17 +409,17 @@ spec:
       labels:
         app: mcp-memory
     spec:
-      hostNetwork: true  # Required for mDNS
+      hostNetwork: true # Required for mDNS
       containers:
-      - name: mcp-memory
-        image: mcp-memory-service:latest
-        env:
-        - name: MCP_MDNS_ENABLED
-          value: "true"
-        - name: MCP_HTTPS_ENABLED
-          value: "true"
-        ports:
-        - containerPort: 8000
+        - name: mcp-memory
+          image: mcp-memory-service:latest
+          env:
+            - name: MCP_MDNS_ENABLED
+              value: 'true'
+            - name: MCP_HTTPS_ENABLED
+              value: 'true'
+          ports:
+            - containerPort: 8001
 ```
 
 ## Conclusion
@@ -409,5 +427,6 @@ spec:
 mDNS service discovery significantly simplifies MCP Memory Service deployment by eliminating manual endpoint configuration. Combined with automatic HTTPS support, it provides a secure, zero-configuration solution for local network deployments.
 
 For more information, see:
+
 - [Multi-Client Server Deployment Guide](../deployment/multi-client-server.md)
 - [General Troubleshooting](../troubleshooting/general.md)

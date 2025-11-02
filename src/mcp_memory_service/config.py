@@ -150,7 +150,7 @@ def safe_get_bool_env(env_var: str, default: bool) -> bool:
 
 def validate_and_create_path(path: str) -> str:
     """Validate and create a directory path, ensuring it's writable.
-    
+
     This function ensures that the specified directory path exists and is writable.
     It performs several checks and has a retry mechanism to handle potential race
     conditions, especially when running in environments like Claude Desktop where
@@ -160,7 +160,7 @@ def validate_and_create_path(path: str) -> str:
         # Convert to absolute path and expand user directory if present (e.g. ~)
         abs_path = os.path.abspath(os.path.expanduser(path))
         logger.debug(f"Validating path: {abs_path}")
-        
+
         # Create directory and all parents if they don't exist
         try:
             os.makedirs(abs_path, exist_ok=True)
@@ -168,30 +168,30 @@ def validate_and_create_path(path: str) -> str:
         except Exception as e:
             logger.error(f"Error creating directory {abs_path}: {str(e)}")
             raise PermissionError(f"Cannot create directory {abs_path}: {str(e)}")
-            
+
         # Add small delay to prevent potential race conditions on macOS during initial write test
         time.sleep(0.1)
-        
+
         # Verify that the path exists and is a directory
         if not os.path.exists(abs_path):
             logger.error(f"Path does not exist after creation attempt: {abs_path}")
             raise PermissionError(f"Path does not exist: {abs_path}")
-        
+
         if not os.path.isdir(abs_path):
             logger.error(f"Path is not a directory: {abs_path}")
             raise PermissionError(f"Path is not a directory: {abs_path}")
-        
+
         # Write test with retry mechanism
         max_retries = 3
         retry_delay = 0.5
         test_file = os.path.join(abs_path, '.write_test')
-        
+
         for attempt in range(max_retries):
             try:
                 logger.debug(f"Testing write permissions (attempt {attempt+1}/{max_retries}): {test_file}")
                 with open(test_file, 'w') as f:
                     f.write('test')
-                
+
                 if os.path.exists(test_file):
                     logger.debug(f"Successfully wrote test file: {test_file}")
                     os.remove(test_file)
@@ -208,7 +208,7 @@ def validate_and_create_path(path: str) -> str:
                 else:
                     logger.error(f"All write test attempts failed for {abs_path}")
                     raise PermissionError(f"Directory {abs_path} is not writable: {str(e)}")
-        
+
         return abs_path
     except Exception as e:
         logger.error(f"Error validating path {path}: {str(e)}")
@@ -220,7 +220,7 @@ def get_base_directory() -> str:
     # First choice: Environment variable
     if base_dir := os.getenv('MCP_MEMORY_BASE_DIR'):
         return validate_and_create_path(base_dir)
-    
+
     # Second choice: Local app data directory
     home = str(Path.home())
     if sys.platform == 'darwin':  # macOS
@@ -229,13 +229,26 @@ def get_base_directory() -> str:
         base = os.path.join(os.getenv('LOCALAPPDATA', ''), 'mcp-memory')
     else:  # Linux and others
         base = os.path.join(home, '.local', 'share', 'mcp-memory')
-    
-    return validate_and_create_path(base)
+
+    try:
+        return validate_and_create_path(base)
+    except PermissionError as primary_error:
+        fallback_base = os.getenv(
+            'MCP_MEMORY_FALLBACK_DIR',
+            os.path.join(os.getcwd(), '.mcp-memory'),
+        )
+        logger.warning(
+            "Base directory %s not writable (%s); falling back to %s",
+            base,
+            primary_error,
+            fallback_base,
+        )
+        return validate_and_create_path(fallback_base)
 
 # Initialize paths
 try:
     BASE_DIR = get_base_directory()
-    
+
     # Try multiple environment variable names for backups path
     backups_path = None
     for env_var in ['MCP_MEMORY_BACKUPS_PATH', 'mcpMemoryBackupsPath']:
@@ -243,13 +256,36 @@ try:
             backups_path = path
             logger.info(f"Using {env_var}={path} for backups path")
             break
-    
+
     # If no environment variable is set, use the default path
     if not backups_path:
         backups_path = os.path.join(BASE_DIR, 'backups')
         logger.info(f"No backups path environment variable found, using default: {backups_path}")
 
-    BACKUPS_PATH = validate_and_create_path(backups_path)
+    def _ensure_path_with_fallback(preferred: str, directory_name: str) -> str:
+        try:
+            return validate_and_create_path(preferred)
+        except PermissionError as path_error:
+            fallback_base = os.getenv(
+                'MCP_MEMORY_FALLBACK_DIR',
+                os.path.join(os.getcwd(), '.mcp-memory'),
+            )
+            fallback_path = os.path.join(fallback_base, directory_name)
+            logger.warning(
+                "%s path %s not writable (%s); falling back to %s",
+                directory_name,
+                preferred,
+                path_error,
+                fallback_path,
+            )
+            return validate_and_create_path(fallback_path)
+
+    BACKUPS_PATH = _ensure_path_with_fallback(backups_path, 'backups')
+
+    # Maintain backwards compatibility for existing tests and integrations that rely on
+    # the historical CHROMA_PATH constant.
+    chroma_preferred = os.path.join(BASE_DIR, 'chroma')
+    CHROMA_PATH = _ensure_path_with_fallback(chroma_preferred, 'chroma')
 
     # Print the final paths used
     logger.info(f"Using backups path: {BACKUPS_PATH}")
@@ -340,17 +376,17 @@ if STORAGE_BACKEND == 'sqlite_vec' or STORAGE_BACKEND == 'hybrid':
             sqlite_vec_path = path
             logger.info(f"Using {env_var}={path} for SQLite-vec database path")
             break
-    
+
     # If no environment variable is set, use the default path
     if not sqlite_vec_path:
         sqlite_vec_path = os.path.join(BASE_DIR, 'sqlite_vec.db')
         logger.info(f"No SQLite-vec path environment variable found, using default: {sqlite_vec_path}")
-    
+
     # Ensure directory exists for SQLite database
     sqlite_dir = os.path.dirname(sqlite_vec_path)
     if sqlite_dir:
         os.makedirs(sqlite_dir, exist_ok=True)
-    
+
     SQLITE_VEC_PATH = sqlite_vec_path
     logger.info(f"Using SQLite-vec database path: {SQLITE_VEC_PATH}")
 else:
@@ -371,14 +407,14 @@ if STORAGE_BACKEND == 'cloudflare' or STORAGE_BACKEND == 'hybrid':
     CLOUDFLARE_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID')
     CLOUDFLARE_VECTORIZE_INDEX = os.getenv('CLOUDFLARE_VECTORIZE_INDEX')
     CLOUDFLARE_D1_DATABASE_ID = os.getenv('CLOUDFLARE_D1_DATABASE_ID')
-    
+
     # Optional Cloudflare settings
     CLOUDFLARE_R2_BUCKET = os.getenv('CLOUDFLARE_R2_BUCKET')  # For large content storage
     CLOUDFLARE_EMBEDDING_MODEL = os.getenv('CLOUDFLARE_EMBEDDING_MODEL', '@cf/baai/bge-base-en-v1.5')
     CLOUDFLARE_LARGE_CONTENT_THRESHOLD = int(os.getenv('CLOUDFLARE_LARGE_CONTENT_THRESHOLD', '1048576'))  # 1MB
     CLOUDFLARE_MAX_RETRIES = int(os.getenv('CLOUDFLARE_MAX_RETRIES', '3'))
     CLOUDFLARE_BASE_DELAY = float(os.getenv('CLOUDFLARE_BASE_DELAY', '1.0'))
-    
+
     # Validate required settings
     missing_vars = []
     if not CLOUDFLARE_API_TOKEN:
@@ -389,12 +425,12 @@ if STORAGE_BACKEND == 'cloudflare' or STORAGE_BACKEND == 'hybrid':
         missing_vars.append('CLOUDFLARE_VECTORIZE_INDEX')
     if not CLOUDFLARE_D1_DATABASE_ID:
         missing_vars.append('CLOUDFLARE_D1_DATABASE_ID')
-    
+
     if missing_vars:
         logger.error(f"Missing required environment variables for Cloudflare backend: {', '.join(missing_vars)}")
         logger.error("Please set the required variables or switch to a different backend")
         sys.exit(1)
-    
+
     logger.info(f"Using Cloudflare backend with:")
     logger.info(f"  Vectorize Index: {CLOUDFLARE_VECTORIZE_INDEX}")
     logger.info(f"  D1 Database: {CLOUDFLARE_D1_DATABASE_ID}")
@@ -486,7 +522,7 @@ else:
 
 # HTTP Server Configuration
 HTTP_ENABLED = os.getenv('MCP_HTTP_ENABLED', 'false').lower() == 'true'
-HTTP_PORT = safe_get_int_env('MCP_HTTP_PORT', 8000, min_value=1024, max_value=65535)  # Non-privileged ports only
+HTTP_PORT = safe_get_int_env('MCP_HTTP_PORT', 8001, min_value=1024, max_value=65535)  # Non-privileged ports only
 HTTP_HOST = os.getenv('MCP_HTTP_HOST', '0.0.0.0')
 CORS_ORIGINS = os.getenv('MCP_CORS_ORIGINS', '*').split(',')
 SSE_HEARTBEAT_INTERVAL = safe_get_int_env('MCP_SSE_HEARTBEAT', 30, min_value=5, max_value=300)  # 5 seconds to 5 minutes
@@ -572,23 +608,23 @@ CONSOLIDATION_CONFIG = {
         'standard': int(os.getenv('MCP_RETENTION_STANDARD', '30')),
         'temporary': int(os.getenv('MCP_RETENTION_TEMPORARY', '7'))
     },
-    
+
     # Association settings
     'associations_enabled': os.getenv('MCP_ASSOCIATIONS_ENABLED', 'true').lower() == 'true',
     'min_similarity': float(os.getenv('MCP_ASSOCIATION_MIN_SIMILARITY', '0.3')),
     'max_similarity': float(os.getenv('MCP_ASSOCIATION_MAX_SIMILARITY', '0.7')),
     'max_pairs_per_run': int(os.getenv('MCP_ASSOCIATION_MAX_PAIRS', '100')),
-    
+
     # Clustering settings
     'clustering_enabled': os.getenv('MCP_CLUSTERING_ENABLED', 'true').lower() == 'true',
     'min_cluster_size': int(os.getenv('MCP_CLUSTERING_MIN_SIZE', '5')),
     'clustering_algorithm': os.getenv('MCP_CLUSTERING_ALGORITHM', 'dbscan'),  # 'dbscan', 'hierarchical', 'simple'
-    
+
     # Compression settings
     'compression_enabled': os.getenv('MCP_COMPRESSION_ENABLED', 'true').lower() == 'true',
     'max_summary_length': int(os.getenv('MCP_COMPRESSION_MAX_LENGTH', '500')),
     'preserve_originals': os.getenv('MCP_COMPRESSION_PRESERVE_ORIGINALS', 'true').lower() == 'true',
-    
+
     # Forgetting settings
     'forgetting_enabled': os.getenv('MCP_FORGETTING_ENABLED', 'true').lower() == 'true',
     'relevance_threshold': float(os.getenv('MCP_FORGETTING_RELEVANCE_THRESHOLD', '0.1')),
@@ -731,6 +767,15 @@ def validate_oauth_configuration() -> None:
     elif OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES > 1440:  # 24 hours
         warnings.append(f"OAuth access token expiry is very long: {OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES} minutes")
 
+    if OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES <= 0:
+        errors.append(f"OAuth refresh token expiry must be positive: {OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES}")
+    elif OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES > 525600:
+        warnings.append(f"OAuth refresh token expiry is very long: {OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES} minutes")
+    elif OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES < OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES:
+        warnings.append(
+            "OAuth refresh token expiry is shorter than access token expiry; consider increasing for offline access"
+        )
+
     if OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES <= 0:
         errors.append(f"OAuth authorization code expiry must be positive: {OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES}")
     elif OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES > 60:  # 1 hour
@@ -792,6 +837,7 @@ OAUTH_ISSUER = os.getenv('MCP_OAUTH_ISSUER') or get_oauth_issuer()
 
 # OAuth token configuration
 OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES = safe_get_int_env('MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES', 60, min_value=1, max_value=1440)  # 1 minute to 24 hours
+OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES = safe_get_int_env('MCP_OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES', 43200, min_value=5, max_value=525600)  # 5 minutes to 365 days
 OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES = safe_get_int_env('MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES', 10, min_value=1, max_value=60)  # 1 minute to 1 hour
 
 # OAuth security configuration
@@ -802,6 +848,7 @@ if OAUTH_ENABLED:
     logger.info(f"OAuth issuer: {OAUTH_ISSUER}")
     logger.info(f"OAuth JWT algorithm: {get_jwt_algorithm()}")
     logger.info(f"OAuth access token expiry: {OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES} minutes")
+    logger.info(f"OAuth refresh token expiry: {OAUTH_REFRESH_TOKEN_EXPIRE_MINUTES} minutes")
     logger.info(f"Anonymous access allowed: {ALLOW_ANONYMOUS_ACCESS}")
 
     # Warn about potential reverse proxy configuration issues

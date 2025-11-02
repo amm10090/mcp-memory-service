@@ -8,15 +8,16 @@ Natural Memory Triggers uses a sophisticated multi-tier architecture designed fo
 
 ### Performance Tiers
 
-| Tier | Target Latency | Processing | Accuracy | Use Case |
-|------|---------------|------------|-----------|----------|
-| **Instant** | < 50ms | Pattern matching, cache checks | 85% | Common memory-seeking patterns |
-| **Fast** | < 150ms | Lightweight semantic analysis | 90% | Topic shifts, question patterns |
-| **Intensive** | < 500ms | Deep semantic understanding | 95% | Complex context analysis |
+| Tier          | Target Latency | Processing                     | Accuracy | Use Case                        |
+| ------------- | -------------- | ------------------------------ | -------- | ------------------------------- |
+| **Instant**   | < 50ms         | Pattern matching, cache checks | 85%      | Common memory-seeking patterns  |
+| **Fast**      | < 150ms        | Lightweight semantic analysis  | 90%      | Topic shifts, question patterns |
+| **Intensive** | < 500ms        | Deep semantic understanding    | 95%      | Complex context analysis        |
 
 ### Real-World Benchmarks
 
 **Production Performance Metrics:**
+
 - ✅ **85%+ trigger accuracy** across all processing tiers
 - ✅ **<50ms instant analysis** for cached and pattern-matched queries
 - ✅ **<150ms fast analysis** for semantic topic detection
@@ -36,24 +37,28 @@ node memory-mode-controller.js profile speed_focused
 ```
 
 **Configuration:**
+
 - **Max Latency**: 100ms
 - **Enabled Tiers**: Instant only
 - **Background Processing**: Disabled
 - **Cache Aggressiveness**: High
 
 **Best For:**
+
 - Quick coding sessions
 - Pair programming
 - Time-sensitive development work
 - Performance-critical environments
 
 **Trade-offs:**
+
 - Minimal memory awareness
 - Only pattern-based detection
 - No semantic analysis
 - Reduced context accuracy
 
 **Optimization Tips:**
+
 ```bash
 # Increase cache size for better hit rates
 node memory-mode-controller.js config set performance.cacheSize 100
@@ -74,18 +79,21 @@ node memory-mode-controller.js profile balanced
 ```
 
 **Configuration:**
+
 - **Max Latency**: 200ms
 - **Enabled Tiers**: Instant + Fast
 - **Background Processing**: Enabled
 - **Degradation Threshold**: 400ms
 
 **Best For:**
+
 - Daily development work
 - General coding sessions
 - Code reviews and debugging
 - Most productive for regular use
 
 **Optimization Tips:**
+
 ```bash
 # Fine-tune sensitivity for your preference
 node memory-mode-controller.js sensitivity 0.6
@@ -106,18 +114,21 @@ node memory-mode-controller.js profile memory_aware
 ```
 
 **Configuration:**
+
 - **Max Latency**: 500ms
 - **Enabled Tiers**: All (Instant + Fast + Intensive)
 - **Background Processing**: Enabled
 - **Context Analysis**: Deep semantic understanding
 
 **Best For:**
+
 - Architectural decision sessions
 - Complex problem solving
 - Research and exploration work
 - When context quality is paramount
 
 **Optimization Tips:**
+
 ```bash
 # Enable all analysis features
 node memory-mode-controller.js config set performance.enableFullAnalysis true
@@ -138,18 +149,21 @@ node memory-mode-controller.js profile adaptive
 ```
 
 **Configuration:**
+
 - **Max Latency**: Auto-adjusting (100ms - 800ms)
 - **Enabled Tiers**: Dynamic based on usage patterns
 - **User Feedback**: Tracks satisfaction and adjusts
 - **Learning Rate**: 0.05 (configurable)
 
 **Optimization Process:**
+
 1. **Learning Phase** (first 50 interactions): Collects usage data
 2. **Adjustment Phase** (ongoing): Optimizes based on patterns
 3. **Feedback Integration**: Incorporates user satisfaction signals
 4. **Performance Tuning**: Adjusts tiers and thresholds automatically
 
 **Monitoring Adaptive Learning:**
+
 ```bash
 # Check learning progress
 node memory-mode-controller.js metrics --learning
@@ -181,18 +195,21 @@ watch -n 5 "node ~/.claude/hooks/memory-mode-controller.js metrics"
 **Key Metrics to Monitor:**
 
 #### Response Time Metrics
+
 - **Average Latency**: Overall response time across all tiers
 - **Tier-Specific Latency**: Performance breakdown by processing tier
 - **Cache Hit Rate**: Percentage of requests served from cache
 - **Memory Service Latency**: Backend response times
 
 #### Accuracy Metrics
+
 - **Trigger Accuracy**: Percentage of relevant memory retrievals
 - **False Positive Rate**: Percentage of irrelevant triggers
 - **User Satisfaction**: Adaptive feedback scoring
 - **Success Rate**: Overall system effectiveness
 
 #### Resource Usage Metrics
+
 - **Cache Size**: Current semantic cache utilization
 - **Memory Usage**: Node.js heap and memory consumption
 - **CPU Usage**: Processing overhead (available with `--system` flag)
@@ -258,6 +275,7 @@ Cache Performance Analysis:
 ### Cache Optimization Strategies
 
 #### High Hit Rate Strategy
+
 ```bash
 # Increase cache size for better retention
 node memory-mode-controller.js config set performance.cacheSize 100
@@ -267,6 +285,7 @@ node memory-mode-controller.js config set performance.cacheRetentionTime 3600000
 ```
 
 #### Memory-Conscious Strategy
+
 ```bash
 # Reduce cache size for lower memory usage
 node memory-mode-controller.js config set performance.cacheSize 25
@@ -295,6 +314,7 @@ node memory-mode-controller.js config set memoryService.keepAlive true
 ### Backend-Specific Optimization
 
 #### SQLite-vec Backend
+
 ```bash
 # Optimize for local performance
 node memory-mode-controller.js config set memoryService.localOptimizations true
@@ -302,13 +322,15 @@ node memory-mode-controller.js config set memoryService.timeout 3000
 ```
 
 #### Cloudflare Backend
+
 ```bash
 # Optimize for network latency
-node memory-mode-controller.js config set memoryService.timeout 8000
+node memory-mode-controller.js config set memoryService.timeout 8001
 node memory-mode-controller.js config set memoryService.retryAttempts 2
 ```
 
 #### ChromaDB Backend
+
 ```bash
 # Optimize for multi-client access
 node memory-mode-controller.js config set memoryService.timeout 6000
@@ -371,6 +393,7 @@ node memory-mode-controller.js status
 ### CPU Usage Optimization
 
 #### Single-Core Optimization
+
 ```bash
 # Disable background processing for CPU-constrained environments
 node memory-mode-controller.js config set performance.backgroundProcessing false
@@ -380,6 +403,7 @@ node memory-mode-controller.js config set performance.maxConcurrentAnalysis 1
 ```
 
 #### Multi-Core Optimization
+
 ```bash
 # Enable parallel processing (if available)
 node memory-mode-controller.js config set performance.enableParallelProcessing true
@@ -397,6 +421,7 @@ node memory-mode-controller.js config set performance.maxConcurrentAnalysis 3
 **Symptoms**: Response times consistently above target thresholds
 
 **Diagnosis**:
+
 ```bash
 # Identify bottlenecks
 node memory-mode-controller.js metrics --breakdown
@@ -409,6 +434,7 @@ top -p $(pgrep -f memory-mode-controller)
 ```
 
 **Solutions**:
+
 1. **Switch to faster profile**: `node memory-mode-controller.js profile speed_focused`
 2. **Optimize cache**: Increase cache size and check hit rates
 3. **Memory service optimization**: Check backend performance
@@ -419,11 +445,13 @@ top -p $(pgrep -f memory-mode-controller)
 **Symptoms**: Low cache hit rate (< 20%)
 
 **Diagnosis**:
+
 ```bash
 node memory-mode-controller.js cache analyze
 ```
 
 **Solutions**:
+
 1. **Increase cache size**: `node memory-mode-controller.js config set performance.cacheSize 100`
 2. **Adjust cache retention**: Increase cache cleanup threshold
 3. **Pattern analysis**: Review most common missed patterns
@@ -433,6 +461,7 @@ node memory-mode-controller.js cache analyze
 **Symptoms**: Frequent timeout errors in metrics
 
 **Diagnosis**:
+
 ```bash
 # Test memory service responsiveness
 time curl -k https://localhost:8443/api/health
@@ -442,6 +471,7 @@ tail -f ~/Library/Logs/Claude/mcp-server-memory.log
 ```
 
 **Solutions**:
+
 1. **Increase timeout**: `node memory-mode-controller.js config set memoryService.timeout 10000`
 2. **Check backend**: Switch to faster backend if available
 3. **Network optimization**: Ensure local service deployment
@@ -490,6 +520,7 @@ node --inspect ~/.claude/hooks/memory-mode-controller.js status &
 ### Workflow-Specific Optimization
 
 #### Development Sessions
+
 ```bash
 # Morning setup for general development
 node memory-mode-controller.js profile balanced
@@ -497,6 +528,7 @@ node memory-mode-controller.js sensitivity 0.6
 ```
 
 #### Architecture Sessions
+
 ```bash
 # Setup for architecture work
 node memory-mode-controller.js profile memory_aware
@@ -504,6 +536,7 @@ node memory-mode-controller.js sensitivity 0.4
 ```
 
 #### Quick Fixes/Debugging
+
 ```bash
 # Setup for focused debugging
 node memory-mode-controller.js profile speed_focused
@@ -513,6 +546,7 @@ node memory-mode-controller.js sensitivity 0.8
 ### Maintenance Routines
 
 #### Daily Maintenance
+
 ```bash
 # Check system health
 node memory-mode-controller.js health
@@ -527,6 +561,7 @@ fi
 ```
 
 #### Weekly Optimization
+
 ```bash
 # Export performance data for analysis
 node memory-mode-controller.js export metrics > weekly-metrics.json

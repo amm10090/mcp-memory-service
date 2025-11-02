@@ -16,6 +16,7 @@ This setup provides global distribution, automatic scaling, and cost-effective p
 For users who want to get started immediately:
 
 ### Prerequisites
+
 1. **Cloudflare Account**: You need a Cloudflare account with Workers/D1/Vectorize access
 2. **API Token**: Create an API token with these permissions:
    - **Vectorize Edit** (for creating and managing vector indexes)
@@ -114,6 +115,7 @@ wrangler r2 bucket create mcp-memory-content
 If you prefer manual creation via the Cloudflare Dashboard or encounter authentication issues:
 
 **Create Vectorize Index via Dashboard:**
+
 1. Go to [Cloudflare Dashboard → Vectorize](https://dash.cloudflare.com/vectorize)
 2. Click "Create Index"
 3. Name: `mcp-memory-index`
@@ -121,18 +123,21 @@ If you prefer manual creation via the Cloudflare Dashboard or encounter authenti
 5. Metric: `cosine`
 
 **Create D1 Database via Dashboard:**
+
 1. Go to [Cloudflare Dashboard → D1](https://dash.cloudflare.com/d1)
 2. Click "Create Database"
 3. Name: `mcp-memory-db`
 4. Copy the Database ID from the overview page
 
 **Create R2 Bucket via Dashboard (Optional):**
+
 1. Go to [Cloudflare Dashboard → R2](https://dash.cloudflare.com/r2)
 2. Click "Create Bucket"
 3. Name: `mcp-memory-content`
 4. Choose region closest to your location
 
 **Alternative API Creation:**
+
 ```bash
 # Create Vectorize index via API
 curl -X POST "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/vectorize/indexes" \
@@ -232,11 +237,13 @@ python -m src.mcp_memory_service.server
 ### 5.2 Verify Configuration
 
 The service will automatically:
+
 1. Initialize the D1 database schema
 2. Verify access to the Vectorize index
 3. Check R2 bucket access (if configured)
 
 Look for these success messages in the logs:
+
 ```
 INFO:mcp_memory_service.config:Using Cloudflare backend with:
 INFO:mcp_memory_service.config:  Vectorize Index: mcp-memory-index
@@ -248,15 +255,17 @@ INFO:mcp_memory_service.storage.cloudflare:Cloudflare storage backend initialize
 ### 5.3 Test Basic Operations
 
 **Option A: Comprehensive Test Suite**
+
 ```bash
 # Run comprehensive automated tests
 python scripts/test_cloudflare_backend.py
 ```
 
 **Option B: Manual API Testing**
+
 ```bash
 # Store a test memory
-curl -X POST http://localhost:8000/api/memories \
+curl -X POST http://localhost:8001/api/memories \
   -H "Content-Type: application/json" \
   -d '{
     "content": "This is a test memory for Cloudflare backend",
@@ -264,7 +273,7 @@ curl -X POST http://localhost:8000/api/memories \
   }'
 
 # Search memories
-curl -X POST http://localhost:8000/api/memories/search \
+curl -X POST http://localhost:8001/api/memories/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "test memory",
@@ -272,10 +281,11 @@ curl -X POST http://localhost:8000/api/memories/search \
   }'
 
 # Get statistics
-curl http://localhost:8000/api/stats
+curl http://localhost:8001/api/stats
 ```
 
 **Option C: Automated Resource Setup**
+
 ```bash
 # Set up Cloudflare resources automatically
 python scripts/setup_cloudflare_resources.py
@@ -286,10 +296,12 @@ python scripts/setup_cloudflare_resources.py
 ### Data Flow
 
 1. **Content Storage**:
+
    - Small content (<1MB): Stored directly in D1
    - Large content (>1MB): Stored in R2, referenced in D1
 
 2. **Vector Processing**:
+
    - Content → Workers AI → Embedding Vector
    - Vector stored in Vectorize with metadata
    - Semantic search via Vectorize similarity
@@ -353,7 +365,8 @@ ERROR: Missing required environment variables for Cloudflare backend: CLOUDFLARE
 ERROR: Unauthorized - Invalid API token
 ```
 
-**Solution**: 
+**Solution**:
+
 - Verify all required environment variables are set
 - Check API token has correct permissions (Vectorize:Edit, D1:Edit, Workers AI:Read)
 - Ensure token is not expired
@@ -366,7 +379,8 @@ ValueError: Vectorize index 'mcp-memory-index' not found
 ValueError: D1 database not found
 ```
 
-**Solution**: 
+**Solution**:
+
 - Create the Vectorize index or verify the index name is correct
 - Check that resources were created in the correct account
 - Confirm resource IDs/names match exactly
@@ -379,7 +393,8 @@ ValueError: Failed to store vector data
 HTTP 400: Invalid vector data format
 ```
 
-**Solution**: 
+**Solution**:
+
 - Check vector dimensions (must be 768)
 - Verify NDJSON format for vector data
 - Ensure metadata values are properly serialized
@@ -392,7 +407,8 @@ ValueError: Failed to initialize D1 schema
 HTTP 403: Insufficient permissions
 ```
 
-**Solution**: 
+**Solution**:
+
 - Verify D1 database ID and API token permissions
 - Ensure database exists and is accessible
 - Check API token has D1:Edit permissions
@@ -404,7 +420,8 @@ Rate limited after 3 retries
 HTTP 429: Too Many Requests
 ```
 
-**Solution**: 
+**Solution**:
+
 - Increase `CLOUDFLARE_MAX_RETRIES` or `CLOUDFLARE_BASE_DELAY` for more conservative retry behavior
 - Implement exponential backoff (already included)
 - Monitor API usage through Cloudflare dashboard
@@ -423,10 +440,10 @@ python -m src.mcp_memory_service.server --debug
 
 ```bash
 # Check backend health
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 
 # Get detailed statistics
-curl http://localhost:8000/api/stats
+curl http://localhost:8001/api/stats
 ```
 
 ## Limitations
@@ -501,22 +518,23 @@ python scripts/import_to_cloudflare.py /path/to/export.json
 #### 2. Configure Each Machine
 
 **Claude Desktop Configuration** (`claude_desktop_config.json`):
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "/path/to/memory",
-      "args": ["server"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "cloudflare",
-        "MCP_MEMORY_SQLITE_PATH": "/local/backup/path/sqlite_vec.db",
-        "CLOUDFLARE_API_TOKEN": "your-token",
-        "CLOUDFLARE_ACCOUNT_ID": "your-account",
-        "CLOUDFLARE_D1_DATABASE_ID": "your-d1-id",
-        "CLOUDFLARE_VECTORIZE_INDEX": "mcp-memory-index"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "/path/to/memory",
+			"args": ["server"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "cloudflare",
+				"MCP_MEMORY_SQLITE_PATH": "/local/backup/path/sqlite_vec.db",
+				"CLOUDFLARE_API_TOKEN": "your-token",
+				"CLOUDFLARE_ACCOUNT_ID": "your-account",
+				"CLOUDFLARE_D1_DATABASE_ID": "your-d1-id",
+				"CLOUDFLARE_VECTORIZE_INDEX": "mcp-memory-index"
+			}
+		}
+	}
 }
 ```
 
@@ -545,26 +563,31 @@ async def test_sync():
 ### Important Notes
 
 - **v6.13.7 Required**: This version fixes the critical Vectorize ID length issue
-- **Breaking Change**: Vector IDs changed format from v6.13.6 (removed "mem_" prefix)
+- **Breaking Change**: Vector IDs changed format from v6.13.6 (removed "mem\_" prefix)
 - **Backup Strategy**: Local sqlite_vec files are maintained for fallback
 - **Migration Time**: Allow extra time for initial memory migration to Cloudflare
 
 ### Troubleshooting Sync Issues
 
 #### Vector ID Length Error (Fixed in v6.13.7)
+
 ```
 Error: "id too long; max is 64 bytes, got 68 bytes"
 ```
+
 **Solution**: Update to v6.13.7 or later
 
 #### Environment Variable Issues
+
 **Problem**: Memories not syncing between machines
 **Solution**:
+
 - Verify identical environment variables on all machines
 - Check Claude Desktop configuration matches exactly
 - Restart Claude Desktop after config changes
 
 #### Sync Verification
+
 ```bash
 # Check memory count on each machine
 memory status

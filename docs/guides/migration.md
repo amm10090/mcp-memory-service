@@ -27,6 +27,7 @@ python scripts/migrate_chroma_to_sqlite.py
 ```
 
 The script will:
+
 - ✅ Check your existing ChromaDB data
 - ✅ Count all memories to migrate
 - ✅ Ask for confirmation before proceeding
@@ -66,6 +67,7 @@ python scripts/migrate_chroma_to_sqlite.py
 ```
 
 **Example Output:**
+
 ```
 🚀 MCP Memory Service - ChromaDB to SQLite-vec Migration
 ============================================================
@@ -137,24 +139,24 @@ To use the new web interface:
 ```bash
 # Enable HTTP server
 export MCP_HTTP_ENABLED=true
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 
 # Start HTTP server
 python scripts/run_http_server.py
 
-# Open browser to http://localhost:8000
+# Open browser to http://localhost:8001
 ```
 
 ## Configuration Reference
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MCP_MEMORY_STORAGE_BACKEND` | Storage backend (`chroma` or `sqlite_vec`) | `chroma` |
-| `MCP_MEMORY_SQLITE_PATH` | SQLite-vec database file path | `~/.mcp_memory/sqlite_vec.db` |
-| `MCP_HTTP_ENABLED` | Enable HTTP/SSE interface | `false` |
-| `MCP_HTTP_PORT` | HTTP server port | `8000` |
+| Variable                     | Description                                | Default                       |
+| ---------------------------- | ------------------------------------------ | ----------------------------- |
+| `MCP_MEMORY_STORAGE_BACKEND` | Storage backend (`chroma` or `sqlite_vec`) | `chroma`                      |
+| `MCP_MEMORY_SQLITE_PATH`     | SQLite-vec database file path              | `~/.mcp_memory/sqlite_vec.db` |
+| `MCP_HTTP_ENABLED`           | Enable HTTP/SSE interface                  | `false`                       |
+| `MCP_HTTP_PORT`              | HTTP server port                           | `8001`                        |
 
 ### Claude Desktop Configuration
 
@@ -162,21 +164,16 @@ Update your `claude_desktop_config.json`:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/path/to/mcp-memory-service",
-        "run",
-        "memory"
-      ],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "MCP_MEMORY_SQLITE_PATH": "/path/to/memory_migrated.db"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"MCP_MEMORY_SQLITE_PATH": "/path/to/memory_migrated.db"
+			}
+		}
+	}
 }
 ```
 
@@ -185,6 +182,7 @@ Update your `claude_desktop_config.json`:
 ### Common Migration Issues (v5.0.0)
 
 > **If you're experiencing issues with v5.0.0 migration, please use the enhanced migration script:**
+>
 > ```bash
 > python scripts/migrate_v5_enhanced.py --help
 > ```
@@ -194,6 +192,7 @@ Update your `claude_desktop_config.json`:
 **Problem:** Migration script uses hardcoded paths and ignores custom ChromaDB locations.
 
 **Solution:**
+
 ```bash
 # Specify custom paths explicitly
 python scripts/migrate_chroma_to_sqlite.py \
@@ -211,6 +210,7 @@ python scripts/migrate_chroma_to_sqlite.py
 **Problem:** Migration fails with "NOT NULL constraint failed: memories.content_hash"
 
 **Solution:** This has been fixed in v5.0.1. The migration script now generates proper SHA256 hashes. If you encounter this:
+
 1. Update to latest version: `git pull`
 2. Use the enhanced migration script: `python scripts/migrate_v5_enhanced.py`
 
@@ -219,6 +219,7 @@ python scripts/migrate_chroma_to_sqlite.py
 **Problem:** Tags become corrupted during migration, appearing as `['tag1', 'tag2']` instead of `tag1,tag2`
 
 **Solution:** The enhanced migration script includes tag validation and correction:
+
 ```bash
 # Validate existing migration
 python scripts/validate_migration.py /path/to/sqlite.db
@@ -232,6 +233,7 @@ python scripts/migrate_v5_enhanced.py --force
 **Problem:** Migration appears to hang with no progress indication
 
 **Solution:** Use verbose mode and batch size control:
+
 ```bash
 # Run with progress indicators
 pip install tqdm  # For progress bars
@@ -243,6 +245,7 @@ python scripts/migrate_v5_enhanced.py --verbose --batch-size 10
 **Problem:** SSL certificate errors, version conflicts with ChromaDB/sentence-transformers
 
 **Solution:**
+
 ```bash
 # Clean install dependencies
 pip uninstall chromadb sentence-transformers -y
@@ -258,6 +261,7 @@ export SSL_CERT_FILE=""
 #### Validate Your Migration
 
 After migration, always validate the data:
+
 ```bash
 # Basic validation
 python scripts/validate_migration.py
@@ -271,12 +275,14 @@ python scripts/validate_migration.py --compare --chroma-path ~/.mcp_memory_chrom
 If migration failed or corrupted data:
 
 1. **Restore from backup:**
+
    ```bash
    # If you created a backup
    python scripts/restore_memories.py migration_backup.json
    ```
 
 2. **Rollback to ChromaDB:**
+
    ```bash
    # Temporarily switch back
    export MCP_MEMORY_STORAGE_BACKEND=chroma
@@ -284,10 +290,11 @@ If migration failed or corrupted data:
    ```
 
 3. **Re-migrate with enhanced script:**
+
    ```bash
    # Clean the target database
    rm /path/to/sqlite_vec.db
-   
+
    # Use enhanced migration
    python scripts/migrate_v5_enhanced.py \
      --chroma-path /path/to/chroma \
@@ -307,16 +314,19 @@ If you continue to experience issues:
 ### Migration Best Practices
 
 1. **Always backup first:**
+
    ```bash
    cp -r ~/.mcp_memory_chroma ~/.mcp_memory_chroma_backup
    ```
 
 2. **Test with dry-run:**
+
    ```bash
    python scripts/migrate_v5_enhanced.py --dry-run
    ```
 
 3. **Validate after migration:**
+
    ```bash
    python scripts/validate_migration.py
    ```
@@ -327,6 +337,7 @@ If you continue to experience issues:
    - Keep backups for at least a week
 
 **"Migration verification failed"**
+
 - Some memories may have failed to migrate
 - Check error summary in migration output
 - Consider re-running migration
@@ -334,22 +345,24 @@ If you continue to experience issues:
 ### Runtime Issues
 
 **"Storage backend not found"**
+
 - Ensure `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`
 - Check that SQLite-vec dependencies are installed
 
 **"Database file not found"**
+
 - Verify `MCP_MEMORY_SQLITE_PATH` points to migrated database
 - Check file permissions
 
 ### Performance Comparison
 
-| Aspect | ChromaDB | SQLite-vec |
-|--------|----------|------------|
-| Startup time | ~2-3 seconds | ~0.5 seconds |
-| Memory usage | ~100-200MB | ~20-50MB |
-| Storage | Directory + files | Single file |
-| Dependencies | chromadb, sqlite | sqlite-vec only |
-| Scalability | Better for >10k memories | Optimal for <10k memories |
+| Aspect       | ChromaDB                 | SQLite-vec                |
+| ------------ | ------------------------ | ------------------------- |
+| Startup time | ~2-3 seconds             | ~0.5 seconds              |
+| Memory usage | ~100-200MB               | ~20-50MB                  |
+| Storage      | Directory + files        | Single file               |
+| Dependencies | chromadb, sqlite         | sqlite-vec only           |
+| Scalability  | Better for >10k memories | Optimal for <10k memories |
 
 ## Rollback Plan
 
@@ -378,12 +391,14 @@ After successful migration:
 ## Support
 
 If you encounter issues:
+
 1. Check the migration output and error messages
 2. Verify environment variables are set correctly
 3. Test with a small subset of data first
 4. Review logs for detailed error information
 
 The migration preserves all your data including:
+
 - Memory content and metadata
 - Tags and timestamps
 - Content hashes (for deduplication)

@@ -7,18 +7,22 @@ This document catalogs available APIs exposed via the MCP servers and summarizes
 Defined in `src/mcp_memory_service/mcp_server.py` using `@mcp.tool()`:
 
 - `store_memory(content, tags=None, memory_type="note", metadata=None, client_hostname=None)`
+
   - Stores a new memory; tags and metadata optional. If `INCLUDE_HOSTNAME=true`, a `source:<hostname>` tag and `hostname` metadata are added.
   - Response: `{ success: bool, message: str, content_hash: str }`.
 
 - `retrieve_memory(query, n_results=5, min_similarity=0.0)`
+
   - Semantic search by query; returns up to `n_results` matching memories.
   - Response: `{ memories: [{ content, content_hash, tags, memory_type, created_at, similarity_score }...], query, total_results }`.
 
 - `search_by_tag(tags, match_all=False)`
+
   - Search by a tag or list of tags. `match_all=true` requires all tags; otherwise any.
   - Response: `{ memories: [{ content, content_hash, tags, memory_type, created_at }...], search_tags: [...], match_all, total_results }`.
 
 - `delete_memory(content_hash)`
+
   - Deletes a memory by its content hash.
   - Response: `{ success: bool, message: str, content_hash }`.
 
@@ -26,7 +30,7 @@ Defined in `src/mcp_memory_service/mcp_server.py` using `@mcp.tool()`:
   - Health and status of the configured backend.
   - Response: `{ status: "healthy"|"error", backend, statistics: { total_memories, total_tags, storage_size, last_backup }, timestamp? }`.
 
-Transport: `mcp.run("streamable-http")`, default host `0.0.0.0`, default port `8000` or `MCP_SERVER_PORT`/`MCP_SERVER_HOST`.
+Transport: `mcp.run("streamable-http")`, default host `0.0.0.0`, default port `8001` or `MCP_SERVER_PORT`/`MCP_SERVER_HOST`.
 
 ## MCP (stdio) Server Tools and Prompts
 
@@ -80,4 +84,3 @@ Delete by hash:
 tool: delete_memory
 args: { "content_hash": "<hash>" }
 ```
-

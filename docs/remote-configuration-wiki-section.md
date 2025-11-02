@@ -16,68 +16,72 @@ The MCP Memory Service includes a Node.js bridge that translates HTTP API calls 
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_HTTP_ENDPOINT": "https://your-server:8000/api",
-        "MCP_MEMORY_API_KEY": "your-secure-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_HTTP_ENDPOINT": "https://your-server:8001/api",
+				"MCP_MEMORY_API_KEY": "your-secure-api-key"
+			}
+		}
+	}
 }
 ```
 
 ### Configuration Options
 
 #### Manual Endpoint Configuration (Recommended for Remote Servers)
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_HTTP_ENDPOINT": "https://your-server:8000/api",
-        "MCP_MEMORY_API_KEY": "your-secure-api-key",
-        "MCP_MEMORY_AUTO_DISCOVER": "false",
-        "MCP_MEMORY_PREFER_HTTPS": "true"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_HTTP_ENDPOINT": "https://your-server:8001/api",
+				"MCP_MEMORY_API_KEY": "your-secure-api-key",
+				"MCP_MEMORY_AUTO_DISCOVER": "false",
+				"MCP_MEMORY_PREFER_HTTPS": "true"
+			}
+		}
+	}
 }
 ```
 
 #### Auto-Discovery (For Local Network)
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "node",
-      "args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
-      "env": {
-        "MCP_MEMORY_AUTO_DISCOVER": "true",
-        "MCP_MEMORY_PREFER_HTTPS": "true",
-        "MCP_MEMORY_API_KEY": "your-api-key"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "node",
+			"args": ["/path/to/mcp-memory-service/examples/http-mcp-bridge.js"],
+			"env": {
+				"MCP_MEMORY_AUTO_DISCOVER": "true",
+				"MCP_MEMORY_PREFER_HTTPS": "true",
+				"MCP_MEMORY_API_KEY": "your-api-key"
+			}
+		}
+	}
 }
 ```
 
 ### Step-by-Step Setup
 
 1. **Download the HTTP Bridge**
+
    - Copy [`examples/http-mcp-bridge.js`](https://github.com/doobidoo/mcp-memory-service/blob/main/examples/http-mcp-bridge.js) to your local machine
 
 2. **Update Configuration**
+
    - Open your Claude Desktop configuration file:
      - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
      - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
    - Add the remote server configuration (see examples above)
    - Replace `/path/to/mcp-memory-service/examples/http-mcp-bridge.js` with the actual path
-   - Replace `https://your-server:8000/api` with your server's endpoint
+   - Replace `https://your-server:8001/api` with your server's endpoint
    - Replace `your-secure-api-key` with your actual API key
 
 3. **Verify Connection**
@@ -98,24 +102,26 @@ The HTTP-to-MCP bridge supports:
 
 ### Environment Variables Reference
 
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `MCP_HTTP_ENDPOINT` | Remote server API endpoint (Streamable HTTP lives at `/mcp`; REST at `/api`) | `http://localhost:8000/api` | `https://myserver.com:8000/api` |
-| `MCP_MEMORY_API_KEY` | Authentication token for client bridge (server uses `MCP_API_KEY`) | None | `abc123xyz789` |
-| `MCP_MEMORY_AUTO_DISCOVER` | Enable mDNS service discovery | `false` | `true` |
-| `MCP_MEMORY_PREFER_HTTPS` | Prefer HTTPS over HTTP when discovering | `true` | `false` |
+| Variable                   | Description                                                                  | Default                     | Example                         |
+| -------------------------- | ---------------------------------------------------------------------------- | --------------------------- | ------------------------------- |
+| `MCP_HTTP_ENDPOINT`        | Remote server API endpoint (Streamable HTTP lives at `/mcp`; REST at `/api`) | `http://localhost:8001/api` | `https://myserver.com:8001/api` |
+| `MCP_MEMORY_API_KEY`       | Authentication token for client bridge (server uses `MCP_API_KEY`)           | None                        | `abc123xyz789`                  |
+| `MCP_MEMORY_AUTO_DISCOVER` | Enable mDNS service discovery                                                | `false`                     | `true`                          |
+| `MCP_MEMORY_PREFER_HTTPS`  | Prefer HTTPS over HTTP when discovering                                      | `true`                      | `false`                         |
 
 ### Troubleshooting Remote Connections
 
 #### Connection Refused
+
 - **Issue**: Bridge can't connect to the remote server
 - **Solutions**:
   - Verify the server is running and accessible
-  - Check firewall rules allow connections on port 8000
+  - Check firewall rules allow connections on port 8001
   - Confirm the endpoint URL is correct
-  - Test with curl: `curl https://your-server:8000/api/health`
+  - Test with curl: `curl https://your-server:8001/api/health`
 
 #### SSL Certificate Issues
+
 - **Issue**: HTTPS connections fail with SSL errors
 - **Solutions**:
   - The bridge automatically accepts self-signed certificates
@@ -123,6 +129,7 @@ The HTTP-to-MCP bridge supports:
   - Check server logs for SSL configuration issues
 
 #### API Key Authentication Failed
+
 - **Issue**: Server returns 401 Unauthorized
 - **Solutions**:
   - Verify the API key is correctly set on the server
@@ -130,6 +137,7 @@ The HTTP-to-MCP bridge supports:
   - Ensure no extra whitespace in the API key value
 
 #### Service Discovery Not Working
+
 - **Issue**: Auto-discovery can't find the service
 - **Solutions**:
   - Use manual endpoint configuration instead
@@ -137,6 +145,7 @@ The HTTP-to-MCP bridge supports:
   - Check if mDNS/Bonjour is enabled on your network
 
 #### Bridge Logs Not Appearing
+
 - **Issue**: Can't see bridge connection logs
 - **Solutions**:
   - Bridge logs appear in Claude Desktop's console/stderr
@@ -146,9 +155,10 @@ The HTTP-to-MCP bridge supports:
 ### Complete Example Files
 
 For complete working examples, see:
+
 - [`examples/claude-desktop-http-config.json`](https://github.com/doobidoo/mcp-memory-service/blob/main/examples/claude-desktop-http-config.json) - Complete configuration template
 - [`examples/http-mcp-bridge.js`](https://github.com/doobidoo/mcp-memory-service/blob/main/examples/http-mcp-bridge.js) - Full bridge implementation with documentation
 
 ---
 
-*This section should be added to the existing "1. Claude Desktop Integration" section of the 03 Integration Guide wiki page, positioned after the basic local configuration examples.*
+_This section should be added to the existing "1. Claude Desktop Integration" section of the 03 Integration Guide wiki page, positioned after the basic local configuration examples._

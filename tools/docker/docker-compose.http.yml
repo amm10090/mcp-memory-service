@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Docker Compose configuration for HTTP/API mode
 # Usage: docker-compose -f docker-compose.http.yml up -d
 
@@ -9,7 +7,7 @@ services:
       context: ../..
       dockerfile: tools/docker/Dockerfile
     ports:
-      - "${HTTP_PORT:-8000}:8000"  # Map to different port if needed
+      - '${HTTP_PORT:-8081}:8001' # Map to different port if needed
     volumes:
       # Single data directory for all storage
       - ./data:/app/data
@@ -23,28 +21,38 @@ services:
     environment:
       # Mode selection
       - MCP_MODE=http
-      
+
       # Storage configuration
-      - MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
-      - MCP_MEMORY_SQLITE_PATH=/app/data/sqlite_vec.db
-      - MCP_MEMORY_BACKUPS_PATH=/app/data/backups
-      
+      - MCP_MEMORY_STORAGE_BACKEND=cloudflare
+      - CLOUDFLARE_API_TOKEN=8hsVk6pEey-6qEy-DPJowSlYMSk0-pq_ARNrcGnk
+      - CLOUDFLARE_ACCOUNT_ID=198ba79e8177dcc4ca65de919cbfc722
+      - CLOUDFLARE_D1_DATABASE_ID=2bb9ef18-9e17-4356-abe8-fadb3be4df59
+      - CLOUDFLARE_VECTORIZE_INDEX=your-index-name
       # HTTP configuration
-      - MCP_HTTP_PORT=8000
+      - MCP_HTTP_PORT=8001
       - MCP_HTTP_HOST=0.0.0.0
-      - MCP_API_KEY=${MCP_API_KEY:-your-secure-api-key-here}
-      
+      - MCP_HTTP_ENABLED=true
+      # Authentication configuration
+      - MCP_OAUTH_ENABLED=flease
+      - MCP_OAUTH_ISSUER=http://localhost:8081 # Match server port
+      - MCP_HTTPS_ENABLED=false # Optional for localhost
+      - MCP_OAUTH_ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - MCP_OAUTH_AUTHORIZATION_CODE_EXPIRE_MINUTES=10
+
+      # Service Discovery
+      - MCP_MDNS_ENABLED=true
+      - MCP_MDNS_SERVICE_NAME=memory
       # Optional: HTTPS configuration
       # - MCP_HTTPS_ENABLED=true
       # - MCP_HTTPS_PORT=8443
       # - MCP_SSL_CERT_FILE=/app/certs/cert.pem
       # - MCP_SSL_KEY_FILE=/app/certs/key.pem
-      
+
       # Performance tuning
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_LEVEL=DEBUG
       - MAX_RESULTS_PER_QUERY=10
       - SIMILARITY_THRESHOLD=0.7
-      
+
       # Python configuration
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app/src
@@ -52,19 +60,19 @@ services:
       # Offline mode (uncomment if models are pre-cached and network is restricted)
       # - HF_HUB_OFFLINE=1
       # - TRANSFORMERS_OFFLINE=1
-    
+
     # Use the unified entrypoint
-    entrypoint: ["/usr/local/bin/docker-entrypoint-unified.sh"]
-    
+    entrypoint: ['/usr/local/bin/docker-entrypoint-unified.sh']
+
     restart: unless-stopped
-    
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    
+
     # Resource limits (optional, adjust as needed)
     deploy:
       resources:

@@ -5,6 +5,7 @@ This document provides a real-world demonstration of MCP Memory Service capabili
 ## Session Overview
 
 This walkthrough demonstrates:
+
 - **🐛 Debugging and Problem Resolution** - Troubleshooting installation issues
 - **🔧 Development Workflows** - Code fixes, testing, and deployment
 - **📚 Documentation Creation** - Comprehensive guide development
@@ -19,11 +20,13 @@ This walkthrough demonstrates:
 **Issue**: Missing `aiohttp` dependency caused memory service startup failures.
 
 **Memory Service in Action**:
+
 ```
 Error storing memory: No module named 'aiohttp'
 ```
 
 **Solution Process**:
+
 1. **Identified the root cause**: Missing dependency not included in installer
 2. **Manual fix**: Added `aiohttp>=3.8.0` to `pyproject.toml`
 3. **Installer enhancement**: Updated `install.py` to handle aiohttp automatically
@@ -38,16 +41,18 @@ Error storing memory: No module named 'aiohttp'
 **Debugging Session Workflow**:
 
 1. **Problem Identification**
+
    ```bash
    # Server status showed "failed"
    # Core issue: "uv" command not found
    ```
 
 2. **Manual Resolution**
+
    ```bash
    # Install uv manually
    curl -LsSf https://astral.sh/uv/install.sh | sh
-   
+
    # Update configuration to use full path
    /home/hkr/.local/bin/uv
    ```
@@ -73,12 +78,14 @@ Error storing memory: No module named 'aiohttp'
 **Key Findings Stored in Memory**:
 
 ❌ **Why Cloud Storage Doesn't Work**:
+
 - File locking conflicts with cloud sync
-- Database corruption from incomplete syncs  
+- Database corruption from incomplete syncs
 - Sync conflicts create "conflicted copy" files
 - Performance issues (full file re-upload)
 
 ✅ **Recommended Solution**:
+
 - Centralized HTTP/SSE server deployment
 - Real-time sync via Server-Sent Events
 - Cross-platform HTTP API access
@@ -87,12 +94,14 @@ Error storing memory: No module named 'aiohttp'
 ### Solution Implementation
 
 **Memory Service Revealed Existing Capabilities**:
+
 - Full FastAPI HTTP server already built-in
 - Server-Sent Events (SSE) for real-time updates
 - CORS support and API authentication
 - Complete REST API with documentation
 
 **Deployment Commands**:
+
 ```bash
 # Server setup
 python install.py --server-mode --enable-http-api
@@ -101,9 +110,9 @@ export MCP_API_KEY="your-secure-key"
 python scripts/run_http_server.py
 
 # Access points
-# API: http://server:8000/api/docs
-# Dashboard: http://server:8000/
-# SSE: http://server:8000/api/events/stream
+# API: http://server:8001/api/docs
+# Dashboard: http://server:8001/
+# SSE: http://server:8001/api/events/stream
 ```
 
 ## Part 3: Comprehensive Documentation Creation
@@ -113,12 +122,14 @@ python scripts/run_http_server.py
 The session produced **900+ lines of documentation** covering:
 
 1. **[Multi-Client Deployment Guide](../integration/multi-client.md)**
+
    - Centralized server deployment
    - Cloud storage limitations
    - Docker and cloud platform examples
    - Security and performance tuning
 
 2. **HTTP-to-MCP Bridge** (`examples/http-mcp-bridge.js`)
+
    - Node.js bridge for client integration
    - JSON-RPC to REST API translation
 
@@ -136,15 +147,17 @@ The session produced **900+ lines of documentation** covering:
 Throughout the session, the memory service demonstrated:
 
 **Storage Operations**:
+
 ```
 ✅ License change completion details
-✅ Multi-client deployment solutions  
+✅ Multi-client deployment solutions
 ✅ Technical analysis of SQLite limitations
 ✅ Complete debugging session summary
 ✅ Documentation update records
 ```
 
 **Retrieval and Organization**:
+
 ```
 🔍 Tag-based searches: ["license", "apache-2.0", "multi-client"]
 🔍 Semantic queries: "SQLite cloud storage", "HTTP server deployment"
@@ -152,6 +165,7 @@ Throughout the session, the memory service demonstrated:
 ```
 
 **Memory Cleanup**:
+
 ```
 🧹 Identified redundant information
 🧹 Removed duplicate multi-client entries
@@ -162,11 +176,13 @@ Throughout the session, the memory service demonstrated:
 ### Advanced Memory Features
 
 **Content Hashing**: Automatic duplicate detection
+
 ```
 Hash: 84b3e7e7be92074154696852706d79b8e6186dad6c58dec608943b3cd537a8f7
 ```
 
 **Metadata Management**: Tags, types, and timestamps
+
 ```
 Tags: documentation, multi-client, deployment, http-server
 Type: documentation-update
@@ -174,12 +190,13 @@ Created: 2025-01-XX (ISO format)
 ```
 
 **Health Monitoring**: Database statistics and performance
+
 ```json
 {
-  "total_memories": 7,
-  "database_size_mb": 1.56,
-  "backend": "sqlite-vec",
-  "embedding_model": "all-MiniLM-L6-v2"
+	"total_memories": 7,
+	"database_size_mb": 1.56,
+	"backend": "sqlite-vec",
+	"embedding_model": "all-MiniLM-L6-v2"
 }
 ```
 
@@ -188,11 +205,13 @@ Created: 2025-01-XX (ISO format)
 ### License Management
 
 **Decision Process**:
+
 - Evaluated MIT vs Apache 2.0 vs other licenses
 - Considered enterprise adoption and patent protection
 - Made production-ready licensing decision
 
 **Implementation**:
+
 - Complete license change from MIT to Apache 2.0
 - Added copyright headers to 75 Python files
 - Updated badges and documentation
@@ -225,8 +244,9 @@ graph LR
 ### 3. Collaborative Knowledge Building
 
 The session built up a comprehensive knowledge base including:
+
 - Technical limitations and solutions
-- Architecture decisions and rationale  
+- Architecture decisions and rationale
 - Complete deployment guides
 - Troubleshooting procedures
 - Best practices and recommendations
@@ -259,6 +279,7 @@ The session built up a comprehensive knowledge base including:
 ### SQLite-vec Performance
 
 The session database remained performant throughout:
+
 - **7 memories stored** with rich metadata
 - **1.56 MB database size** - lightweight and fast
 - **Sub-millisecond queries** for retrieval operations
@@ -267,6 +288,7 @@ The session database remained performant throughout:
 ### HTTP/SSE Server Capabilities
 
 Discovered comprehensive server functionality:
+
 - **FastAPI integration** with automatic API documentation
 - **Real-time updates** via Server-Sent Events
 - **CORS and authentication** for production deployment
@@ -275,6 +297,7 @@ Discovered comprehensive server functionality:
 ### Development Tools Integration
 
 The session showcased integration with:
+
 - **Git workflows**: Systematic commits with detailed messages
 - **Documentation tools**: Markdown, code examples, configuration files
 - **Package management**: uv, pip, dependency resolution
@@ -285,7 +308,7 @@ The session showcased integration with:
 This session demonstrates the MCP Memory Service as a powerful tool for:
 
 - **🧠 Knowledge Management**: Persistent memory across development sessions
-- **🔧 Problem Solving**: Systematic debugging and solution development  
+- **🔧 Problem Solving**: Systematic debugging and solution development
 - **📚 Documentation**: Comprehensive guide creation and maintenance
 - **🌐 Architecture**: Multi-client deployment and scaling solutions
 - **👥 Team Collaboration**: Shared knowledge and decision tracking
@@ -296,4 +319,4 @@ The memory service transforms from a simple storage tool into a **development wo
 
 ---
 
-*This walkthrough is based on an actual development session demonstrating real-world MCP Memory Service usage patterns and capabilities.*
+_This walkthrough is based on an actual development session demonstrating real-world MCP Memory Service usage patterns and capabilities._

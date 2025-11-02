@@ -87,9 +87,9 @@ async def mcp_server_lifespan(server: FastMCP) -> AsyncIterator[MCPServerContext
 
 # Create FastMCP server instance
 mcp = FastMCP(
-    name="MCP Memory Service", 
+    name="MCP Memory Service",
     host="0.0.0.0",  # Listen on all interfaces for remote access
-    port=8000,       # Default port
+    port=8001,       # Default port
     lifespan=mcp_server_lifespan,
     stateless_http=True  # Enable stateless HTTP for Claude Code compatibility
 )
@@ -290,13 +290,13 @@ async def list_memories(
 ) -> Dict[str, Any]:
     """
     List memories with pagination and optional filtering.
-    
+
     Args:
         page: Page number (1-based)
         page_size: Number of memories per page
         tag: Filter by specific tag
         memory_type: Filter by memory type
-    
+
     Returns:
         Dictionary with memories and pagination info
     """
@@ -318,12 +318,12 @@ async def list_memories(
 def main():
     """Main entry point for the FastAPI MCP server."""
     # Configure for Claude Code integration
-    port = int(os.getenv("MCP_SERVER_PORT", "8000"))
+    port = int(os.getenv("MCP_SERVER_PORT", "8001"))
     host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")
-    
+
     logger.info(f"Starting MCP Memory Service FastAPI server on {host}:{port}")
     logger.info(f"Storage backend: {STORAGE_BACKEND}")
-    
+
     # Run server with streamable HTTP transport
     mcp.run("streamable-http")
 

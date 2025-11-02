@@ -53,6 +53,7 @@ export MCP_MEMORY_SQLITE_PATH=/path/to/your/memory.db
 ### Platform-Specific Setup
 
 #### macOS (Bash/Zsh)
+
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
@@ -60,6 +61,7 @@ export MCP_MEMORY_SQLITE_PATH="$HOME/Library/Application Support/mcp-memory/sqli
 ```
 
 #### Windows (PowerShell)
+
 ```powershell
 # Add to PowerShell profile
 $env:MCP_MEMORY_STORAGE_BACKEND = "sqlite_vec"
@@ -67,12 +69,14 @@ $env:MCP_MEMORY_SQLITE_PATH = "$env:LOCALAPPDATA\mcp-memory\sqlite_vec.db"
 ```
 
 #### Windows (Command Prompt)
+
 ```cmd
 set MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 set MCP_MEMORY_SQLITE_PATH=%LOCALAPPDATA%\mcp-memory\sqlite_vec.db
 ```
 
 #### Linux
+
 ```bash
 # Add to ~/.bashrc
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
@@ -85,15 +89,15 @@ Update your Claude Desktop MCP configuration:
 
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec"
+			}
+		}
+	}
 }
 ```
 
@@ -119,11 +123,13 @@ python scripts/migrate_storage.py \
 ### Manual Migration Steps
 
 1. **Stop the MCP Memory Service**
+
    ```bash
    # Stop Claude Desktop or any running instances
    ```
 
 2. **Create a backup** (recommended)
+
    ```bash
    python scripts/migrate_storage.py \
      --from chroma \
@@ -135,6 +141,7 @@ python scripts/migrate_storage.py \
    ```
 
 3. **Set environment variables**
+
    ```bash
    export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
    ```
@@ -170,11 +177,11 @@ asyncio.run(check_stats())
 
 ### Memory Usage
 
-| Collection Size | ChromaDB RAM | SQLite-vec RAM | Difference |
-|----------------|--------------|----------------|------------|
-| 1,000 memories | ~200 MB | ~50 MB | -75% |
-| 10,000 memories | ~800 MB | ~200 MB | -75% |
-| 100,000 memories | ~4 GB | ~1 GB | -75% |
+| Collection Size  | ChromaDB RAM | SQLite-vec RAM | Difference |
+| ---------------- | ------------ | -------------- | ---------- |
+| 1,000 memories   | ~200 MB      | ~50 MB         | -75%       |
+| 10,000 memories  | ~800 MB      | ~200 MB        | -75%       |
+| 100,000 memories | ~4 GB        | ~1 GB          | -75%       |
 
 ### Query Performance
 
@@ -211,8 +218,9 @@ SQLite-vec supports advanced multi-client access through **two complementary app
 #### Phase 1: WAL Mode (Default)
 
 The backend automatically enables WAL mode with these default settings:
+
 - **WAL Mode**: Enables multiple readers + single writer
-- **Busy Timeout**: 5 seconds (prevents immediate lock errors)  
+- **Busy Timeout**: 5 seconds (prevents immediate lock errors)
 - **Synchronous**: NORMAL (balanced performance/safety)
 
 #### Phase 2: HTTP Server Auto-Detection (Advanced)
@@ -220,11 +228,13 @@ The backend automatically enables WAL mode with these default settings:
 The system automatically detects the optimal coordination mode:
 
 **Auto-Detection Modes:**
+
 - **`http_client`**: Existing HTTP server detected → Connect as client
 - **`http_server`**: No server found, port available → Start HTTP server
 - **`direct`**: Port in use by other service → Fall back to WAL mode
 
 **Coordination Flow:**
+
 1. Check if MCP Memory Service HTTP server is running
 2. If found → Use HTTP client to connect to existing server
 3. If not found and port available → Auto-start HTTP server (optional)
@@ -258,7 +268,7 @@ Enable automatic HTTP server coordination for optimal multi-client access:
 export MCP_HTTP_ENABLED=true
 
 # Configure HTTP server settings (optional)
-export MCP_HTTP_PORT=8000
+export MCP_HTTP_PORT=8001
 export MCP_HTTP_HOST=localhost
 
 # Combine with SQLite-vec backend
@@ -268,12 +278,14 @@ export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 **Coordination Modes Explained:**
 
 1. **Automatic Mode (Recommended)**
+
    ```bash
    # No configuration needed - auto-detects best mode
    export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
    ```
 
 2. **Forced HTTP Client Mode**
+
    ```bash
    # Always connect to existing server (fails if none running)
    export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
@@ -292,51 +304,55 @@ export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 #### Multi-Client Claude Desktop Configuration
 
 **Option 1: Automatic Coordination (Recommended)**
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "MCP_HTTP_ENABLED": "true"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"MCP_HTTP_ENABLED": "true"
+			}
+		}
+	}
 }
 ```
 
 **Option 2: Manual HTTP Server + Client Mode**
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv", 
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "MCP_HTTP_ENABLED": "false"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"MCP_HTTP_ENABLED": "false"
+			}
+		}
+	}
 }
 ```
-*Note: Requires manually running `python scripts/run_http_server.py` first*
+
+_Note: Requires manually running `python scripts/run_http_server.py` first_
 
 **Option 3: WAL Mode Only (Simple)**
+
 ```json
 {
-  "mcpServers": {
-    "memory": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
-        "MCP_MEMORY_SQLITE_PRAGMAS": "busy_timeout=10000"
-      }
-    }
-  }
+	"mcpServers": {
+		"memory": {
+			"command": "uv",
+			"args": ["--directory", "/path/to/mcp-memory-service", "run", "memory"],
+			"env": {
+				"MCP_MEMORY_STORAGE_BACKEND": "sqlite_vec",
+				"MCP_MEMORY_SQLITE_PRAGMAS": "busy_timeout=10000"
+			}
+		}
+	}
 }
 ```
 
@@ -351,15 +367,15 @@ from src.mcp_memory_service.storage.sqlite_vec import SqliteVecMemoryStorage
 async def optimize():
     storage = SqliteVecMemoryStorage('path/to/db')
     await storage.initialize()
-    
+
     # Clean up duplicates
     count, msg = await storage.cleanup_duplicates()
     print(f'Cleaned up {count} duplicates')
-    
+
     # Vacuum database
     storage.conn.execute('VACUUM')
     print('Database vacuumed')
-    
+
     storage.close()
 
 asyncio.run(optimize())
@@ -391,10 +407,13 @@ python scripts/migrate_storage.py \
 ### Common Issues
 
 #### 1. sqlite-vec Not Found
+
 ```
 ImportError: No module named 'sqlite_vec'
 ```
+
 **Solution**: Install sqlite-vec package
+
 ```bash
 pip install sqlite-vec
 # or
@@ -402,6 +421,7 @@ uv add sqlite-vec
 ```
 
 #### 2. Database Lock Errors
+
 ```
 sqlite3.OperationalError: database is locked
 ```
@@ -409,6 +429,7 @@ sqlite3.OperationalError: database is locked
 **✅ Fixed in v8.9.0** - Proper SQLite pragmas now automatically configured by installer
 
 **For Single Client Issues:**
+
 ```bash
 # Kill existing processes
 pkill -f "mcp-memory-service"
@@ -416,6 +437,7 @@ pkill -f "mcp-memory-service"
 ```
 
 **For Multi-Client Setup (Claude Desktop + Claude Code + HTTP Server):**
+
 ```bash
 # v8.9.0+ Solution: Configure recommended pragma values
 export MCP_MEMORY_SQLITE_PRAGMAS="busy_timeout=15000,cache_size=20000"
@@ -438,18 +460,22 @@ rm /path/to/your/database-shm
 ```
 
 **Prevention Tips:**
+
 - Always use WAL mode (enabled by default)
 - Configure appropriate busy timeouts for your use case
 - Ensure proper shutdown of MCP clients
 - Use connection retry logic (built-in)
 
 #### 5. HTTP Coordination Issues
+
 ```
 Failed to initialize HTTP client storage: Connection refused
 ```
+
 **Solutions:**
 
 **Auto-Detection Problems:**
+
 ```bash
 # Check if HTTP server auto-start is working
 export LOG_LEVEL=DEBUG
@@ -464,6 +490,7 @@ print(asyncio.run(detect_server_coordination_mode()))
 ```
 
 **Manual HTTP Server Setup:**
+
 ```bash
 # Start HTTP server manually in separate terminal
 python scripts/run_http_server.py
@@ -472,16 +499,18 @@ python scripts/run_http_server.py
 ```
 
 **Port Conflicts:**
+
 ```bash
 # Check what's using the port
-netstat -an | grep :8000  # Linux/macOS
-netstat -an | findstr :8000  # Windows
+netstat -an | grep :8001  # Linux/macOS
+netstat -an | findstr :8001  # Windows
 
 # Use different port
 export MCP_HTTP_PORT=8001
 ```
 
 **Fallback to WAL Mode:**
+
 ```bash
 # Force WAL mode if HTTP coordination fails
 export MCP_HTTP_ENABLED=false
@@ -489,10 +518,13 @@ export MCP_HTTP_ENABLED=false
 ```
 
 #### 3. Permission Errors
+
 ```
 PermissionError: [Errno 13] Permission denied
 ```
+
 **Solution**: Check database file permissions
+
 ```bash
 # Fix permissions
 chmod 644 /path/to/sqlite_vec.db
@@ -500,10 +532,13 @@ chmod 755 /path/to/directory
 ```
 
 #### 4. Migration Failures
+
 ```
 Migration failed: No memories found
 ```
+
 **Solution**: Verify source path and initialize if needed
+
 ```bash
 # Check source exists
 ls -la /path/to/chroma_db
@@ -530,13 +565,13 @@ from src.mcp_memory_service.storage.sqlite_vec import SqliteVecMemoryStorage
 async def health_check():
     storage = SqliteVecMemoryStorage('path/to/db')
     await storage.initialize()
-    
+
     stats = storage.get_stats()
     print(f"Backend: {stats['backend']}")
     print(f"Total memories: {stats['total_memories']}")
     print(f"Database size: {stats['database_size_mb']} MB")
     print(f"Embedding model: {stats['embedding_model']}")
-    
+
     storage.close()
 
 asyncio.run(health_check())
@@ -544,23 +579,24 @@ asyncio.run(health_check())
 
 ## Comparison: ChromaDB vs SQLite-vec
 
-| Feature | ChromaDB | SQLite-vec | Winner |
-|---------|----------|------------|--------|
-| Setup Complexity | Medium | Low | SQLite-vec |
-| Memory Usage | High | Low | SQLite-vec |
-| Query Performance | Excellent | Very Good | ChromaDB |
-| Portability | Poor | Excellent | SQLite-vec |
-| Backup/Restore | Complex | Simple | SQLite-vec |
-| Concurrent Access | Good | Excellent (HTTP + WAL) | SQLite-vec |
-| Multi-Client Support | Good | Excellent (HTTP + WAL) | SQLite-vec |
-| Ecosystem | Rich | Growing | ChromaDB |
-| Reliability | Good | Excellent | SQLite-vec |
+| Feature              | ChromaDB  | SQLite-vec             | Winner     |
+| -------------------- | --------- | ---------------------- | ---------- |
+| Setup Complexity     | Medium    | Low                    | SQLite-vec |
+| Memory Usage         | High      | Low                    | SQLite-vec |
+| Query Performance    | Excellent | Very Good              | ChromaDB   |
+| Portability          | Poor      | Excellent              | SQLite-vec |
+| Backup/Restore       | Complex   | Simple                 | SQLite-vec |
+| Concurrent Access    | Good      | Excellent (HTTP + WAL) | SQLite-vec |
+| Multi-Client Support | Good      | Excellent (HTTP + WAL) | SQLite-vec |
+| Ecosystem            | Rich      | Growing                | ChromaDB   |
+| Reliability          | Good      | Excellent              | SQLite-vec |
 
 ## Best Practices
 
 ### When to Use SQLite-vec
 
 ✅ **Use SQLite-vec when:**
+
 - Memory collections < 100,000 entries
 - Multi-client access needed (Claude Desktop + Claude Code + others)
 - Seamless setup and coordination required (auto-detection)
@@ -572,6 +608,7 @@ asyncio.run(health_check())
 ### When to Use ChromaDB
 
 ✅ **Use ChromaDB when:**
+
 - Memory collections > 100,000 entries
 - Heavy concurrent usage
 - Maximum query performance is critical
@@ -581,6 +618,7 @@ asyncio.run(health_check())
 ### Multi-Client Coordination Tips
 
 1. **Automatic Mode (Recommended)**
+
    ```bash
    # Let the system choose the best coordination method
    export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
@@ -588,6 +626,7 @@ asyncio.run(health_check())
    ```
 
 2. **Monitoring Coordination Mode**
+
    ```bash
    # Check which mode is being used
    export LOG_LEVEL=INFO
@@ -595,12 +634,13 @@ asyncio.run(health_check())
    ```
 
 3. **HTTP Server Management**
+
    ```bash
    # Manual server control
    python scripts/run_http_server.py  # Start manually
-   
+
    # Check server health
-   curl http://localhost:8000/health
+   curl http://localhost:8001/health
    ```
 
 4. **Fallback Strategy**
@@ -612,12 +652,14 @@ asyncio.run(health_check())
 ### Performance Tips
 
 1. **Regular Optimization**
+
    ```bash
    # Run monthly
    python scripts/optimize_sqlite_vec.py
    ```
 
 2. **Batch Operations**
+
    ```python
    # Store memories in batches for better performance
    for batch in chunk_memories(all_memories, 100):

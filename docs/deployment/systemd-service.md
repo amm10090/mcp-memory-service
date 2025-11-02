@@ -5,6 +5,7 @@ This guide explains how to set up the MCP Memory HTTP server as a systemd servic
 ## Overview
 
 The systemd service provides:
+
 - ✅ **Automatic startup** on user login
 - ✅ **Persistent operation** even when logged out (with linger enabled)
 - ✅ **Automatic restarts** on failure
@@ -22,6 +23,7 @@ bash scripts/service/install_http_service.sh
 ```
 
 The script will:
+
 1. Check prerequisites (.env file, venv)
 2. Ask whether to install as user or system service
 3. Copy service file to appropriate location
@@ -119,6 +121,7 @@ journalctl --user -u mcp-memory-http.service -p err
 ## Configuration
 
 The service file is located at:
+
 - User service: `~/.config/systemd/user/mcp-memory-http.service`
 - System service: `/etc/systemd/system/mcp-memory-http.service`
 
@@ -155,12 +158,14 @@ WantedBy=default.target
 ### Important Configuration Points
 
 1. **User Service vs System Service:**
+
    - User services run as your user (recommended)
    - System services run at boot (before user login)
    - User services can't have `User=` and `Group=` directives
    - User services use `WantedBy=default.target` not `multi-user.target`
 
 2. **Environment Loading:**
+
    - Service loads `.env` file via `EnvironmentFile` directive
    - All environment variables are available to the service
    - Changes to `.env` require service restart
@@ -175,6 +180,7 @@ WantedBy=default.target
 ### Service Won't Start
 
 **Check status for errors:**
+
 ```bash
 systemctl --user status mcp-memory-http.service
 ```
@@ -182,21 +188,25 @@ systemctl --user status mcp-memory-http.service
 **Common Issues:**
 
 1. **GROUP error (status=216/GROUP):**
+
    - Remove `User=` and `Group=` directives from user service file
    - These are only for system services
 
 2. **Permission denied:**
+
    - Check that `.env` file is readable by your user
    - Check that venv and scripts are accessible
    - For system services, ensure files are owned by service user
 
 3. **Port already in use:**
+
    ```bash
-   lsof -i :8000
+   lsof -i :8001
    # Kill existing process or change port in .env
    ```
 
 4. **Missing dependencies:**
+
    ```bash
    # Verify venv is set up
    ls -la venv/bin/python
@@ -212,6 +222,7 @@ systemctl --user status mcp-memory-http.service
 **Error:** "Unit is added as a dependency to a non-existent unit"
 
 **Solution:** For user services, change `WantedBy=` target:
+
 ```bash
 # Edit service file
 nano ~/.config/systemd/user/mcp-memory-http.service
@@ -232,6 +243,7 @@ systemctl --user reenable mcp-memory-http.service
 ### Logs Show Configuration Errors
 
 **Check environment loading:**
+
 ```bash
 # View effective environment
 systemctl --user show-environment
@@ -245,6 +257,7 @@ venv/bin/python scripts/server/run_http_server.py
 ### Service Stops After Logout
 
 **Enable linger to keep user services running:**
+
 ```bash
 loginctl enable-linger $USER
 
@@ -272,11 +285,13 @@ systemd-cgtop --user
 ## Security Considerations
 
 The service includes basic security hardening:
+
 - `NoNewPrivileges=true` - Prevents privilege escalation
 - `PrivateTmp=true` - Isolated /tmp directory
 - User services run with user permissions (no root access)
 
 For system services, consider additional hardening:
+
 - `ProtectSystem=strict` - Read-only access to system directories
 - `ProtectHome=read-only` - Limited home directory access
 - `ReadWritePaths=` - Explicitly allow write access to database paths

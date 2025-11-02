@@ -12,9 +12,15 @@ import sys
 from typing import Optional
 
 import httpx
+import pytest
 
 
-async def test_oauth_basic_auth(base_url: str = "http://localhost:8000") -> bool:
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+@pytest.mark.anyio("asyncio")
+async def test_oauth_basic_auth(base_url: str = "http://localhost:8001") -> bool:
     """
     Test OAuth 2.1 token endpoint with both Basic and form authentication.
 
@@ -32,7 +38,7 @@ async def test_oauth_basic_auth(base_url: str = "http://localhost:8000") -> bool
             registration_data = {
                 "client_name": "Basic Auth Test Client",
                 "redirect_uris": ["https://example.com/callback"],
-                "grant_types": ["authorization_code"],
+                "grant_types": ["authorization_code", "refresh_token"],
                 "response_types": ["code"]
             }
 
@@ -232,7 +238,7 @@ async def main():
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
     else:
-        base_url = "http://localhost:8000"
+        base_url = "http://localhost:8001"
 
     print("OAuth 2.1 Basic Authentication Test")
     print("===================================")

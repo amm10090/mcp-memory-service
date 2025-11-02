@@ -8,8 +8,8 @@ The core of the project is the `MemoryServer` class, which handles all MCP tool 
 
 The project offers two distinct storage backends, allowing users to choose the best fit for their needs:
 
-*   **ChromaDB:** A feature-rich vector database that provides advanced search capabilities and is well-suited for large memory collections.
-*   **SQLite-vec:** A lightweight, file-based backend that uses the `sqlite-vec` extension for vector similarity search. This is a great option for resource-constrained environments.
+- **ChromaDB:** A feature-rich vector database that provides advanced search capabilities and is well-suited for large memory collections.
+- **SQLite-vec:** A lightweight, file-based backend that uses the `sqlite-vec` extension for vector similarity search. This is a great option for resource-constrained environments.
 
 The project also includes a comprehensive suite of scripts for installation, testing, and maintenance, as well as detailed documentation.
 
@@ -49,7 +49,7 @@ memory
 The server can also be run as a FastAPI application using `uvicorn`:
 
 ```bash
-uvicorn mcp_memory_service.server:app --host 0.0.0.0 --port 8000
+uvicorn mcp_memory_service.server:app --host 0.0.0.0 --port 8001
 ```
 
 ### Testing
@@ -62,10 +62,10 @@ pytest tests/
 
 ## Development Conventions
 
-*   **Python 3.10+:** The project requires Python 3.10 or higher.
-*   **Type Hinting:** The codebase uses type hints extensively to improve code clarity and maintainability.
-*   **Async/Await:** The project uses the `async/await` pattern for all I/O operations to ensure high performance and scalability.
-*   **PEP 8:** The code follows the PEP 8 style guide.
-*   **Dataclasses:** The project uses dataclasses for data models to reduce boilerplate code.
-*   **Docstrings:** All modules and functions have triple-quoted docstrings that explain their purpose, arguments, and return values.
-*   **Testing:** All new features should be accompanied by tests to ensure they work as expected and don't introduce regressions.
+- **Python 3.10+:** The project requires Python 3.10 or higher.
+- **Type Hinting:** The codebase uses type hints extensively to improve code clarity and maintainability.
+- **Async/Await:** The project uses the `async/await` pattern for all I/O operations to ensure high performance and scalability.
+- **PEP 8:** The code follows the PEP 8 style guide.
+- **Dataclasses:** The project uses dataclasses for data models to reduce boilerplate code.
+- **Docstrings:** All modules and functions have triple-quoted docstrings that explain their purpose, arguments, and return values.
+- **Testing:** All new features should be accompanied by tests to ensure they work as expected and don't introduce regressions.
