@@ -1,35 +1,36 @@
-# mDNS Service Discovery Guide
+# mDNS 服务发现指南
 
-This guide covers the automatic service discovery feature introduced in MCP Memory Service v2.1.0, which uses mDNS (Multicast DNS) to enable zero-configuration networking.
+本文介绍 MCP Memory Service 自 v2.1.0 引入的 mDNS（Multicast DNS）自动发现能力，帮助你实现零配置网络接入。
 
-## Overview
+## 概览
 
-mDNS service discovery allows MCP Memory Service instances to:
-- **Automatically advertise** themselves on the local network
-- **Auto-discover** available services without manual configuration
-- **Prioritize secure connections** (HTTPS over HTTP)
-- **Validate service health** before establishing connections
+借助 mDNS，MCP Memory Service 可以：
 
-## Quick Start
+- **自动广播** 服务信息到本地网络；
+- **自动发现** 可用实例，无需手动填写地址；
+- **优先使用安全连接**（HTTPS 优先于 HTTP）；
+- **连接前先行校验健康状态**，确保服务可用。
 
-### 1. Start Server with mDNS
+## 快速上手
+
+### 1. 启动启用 mDNS 的服务
 
 ```bash
-# Basic setup (mDNS enabled by default)
+# 基础运行（默认启用 mDNS）
 python scripts/run_http_server.py
 
-# With HTTPS (auto-generates certificates)
+# 启用 HTTPS（自动生成证书）
 export MCP_HTTPS_ENABLED=true
 python scripts/run_http_server.py
 
-# Custom service name
+# 自定义服务名称
 export MCP_MDNS_SERVICE_NAME="Team Memory Service"
 python scripts/run_http_server.py
 ```
 
-### 2. Configure Client for Auto-Discovery
+### 2. 配置客户端自动发现
 
-**Claude Desktop Configuration:**
+**Claude Desktop 配置示例：**
 
 ```json
 {
@@ -47,40 +48,40 @@ python scripts/run_http_server.py
 }
 ```
 
-That's it! The client will automatically find and connect to available services.
+完成上述配置后，客户端即可自动发现并连接可用服务。
 
-## Configuration Reference
+## 配置参考
 
-### Server Configuration
+### 服务器端
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `MCP_MDNS_ENABLED` | `true` | Enable/disable mDNS advertisement |
-| `MCP_MDNS_SERVICE_NAME` | `"MCP Memory Service"` | Display name for the service |
-| `MCP_MDNS_SERVICE_TYPE` | `"_mcp-memory._tcp.local."` | RFC-compliant service type |
-| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5` | Discovery timeout in seconds |
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MCP_MDNS_ENABLED` | `true` | 是否启用 mDNS 广播 |
+| `MCP_MDNS_SERVICE_NAME` | `"MCP Memory Service"` | 在网络中的展示名称 |
+| `MCP_MDNS_SERVICE_TYPE` | `"_mcp-memory._tcp.local."` | 符合 RFC 的服务类型 |
+| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5` | 客户端发现超时时间（秒） |
 
-### Client Configuration
+### 客户端
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `MCP_MEMORY_AUTO_DISCOVER` | `false` | Enable automatic service discovery |
-| `MCP_MEMORY_PREFER_HTTPS` | `true` | Prefer HTTPS services over HTTP |
-| `MCP_HTTP_ENDPOINT` | (none) | Manual fallback endpoint |
-| `MCP_MEMORY_API_KEY` | (none) | API key for authentication |
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MCP_MEMORY_AUTO_DISCOVER` | `false` | 是否启用自动发现 |
+| `MCP_MEMORY_PREFER_HTTPS` | `true` | 是否优先选择 HTTPS |
+| `MCP_HTTP_ENDPOINT` | （无） | 回退的手动指定端点 |
+| `MCP_MEMORY_API_KEY` | （无） | 访问认证所需的 API 密钥 |
 
-## HTTPS Integration
+## HTTPS 集成
 
-### Automatic Certificate Generation
+### 自动生成证书
 
-The server can automatically generate self-signed certificates for development:
+开发环境可自动生成自签名证书：
 
 ```bash
 export MCP_HTTPS_ENABLED=true
 python scripts/run_http_server.py
 ```
 
-Output:
+示例日志：
 ```
 Generating self-signed certificate for HTTPS...
 Generated self-signed certificate: /tmp/mcp-memory-certs/cert.pem
@@ -89,9 +90,9 @@ Starting MCP Memory Service HTTPS server on 0.0.0.0:8000
 mDNS service advertisement started
 ```
 
-### Custom Certificates
+### 自带证书
 
-For production deployments:
+生产环境请使用受信任证书：
 
 ```bash
 export MCP_HTTPS_ENABLED=true
@@ -100,37 +101,38 @@ export MCP_SSL_KEY_FILE="/path/to/your/key.pem"
 python scripts/run_http_server.py
 ```
 
-## Service Discovery Process
+## 服务发现流程
 
-### Client Discovery Flow
+### 客户端流程
 
-1. **Discovery Phase**: Client broadcasts mDNS query for `_mcp-memory._tcp.local.`
-2. **Response Collection**: Collects responses from all available services
-3. **Service Prioritization**: Sorts services by:
-   - HTTPS preference (if `MCP_MEMORY_PREFER_HTTPS=true`)
-   - Health check results
-   - Response time
-   - Port preference
-4. **Health Validation**: Tests endpoints with `/api/health` calls
-5. **Connection**: Connects to the best available service
+1. **发现阶段**：广播 `_mcp-memory._tcp.local.` 查询；
+2. **收集响应**：接收所有服务端的反馈；
+3. **优先级排序**：基于以下顺序筛选：
+   - 是否支持 HTTPS（若 `MCP_MEMORY_PREFER_HTTPS=true`）
+   - 健康检查结果
+   - 响应耗时
+   - 端口偏好
+4. **健康校验**：调用 `/api/health` 验证服务状态；
+5. **建立连接**：选择最优服务完成连接。
 
-### Server Advertisement
+### 服务器广播信息
 
-The server advertises with the following metadata:
-- **Service Type**: `_mcp-memory._tcp.local.`
-- **Properties**:
-  - `api_version`: Server version
-  - `https`: Whether HTTPS is enabled
-  - `auth_required`: Whether API key is required
-  - `api_path`: API base path (`/api`)
-  - `sse_path`: SSE endpoint path (`/api/events`)
-  - `docs_path`: Documentation path (`/api/docs`)
+服务器以以下元数据对外发布：
 
-## Network Requirements
+- **服务类型**：`_mcp-memory._tcp.local.`
+- **属性字段**：
+  - `api_version`：服务器版本；
+  - `https`：是否启用 HTTPS；
+  - `auth_required`：是否需要 API 密钥；
+  - `api_path`：API 基路径（`/api`）；
+  - `sse_path`：SSE 事件流路径（`/api/events`）；
+  - `docs_path`：文档路径（`/api/docs`）。
 
-### Firewall Configuration
+## 网络要求
 
-Ensure mDNS traffic is allowed:
+### 防火墙配置
+
+确保允许 mDNS 流量：
 
 ```bash
 # Linux (UFW)
@@ -139,148 +141,141 @@ sudo ufw allow 5353/udp
 # Linux (iptables)
 sudo iptables -A INPUT -p udp --dport 5353 -j ACCEPT
 
-# macOS/Windows: mDNS typically allowed by default
+# macOS/Windows：默认已放行 mDNS
 ```
 
-### Network Topology
+### 网络拓扑
 
-mDNS works on:
-- ✅ Local Area Networks (LAN)
-- ✅ WiFi networks
-- ✅ VPN networks (if multicast is supported)
-- ❌ Across different subnets (without mDNS relay)
-- ❌ Internet (by design - local network only)
+mDNS 在以下场景可用：
 
-## Troubleshooting
+- ✅ 局域网（LAN）
+- ✅ WiFi 网络
+- ✅ 支持多播的 VPN
+- ❌ 跨子网（除非配置 mDNS relay）
+- ❌ 互联网（设计上仅限本地网络）
 
-### Common Issues
+## 故障排查
 
-#### No Services Discovered
+### 常见问题
 
-**Symptoms:**
+#### 未发现任何服务
+
+**日志症状：**
 ```
 Attempting to discover MCP Memory Service via mDNS...
 No MCP Memory Services discovered
 Using default endpoint: http://localhost:8000/api
 ```
 
-**Solutions:**
-1. Verify server is running with mDNS enabled:
+**解决思路：**
+1. 确认服务已启动且启用 mDNS：
    ```bash
    grep "mDNS service advertisement started" server.log
    ```
-
-2. Check network connectivity:
+2. 检查网络连通性：
    ```bash
-   ping 224.0.0.251  # mDNS multicast address
+   ping 224.0.0.251
    ```
-
-3. Verify firewall allows mDNS:
+3. 检查防火墙规则：
    ```bash
    sudo ufw status | grep 5353
    ```
 
-#### Discovery Timeout
+#### 发现超时
 
-**Symptoms:**
+**日志症状：**
 ```
 Discovery failed: Request timeout
 ```
 
-**Solutions:**
-1. Increase discovery timeout:
+**解决思路：**
+1. 增加超时时间：
    ```bash
    export MCP_MDNS_DISCOVERY_TIMEOUT=10
    ```
+2. 检查网络延迟；
+3. 确认网络支持多播。
 
-2. Check network latency
-3. Verify multicast is working on network
+#### 连接到非预期服务
 
-#### Wrong Service Selected
+**现象：** 客户端优先连接 HTTP 而非 HTTPS。
 
-**Symptoms:**
-Client connects to HTTP instead of HTTPS service.
-
-**Solutions:**
-1. Force HTTPS preference (client bridge):
+**解决思路：**
+1. 强制 HTTPS 优先（客户端桥）：
    ```bash
    export MCP_MEMORY_PREFER_HTTPS=true
    ```
-
-2. Use manual endpoint override (client bridge):
+2. 手动指定服务端点：
    ```bash
    export MCP_MEMORY_AUTO_DISCOVER=false
    export MCP_HTTP_ENDPOINT="https://preferred-server:8000/api"
    ```
 
-### Debug Mode
+### 调试模式
 
-Enable detailed logging:
+开启详细日志：
 
-**Server:**
+**服务器：**
 ```bash
 export LOG_LEVEL=DEBUG
 python scripts/run_http_server.py
 ```
 
-**Client:**
+**客户端：**
 ```bash
-# Redirect stderr to see discovery details
 node examples/http-mcp-bridge.js 2>discovery.log
 ```
 
-### Manual Discovery Testing
+### 手动测试发现
 
-Test mDNS discovery manually:
-
-**macOS:**
+**macOS：**
 ```bash
-# Browse for services
+# 浏览可用服务
 dns-sd -B _mcp-memory._tcp
 
-# Resolve specific service
+# 解析特定服务
 dns-sd -L "MCP Memory Service" _mcp-memory._tcp
 ```
 
-**Linux:**
+**Linux：**
 ```bash
-# Browse for services
+# 浏览服务
 avahi-browse -t _mcp-memory._tcp
 
-# Resolve specific service
+# 解析主机名
 avahi-resolve-host-name hostname.local
 ```
 
-## Advanced Usage
+## 高级用法
 
-### Multiple Service Environments
+### 多服务环境
 
-Deploy multiple services with different names:
+为不同环境部署独立服务：
 
 ```bash
-# Development server
+# 开发环境
 export MCP_MDNS_SERVICE_NAME="Dev Memory Service"
 export MCP_HTTP_PORT=8000
 python scripts/run_http_server.py &
 
-# Staging server
+# 预发布环境
 export MCP_MDNS_SERVICE_NAME="Staging Memory Service"
 export MCP_HTTP_PORT=8001
 python scripts/run_http_server.py &
 ```
 
-Clients will discover both and can select based on preferences.
+客户端将同时发现两者，可按需选择。
 
-### Load Balancing
+### 负载分担
 
-With multiple identical services, clients automatically distribute load by:
-1. Health check response times
-2. Connection success rates
-3. Round-robin selection among healthy services
+面对多个相同服务实例，客户端会基于：
+1. 健康检查响应时间；
+2. 连接成功率；
+3. 在健康实例间轮询，自动分摊请求量。
 
-### Service Monitoring
+### 服务监控
 
-Monitor discovered services programmatically:
+可编程方式查看已发现服务：
 
 ```python
 import asyncio
@@ -299,58 +294,58 @@ async def monitor_services():
 asyncio.run(monitor_services())
 ```
 
-## Security Considerations
+## 安全注意事项
 
-### Network Security
+### 网络安全
 
-1. **Local Network Only**: mDNS is designed for local networks and doesn't route across the internet
-2. **Network Segmentation**: Use VLANs to isolate service discovery if needed
-3. **Firewall Rules**: Restrict mDNS to trusted network segments
+1. **仅限本地网络**：mDNS 默认不会跨互联网；
+2. **网络隔离**：需要时可通过 VLAN 控制发现范围；
+3. **防火墙规则**：仅在受信网段开放 mDNS。
 
-### Authentication
+### 认证
 
-Always use API keys even with mDNS:
+即便在本地网络，也建议启用 API Key：
 
 ```bash
-# Server
+# 服务器端
 export MCP_API_KEY="$(openssl rand -base64 32)"
 
-# Client (Node bridge)
+# 客户端（Node 桥）
 export MCP_MEMORY_API_KEY="same-key-as-server"
 ```
 
-### Encryption
+### 加密
 
-Enable HTTPS for encrypted communication:
+启用 HTTPS 以确保通信安全：
 
 ```bash
 export MCP_HTTPS_ENABLED=true
-export MCP_MEMORY_PREFER_HTTPS=true  # client bridge preference
+export MCP_MEMORY_PREFER_HTTPS=true
 ```
 
-## Best Practices
+## 最佳实践
 
-### Development
+### 开发环境
 
-- Use auto-generated certificates for development
-- Enable debug logging for troubleshooting
-- Use descriptive service names for multi-developer environments
+- 使用自动生成的自签名证书；
+- 启用调试日志定位问题；
+- 多人协作时为服务命名，便于区分。
 
-### Production
+### 生产环境
 
-- Use proper SSL certificates from trusted CAs
-- Implement network segmentation
-- Monitor service discovery logs
-- Set appropriate discovery timeouts for network conditions
+- 使用受信任 CA 签发的正式证书；
+- 根据需求对网络进行分区；
+- 监控服务发现相关日志；
+- 根据网络情况调整发现超时。
 
-### Team Collaboration
+### 团队协作
 
-- Establish naming conventions for services
-- Document service discovery configuration
-- Use consistent API key management
-- Test discovery across different network conditions
+- 约定统一的服务命名；
+- 将发现配置写入项目文档；
+- 统一管理 API Key；
+- 在不同网络环境下测试发现流程。
 
-## Integration Examples
+## 集成示例
 
 ### Docker Compose
 
@@ -404,10 +399,11 @@ spec:
         - containerPort: 8000
 ```
 
-## Conclusion
+## 结论
 
-mDNS service discovery significantly simplifies MCP Memory Service deployment by eliminating manual endpoint configuration. Combined with automatic HTTPS support, it provides a secure, zero-configuration solution for local network deployments.
+mDNS 服务发现大幅简化了 MCP Memory Service 的部署流程，摆脱手动配置端点的繁琐；配合自动化 HTTPS，可在本地网络中提供安全、零配置的接入体验。
 
-For more information, see:
-- [Multi-Client Server Deployment Guide](../deployment/multi-client-server.md)
-- [General Troubleshooting](../troubleshooting/general.md)
+更多信息：
+
+- [多客户端服务器部署指南](../deployment/multi-client-server.md)
+- [通用故障排查](../troubleshooting/general.md)

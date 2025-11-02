@@ -1,191 +1,99 @@
-# MCP Memory Service Troubleshooting Guide
+# MCP Memory Service 故障排查指南
 
-This guide covers common issues and their solutions when working with the MCP Memory Service.
+本文汇总常见问题及对应解决方案，便于在本地或 CI 环境使用 MCP Memory Service 时快速定位故障。
 
-## First-Time Setup Warnings (Normal Behavior)
+## 首次启动警告（正常现象）
 
-### Expected Warnings on First Run
+### 常见提示
 
-The following warnings are **completely normal** during first-time setup:
+以下日志在首次运行时属于**正常行为**：
 
-#### "No snapshots directory" Warning
+#### “No snapshots directory” 警告
 ```
 WARNING:mcp_memory_service.storage.sqlite_vec:Failed to load from cache: No snapshots directory
 ```
-- **Status:** ✅ Normal - Service is checking for cached models
-- **Action:** None required - Model will download automatically
-- **Duration:** Appears only on first run
+- **状态**：✅ 正常——服务在检查模型缓存；
+- **处理**：无需操作，模型会自动下载；
+- **出现频次**：仅首次运行。
 
-#### "TRANSFORMERS_CACHE deprecated" Warning  
+#### “TRANSFORMERS_CACHE deprecated” 警告
 ```
 WARNING: Using TRANSFORMERS_CACHE is deprecated
 ```
-- **Status:** ✅ Normal - Informational warning from Hugging Face
-- **Action:** None required - Doesn't affect functionality
-- **Duration:** May appear on each run (can be ignored)
+- **状态**：✅ 正常——来自 Hugging Face 的信息提示；
+- **处理**：无需操作，不影响功能；
+- **出现频次**：可能每次运行都出现，可忽略。
 
-#### Model Download Messages
+#### 模型下载日志
 ```
 Downloading model 'all-MiniLM-L6-v2'...
 ```
-- **Status:** ✅ Normal - One-time model download (~25MB)
-- **Action:** Wait 1-2 minutes for download to complete
-- **Duration:** First run only
+- **状态**：✅ 正常——首次运行需要下载约 25MB 模型；
+- **处理**：等待 1-2 分钟；
+- **出现频次**：首次运行。
 
-For detailed information, see the [First-Time Setup Guide](../first-time-setup.md).
+更多信息见 [首次运行指南](../first-time-setup.md)。
 
-## Python 3.13 sqlite-vec Issues
+## Python 3.13 + sqlite-vec 安装失败
 
-### Problem: sqlite-vec Installation Fails on Python 3.13
-**Error:** `Failed to install SQLite-vec: Command ... returned non-zero exit status 1`
+**报错示例**：`Failed to install SQLite-vec: Command ... returned non-zero exit status 1`
 
-**Cause:** sqlite-vec doesn't have pre-built wheels for Python 3.13 yet, and no source distribution is available on PyPI.
+**原因**：sqlite-vec 尚未提供 Python 3.13 的 wheel，且 PyPI 上暂时没有源码包。
 
-**Solutions:**
+**解决方案**：
 
-1. **Automatic Fallback (v6.13.2+)**
-   - The installer now automatically tries multiple installation methods
-   - It will attempt: uv pip, standard pip, source build, and GitHub installation
-   - If all fail, you'll be prompted to switch to ChromaDB
-
-2. **Use Python 3.12 (Recommended)**
+1. **自动回退（v6.13.2+）**：安装脚本会尝试 uv pip、pip、源码构建、GitHub 安装；若全部失败，会提示切换 ChromaDB。
+2. **推荐**：使用 Python 3.12。
+3. **切换后端**：`python install.py --storage-backend chromadb`。
+4. **手动尝试**：
    ```bash
-   # macOS
-   brew install python@3.12
-   python3.12 -m venv .venv
-   source .venv/bin/activate
-   python install.py
-   ```
-
-3. **Switch to ChromaDB Backend**
-   ```bash
-   python install.py --storage-backend chromadb
-   ```
-
-4. **Manual Installation Attempts**
-   ```bash
-   # Force source build
    pip install --no-binary :all: sqlite-vec
-   
-   # Install from GitHub
    pip install git+https://github.com/asg017/sqlite-vec.git#subdirectory=python
-   
-   # Alternative: pysqlite3-binary
    pip install pysqlite3-binary
    ```
+5. **反馈问题**：关注 https://github.com/asg017/sqlite-vec/issues 获取最新进展。
 
-5. **Report Issue**
-   - Check for updates: https://github.com/asg017/sqlite-vec/issues
-   - sqlite-vec may add Python 3.13 support in future releases
+## macOS 无法启用 sqlite 扩展
 
-## macOS SQLite Extension Issues
+**报错**：`AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`
 
-### Problem: `AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`
-**Error:** Python 3.12 (and other versions) on macOS failing with sqlite-vec backend
+**原因**：macOS 系统自带 Python 未启用 `--enable-loadable-sqlite-extensions`。
 
-**Cause:** Python on macOS is not compiled with `--enable-loadable-sqlite-extensions` by default. The system SQLite library doesn't support extensions.
+**解决方案**：
 
-**Platform:** Affects macOS (all versions), particularly with system Python
+1. **Homebrew Python（推荐）**：`brew install python`，并使用该版本重装服务；
+2. **pyenv + 扩展支持**：使用 `PYTHON_CONFIGURE_OPTS='--enable-loadable-sqlite-extensions'` 安装；
+3. **切换 ChromaDB 后端**：不需要 sqlite 扩展；
+4. **检测命令**：参考指南中提供的 `python -c` 测试脚本判断扩展是否启用。
 
-**Solutions:**
+## 安装相关
 
-1. **Use Homebrew Python (Recommended)**
-   ```bash
-   # Install Homebrew Python (includes extension support)
-   brew install python
-   hash -r  # Refresh shell command cache
-   python3 --version  # Verify Homebrew version
-   
-   # Reinstall MCP Memory Service
-   python3 install.py
-   ```
+若遇到路径权限、依赖缺失、安装脚本失败等问题，请参考主安装文档中的故障排查章节（内容与此处一致，为避免重复此处略）。
 
-2. **Use pyenv with Extension Support**
-   ```bash
-   # Install pyenv
-   brew install pyenv
-   
-   # Install Python with extension support
-   PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" \
-   LDFLAGS="-L$(brew --prefix sqlite)/lib" \
-   CPPFLAGS="-I$(brew --prefix sqlite)/include" \
-   pyenv install 3.12.0
-   
-   pyenv local 3.12.0
-   python install.py
-   ```
+## MCP 协议问题
 
-3. **Switch to ChromaDB Backend**
-   ```bash
-   # ChromaDB doesn't require SQLite extensions
-   export MCP_MEMORY_STORAGE_BACKEND=chromadb
-   python install.py --storage-backend chromadb
-   ```
+### “Method not found” 错误
 
-4. **Verify Extension Support**
-   ```bash
-   python3 -c "
-   import sqlite3
-   conn = sqlite3.connect(':memory:')
-   if hasattr(conn, 'enable_load_extension'):
-       try:
-           conn.enable_load_extension(True)
-           print('✅ Extension support working')
-       except Exception as e:
-           print(f'❌ Extension support disabled: {e}')
-   else:
-       print('❌ No enable_load_extension attribute')
-   "
-   ```
+- **症状**：Claude Desktop 日志出现 “Method not found” 或 JSON 错误弹窗；
+- **原因**：服务器未实现必需 MCP 方法（如 resources/list 等）；
+- **解决**：升级至最新版本或参考 `MCP_PROTOCOL_FIX.md` 补全接口实现。
 
-**Why this happens:**
-- Security: Extension loading disabled by default
-- Compilation: System Python not built with extension support
-- Library: macOS bundled SQLite lacks extension loading capability
+## Windows 平台问题
 
-**Detection:** The installer now automatically detects this issue and provides guidance.
+- **JSON 编码/解码异常**、**路径权限问题** 等，请参见 `WINDOWS_JSON_FIX.md` 及相关章节。
 
-## Common Installation Issues
+## 性能优化
 
-[Content from installation.md's troubleshooting section - already well documented]
+- 包括内存占用高、查询缓慢以及硬件加速配置，详见安装文档中“性能优化”章节。
 
-## MCP Protocol Issues
+## Debug 工具
 
-### Method Not Found Errors
+- 推荐使用 `python scripts/validation/diagnose_backend_config.py` 获取环境诊断；
+- 其他调试手段见安装文档“Debugging Tools”章节。
 
-If you're seeing "Method not found" errors or JSON error popups in Claude Desktop:
+## 获取帮助
 
-#### Symptoms
-- "Method not found" errors in logs
-- JSON error popups in Claude Desktop
-- Connection issues between Claude Desktop and the memory service
-
-#### Solution
-1. Ensure you have the latest version of the MCP Memory Service
-2. Verify your server implements all required MCP protocol methods:
-   - resources/list
-   - resources/read
-   - resource_templates/list
-3. Update your Claude Desktop configuration using the provided template
-
-[Additional content from MCP_PROTOCOL_FIX.md]
-
-## Windows-Specific Issues
-
-[Content from WINDOWS_JSON_FIX.md and windows-specific sections]
-
-## Performance Optimization
-
-### Memory Issues
-[Content from installation.md's performance section]
-
-### Acceleration Issues
-[Content from installation.md's acceleration section]
-
-## Debugging Tools
-
-[Content from installation.md's debugging section]
-
-## Getting Help
-
-[Content from installation.md's help section]
+- 运行检测脚本：`python scripts/validation/diagnose_backend_config.py`；
+- 查看 GitHub Issues；
+- 查阅主仓库 README 与 `CLAUDE.md`；
+- 若仍无法定位问题，建议在 Issue 中附带完整日志与配置信息。
