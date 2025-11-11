@@ -19,7 +19,25 @@
 
 ## 🚀 快速开始（约 2 分钟）
 
-### 🆕 最新版本：**v8.16.0**（2025 年 11 月 1 日）
+### 🆕 最新版本：**v8.23.1**（2025 年 11 月 10 日）
+
+**陈旧虚拟环境防护体系** 🛡️🔧 —— 6 层流水线从开发、运行到 CI 全面阻断 “源代码已更新但虚拟环境仍旧” 的错位风险。
+
+**本次新增**：
+- 🛡️ **自动检测**：预提交钩子 + `scripts/validation/check_dev_setup.py` 会在虚拟环境落后时直接拒绝提交。
+- ⚠️ **运行期告警**：`uv run memory server` 启动时比对源码与安装包版本，第一时间提示不一致。
+- 📚 **开发指引**：CLAUDE.md、README 与 ai-agent 指南均要求使用 `pip install -e .` 可编辑安装。
+- 🤖 **交互式引导**：`scripts/installation/install.py` 能识别 git 工作区，并自动提示改用可编辑安装模式。
+- 🔄 **CI/CD 校验**：新增 `.github/workflows/dev-setup-validation.yml`，覆盖检测脚本、钩子、运行期告警及文档准确性五类检查。
+
+**近期版本回顾**：
+- **v8.23.0** —— 通过 Code Execution API 运行整合调度器，令记忆整合任务节省 88% 令牌。
+- **v8.22.x** —— 全量修复标签校验与文档导入流程。
+- **v8.21.0** —— Amp PR 自动化与记忆钩子稳定性改进。
+
+**📖 详情**：参见 [CHANGELOG.md](CHANGELOG.md#8231---2025-11-10) ｜ [全部发行列表](https://github.com/doobidoo/mcp-memory-service/releases)
+
+### 🔁 上一重点版本：**v8.16.0**（2025 年 11 月 1 日）
 
 **数据库维护与类型整合** —— 面向生产环境的记忆数据库健康管理工具。
 
@@ -47,7 +65,7 @@
 - 调整后：128 个规范类型，所有记忆均正确分类。
 - 效果：查询效率显著提升，命名统一，语义分组更准确。
 
-**📖 更多详情**：查看 [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01)｜[维护指南](scripts/maintenance/README.md#consolidate_memory_typespy-new)｜[Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160)｜[全部发行说明](https://github.com/doobidoo/mcp-memory-service/releases)
+**📖 更多详情**：查看 [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01)｜[维护指南](scripts/maintenance/README.md#consolidate_memory_typespy-new)｜[Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160)
 
 ---
 
@@ -94,6 +112,41 @@ uv pip install mcp-memory-service
 ```
 
 若需使用交互式安装程序进行高级配置，请克隆仓库并运行 `python scripts/installation/install.py`。
+
+### 传统部署选项
+
+### 🛠️ 开发者环境（贡献指南）
+
+在本地开发或贡献代码时，请按照以下流程搭建环境，确保源码改动能立即生效：
+
+```bash
+# 克隆仓库
+git clone https://github.com/doobidoo/mcp-memory-service.git
+cd mcp-memory-service
+
+# 创建并激活虚拟环境
+python -m venv venv
+source venv/bin/activate  # Windows 使用 venv\Scripts\activate
+
+# 关键：以可编辑模式安装，源码变更即时生效
+pip install -e .
+
+# 验证安装位置（应指向本地 src 目录而非 site-packages）
+pip show mcp-memory-service | grep Location
+
+# 启动开发服务器
+uv run memory server
+```
+
+> ⚠️ **必须使用 `-e`**：否则 MCP 服务器会继续加载旧的 site-packages 版本，即使源码更新也不会生效。
+
+**版本一致性校验：**
+
+```bash
+python scripts/validation/check_dev_setup.py
+```
+
+更多开发规范详见 [CLAUDE.md](CLAUDE.md#development-setup-critical)。
 
 ### 传统部署选项
 
@@ -175,18 +228,34 @@ npx -y @smithery/cli install @doobidoo/mcp-memory-service --client claude
 - **回退策略**：切换至 Cloudflare 或混合后端：`--storage-backend cloudflare` 或 `--storage-backend hybrid`；
 - 详见 [Troubleshooting Guide](docs/troubleshooting/general.md#macos-sqlite-extension-issues) 获取说明。
 
+## 🎯 记忆感知示例
+
+**智能上下文注入** —— 自然记忆触发器会在会话开始时自动推送最相关的项目背景：
+
+<img src="docs/assets/images/memory-awareness-hooks-example.png" alt="Memory Awareness Hooks in Action" width="100%" />
+
+**画面解读：**
+- 🧠 **自动记忆注入**：在 2,526 条记忆中筛选出 8 条最相关信息。
+- 📂 **智能分栏**：按 “近期工作 / 当前问题 / 额外上下文” 分类展示。
+- 📊 **Git 语义分析**：自动提取最近提交与关键词。
+- 🎯 **相关性评分**：最高 100%（今日）、89%（8 天前）、84%（今日）。
+- ⚡ **极速检索**：SQLite-vec 后端 5ms 读取延迟。
+- 🔄 **后台同步**：混合后端持续与 Cloudflare 同步。
+
+**效果**：Claude 每次会话都自动带入最新作业背景，无需手动补充提示。
+
 ## 📚 完整文档索引
 
 **👉 访问我们内容丰富的 [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki)，获取更细致的图文指南：**
 
-### 🧠 v7.1.0 自然记忆触发器（最新版）
+### 🧠 v7.1.3 自然记忆触发器（最新版）
 
-- **[Natural Memory Triggers v7.1.0 指南](https://github.com/doobidoo/mcp-memory-service/wiki/Natural-Memory-Triggers-v7.1.0)** —— 智能化的自动记忆感知能力
-  - ✅ **85%+ 触发准确率**，依赖语义模式检测
-  - ✅ **分层性能档位**（50ms 即时 → 150ms 快速 → 500ms 深度）
-  - ✅ **CLI 管理系统**，支持实时调整配置
-  - ✅ **Git 感知上下文**，增强语义相关性
-  - ✅ **零重启安装**，动态加载钩子
+- **[Natural Memory Triggers v7.1.3 指南](https://github.com/doobidoo/mcp-memory-service/wiki/Natural-Memory-Triggers-v7.1.0)** —— 自动化记忆唤醒系统
+  - ✅ **85%+ 触发准确率**，依托语义模式匹配。
+  - ✅ **多档性能曲线**（50ms 即时 → 150ms 快速 → 500ms 深度）。
+  - ✅ **CLI 管理面板**，实时调整灵敏度与性能档位。
+  - ✅ **Git 感知上下文**，结合最近提交与关键词。
+  - ✅ **零重启部署**，钩子可动态加载。
 
 ### 🆕 v7.0.0 OAuth 与团队协作
 

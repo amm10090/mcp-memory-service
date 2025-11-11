@@ -815,10 +815,20 @@ class HybridMemoryStorage(MemoryStorage):
         """Search memories in primary storage."""
         return await self.primary.search(query, n_results)
 
-    async def search_by_tag(self, tags: List[str], match_all: bool = False) -> List[Memory]:
-        """Search memories by tags in primary storage."""
-        operation = "AND" if match_all else "OR"
-        return await self.primary.search_by_tags(tags, operation=operation)
+    async def search_by_tag(self, tags: List[str], time_start: Optional[float] = None) -> List[Memory]:
+        """Search memories by tags in primary storage with optional time filtering.
+
+        This method performs an OR search for tags. The `match_all` (AND) logic
+        is handled at the API layer.
+
+        Args:
+            tags: List of tags to search for
+            time_start: Optional Unix timestamp (in seconds) to filter memories created after this time
+
+        Returns:
+            List of Memory objects matching the tag criteria and time filter
+        """
+        return await self.primary.search_by_tag(tags, time_start=time_start)
 
     async def search_by_tags(self, tags: List[str], match_all: bool = False) -> List[Memory]:
         """Search memories by tags (alternative method signature)."""
@@ -947,6 +957,20 @@ class HybridMemoryStorage(MemoryStorage):
     async def get_largest_memories(self, n: int = 10) -> List[Memory]:
         """Get largest memories by content length from primary storage."""
         return await self.primary.get_largest_memories(n)
+
+    async def get_memory_timestamps(self, days: Optional[int] = None) -> List[float]:
+        """
+        Get memory creation timestamps only, without loading full memory objects.
+
+        Delegates to primary storage (SQLite-vec) for optimal performance.
+
+        Args:
+            days: Optional filter to only get memories from last N days
+
+        Returns:
+            List of Unix timestamps (float) in descending order (newest first)
+        """
+        return await self.primary.get_memory_timestamps(days)
 
     async def recall(self, query: Optional[str] = None, n_results: int = 5, start_timestamp: Optional[float] = None, end_timestamp: Optional[float] = None) -> List[MemoryQueryResult]:
         """

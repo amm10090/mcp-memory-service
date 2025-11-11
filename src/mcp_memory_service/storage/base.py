@@ -20,7 +20,7 @@ Licensed under the MIT License. See LICENSE file in the project root for full li
 import asyncio
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any, Tuple
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from ..models.memory import Memory, MemoryQueryResult
 
 class MemoryStorage(ABC):
@@ -97,8 +97,16 @@ class MemoryStorage(ABC):
         pass
     
     @abstractmethod
-    async def search_by_tag(self, tags: List[str]) -> List[Memory]:
-        """Search memories by tags."""
+    async def search_by_tag(self, tags: List[str], time_start: Optional[float] = None) -> List[Memory]:
+        """Search memories by tags with optional time filtering.
+
+        Args:
+            tags: List of tags to search for
+            time_start: Optional Unix timestamp (in seconds) to filter memories created after this time
+
+        Returns:
+            List of Memory objects matching the tag criteria and time filter
+        """
         pass
 
     async def search_by_tag_chronological(self, tags: List[str], limit: int = None, offset: int = 0) -> List[Memory]:
@@ -307,7 +315,34 @@ class MemoryStorage(ABC):
     async def get_memory_connections(self) -> Dict[str, int]:
         """Get memory connection statistics. Override for specific implementations."""
         return {}
-    
+
     async def get_access_patterns(self) -> Dict[str, datetime]:
         """Get memory access pattern statistics. Override for specific implementations."""
         return {}
+
+    async def get_memory_timestamps(self, days: Optional[int] = None) -> List[float]:
+        """
+        Get memory creation timestamps only, without loading full memory objects.
+
+        This is an optimized method for analytics that only needs timestamps,
+        avoiding the overhead of loading full memory content and embeddings.
+
+        Args:
+            days: Optional filter to only get memories from last N days
+
+        Returns:
+            List of Unix timestamps (float) in descending order (newest first)
+        """
+        # Default implementation falls back to get_recent_memories
+        # Concrete backends should override with optimized SQL queries
+        n = 5000 if days is None else days * 100  # Rough estimate
+        memories = await self.get_recent_memories(n=n)
+        timestamps = [m.created_at for m in memories if m.created_at]
+
+        # Filter by days if specified
+        if days is not None:
+            cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_timestamp = cutoff.timestamp()
+            timestamps = [ts for ts in timestamps if ts >= cutoff_timestamp]
+
+        return sorted(timestamps, reverse=True)

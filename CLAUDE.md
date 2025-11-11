@@ -10,6 +10,10 @@
 
 MCP Memory Service 是一款模型上下文协议（Model Context Protocol，简称 MCP）服务器，为 Claude Desktop 提供语义记忆与持久化存储。系统支持 SQLite-vec、Cloudflare 以及混合后端模式。
 
+> **🆕 v8.23.1**：**陈旧虚拟环境防护体系** —— 通过检测脚本、预提交钩子、运行期告警、交互式安装引导与 CI/CD 校验，彻底避免 “源码更新但 venv 仍旧” 的错位。详见 [CHANGELOG.md](CHANGELOG.md)。
+>
+> **提示**：发布新版本时，请更新此处的版本号与一句话简介，并按照 `.claude/agents/github-release-manager.md` 的清单执行完整流程。
+>
 > **🚨 v8.13.3**：**MCP 工具恢复** —— 修复 v8.12.0 回归导致的记忆操作中断，将 MemoryService 响应转换为规范的 MCP `TypedDict`。更新后请执行 `/mcp` 重新加载服务器。
 >
 > **🔄 v8.13.2**：**同步脚本恢复** —— 解决 `store_memory` API 迁移引发的后端同步失败，改用 `storage.store()` 正确创建 Memory 对象。
@@ -39,6 +43,7 @@ uv run memory server                           # Start server (v6.3.0+ consolida
 pytest tests/                                 # Run tests
 python scripts/validation/verify_environment.py # Check environment
 python scripts/validation/validate_configuration_complete.py   # Comprehensive configuration validation
+python scripts/validation/check_dev_setup.py   # Detect stale editable installs / venv mismatches
 
 # Memory Operations (requires: python scripts/utils/claude_commands_utils.py)
 claude /memory-store "content"                 # Store information
@@ -461,6 +466,15 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 **安装程序（v6.16.0+）增强**：交互式后端选择、自动生成 `.env` 与凭据校验、安装期即验证连接、出错时优雅回退本地模式。
 
 ## 开发指南
+
+### 🧠 记忆与文档
+
+### ⚙️ 开发环境关键要求
+
+- **始终使用可编辑安装**：执行 `pip install -e .`，避免源代码更新后虚拟环境仍旧。
+- **每次拉取上游后运行** `python scripts/validation/check_dev_setup.py`，确保源码与 venv 版本一致。
+- **预提交钩子已强制校验**：若缺少可编辑安装会直接阻止提交，可通过 `scripts/installation/install.py` 自动装配钩子。
+- **服务器启动自检**：`uv run memory server` 若检测到版本不一致会输出警告，必须在继续开发前解决。
 
 ### 🧠 记忆与文档
 

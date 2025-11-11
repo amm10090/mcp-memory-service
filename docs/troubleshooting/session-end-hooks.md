@@ -45,14 +45,30 @@ Ctrl+C 只是挂起会话，并未结束；恢复时会触发 `SessionStart:resu
 
 ---
 
-## 常见问题：连接失败
+## 常见问题：连接失败（SessionEnd & SessionStart）
 
-### 症状
+> **提示**：该问题会同时影响 SessionEnd 与 SessionStart，但表现不同：
+> - **SessionEnd**：硬失败，无法写入会话记忆；
+> - **SessionStart**：软失败，回退到 MCP 工具并提示 “No relevant memories found”。
+>
+> 关于 SessionStart 的更多排查，可参考 [hooks-quick-reference.md](hooks-quick-reference.md#sessionstart-hook-issues)。
+
+### SessionEnd 症状
 
 SessionStart 时出现：
 ```
 ⚠️ Memory Connection → Failed to connect using any available protocol
 💾 Storage → 💾 Unknown Storage (http://127.0.0.1:8000)
+```
+
+### SessionStart 症状
+
+多条 “MCP Fallback” 提示且未加载任何记忆：
+```
+↩️  MCP Fallback → Using standard MCP tools
+↩️  MCP Fallback → Using standard MCP tools
+↩️  MCP Fallback → Using standard MCP tools
+📭 Memory Search → No relevant memories found
 ```
 
 ### 原因

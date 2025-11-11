@@ -23,7 +23,7 @@ import hashlib
 import asyncio
 import time
 from typing import List, Dict, Any, Tuple, Optional
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import httpx
 
 from .base import MemoryStorage
@@ -556,41 +556,99 @@ class CloudflareStorage(MemoryStorage):
         
         return []
     
-    async def search_by_tag(self, tags: List[str]) -> List[Memory]:
-        """Search memories by tags."""
+    async def search_by_tags(self, tags: List[str], operation: str = "AND") -> List[Memory]:
+        """Search memories by tags with AND/OR semantics."""
+        return await self._search_by_tags_internal(tags=tags, operation=operation)
+
+    async def search_by_tag(self, tags: List[str], time_start: Optional[float] = None) -> List[Memory]:
+        """Search memories by tags with optional time filtering (legacy OR behavior)."""
+        return await self._search_by_tags_internal(
+            tags=tags,
+            operation="OR",
+            time_start=time_start
+        )
+
+    async def _search_by_tags_internal(
+        self,
+        tags: List[str],
+        operation: Optional[str] = None,
+        time_start: Optional[float] = None
+    ) -> List[Memory]:
+        """Shared implementation for tag-based queries with optional time filtering."""
         try:
             if not tags:
                 return []
-            
-            # Build SQL query for tag search
-            placeholders = ",".join(["?"] * len(tags))
-            sql = f"""
-            SELECT DISTINCT m.* FROM memories m
-            JOIN memory_tags mt ON m.id = mt.memory_id
-            JOIN tags t ON mt.tag_id = t.id
-            WHERE t.name IN ({placeholders})
-            ORDER BY m.created_at DESC
-            """
-            
-            payload = {"sql": sql, "params": tags}
+
+            # Normalize tags (deduplicate, drop empty strings)
+            deduped_tags = list(dict.fromkeys([tag for tag in tags if tag]))
+            if not deduped_tags:
+                return []
+
+            normalized_operation = (operation or "AND")
+            if isinstance(normalized_operation, str):
+                normalized_operation = normalized_operation.strip().upper() or "AND"
+            else:
+                normalized_operation = "AND"
+
+            if normalized_operation not in {"AND", "OR"}:
+                logger.warning(
+                    "Unsupported tag search operation '%s'; defaulting to AND",
+                    operation
+                )
+                normalized_operation = "AND"
+
+            placeholders = ",".join(["?"] * len(deduped_tags))
+            params: List[Any] = list(deduped_tags)
+
+            sql = (
+                "SELECT m.* FROM memories m "
+                "JOIN memory_tags mt ON m.id = mt.memory_id "
+                "JOIN tags t ON mt.tag_id = t.id "
+                f"WHERE t.name IN ({placeholders})"
+            )
+
+            if time_start is not None:
+                sql += " AND m.created_at >= ?"
+                params.append(time_start)
+
+            sql += " GROUP BY m.id"
+
+            if normalized_operation == "AND":
+                sql += " HAVING COUNT(DISTINCT t.name) = ?"
+                params.append(len(deduped_tags))
+
+            sql += " ORDER BY m.created_at DESC"
+
+            payload = {"sql": sql, "params": params}
             response = await self._retry_request("POST", f"{self.d1_url}/query", json=payload)
             result = response.json()
-            
+
             if not result.get("success"):
                 raise ValueError(f"D1 tag search failed: {result}")
-            
-            memories = []
-            if result.get("result", [{}])[0].get("results"):
-                for row in result["result"][0]["results"]:
-                    memory = await self._load_memory_from_row(row)
-                    if memory:
-                        memories.append(memory)
-            
-            logger.info(f"Found {len(memories)} memories with tags: {tags}")
+
+            rows = result.get("result", [{}])[0].get("results") or []
+            memories: List[Memory] = []
+
+            for row in rows:
+                memory = await self._load_memory_from_row(row)
+                if memory:
+                    memories.append(memory)
+
+            logger.info(
+                "Found %d memories with tags: %s (operation: %s)",
+                len(memories),
+                deduped_tags,
+                normalized_operation
+            )
             return memories
-            
+
         except Exception as e:
-            logger.error(f"Failed to search by tags: {e}")
+            logger.error(
+                "Failed to search memories by tags %s with operation %s: %s",
+                tags,
+                operation,
+                e
+            )
             return []
     
     async def _load_memory_from_row(self, row: Dict[str, Any]) -> Optional[Memory]:
@@ -1026,6 +1084,46 @@ class CloudflareStorage(MemoryStorage):
 
         except Exception as e:
             logger.error(f"Failed to get largest memories: {e}")
+            return []
+
+    async def get_memory_timestamps(self, days: Optional[int] = None) -> List[float]:
+        """
+        Get memory creation timestamps only, without loading full memory objects.
+
+        This is an optimized method for analytics that only needs timestamps,
+        avoiding the overhead of loading full memory content and embeddings.
+
+        Args:
+            days: Optional filter to only get memories from last N days
+
+        Returns:
+            List of Unix timestamps (float) in descending order (newest first)
+        """
+        try:
+            if days is not None:
+                cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+                cutoff_timestamp = cutoff.timestamp()
+
+                sql = "SELECT created_at FROM memories WHERE created_at >= ? ORDER BY created_at DESC"
+                payload = {"sql": sql, "params": [cutoff_timestamp]}
+            else:
+                sql = "SELECT created_at FROM memories ORDER BY created_at DESC"
+                payload = {"sql": sql, "params": []}
+
+            response = await self._retry_request("POST", f"{self.d1_url}/query", json=payload)
+            result = response.json()
+
+            timestamps = []
+            if result.get("success") and result.get("result", [{}])[0].get("results"):
+                for row in result["result"][0]["results"]:
+                    if row.get("created_at") is not None:
+                        timestamps.append(float(row["created_at"]))
+
+            logger.info(f"Retrieved {len(timestamps)} memory timestamps")
+            return timestamps
+
+        except Exception as e:
+            logger.error(f"Failed to get memory timestamps: {e}")
             return []
 
     def sanitized(self, tags):

@@ -27,7 +27,7 @@ import sys
 import platform
 from collections import Counter
 from typing import List, Dict, Any, Tuple, Optional, Set, Callable
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import asyncio
 import random
 
@@ -923,25 +923,39 @@ SOLUTIONS:
             logger.error(traceback.format_exc())
             return []
     
-    async def search_by_tag(self, tags: List[str]) -> List[Memory]:
-        """Search memories by tags."""
+    async def search_by_tag(self, tags: List[str], time_start: Optional[float] = None) -> List[Memory]:
+        """Search memories by tags with optional time filtering.
+
+        Args:
+            tags: List of tags to search for (OR logic)
+            time_start: Optional Unix timestamp (in seconds) to filter memories created after this time
+
+        Returns:
+            List of Memory objects matching the tag criteria and time filter
+        """
         try:
             if not self.conn:
                 logger.error("Database not initialized")
                 return []
-            
+
             if not tags:
                 return []
-            
+
             # Build query for tag search (OR logic)
             tag_conditions = " OR ".join(["tags LIKE ?" for _ in tags])
             tag_params = [f"%{tag}%" for tag in tags]
-            
+
+            # Add time filter to WHERE clause if provided
+            where_clause = f"WHERE ({tag_conditions})"
+            if time_start is not None:
+                where_clause += " AND created_at >= ?"
+                tag_params.append(time_start)
+
             cursor = self.conn.execute(f'''
                 SELECT content_hash, content, tags, memory_type, metadata,
                        created_at, updated_at, created_at_iso, updated_at_iso
                 FROM memories
-                WHERE {tag_conditions}
+                {where_clause}
                 ORDER BY created_at DESC
             ''', tag_params)
             
@@ -1959,6 +1973,50 @@ SOLUTIONS:
 
         except Exception as e:
             logger.error(f"Error getting largest memories: {e}")
+            return []
+
+    async def get_memory_timestamps(self, days: Optional[int] = None) -> List[float]:
+        """
+        Get memory creation timestamps only, without loading full memory objects.
+
+        This is an optimized method for analytics that only needs timestamps,
+        avoiding the overhead of loading full memory content and embeddings.
+
+        Args:
+            days: Optional filter to only get memories from last N days
+
+        Returns:
+            List of Unix timestamps (float) in descending order (newest first)
+        """
+        try:
+            await self.initialize()
+
+            if days is not None:
+                cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+                cutoff_timestamp = cutoff.timestamp()
+
+                query = """
+                    SELECT created_at
+                    FROM memories
+                    WHERE created_at >= ?
+                    ORDER BY created_at DESC
+                """
+                cursor = self.conn.execute(query, (cutoff_timestamp,))
+            else:
+                query = """
+                    SELECT created_at
+                    FROM memories
+                    ORDER BY created_at DESC
+                """
+                cursor = self.conn.execute(query)
+
+            rows = cursor.fetchall()
+            timestamps = [row[0] for row in rows if row[0] is not None]
+
+            return timestamps
+
+        except Exception as e:
+            logger.error(f"Error getting memory timestamps: {e}")
             return []
 
     async def count_all_memories(self, memory_type: Optional[str] = None, tags: Optional[List[str]] = None) -> int:

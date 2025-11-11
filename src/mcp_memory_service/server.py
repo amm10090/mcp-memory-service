@@ -231,15 +231,59 @@ if not os.getenv('DEBUG_MODE'):
 def check_uv_environment():
     """Check if UV is being used and provide recommendations if not."""
     running_with_uv = 'UV_ACTIVE' in os.environ or any('uv' in arg.lower() for arg in sys.argv)
-    
+
     if not running_with_uv:
         logger.info("Memory server is running without UV. For better performance and dependency management, consider using UV:")
         logger.info("  pip install uv")
         logger.info("  uv run memory")
     else:
         logger.info("Memory server is running with UV")
-    
-    return running_with_uv
+
+def check_version_consistency():
+    """
+    Check if installed package version matches source code version.
+
+    Warns if version mismatch detected (common "stale venv" issue).
+    This helps catch the scenario where source code is updated but
+    the package wasn't reinstalled with 'pip install -e .'.
+    """
+    try:
+        # Get source code version (from __init__.py)
+        source_version = __version__
+
+        # Get installed package version (from package metadata)
+        try:
+            import pkg_resources
+            installed_version = pkg_resources.get_distribution("mcp-memory-service").version
+        except:
+            # If pkg_resources fails, try importlib.metadata (Python 3.8+)
+            try:
+                from importlib import metadata
+                installed_version = metadata.version("mcp-memory-service")
+            except:
+                # Can't determine installed version - skip check
+                return
+
+        # Compare versions
+        if installed_version != source_version:
+            logger.warning("=" * 70)
+            logger.warning("⚠️  VERSION MISMATCH DETECTED!")
+            logger.warning(f"   Source code: v{source_version}")
+            logger.warning(f"   Installed:   v{installed_version}")
+            logger.warning("")
+            logger.warning("   This usually means you need to run:")
+            logger.warning("   pip install -e . --force-reinstall")
+            logger.warning("")
+            logger.warning("   Then restart the MCP server:")
+            logger.warning("   - In Claude Code: Run /mcp")
+            logger.warning("   - In Claude Desktop: Restart the application")
+            logger.warning("=" * 70)
+        else:
+            logger.debug(f"Version check OK: v{source_version}")
+
+    except Exception as e:
+        # Don't fail server startup on version check errors
+        logger.debug(f"Version check failed (non-critical): {e}")
 
 # Configure environment variables based on detected system
 def configure_environment():
@@ -1426,9 +1470,18 @@ class MemoryServer:
                             "type": "object",
                             "properties": {
                                 "tags": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "List of tags to search for. Returns memories matching ANY of these tags."
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "List of tags to search for. Returns memories matching ANY of these tags. Accepts either an array of strings or a comma-separated string."
                                 }
                             },
                             "required": ["tags"]
@@ -1464,9 +1517,18 @@ class MemoryServer:
                             "type": "object",
                             "properties": {
                                 "tags": {
-                                    "type": "array", 
-                                    "items": {"type": "string"},
-                                    "description": "Array of tag labels. Memories containing any of these tags will be deleted."
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "Array of tag labels. Memories containing any of these tags will be deleted. Accepts either an array of strings or a comma-separated string."
                                 }
                             },
                             "required": ["tags"]
@@ -1486,9 +1548,18 @@ class MemoryServer:
                             "type": "object",
                             "properties": {
                                 "tags": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "List of tag labels. Memories containing any of these tags will be deleted."
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "List of tag labels. Memories containing any of these tags will be deleted. Accepts either an array of strings or a comma-separated string."
                                 }
                             },
                             "required": ["tags"]
@@ -1507,9 +1578,18 @@ class MemoryServer:
                             "type": "object",
                             "properties": {
                                 "tags": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "List of tag labels. Only memories containing ALL of these tags will be deleted."
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "List of tag labels. Only memories containing ALL of these tags will be deleted. Accepts either an array of strings or a comma-separated string."
                                 }
                             },
                             "required": ["tags"]
@@ -1731,9 +1811,18 @@ class MemoryServer:
                                     "description": "Dictionary of metadata fields to update.",
                                     "properties": {
                                         "tags": {
-                                            "type": "array",
-                                            "items": {"type": "string"},
-                                            "description": "Replace existing tags with this list."
+                                            "oneOf": [
+                                                {
+                                                    "type": "array",
+                                                    "items": {"type": "string"},
+                                                    "description": "Tags as an array of strings"
+                                                },
+                                                {
+                                                    "type": "string",
+                                                    "description": "Tags as comma-separated string"
+                                                }
+                                            ],
+                                            "description": "Replace existing tags with this list. Accepts either an array of strings or a comma-separated string."
                                         },
                                         "memory_type": {
                                             "type": "string",
@@ -1911,9 +2000,18 @@ class MemoryServer:
                                     "description": "Path to the document file to ingest."
                                 },
                                 "tags": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "Optional tags to apply to all memories created from this document.",
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "Optional tags to apply to all memories created from this document. Accepts either an array of strings or a comma-separated string.",
                                     "default": []
                                 },
                                 "chunk_size": {
@@ -1959,9 +2057,18 @@ class MemoryServer:
                                     "description": "Path to the directory containing documents to ingest."
                                 },
                                 "tags": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "Optional tags to apply to all memories created.",
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "description": "Tags as an array of strings"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "description": "Tags as comma-separated string"
+                                        }
+                                    ],
+                                    "description": "Optional tags to apply to all memories created. Accepts either an array of strings or a comma-separated string.",
                                     "default": []
                                 },
                                 "recursive": {
@@ -2150,7 +2257,7 @@ class MemoryServer:
             start_time = time.time()
 
             # Call shared MemoryService business logic
-            result = await self.memory_service.retrieve_memory(
+            result = await self.memory_service.retrieve_memories(
                 query=query,
                 n_results=n_results
             )
@@ -2176,7 +2283,11 @@ class MemoryServer:
                 if created_at:
                     # Parse ISO string and format
                     try:
-                        dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                        # Handle both float (timestamp) and string (ISO format) types
+                        if isinstance(created_at, (int, float)):
+                            dt = datetime.fromtimestamp(created_at)
+                        else:
+                            dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
                         memory_info.append(f"Timestamp: {dt.strftime('%Y-%m-%d %H:%M:%S')}")
                     except (ValueError, TypeError):
                         memory_info.append(f"Timestamp: {created_at}")
@@ -2201,8 +2312,10 @@ class MemoryServer:
             return [types.TextContent(type="text", text=f"Error retrieving memories: {str(e)}")]
 
     async def handle_search_by_tag(self, arguments: dict) -> List[types.TextContent]:
-        tags = arguments.get("tags", [])
-        
+        from .services.memory_service import normalize_tags
+
+        tags = normalize_tags(arguments.get("tags", []))
+
         if not tags:
             return [types.TextContent(type="text", text="Error: Tags are required")]
         
@@ -2229,9 +2342,13 @@ class MemoryServer:
                 created_at = memory.get("created_at")
                 if created_at:
                     try:
-                        dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                        # Handle both float (timestamp) and string (ISO format) types
+                        if isinstance(created_at, (int, float)):
+                            dt = datetime.fromtimestamp(created_at)
+                        else:
+                            dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
                         memory_info.append(f"Timestamp: {dt.strftime('%Y-%m-%d %H:%M:%S')}")
-                    except (ValueError, TypeError):
+                    except (ValueError, TypeError) as e:
                         memory_info.append(f"Timestamp: {created_at}")
 
                 memory_info.extend([
@@ -2270,14 +2387,15 @@ class MemoryServer:
 
     async def handle_delete_by_tag(self, arguments: dict) -> List[types.TextContent]:
         """Handler for deleting memories by tags."""
+        from .services.memory_service import normalize_tags
+
         tags = arguments.get("tags", [])
-        
+
         if not tags:
             return [types.TextContent(type="text", text="Error: Tags array is required")]
-        
-        # Convert single string to array if needed for backward compatibility
-        if isinstance(tags, str):
-            tags = [tags]
+
+        # Normalize tags (handles comma-separated strings and arrays)
+        tags = normalize_tags(tags)
         
         try:
             # Initialize storage lazily when needed
@@ -2290,8 +2408,10 @@ class MemoryServer:
 
     async def handle_delete_by_tags(self, arguments: dict) -> List[types.TextContent]:
         """Handler for explicit multiple tag deletion with progress tracking."""
-        tags = arguments.get("tags", [])
-        
+        from .services.memory_service import normalize_tags
+
+        tags = normalize_tags(arguments.get("tags", []))
+
         if not tags:
             return [types.TextContent(type="text", text="Error: Tags array is required")]
         
@@ -2332,8 +2452,10 @@ class MemoryServer:
 
     async def handle_delete_by_all_tags(self, arguments: dict) -> List[types.TextContent]:
         """Handler for deleting memories that contain ALL specified tags."""
-        tags = arguments.get("tags", [])
-        
+        from .services.memory_service import normalize_tags
+
+        tags = normalize_tags(arguments.get("tags", []))
+
         if not tags:
             return [types.TextContent(type="text", text="Error: Tags array is required")]
         
@@ -2359,19 +2481,25 @@ class MemoryServer:
     async def handle_update_memory_metadata(self, arguments: dict) -> List[types.TextContent]:
         """Handle memory metadata update requests."""
         try:
+            from .services.memory_service import normalize_tags
+
             content_hash = arguments.get("content_hash")
             updates = arguments.get("updates")
             preserve_timestamps = arguments.get("preserve_timestamps", True)
-            
+
             if not content_hash:
                 return [types.TextContent(type="text", text="Error: content_hash is required")]
-            
+
             if not updates:
                 return [types.TextContent(type="text", text="Error: updates dictionary is required")]
-            
+
             if not isinstance(updates, dict):
                 return [types.TextContent(type="text", text="Error: updates must be a dictionary")]
-            
+
+            # Normalize tags if present in updates
+            if "tags" in updates:
+                updates["tags"] = normalize_tags(updates["tags"])
+
             # Initialize storage lazily when needed
             storage = await self._ensure_storage_initialized()
             
@@ -3297,8 +3425,10 @@ Memories Archived: {report.memories_archived}"""
             # Initialize storage lazily when needed
             storage = await self._ensure_storage_initialized()
             
+            from .services.memory_service import normalize_tags
+
             file_path = Path(arguments["file_path"])
-            tags = arguments.get("tags", [])
+            tags = normalize_tags(arguments.get("tags", []))
             chunk_size = arguments.get("chunk_size", 1000)
             chunk_overlap = arguments.get("chunk_overlap", 200)
             memory_type = arguments.get("memory_type", "document")
@@ -3338,7 +3468,12 @@ Memories Archived: {report.memories_archived}"""
                     # Combine document tags with chunk metadata tags
                     all_tags = tags.copy()
                     if chunk.metadata.get('tags'):
-                        all_tags.extend(chunk.metadata['tags'])
+                        # Handle tags from chunk metadata (can be string or list)
+                        chunk_tags = chunk.metadata['tags']
+                        if isinstance(chunk_tags, str):
+                            # Split comma-separated string into list
+                            chunk_tags = [tag.strip() for tag in chunk_tags.split(',') if tag.strip()]
+                        all_tags.extend(chunk_tags)
                     
                     # Create memory object
                     memory = Memory(
@@ -3401,8 +3536,10 @@ Memories Archived: {report.memories_archived}"""
             # Initialize storage lazily when needed
             storage = await self._ensure_storage_initialized()
             
+            from .services.memory_service import normalize_tags
+
             directory_path = Path(arguments["directory_path"])
-            tags = arguments.get("tags", [])
+            tags = normalize_tags(arguments.get("tags", []))
             recursive = arguments.get("recursive", True)
             file_extensions = arguments.get("file_extensions", ["pdf", "txt", "md", "json"])
             chunk_size = arguments.get("chunk_size", 1000)
@@ -3480,9 +3617,14 @@ Memories Archived: {report.memories_archived}"""
                             all_tags = tags.copy()
                             all_tags.append(f"source_dir:{directory_path.name}")
                             all_tags.append(f"file_type:{file_path.suffix.lstrip('.')}")
-                            
+
                             if chunk.metadata.get('tags'):
-                                all_tags.extend(chunk.metadata['tags'])
+                                # Handle tags from chunk metadata (can be string or list)
+                                chunk_tags = chunk.metadata['tags']
+                                if isinstance(chunk_tags, str):
+                                    # Split comma-separated string into list
+                                    chunk_tags = [tag.strip() for tag in chunk_tags.split(',') if tag.strip()]
+                                all_tags.extend(chunk_tags)
                             
                             # Create memory object
                             memory = Memory(
@@ -3558,10 +3700,13 @@ async def async_main():
     
     # Run dependency check before starting
     run_dependency_check()
-    
+
     # Check if running with UV
     check_uv_environment()
-    
+
+    # Check for version mismatch (stale venv issue)
+    check_version_consistency()
+
     # Debug logging is now handled by the CLI layer
 
     # Print system diagnostics only for LM Studio (avoid JSON parsing errors in Claude Desktop)
