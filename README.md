@@ -15,7 +15,25 @@
 
 ## 🚀 Quick Start (2 minutes)
 
-### 🆕 Latest Release: **v8.16.0** (Nov 1, 2025)
+### 🆕 Latest Release: **v8.23.1** (Nov 10, 2025)
+
+**Stale Virtual Environment Prevention System** 🛡️🔧 — 6-layer workflow that prevents "stale venv vs source" mismatches.
+
+**What's Included**:
+- 🛡️ **Automated detection** – Pre-commit hook + `scripts/validation/check_dev_setup.py` block commits when virtualenvs fall behind
+- ⚠️ **Runtime warnings** – `uv run memory server` compares source/package versions at startup
+- 📚 **Developer guidance** – CLAUDE.md, README.md, and ai-agent instructions now require `pip install -e .`
+- 🤖 **Interactive onboarding** – `scripts/installation/install.py` detects git worktrees and automatically prompts for editable installs
+- 🔄 **CI/CD validation** – `.github/workflows/dev-setup-validation.yml` runs five jobs covering detection, hooks, runtime checks, and docs accuracy
+
+**Previous Releases**:
+- **v8.23.0** – Consolidation Scheduler via Code Execution API (88% token reduction)
+- **v8.22.x** – Complete tag schema validation + ingestion fixes
+- **v8.21.0** – Amp PR Automator & memory hook reliability improvements
+
+**📖 Full Details**: [CHANGELOG.md](CHANGELOG.md#8231---2025-11-10) | [All Releases](https://github.com/doobidoo/mcp-memory-service/releases)
+
+### 🔁 Previous Spotlight: **v8.16.0** (Nov 1, 2025)
 
 **Database Maintenance & Type Consolidation** - Professional-grade tools for maintaining memory database health and organization.
 
@@ -43,7 +61,7 @@
 - After: 128 organized types, all memories properly categorized
 - Impact: Improved query efficiency, consistent naming, better semantic grouping
 
-**📖 Full Details**: [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01) | [Maintenance Guide](scripts/maintenance/README.md#consolidate_memory_typespy-new) | [Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160) | [All Releases](https://github.com/doobidoo/mcp-memory-service/releases)
+**📖 Full Details**: [CHANGELOG.md](CHANGELOG.md#8160---2025-11-01) | [Maintenance Guide](scripts/maintenance/README.md#consolidate_memory_typespy-new) | [Issue #160](https://github.com/doobidoo/mcp-memory-service/issues/160)
 
 ---
 
@@ -90,6 +108,40 @@ uv pip install mcp-memory-service
 ```
 
 For advanced configuration with the interactive installer, clone the repo and run `python scripts/installation/install.py`.
+
+### Developer Setup (Contributing)
+
+**For development and contributing**, use editable install to ensure source code changes take effect immediately:
+
+```bash
+# Clone repository
+git clone https://github.com/doobidoo/mcp-memory-service.git
+cd mcp-memory-service
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# CRITICAL: Editable install (code changes take effect immediately)
+pip install -e .
+
+# Verify editable mode (should show source directory, not site-packages)
+pip show mcp-memory-service | grep Location
+# Expected: Location: /path/to/mcp-memory-service/src
+
+# Start development server
+uv run memory server
+```
+
+**⚠️ Important**: Editable install (`-e` flag) ensures MCP servers load from source code, not stale `site-packages`. Without this, source changes won't be reflected until you reinstall the package.
+
+**Version Mismatch Check:**
+```bash
+# Verify installed version matches source code
+python scripts/validation/check_dev_setup.py
+```
+
+See [CLAUDE.md](CLAUDE.md#development-setup-critical) for complete development guidelines.
 
 ### Traditional Setup Options
 
@@ -171,13 +223,29 @@ These warnings disappear after the first successful run. The service is working 
 - **Fallback**: Use Cloudflare or Hybrid backend: `--storage-backend cloudflare` or `--storage-backend hybrid`
 - See [Troubleshooting Guide](docs/troubleshooting/general.md#macos-sqlite-extension-issues) for details
 
+## 🎯 Memory Awareness in Action
+
+**Intelligent Context Injection** - See how the memory service automatically surfaces relevant information at session start:
+
+<img src="docs/assets/images/memory-awareness-hooks-example.png" alt="Memory Awareness Hooks in Action" width="100%" />
+
+**What you're seeing:**
+- 🧠 **Automatic memory injection** - 8 relevant memories found from 2,526 total
+- 📂 **Smart categorization** - Recent Work, Current Problems, Additional Context
+- 📊 **Git-aware analysis** - Recent commits and keywords automatically extracted
+- 🎯 **Relevance scoring** - Top memories scored at 100% (today), 89% (8d ago), 84% (today)
+- ⚡ **Fast retrieval** - SQLite-vec backend with 5ms read performance
+- 🔄 **Background sync** - Hybrid backend syncing to Cloudflare
+
+**Result**: Claude starts every session with full project context - no manual prompting needed.
+
 ## 📚 Complete Documentation
 
 **👉 Visit our comprehensive [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki) for detailed guides:**
 
-### 🧠 v7.1.0 Natural Memory Triggers (Latest)
+### 🧠 v7.1.3 Natural Memory Triggers (Latest)
 
-- **[Natural Memory Triggers v7.1.0 Guide](https://github.com/doobidoo/mcp-memory-service/wiki/Natural-Memory-Triggers-v7.1.0)** - Intelligent automatic memory awareness
+- **[Natural Memory Triggers v7.1.3 Guide](https://github.com/doobidoo/mcp-memory-service/wiki/Natural-Memory-Triggers-v7.1.0)** - Intelligent automatic memory awareness
   - ✅ **85%+ trigger accuracy** with semantic pattern detection
   - ✅ **Multi-tier performance** (50ms instant → 150ms fast → 500ms intensive)
   - ✅ **CLI management system** for real-time configuration

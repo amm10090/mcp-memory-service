@@ -10,6 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 MCP Memory Service is a Model Context Protocol server providing semantic memory and persistent storage for Claude Desktop with SQLite-vec, Cloudflare, and Hybrid storage backends.
 
+> **🆕 v8.23.1**: **Stale Virtual Environment Prevention System** - 6-layer strategy preventing "stale venv vs source code" mismatches: automated detection (check_dev_setup.py, pre-commit hook), runtime warnings (server.py), developer guidance (CLAUDE.md, README.md, ai-agent-instructions.md), interactive onboarding (install.py), and CI/CD validation. Solves root cause: MCP servers load from site-packages, not source files. See [CHANGELOG.md](CHANGELOG.md) for full version history.
+>
+> **Note**: When releasing new versions, update this line with the current version + brief description. Use `.claude/agents/github-release-manager.md` for the release workflow checklist.
+
 > **🚨 v8.13.3**: **MCP Tools Restored** - CRITICAL patch fixing v8.12.0 regression that broke all MCP memory operations. Transform MemoryService responses to proper MCP TypedDict format. Requires MCP server restart (/mcp command) to load fix.
 
 > **🔄 v8.13.2**: **Sync Script Restored** - Fixed broken backend synchronization (store_memory API migration). Proper Memory object creation with storage.store() method.
@@ -39,6 +43,7 @@ uv run memory server                           # Start server (v6.3.0+ consolida
 pytest tests/                                 # Run tests
 python scripts/validation/verify_environment.py # Check environment
 python scripts/validation/validate_configuration_complete.py   # Comprehensive configuration validation
+python scripts/validation/check_dev_setup.py   # Detect stale editable installs / venv mismatches
 
 # Memory Operations (requires: python scripts/utils/claude_commands_utils.py)
 claude /memory-store "content"                 # Store information
@@ -491,6 +496,13 @@ export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 - **Graceful fallbacks** from cloud to local backends if setup fails
 
 ## Development Guidelines
+
+### ⚙️ **Development Setup (Critical)**
+
+- Always install the package in editable mode: `pip install -e .` (prevents stale `site-packages` vs source mismatches)
+- Run `python scripts/validation/check_dev_setup.py` after pulling upstream changes to verify source/venv alignment
+- The pre-commit hook now blocks commits if the editable install is missing or stale—use `scripts/installation/install.py` to auto-enable it
+- Server startup (`uv run memory server`) emits warnings if the version in source vs installed package diverges; resolve immediately before testing
 
 ### 🧠 **Memory & Documentation**
 
