@@ -1,56 +1,36 @@
-# MCP Memory Service - Production Setup
+# MCP Memory Service 生产部署指南
 
-## 🚀 Quick Start
+## 🚀 快速开始
+默认启用记忆归并、mDNS 自动发现、HTTPS 与自启动。
 
-This MCP Memory Service is configured with **consolidation system**, **mDNS auto-discovery**, **HTTPS**, and **automatic startup**.
-
-### **Installation**
 ```bash
-# 1. Install the service
-bash install_service.sh
-
-# 2. Update configuration (if needed)
-./update_service.sh
-
-# 3. Start the service
-sudo systemctl start mcp-memory
+bash install_service.sh         # 安装
+./update_service.sh             # 按需更新配置
+sudo systemctl start mcp-memory # 启动
 ```
 
-### **Verification**
+验证：
 ```bash
-# Check service status
 sudo systemctl status mcp-memory
-
-# Test API health
-curl -k https://localhost:8000/api/health
-
-# Verify mDNS discovery
+curl -k https://localhost:8001/api/health
 avahi-browse -t _mcp-memory._tcp
 ```
 
-## 📋 **Service Details**
+## 📋 服务信息
+- 服务名：`memory._mcp-memory._tcp.local.`
+- HTTPS 地址：`https://localhost:8001`
+- API Key：`mcp-0b1ccbde2197a08dcb12d41af4044be6`
+- 自启动：✅
+- 归并：✅
+- mDNS：✅
 
-- **Service Name**: `memory._mcp-memory._tcp.local.`
-- **HTTPS Address**: https://localhost:8000 
-- **API Key**: `mcp-0b1ccbde2197a08dcb12d41af4044be6`
-- **Auto-Startup**: ✅ Enabled
-- **Consolidation**: ✅ Active
-- **mDNS Discovery**: ✅ Working
-
-## 🛠️ **Management**
-
+## 🛠 管理脚本
 ```bash
-./service_control.sh start     # Start service
-./service_control.sh stop      # Stop service  
-./service_control.sh status    # Show status
-./service_control.sh logs      # View logs
-./service_control.sh health    # Test API
+./service_control.sh start|stop|status|logs|health
 ```
 
-## 📖 **Documentation**
+## 📖 参考
+- 全量指南：`COMPLETE_SETUP_GUIDE.md`
+- systemd 与脚本：`mcp-memory.service`、`archive/setup-development/`
 
-- **Complete Guide**: `COMPLETE_SETUP_GUIDE.md`
-- **Service Files**: `mcp-memory.service`, management scripts
-- **Archive**: `archive/setup-development/` (development files)
-
-**✅ Ready for production use!**
+✅ 可直接投入生产。

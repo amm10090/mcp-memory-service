@@ -1,18 +1,17 @@
-# Memory Context Loading Prompt
+# 记忆上下文加载提示
 
-Use this prompt at the start of Claude Code sessions on machines in your local network:
+适用于局域网内的 Claude Code 会话启动阶段。
 
 ---
 
-## Prompt for Claude Code
-
+## 标准提示
 ```
-Load MCP Memory Service context for this project. Before we begin working, please retrieve and incorporate all stored knowledge about this codebase from my local memory service:
+在开始工作前，请从本地 MCP Memory Service 拉取此项目的全部知识：
 
-**Memory Service Endpoint**: https://your-server-ip:8443/mcp
-**Authorization**: Bearer your-api-key
+- Endpoint: https://your-server-ip:8443/mcp
+- Authorization: Bearer your-api-key
 
-Execute this command to load context:
+执行：
 ```bash
 curl -k -s -X POST https://your-server-ip:8443/mcp \
   -H "Content-Type: application/json" \
@@ -21,39 +20,29 @@ curl -k -s -X POST https://your-server-ip:8443/mcp \
   | jq -r '.result.content[0].text'
 ```
 
-This memory contains:
-- Complete project structure and architecture
-- All key development, testing, and deployment commands
-- Environment variables and configuration patterns
-- Recent changes including v5.0.2 ONNX implementation details
-- Issue management approaches and current project status
-- Testing practices and platform-specific optimizations
-- Remote service deployment and health monitoring
+记忆中包含：
+- 项目结构/架构概览；
+- 开发、测试、部署命令；
+- 环境变量与配置模式；
+- 最近版本（含 v5.0.2 ONNX 细节）；
+- Issue 管理策略与当前状态；
+- 测试实践及平台优化；
+- 远程部署与健康监控方式。
 
-After loading this context, you'll have comprehensive knowledge of the MCP Memory Service project equivalent to extensive codebase exploration, which will significantly reduce token usage and improve response accuracy.
-
-Please confirm successful context loading and summarize the key project information you've retrieved.
+加载完成后，请确认并简要总结关键信息。
 ```
 
 ---
 
-## Alternative Short Prompt
-
-For quick context loading:
-
+## 简化提示
 ```
-Load project context from memory service: curl -k -s -X POST https://your-server-ip:8443/mcp -H "Content-Type: application/json" -H "Authorization: Bearer your-api-key" -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "retrieve_memory", "arguments": {"query": "claude-code-reference", "limit": 20}}}' | jq -r '.result.content[0].text'
-
-Incorporate this MCP Memory Service project knowledge before proceeding.
+Load MCP context: curl -k -s -X POST https://your-server-ip:8443/mcp -H "Content-Type: application/json" -H "Authorization: Bearer your-api-key" -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "retrieve_memory", "arguments": {"query": "claude-code-reference", "limit": 20}}}' | jq -r '.result.content[0].text'
 ```
 
 ---
 
-## Network Distribution
-
-1. **Copy this prompt file** to other machines in your network
-2. **Update IP address** if memory service moves
-3. **Test connectivity** with: `curl -k -s https://your-server-ip:8443/api/health`
-4. **Use at session start** for instant project context
-
-This eliminates repetitive codebase discovery across all your development machines.
+## 分发指引
+1. 将本提示文件复制到其它开发机；
+2. 若服务地址变动，更新 IP；
+3. 通过 `curl -k -s https://your-server-ip:8443/api/health` 自测连通；
+4. 会话伊始执行，即可免去重复熟悉代码库的流程。

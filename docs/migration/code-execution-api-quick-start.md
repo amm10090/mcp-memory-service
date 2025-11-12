@@ -1,414 +1,212 @@
-# Code Execution API: 5-Minute Quick Start
+# Code Execution API：5 分钟极速上手
 
-**Get from "MCP tools working" to "using code execution" in 5 minutes.**
-
----
-
-## Why Migrate? (30 seconds)
-
-The Code Execution API provides **75-90% token reduction** compared to MCP tool calls, translating to significant cost savings:
-
-| Users | Sessions/Day | Annual Token Savings | Annual Cost Savings* |
-|-------|--------------|---------------------|---------------------|
-| 10 | 5 | 109.5M tokens | $16.43 |
-| 50 | 8 | 876M tokens | $131.40 |
-| 100 | 10 | 2.19B tokens | $328.50 |
-
-**Key Benefits:**
-- **Zero code changes** to existing workflows
-- **Automatic fallback** to MCP if code execution fails
-- **Same functionality**, dramatically lower costs
-- **5x faster** execution (50ms cold start vs 250ms MCP)
-
-*Based on Claude Opus input pricing ($0.15/1M tokens)
+**5 分钟内从 “MCP 工具可用” 迁移到 “全面启用代码执行”。**
 
 ---
 
-## Prerequisites (30 seconds)
+## 为何要迁移？（30 秒）
 
-- Existing mcp-memory-service installation (any version)
-- Python 3.10 or higher
-- 5 minutes of your time
+Code Execution API 相比 MCP 工具调用可节省 **75-90% Token**，显著降低成本：
 
-**Check Python version:**
+| 用户数 | 会话/日 | 年度 Token 节省 | 年度成本节省* |
+|--------|---------|-----------------|----------------|
+| 10 | 5 | 1.095 亿 | $16.43 |
+| 50 | 8 | 8.76 亿 | $131.40 |
+| 100 | 10 | 21.9 亿 | $328.50 |
+
+**核心收益**：
+- **无需改代码**，现有工作流原样使用；
+- **自动回退 MCP**，失败也不会中断；
+- **功能一致**，成本骤降；
+- **执行更快**，冷启动 50ms vs MCP 250ms。
+
+\* 以 Claude Opus 输入价 $0.15 / 百万 tokens 估算。
+
+---
+
+## 前置条件（30 秒）
+
+- 已安装 mcp-memory-service（任意版本）；
+- Python ≥ 3.10；
+- 5 分钟空闲时间。
+
 ```bash
-python --version  # or python3 --version
+python --version  # 或 python3 --version
 ```
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Option A: Fresh Install (2 minutes)
-
-If you're installing mcp-memory-service for the first time:
+### A. 全新安装（2 分钟）
 
 ```bash
-# 1. Clone or update repository
 git clone https://github.com/doobidoo/mcp-memory-service.git
 cd mcp-memory-service
-git pull  # If already cloned
+git pull  # 已克隆时更新
 
-# 2. Run installer (code execution enabled by default in v8.19.0+)
-python scripts/installation/install.py
-
-# 3. Done! ✅
+python scripts/installation/install.py  # v8.19.0+ 默认启用代码执行
 ```
 
-The installer automatically enables code execution in Claude Code hooks. No additional configuration needed.
+> 安装器会自动在 Claude Code hooks 中启用代码执行，无需额外配置。
 
----
-
-### Option B: Existing Installation (3 minutes)
-
-If you already have mcp-memory-service installed:
+### B. 既有安装（3 分钟）
 
 ```bash
-# 1. Update code
 cd /path/to/mcp-memory-service
 git pull
-
-# 2. Install/update API module
 pip install -e .
+python --version  # 确认 >=3.10
+```
 
-# 3. Verify Python version (must be 3.10+)
-python --version
-
-# 4. Enable code execution in hooks (if not auto-enabled)
-# Edit ~/.claude/hooks/config.json and add:
+若未自动开启，编辑 `~/.claude/hooks/config.json`：
+```json
 {
   "codeExecution": {
     "enabled": true,
     "timeout": 8000,
     "fallbackToMCP": true,
     "enableMetrics": true,
-    "pythonPath": "python3"  // or "python" on Windows
+    "pythonPath": "python3"  // Windows 可写 "python"
   }
 }
-
-# 5. Done! ✅
 ```
 
-**Note:** v8.19.0+ enables code execution by default. If upgrading from an older version, the installer will prompt you to enable it.
+v8.19.0+ 默认开启，旧版本升级后安装器会提示是否启用。
 
 ---
 
-## Verify It's Working (1 minute)
-
-### Test the API directly
+## 验证（1 分钟）
 
 ```bash
 python -c "from mcp_memory_service.api import search, health; print(health())"
 ```
 
-**Expected output:**
-```
-CompactHealthInfo(status='healthy', count=1247, backend='sqlite_vec')
-```
+期望输出：`CompactHealthInfo(status='healthy', count=1247, backend='sqlite_vec')`
 
-### Check hook logs
-
-In your next Claude Code session, look for these indicators:
-
+Hook 日志应出现：
 ```
 ✅ Using code execution (75% token reduction)
 📊 search() returned 5 results (385 tokens vs 2,625 MCP tokens)
-💾 Backend: sqlite_vec, Count: 1247
-```
-
-If you see these messages, code execution is working correctly!
-
----
-
-## What Changed?
-
-**For You:**
-- Session hooks now use the Python API instead of MCP tool calls
-- **75-90% fewer tokens** consumed per session
-- **5x faster** memory operations (50ms vs 250ms)
-
-**What Stayed the Same:**
-- MCP tools still work (automatic fallback)
-- All existing workflows unchanged
-- Zero breaking changes
-- Same search quality and memory storage
-
-**Architecture:**
-```
-Before (MCP):
-Claude Code → MCP Protocol → Memory Server
-(2,625 tokens for 5 results)
-
-After (Code Execution):
-Claude Code → Python API → Memory Server
-(385 tokens for 5 results)
 ```
 
 ---
 
-## Troubleshooting (1 minute)
+## 迁移后发生了什么？
 
-### Issue: "⚠️ Code execution failed, falling back to MCP"
+- Session hook 自动调用 Python API，**会话 Token -75%**；
+- MCP 工具保留，失败时自动回退；
+- 原有流程、搜索质量、存储行为完全一致。
 
-**Cause:** Python version too old, API not installed, or import error
+```
+Before: Claude Code → MCP → Memory Server （5 条结果 2,625 tokens）
+After : Claude Code → Python API → Memory Server （5 条结果 385 tokens）
+```
 
-**Solutions:**
+---
 
-1. **Check Python version:**
-   ```bash
-   python --version  # Must be 3.10+
-   ```
+## 常见问题（1 分钟）
 
-2. **Verify API installed:**
-   ```bash
-   python -c "import mcp_memory_service.api"
-   ```
+### “⚠️ Code execution failed, falling back to MCP”
+- 检查 Python ≥3.10：`python --version`
+- 确保 API 已安装：
+  ```bash
+  python -c "import mcp_memory_service.api" || pip install -e .
+  ```
+- 校验配置：`grep -A5 codeExecution ~/.claude/hooks/config.json`
 
-   If this fails, run:
-   ```bash
-   cd /path/to/mcp-memory-service
-   pip install -e .
-   ```
-
-3. **Check hook configuration:**
-   ```bash
-   cat ~/.claude/hooks/config.json | grep codeExecution -A 5
-   ```
-
-   Should show:
-   ```json
-   "codeExecution": {
-     "enabled": true,
-     "fallbackToMCP": true
-   }
-   ```
-
-### Issue: ModuleNotFoundError
-
-**Cause:** API module not installed
-
-**Solution:**
+### `ModuleNotFoundError`
 ```bash
 cd /path/to/mcp-memory-service
-pip install -e .  # Install in editable mode
+pip install -e .
 ```
 
-### Issue: Timeout errors
+### 超时
+在配置中增大 `timeout`，例如 15000ms。
 
-**Cause:** Slow storage initialization or network latency
-
-**Solution:** Increase timeout in `~/.claude/hooks/config.json`:
-```json
-{
-  "codeExecution": {
-    "timeout": 15000  // Increase from 8000ms to 15000ms
-  }
-}
-```
-
-### Issue: Still seeing high token counts
-
-**Cause:** Code execution not enabled or hooks not reloaded
-
-**Solutions:**
-1. Verify config: `cat ~/.claude/hooks/config.json | grep "enabled"`
-2. Restart Claude Code to reload hooks
-3. Check logs for "Using code execution" message
+### Token 未下降
+- 再次确认 `enabled=true`；
+- 重启 Claude Code；
+- 查看日志是否出现 “Using code execution”。
 
 ---
 
-## Performance Benchmarks
+## 性能基准
 
-### Token Comparison
+| 操作 | MCP Tokens | Code Tokens | 节省 |
+|------|------------|-------------|------|
+| search(5) | 2,625 | 385 | 85% |
+| store | 150 | 15 | 90% |
+| health | 125 | 20 | 84% |
+| Session hook | 3,600 | 900 | 75% |
 
-| Operation | MCP Tokens | Code Execution | Savings |
-|-----------|------------|----------------|---------|
-| search(5 results) | 2,625 | 385 | 85% |
-| store() | 150 | 15 | 90% |
-| health() | 125 | 20 | 84% |
-| **Session hook (8 memories)** | **3,600** | **900** | **75%** |
-
-### Execution Time
-
-| Scenario | MCP | Code Execution | Improvement |
-|----------|-----|----------------|-------------|
-| Cold start | 250ms | 50ms | 5x faster |
-| Warm call | 100ms | 5-10ms | 10-20x faster |
-| Batch (5 ops) | 500ms | 50ms | 10x faster |
+执行耗时：
+- 冷启动：MCP 250ms → Code 50ms；
+- 暖调用：MCP 100ms → Code 5-10ms。
 
 ---
 
-## Cost Savings Calculator
+## 成本计算
 
-### Personal Use (10 sessions/day)
-- Daily: 10 sessions x 2,700 tokens saved = 27,000 tokens
-- Annual: 27,000 x 365 = **9.86M tokens/year**
-- **Savings: $1.48/year** (at $0.15/1M tokens)
-
-### Small Team (5 users, 8 sessions/day each)
-- Daily: 5 users x 8 sessions x 2,700 tokens = 108,000 tokens
-- Annual: 108,000 x 365 = **39.42M tokens/year**
-- **Savings: $5.91/year**
-
-### Large Team (50 users, 10 sessions/day each)
-- Daily: 50 users x 10 sessions x 2,700 tokens = 1,350,000 tokens
-- Annual: 1,350,000 x 365 = **492.75M tokens/year**
-- **Savings: $73.91/year**
-
-### Enterprise (500 users, 12 sessions/day each)
-- Daily: 500 users x 12 sessions x 2,700 tokens = 16,200,000 tokens
-- Annual: 16,200,000 x 365 = **5.91B tokens/year**
-- **Savings: $886.50/year**
+- **个人（10 会话/日）**：9.86M tokens/年，≈$1.48；
+- **小团队（5 人 × 8 会话）**：39.42M tokens/年，≈$5.91；
+- **50 人团队（10 会话）**：492.75M tokens/年，≈$73.91；
+- **500 人组织（12 会话）**：5.91B tokens/年，≈$886.50。
 
 ---
 
-## Next Steps
+## 下一步
 
-### Monitor Your Savings
-
-Enable metrics to track actual token savings:
-
-```json
-{
-  "codeExecution": {
-    "enableMetrics": true
-  }
-}
-```
-
-Hook logs will show per-operation savings:
-```
-📊 Session hook saved 2,700 tokens (75% reduction)
-💰 Estimated annual savings: $1.48 (personal) / $73.91 (team of 50)
-```
-
-### Explore Advanced Features
-
-The API supports more than just hooks:
-
-```python
-from mcp_memory_service.api import search, store, health, close
-
-# Search with filters
-results = search("architecture decisions", limit=10, tags=["important"])
-
-# Store with metadata
-hash = store("Memory content", tags=["note", "urgent"], memory_type="reminder")
-
-# Check service health
-info = health()
-print(f"Backend: {info.backend}, Memories: {info.count}")
-
-# Cleanup on exit
-close()
-```
-
-### Read the Documentation
-
-- **Full API Reference:** [docs/api/code-execution-interface.md](../api/code-execution-interface.md)
-- **Implementation Details:** [docs/research/code-execution-interface-implementation.md](../research/code-execution-interface-implementation.md)
-- **Hook Migration Guide:** [docs/hooks/phase2-code-execution-migration.md](../hooks/phase2-code-execution-migration.md)
-
-### Stay Updated
-
-- **GitHub Issues:** [Issue #206](https://github.com/doobidoo/mcp-memory-service/issues/206)
-- **Changelog:** [CHANGELOG.md](../../CHANGELOG.md)
-- **Wiki:** [Project Wiki](https://github.com/doobidoo/mcp-memory-service/wiki)
-
----
-
-## Rollback Instructions
-
-If you encounter issues and need to rollback:
-
-1. **Disable code execution in hooks:**
-   ```json
-   {
-     "codeExecution": {
-       "enabled": false
-     }
-   }
+1. **开启指标**：`"enableMetrics": true`，日志会输出每次节省的 Token；
+2. **深入使用 API**：
+   ```python
+   from mcp_memory_service.api import search, store, health
+   hash = store("memory", tags=["note"], memory_type="reminder")
+   results = search("architecture", limit=10, tags=["important"])
+   print(health())
    ```
-
-2. **Restart Claude Code** to reload configuration
-
-3. **Verify MCP fallback working:**
-   - Check logs for "Using MCP tools"
-   - Session hooks should complete successfully
-
-4. **Report the issue:**
-   - GitHub: [Issue #206](https://github.com/doobidoo/mcp-memory-service/issues/206)
-   - Include error logs and configuration
-
-**Note:** MCP tools continue to work even if code execution is enabled, providing automatic fallback for reliability.
+3. **阅读文档**：`docs/api/code-execution-interface.md`、`docs/hooks/phase2-code-execution-migration.md`；
+4. **关注 Issue #206** 获取更新。
 
 ---
 
-## FAQ
+## 回滚
 
-### Q: Do I need to change my code?
-**A:** No. Code execution is transparent to your workflows. If you're using MCP tools directly, they'll continue working.
-
-### Q: What if code execution fails?
-**A:** Automatic fallback to MCP tools. No data loss, just slightly higher token usage.
-
-### Q: Can I use both MCP and code execution?
-**A:** Yes. They coexist seamlessly. Session hooks use code execution, while manual tool calls use MCP (or can also use code execution if you prefer).
-
-### Q: Will this break my existing setup?
-**A:** No. All existing functionality remains unchanged. Code execution is additive, not replacing.
-
-### Q: How do I measure actual savings?
-**A:** Enable metrics in config and check hook logs for per-session token savings.
-
-### Q: What about Windows support?
-**A:** Fully supported. Use `"pythonPath": "python"` in config (instead of `python3`).
-
-### Q: Can I test before committing?
-**A:** Yes. Set `"enabled": true` in config, test one session, then rollback if needed by setting `"enabled": false`.
+```json
+"codeExecution": { "enabled": false }
+```
+重启 Claude Code，确保日志出现 “Using MCP tools”。仍可在 GitHub Issue #206 提交问题。
 
 ---
 
-## Success Metrics
+## FAQ（精选）
 
-You'll know the migration succeeded when you see:
+- **需要改代码吗？** 不需要。
+- **失败会怎样？** 自动回退 MCP，最多多用些 Token。
+- **能同时用 MCP 和 Code Execution 吗？** 可以，两者并存。
+- **如何量化节省？** 启用 metrics，查看 Hook 日志。
+- **Windows 支持？** 有，`pythonPath` 设为 `python`。
+- **能先试后用吗？** 可以，启用后跑一场会话，再视情况关闭。
 
-- ✅ Hook logs show "Using code execution"
-- ✅ Token counts reduced by 75%+ per session
-- ✅ Faster hook execution (<100ms cold start)
-- ✅ No errors or fallback warnings
-- ✅ All memory operations working normally
+---
 
-**Typical Session Before:**
+## 成功判据
+
+- 日志出现 “Using code execution”；
+- 每次会话 Token ≈ 900，而非 3,600；
+- Hook 更快（<100ms 冷启动）；
+- 无错误或回退警告。
+
+**示例**：
 ```
-🔧 Session start hook: 3,600 tokens, 250ms
-📝 8 memories injected
-```
-
-**Typical Session After:**
-```
-🔧 Session start hook: 900 tokens, 50ms (75% token reduction)
-📝 8 memories injected
+🔧 Session start hook: 900 tokens, 50ms
 💡 Saved 2,700 tokens vs MCP tools
 ```
 
 ---
 
-## Support
+## 支持
 
-**Need help?**
-- **Documentation:** [docs/api/](../api/)
-- **GitHub Issues:** [github.com/doobidoo/mcp-memory-service/issues](https://github.com/doobidoo/mcp-memory-service/issues)
-- **Wiki:** [github.com/doobidoo/mcp-memory-service/wiki](https://github.com/doobidoo/mcp-memory-service/wiki)
-
-**Found a bug?**
-- Open an issue: [Issue #206](https://github.com/doobidoo/mcp-memory-service/issues/206)
-- Include: Error logs, config.json, Python version
-
----
-
-**Total Time: 5 minutes**
-**Token Savings: 75-90%**
-**Zero Breaking Changes: ✅**
-
-Happy migrating! 🚀
+- 文档：`docs/api/`、`docs/hooks/`
+- GitHub：提交 Issue（附日志 & 配置）
+- 项目 Wiki：<https://github.com/doobidoo/mcp-memory-service/wiki>

@@ -1,432 +1,382 @@
-# Tag Standardization Guide
+# 标签标准化指南
 
-A comprehensive guide to creating and maintaining a consistent, professional tag system for optimal knowledge organization in the MCP Memory Service.
+面向 MCP Memory Service 的统一标签体系，确保知识资产可检索、可演进且具备专业一致性。
 
-## 🎯 Overview
+## 🎯 概述
 
-Effective tag standardization is the foundation of a powerful knowledge management system. This guide establishes proven tag schemas, naming conventions, and organizational patterns that transform chaotic information into searchable, structured knowledge.
+标准化标签是知识管理的基石。本指南定义命名规范、分层策略与应用示例，用以把零散信息组织成结构化、可搜索的语义网络。
 
-## 📋 Core Principles
+## 📋 核心原则
 
-### 1. Consistency
-- Use standardized naming conventions
-- Apply tags systematically across similar content
-- Maintain format consistency (lowercase, hyphens, etc.)
+### 1. 一致性
+- 严格遵循同一命名规范；
+- 同类型内容沿用相同标签组合；
+- 统一格式（小写、短横线等）。
 
-### 2. Hierarchy
-- Organize tags from general to specific
-- Use multiple category levels for comprehensive organization
-- Create logical groupings that reflect actual usage patterns
+### 2. 层级化
+- 标签自上而下递进：先领域，再子系统；
+- 组合多个类别，覆盖主题、技术、状态等维度；
+- 标签分组须反映真实使用场景。
 
-### 3. Utility
-- Tags should enhance discoverability
-- Focus on how information will be retrieved
-- Balance detail with practical searchability
+### 3. 实用性
+- 标签的首要作用是提升检索效率；
+- 设计标签时先想“如何被搜索”；
+- 细节与可用性保持平衡。
 
-### 4. Evolution
-- Tag schemas should adapt to changing needs
-- Regular review and refinement process
-- Documentation of changes and rationale
+### 4. 演进性
+- 标签体系随项目演化迭代；
+- 建立定期复盘机制，记录调整原因；
+- 准备好合并、拆分与废弃策略。
 
-## 🏷️ Standardized Tag Schema
+## 🏷️ 标准化标签体系
 
-### Category 1: Projects & Repositories
+### 类别 1：项目与代码仓库
 
-**Primary Projects:**
+**主项目：**
 ```
-mcp-memory-service     # Core memory service development
-memory-dashboard       # Dashboard application
-github-integration     # GitHub connectivity and automation
-mcp-protocol          # Protocol-level development
-cloudflare-workers     # Edge computing integration
-```
-
-**Project Components:**
-```
-frontend               # User interface components
-backend               # Server-side development
-api                   # API design and implementation
-database              # Data storage and management
-infrastructure        # Deployment and DevOps
+mcp-memory-service     # 核心记忆服务开发
+memory-dashboard       # Dashboard 应用
+github-integration     # GitHub 集成与自动化
+mcp-protocol           # MCP 协议层开发
+cloudflare-workers     # 边缘计算/Workers 集成
 ```
 
-**Usage Example:**
+**项目组件：**
+```
+frontend               # 前端 / UI 组件
+backend                # 后端 / 服务端实现
+api                    # API 设计与落地
+database               # 数据层与存储
+infrastructure         # 部署与 DevOps
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["mcp-memory-service", "backend", "database", "chromadb"]
 }
 ```
 
-### Category 2: Technologies & Tools
+### 类别 2：技术与工具
 
-**Programming Languages:**
+**编程语言：**
 ```
-python                # Python development
-typescript            # TypeScript development
-javascript            # JavaScript development
-bash                  # Shell scripting
-sql                   # Database queries
-```
-
-**Frameworks & Libraries:**
-```
-react                 # React development
-fastapi               # FastAPI framework
-chromadb              # ChromaDB vector database
-sentence-transformers # Embedding models
-pytest                # Testing framework
+python                # Python 开发
+typescript            # TypeScript 开发
+javascript            # JavaScript 开发
+bash                  # Shell/脚本
+sql                   # SQL/查询
 ```
 
-**Tools & Platforms:**
+**框架与库：**
 ```
-git                   # Version control
-docker                # Containerization
-github                # Repository management
-aws                   # Amazon Web Services
-npm                   # Node package management
+react                 # React 生态
+fastapi               # FastAPI 框架
+chromadb              # ChromaDB 向量库
+sentence-transformers # 句向量模型
+pytest                # 测试框架
 ```
 
-**Usage Example:**
+**工具与平台：**
+```
+git                   # 版本控制
+docker                # 容器化
+github                # 仓库/协作
+aws                   # AWS 平台
+npm                   # Node 包管理
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["python", "chromadb", "sentence-transformers", "pytest"]
 }
 ```
 
-### Category 3: Activities & Processes
+### 类别 3：活动与流程
 
-**Development Activities:**
+**开发活动：**
 ```
-development           # General development work
-implementation        # Feature implementation
-debugging             # Bug investigation and fixing
-testing               # Quality assurance activities
-refactoring           # Code improvement
-optimization          # Performance enhancement
-```
-
-**Documentation Activities:**
-```
-documentation         # Writing documentation
-tutorial              # Creating tutorials
-guide                 # Step-by-step guides
-reference             # Reference materials
-examples              # Code examples
+development           # 一般开发
+implementation        # 功能落地
+debugging             # 调试
+testing               # 测试
+refactoring           # 重构
+optimization          # 性能优化
 ```
 
-**Operational Activities:**
+**文档活动：**
 ```
-deployment            # Application deployment
-monitoring            # System monitoring
-backup                # Data backup processes
-migration             # Data or system migration
-maintenance           # System maintenance
-troubleshooting       # Problem resolution
+documentation         # 文档撰写
+tutorial              # 教程
+guide                 # 指南
+reference             # 速查
+examples              # 示例
 ```
 
-**Usage Example:**
+**运维活动：**
+```
+deployment            # 部署/上线
+monitoring            # 监控
+backup                # 备份
+migration             # 迁移
+maintenance           # 维护
+troubleshooting       # 故障排查
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["debugging", "troubleshooting", "testing", "verification"]
 }
 ```
 
-### Category 4: Content Types & Formats
+### 类别 4：内容类型与格式
 
-**Knowledge Types:**
+**知识类型：**
 ```
-concept               # Conceptual information
-architecture          # System architecture
-design                # Design decisions and patterns
-best-practices        # Proven methodologies
-methodology           # Systematic approaches
-workflow              # Process workflows
-```
-
-**Documentation Formats:**
-```
-tutorial              # Step-by-step instructions
-reference             # Quick reference materials
-example               # Code or process examples
-template              # Reusable templates
-checklist             # Verification checklists
-summary               # Condensed information
+concept               # 概念
+architecture          # 架构
+design                # 设计
+best-practices        # 最佳实践
+methodology           # 方法论
+workflow              # 工作流
 ```
 
-**Technical Content:**
+**文档形态：**
 ```
-configuration         # System configuration
-specification         # Technical specifications
-analysis              # Technical analysis
-research              # Research findings
-review                # Code or process reviews
+tutorial              # 步骤式教程
+reference             # 参考
+example               # 示例
+template              # 模板
+checklist             # 清单
+summary               # 摘要
 ```
 
-**Usage Example:**
+**技术内容：**
+```
+configuration         # 配置
+specification         # 规格
+analysis              # 分析
+research              # 研究
+review                # 评审
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["architecture", "design", "best-practices", "reference"]
 }
 ```
 
-### Category 5: Status & Progress
+### 类别 5：状态与进度
 
-**Development Status:**
+**研发状态：**
 ```
-resolved              # Completed and verified
-in-progress           # Currently being worked on
-blocked               # Waiting for external dependencies
-needs-investigation   # Requires further analysis
-planned               # Scheduled for future work
-cancelled             # No longer being pursued
-```
-
-**Quality Status:**
-```
-verified              # Tested and confirmed working
-tested                # Has undergone testing
-reviewed              # Has been peer reviewed
-approved              # Officially approved
-experimental          # Proof of concept stage
-deprecated            # No longer recommended
+resolved              # 已完成并验证
+in-progress           # 进行中
+blocked               # 被阻塞
+needs-investigation   # 待调研
+planned               # 规划中
+cancelled             # 已取消
 ```
 
-**Priority Levels:**
+**质量状态：**
 ```
-urgent                # Immediate attention required
-high-priority         # Important, should be addressed soon
-normal-priority       # Standard priority
-low-priority          # Can be addressed when time allows
-nice-to-have          # Enhancement, not critical
+verified              # 已验证
+tested                # 已测试
+reviewed              # 已 review
+approved              # 已批准
+experimental          # 实验阶段
+deprecated            # 不再推荐
 ```
 
-**Usage Example:**
+**优先级：**
+```
+urgent                # 立刻处理
+high-priority         # 高优先级
+normal-priority       # 普通
+low-priority          # 低优先级
+nice-to-have          # 可选增强
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["resolved", "verified", "high-priority", "production-ready"]
 }
 ```
 
-### Category 6: Context & Temporal
+### 类别 6：上下文与时间
 
-**Temporal Markers:**
+**时间标记：**
 ```
-january-2025          # Specific month context
-q1-2025               # Quarterly context
-milestone-v1          # Version milestones
-release-candidate     # Release stages
-sprint-3              # Development sprints
-```
-
-**Environmental Context:**
-```
-development           # Development environment
-staging               # Staging environment
-production            # Production environment
-testing               # Testing environment
-local                 # Local development
+january-2025          # 指定月份
+q1-2025               # 季度
+milestone-v1          # 里程碑
+release-candidate     # RC 阶段
+sprint-3              # Sprint
 ```
 
-**Scope & Impact:**
+**环境上下文：**
 ```
-breaking-change       # Introduces breaking changes
-feature               # New feature development
-enhancement           # Improvement to existing feature
-hotfix                # Critical fix
-security              # Security-related
-performance           # Performance-related
+development           # 开发环境
+staging               # 预发
+production            # 生产
+testing               # 测试
+local                 # 本地
 ```
 
-**Usage Example:**
+**范围与影响：**
+```
+breaking-change       # 破坏式变更
+feature               # 新特性
+enhancement           # 增强
+hotfix                # 紧急修复
+security              # 安全
+performance           # 性能
+```
+
+**示例：**
 ```javascript
 {
   "tags": ["june-2025", "production", "security", "hotfix", "critical"]
 }
 ```
 
-## 🎨 Tag Naming Conventions
+## 🎨 标签命名规范
 
-### Format Standards
+### 基础格式
+- 使用小写字母；
+- 空格使用短横线替代：`memory-service`；
+- 描述精准但保持简洁；
+- 除非行业通用，否则避免缩写；
+- 优先使用单数形式。
 
-**Basic Rules:**
-- Use lowercase letters
-- Replace spaces with hyphens: `memory-service` not `memory service`
-- Use descriptive but concise terms
-- Avoid abbreviations unless widely understood
-- Use singular form when possible: `bug` not `bugs`
-
-**Multi-word Tags:**
+**多词标签示例：**
 ```
-✅ Good: memory-service, github-integration, best-practices
-❌ Bad: memoryservice, GitHub_Integration, bestPractices
+✅ memory-service, github-integration, best-practices
+❌ memoryservice, GitHub_Integration, bestPractices
 ```
 
-**Version and Date Tags:**
+**版本与日期：**
 ```
-✅ Good: v1-2-0, january-2025, q1-2025
-❌ Bad: v1.2.0, Jan2025, Q1/2025
-```
-
-**Status and State Tags:**
-```
-✅ Good: in-progress, needs-investigation, high-priority
-❌ Bad: inProgress, needsInvestigation, highPriority
+✅ v1-2-0, january-2025, q1-2025
+❌ v1.2.0, Jan2025, Q1/2025
 ```
 
-### Hierarchical Naming
-
-**Use progressive specificity:**
+**状态标签：**
 ```
-General → Specific
+✅ in-progress, needs-investigation, high-priority
+❌ inProgress, needsInvestigation, highPriority
+```
+
+### 层级命名
+
+- 标签可按“泛化 → 细分”逐级书写：
+```
 project → mcp-memory-service → backend → database
 testing → integration-testing → api-testing
 issue → bug → critical-bug → data-corruption
 ```
 
-**Example Progression:**
+**示例演进：**
 ```javascript
-// General testing memory
 {"tags": ["testing", "verification"]}
-
-// Specific test type
 {"tags": ["testing", "unit-testing", "python", "pytest"]}
-
-// Very specific test
 {"tags": ["testing", "unit-testing", "memory-storage", "chromadb", "pytest"]}
 ```
 
-## 📊 Tag Application Patterns
+## 📊 标签应用模式
 
-### Multi-Category Tagging
+### 多类别组合
 
-**Recommended Pattern:**
-Apply tags from 3-6 categories for comprehensive organization:
-
+建议每条记忆使用 3-6 个类别：
 ```javascript
 {
   "tags": [
-    // Project/Repository (1-2 tags)
     "mcp-memory-service", "backend",
-    
-    // Technology (1-3 tags)
     "python", "chromadb",
-    
-    // Activity (1-2 tags)
     "debugging", "troubleshooting",
-    
-    // Content Type (1 tag)
     "troubleshooting-guide",
-    
-    // Status (1 tag)
     "resolved",
-    
-    // Context (0-2 tags)
     "june-2025", "production"
   ]
 }
 ```
 
-### Content-Specific Patterns
+### 内容特定模式
 
-**Bug Reports and Issues:**
+**缺陷/问题：**
 ```javascript
 {
   "tags": [
-    "issue-7",                    // Specific issue reference
-    "timestamp-corruption",       // Problem description
-    "critical-bug",              // Severity
-    "mcp-memory-service",        // Project
-    "chromadb",                  // Technology
-    "resolved"                   // Status
+    "issue-7",
+    "timestamp-corruption",
+    "critical-bug",
+    "mcp-memory-service",
+    "chromadb",
+    "resolved"
   ]
 }
 ```
 
-**Documentation:**
+**文档类：**
 ```javascript
 {
   "tags": [
-    "documentation",             // Content type
-    "memory-maintenance",        // Topic
-    "best-practices",           // Knowledge type
-    "tutorial",                 // Format
-    "mcp-memory-service",       // Project
-    "reference"                 // Usage type
+    "documentation",
+    "memory-maintenance",
+    "best-practices",
+    "tutorial",
+    "mcp-memory-service",
+    "reference"
   ]
 }
 ```
 
-**Development Milestones:**
+**里程碑：**
 ```javascript
 {
   "tags": [
-    "milestone",                // Event type
-    "v1-2-0",                  // Version
-    "production-ready",        // Status
-    "mcp-memory-service",      // Project
-    "feature-complete",        // Achievement
-    "june-2025"               // Timeline
+    "milestone",
+    "v1-2-0",
+    "production-ready",
+    "mcp-memory-service",
+    "feature-complete",
+    "june-2025"
   ]
 }
 ```
 
-**Research and Concepts:**
+**研究/概念：**
 ```javascript
 {
   "tags": [
-    "concept",                 // Content type
-    "memory-consolidation",    // Topic
-    "architecture",           // Category
-    "research",               // Activity
-    "cognitive-processing",   // Domain
-    "system-design"           // Application
+    "concept",
+    "memory-consolidation",
+    "architecture",
+    "research",
+    "cognitive-processing",
+    "system-design"
   ]
 }
 ```
 
-## 🔍 Tag Selection Guidelines
+## 🔍 标签挑选流程
 
-### Step-by-Step Tag Selection
+1. **确定主语境**：涉及哪个项目/域？
+2. **补充技术细节**：依赖哪些语言、框架、平台？
+3. **描述活动**：这是调试、实现还是测试？
+4. **归类内容类型**：文档、决策、脚本还是报告？
+5. **标注状态**：当前进度、优先级、风险？
+6. **添加时间/环境**：关联哪个版本、Sprint 或环境？
 
-**1. Start with Primary Context**
-- What project or domain does this relate to?
-- What's the main subject matter?
+### 示例
 
-**2. Add Technical Details**
-- What technologies are involved?
-- What tools or platforms?
-
-**3. Describe the Activity**
-- What was being done?
-- What type of work or process?
-
-**4. Classify the Content**
-- What kind of information is this?
-- How will it be used in the future?
-
-**5. Add Status Information**
-- What's the current state?
-- What's the priority or urgency?
-
-**6. Include Temporal Context**
-- When is this relevant?
-- What timeline or milestone?
-
-### Tag Selection Examples
-
-**Example 1: Debug Session Memory**
-
-Content: "Fixed issue with ChromaDB connection timeout in production"
-
-**Analysis:**
-- Primary Context: MCP Memory Service, backend
-- Technical: ChromaDB, connection issues, production
-- Activity: Debugging, troubleshooting, problem resolution
-- Content: Troubleshooting solution, fix documentation
-- Status: Resolved, production issue
-- Temporal: Current work, immediate fix
-
-**Selected Tags:**
+**示例 1：调试记录**
+- 内容：“修复生产环境中 ChromaDB 连接超时问题”；
+- 标签组合：
 ```javascript
 {
   "tags": [
@@ -439,19 +389,9 @@ Content: "Fixed issue with ChromaDB connection timeout in production"
 }
 ```
 
-**Example 2: Planning Document**
-
-Content: "Q2 2025 roadmap for memory service improvements"
-
-**Analysis:**
-- Primary Context: MCP Memory Service, planning
-- Technical: General service improvements
-- Activity: Planning, roadmap development
-- Content: Strategic document, planning guide
-- Status: Planning phase, future work
-- Temporal: Q2 2025, quarterly planning
-
-**Selected Tags:**
+**示例 2：规划文档**
+- 内容：“2025 Q2 记忆服务路线图”；
+- 标签组合：
 ```javascript
 {
   "tags": [
@@ -464,68 +404,41 @@ Content: "Q2 2025 roadmap for memory service improvements"
 }
 ```
 
-## 🛠️ Tag Management Tools
+## 🛠️ 标签治理工具
 
-### Quality Control Queries
-
-**Find inconsistent tagging:**
+### 质量检测
 ```javascript
-// Look for similar content with different tag patterns
+// 排查同义标签
 retrieve_memory({"query": "debugging troubleshooting", "n_results": 10})
-search_by_tag({"tags": ["debug"]})  // vs search_by_tag({"tags": ["debugging"]})
+search_by_tag({"tags": ["debug"]})
 ```
-
-**Identify tag standardization opportunities:**
 ```javascript
-// Find memories that might need additional tags
+// 检查是否需要补充标签
 retrieve_memory({"query": "issue bug problem", "n_results": 15})
-search_by_tag({"tags": ["test"]})  // Check if generic tags need specificity
+search_by_tag({"tags": ["test"]})
 ```
 
-### Tag Analysis Scripts
-
-**Tag frequency analysis:**
+### 分析脚本
 ```javascript
-// Analyze which tags are most/least used
-check_database_health()  // Get overall statistics
-search_by_tag({"tags": ["frequent-tag"]})  // Count instances
+// 统计使用频次
+check_database_health()
+search_by_tag({"tags": ["frequent-tag"]})
 ```
-
-**Pattern consistency check:**
 ```javascript
-// Verify similar content has similar tagging
-const patterns = [
-  "mcp-memory-service",
-  "debugging",
-  "issue-",
-  "resolved"
-];
-// Check each pattern for consistency
+// 校验模式一致性
+const patterns = ["mcp-memory-service", "debugging", "issue-", "resolved"];
 ```
 
-## 📈 Tag Schema Evolution
+## 📈 体系演进
 
-### Regular Review Process
+### 定期复盘
+- **月度**：新增类别？命名是否统一？是否需要合并/拆分？
+- **季度**：统计使用、找出空白、记录更新、形成提案并实施。
 
-**Monthly Review Questions:**
-1. Are there new tag categories needed?
-2. Are existing tags being used consistently?
-3. Should any tags be merged or split?
-4. Are there emerging patterns that need standardization?
-
-**Quarterly Schema Updates:**
-1. Analyze tag usage statistics
-2. Identify inconsistencies or gaps
-3. Propose schema improvements
-4. Document rationale for changes
-5. Implement updates systematically
-
-### Schema Version Control
-
-**Track changes with metadata:**
+### 版本化管理
 ```javascript
 store_memory({
-  "content": "Tag Schema Update v2.1: Added security-related tags, consolidated testing categories...",
+  "content": "Tag Schema Update v2.1: Added security-related tags...",
   "metadata": {
     "tags": ["tag-schema", "version-2-1", "schema-update", "documentation"],
     "type": "schema-documentation"
@@ -533,26 +446,23 @@ store_memory({
 })
 ```
 
-## 🎯 Best Practices Summary
+## 🎯 最佳实践
 
-### Do's
+**Do**
+- ✅ 保持一致；
+- ✅ 覆盖多个类别；
+- ✅ 严格遵守命名规范；
+- ✅ 以检索需求为导向；
+- ✅ 记录决策；
+- ✅ 定期复查与迭代。
 
-✅ **Be Consistent**: Use the same tag patterns for similar content
-✅ **Use Multiple Categories**: Apply tags from different categories for comprehensive organization
-✅ **Follow Naming Conventions**: Stick to lowercase, hyphenated format
-✅ **Think About Retrieval**: Tag based on how you'll search for information
-✅ **Document Decisions**: Record rationale for tag choices
-✅ **Review Regularly**: Update and improve tag schemas over time
-
-### Don'ts
-
-❌ **Over-tag**: Don't add too many tags; focus on the most relevant
-❌ **Under-tag**: Don't use too few tags; aim for 4-8 well-chosen tags
-❌ **Use Inconsistent Formats**: Avoid mixing naming conventions
-❌ **Create Redundant Tags**: Don't duplicate information already in content
-❌ **Ignore Context**: Don't forget temporal or project context
-❌ **Set and Forget**: Don't create tags without ongoing maintenance
+**Don't**
+- ❌ 不要过度或不足打标签（建议 4-8 个）；
+- ❌ 不要混用大小写和字符；
+- ❌ 不要创建冗余标签；
+- ❌ 不要忽视上下文；
+- ❌ 不要“一次性设置后就放任不管”。
 
 ---
 
-*This standardization guide provides the foundation for creating a professional, searchable, and maintainable knowledge management system. Consistent application of these standards will dramatically improve the value and usability of your MCP Memory Service.*
+持续应用以上原则，可让 MCP Memory Service 构建专业、可维护且可量化的知识图谱。

@@ -1,61 +1,61 @@
-# Code Execution Interface API Documentation
+# 代码执行接口（Code Execution Interface）API 文档
 
-## Overview
+## 概述
 
-The Code Execution Interface provides a token-efficient Python API for direct memory operations, achieving 85-95% token reduction compared to MCP tool calls.
+代码执行接口提供一个面向 Python 的轻量 API，可直接操作记忆数据，相比传统 MCP 工具调用节省 85%-95% 的 Token 消耗。
 
-**Version:** 1.0.0
-**Status:** Phase 1 (Core Operations)
-**Issue:** [#206](https://github.com/doobidoo/mcp-memory-service/issues/206)
+- **版本**：1.0.0
+- **阶段**：Phase 1（核心操作）
+- **关联 Issue**：[ #206 ](https://github.com/doobidoo/mcp-memory-service/issues/206)
 
-## Token Efficiency
+## Token 效率
 
-| Operation | MCP Tools | Code Execution | Reduction |
-|-----------|-----------|----------------|-----------|
-| search(5 results) | ~2,625 tokens | ~385 tokens | **85%** |
-| store() | ~150 tokens | ~15 tokens | **90%** |
-| health() | ~125 tokens | ~20 tokens | **84%** |
+| 操作 | MCP 工具 | 代码执行 | 节省幅度 |
+|-----------|-----------|------------|-----------|
+| search（5 条结果） | ≈ 2,625 tokens | ≈ 385 tokens | **85%** |
+| store | ≈ 150 tokens | ≈ 15 tokens | **90%** |
+| health | ≈ 125 tokens | ≈ 20 tokens | **84%** |
 
-**Annual Savings (Conservative):**
-- 10 users x 5 sessions/day x 365 days x 6,000 tokens = 109.5M tokens/year
-- At $0.15/1M tokens: **$16.43/year saved** per 10-user deployment
+**年度保守节省：**
+- 10 名用户 × 5 次会话/天 × 365 天 × 6,000 tokens ≈ 1.095 亿 tokens/年
+- 以 $0.15 / 百万 tokens 计，约 **$16.43 / 10 用户 / 年**
 
-## Installation
+## 安装
 
-The API is included in mcp-memory-service v8.18.2+. No additional installation required.
+v8.18.2 及以上版本已内置该 API，无需额外安装。
 
 ```bash
-# Ensure you have the latest version
+# 确认使用最新版本
 pip install --upgrade mcp-memory-service
 ```
 
-## Quick Start
+## 快速上手
 
 ```python
 from mcp_memory_service.api import search, store, health
 
-# Store a memory (15 tokens)
+# 写入记忆（≈15 tokens）
 hash = store("Implemented OAuth 2.1 authentication", tags=["auth", "feature"])
-print(f"Stored: {hash}")  # Output: Stored: abc12345
+print(f"Stored: {hash}")  # 输出：Stored: abc12345
 
-# Search memories (385 tokens for 5 results)
+# 检索记忆（5 条结果 ≈385 tokens）
 results = search("authentication", limit=5)
 print(f"Found {results.total} memories")
 for m in results.memories:
     print(f"  {m.hash}: {m.preview[:50]}... (score: {m.score:.2f})")
 
-# Health check (20 tokens)
+# 健康检查（≈20 tokens）
 info = health()
 print(f"Backend: {info.backend}, Status: {info.status}, Count: {info.count}")
 ```
 
-## API Reference
+## API 参考
 
-### Core Operations
+### 核心操作
 
-#### search()
+#### `search()`
 
-Semantic search with compact results.
+语义搜索，返回紧凑结果。
 
 ```python
 def search(
@@ -64,21 +64,21 @@ def search(
     tags: Optional[List[str]] = None
 ) -> CompactSearchResult:
     """
-    Search memories using semantic similarity.
+    使用语义相似度检索记忆。
 
     Args:
-        query: Search query text (natural language)
-        limit: Maximum results to return (default: 5)
-        tags: Optional list of tags to filter results
+        query: 自然语言查询
+        limit: 返回数量（默认 5）
+        tags: 可选标签过滤
 
     Returns:
-        CompactSearchResult with memories, total count, and query
+        CompactSearchResult，包含结果列表、总数与原查询
 
     Raises:
-        ValueError: If query is empty or limit is invalid
-        RuntimeError: If storage backend unavailable
+        ValueError: query 为空或 limit 非法
+        RuntimeError: 存储后端不可用
 
-    Token Cost: ~25 tokens + ~73 tokens per result
+    Token Cost: ≈25 tokens + ≈73 tokens * 每条结果
 
     Example:
         >>> results = search("recent architecture decisions", limit=3)
@@ -87,13 +87,13 @@ def search(
     """
 ```
 
-**Performance:**
-- First call: ~50ms (includes storage initialization)
-- Subsequent calls: ~5-10ms (connection reused)
+**性能：**
+- 首次调用：≈50ms（包含存储初始化）
+- 后续调用：≈5-10ms（复用连接）
 
-#### store()
+#### `store()`
 
-Store a new memory.
+写入新的记忆对象。
 
 ```python
 def store(
@@ -102,319 +102,179 @@ def store(
     memory_type: str = "note"
 ) -> str:
     """
-    Store a new memory.
+    写入新记忆。
 
     Args:
-        content: Memory content text
-        tags: Single tag or list of tags (optional)
-        memory_type: Memory type classification (default: "note")
+        content: 记忆内容
+        tags: 单个或多个标签
+        memory_type: 记忆类型（默认 note）
 
     Returns:
-        8-character content hash
+        8 位内容哈希
 
     Raises:
-        ValueError: If content is empty
-        RuntimeError: If storage operation fails
+        ValueError: content 为空
+        RuntimeError: 存储操作失败
 
-    Token Cost: ~15 tokens
-
-    Example:
-        >>> hash = store(
-        ...     "Fixed authentication bug",
-        ...     tags=["bug", "auth"],
-        ...     memory_type="fix"
-        ... )
-        >>> print(f"Stored: {hash}")
-        Stored: abc12345
+    Token Cost: ≈15 tokens
     """
 ```
 
-**Performance:**
-- First call: ~50ms (includes storage initialization)
-- Subsequent calls: ~10-20ms (includes embedding generation)
+**性能：**
+- 首次调用：≈50ms
+- 后续调用：≈10-20ms（包含嵌入生成）
 
-#### health()
+#### `health()`
 
-Service health and status check.
+获取服务健康状态。
 
 ```python
 def health() -> CompactHealthInfo:
-    """
-    Get service health and status.
-
-    Returns:
-        CompactHealthInfo with status, count, and backend
-
-    Token Cost: ~20 tokens
-
-    Example:
-        >>> info = health()
-        >>> if info.status == 'healthy':
-        ...     print(f"{info.count} memories in {info.backend}")
-    """
+    """返回服务状态、记忆数量与后端类型（≈20 tokens）。"""
 ```
 
-**Performance:**
-- First call: ~50ms (includes storage initialization)
-- Subsequent calls: ~5ms (cached stats)
+**性能：**
+- 首次：≈50ms
+- 后续：≈5ms（缓存统计）
 
-### Data Types
+### 数据类型
 
-#### CompactMemory
+#### `CompactMemory`
 
-Minimal memory representation (91% token reduction).
+最小化记忆结构（比完整对象减少 91% Token）。
 
 ```python
 class CompactMemory(NamedTuple):
-    hash: str           # 8-character content hash
-    preview: str        # First 200 characters
-    tags: tuple[str]    # Immutable tags tuple
-    created: float      # Unix timestamp
-    score: float        # Relevance score (0.0-1.0)
+    hash: str           # 8 位哈希
+    preview: str        # 前 200 字符
+    tags: tuple[str]
+    created: float      # Unix 时间戳
+    score: float        # 0.0-1.0 相关度
 ```
 
-**Token Cost:** ~73 tokens (vs ~820 for full Memory object)
+**Token Cost：**≈73 tokens（完整对象约 820 tokens）
 
-#### CompactSearchResult
-
-Search result container.
+#### `CompactSearchResult`
 
 ```python
 class CompactSearchResult(NamedTuple):
-    memories: tuple[CompactMemory]  # Immutable results
-    total: int                       # Total results count
-    query: str                       # Original query
-
-    def __repr__(self) -> str:
-        return f"SearchResult(found={self.total}, shown={len(self.memories)})"
+    memories: tuple[CompactMemory]
+    total: int
+    query: str
 ```
 
-**Token Cost:** ~10 tokens + (73 x num_memories)
-
-#### CompactHealthInfo
-
-Service health information.
+#### `CompactHealthInfo`
 
 ```python
 class CompactHealthInfo(NamedTuple):
     status: str         # 'healthy' | 'degraded' | 'error'
-    count: int          # Total memories
+    count: int
     backend: str        # 'sqlite_vec' | 'cloudflare' | 'hybrid'
 ```
 
-**Token Cost:** ~20 tokens
+## 使用示例
 
-## Usage Examples
-
-### Basic Search
+### 基础搜索
 
 ```python
-from mcp_memory_service.api import search
-
-# Simple search
 results = search("authentication", limit=5)
-print(f"Found {results.total} memories")
-
-# Search with tag filter
 results = search("database", limit=10, tags=["architecture"])
-for m in results.memories:
-    if m.score > 0.7:  # High relevance only
-        print(f"{m.hash}: {m.preview}")
 ```
 
-### Batch Store
+### 批量写入
 
 ```python
-from mcp_memory_service.api import store
-
-# Store multiple memories
-changes = [
-    "Implemented OAuth 2.1 authentication",
-    "Added JWT token validation",
-    "Fixed session timeout bug"
-]
-
 for change in changes:
     hash_val = store(change, tags=["changelog", "auth"])
-    print(f"Stored: {hash_val}")
 ```
 
-### Health Monitoring
+### 健康监控
 
 ```python
-from mcp_memory_service.api import health
-
 info = health()
-
 if info.status != 'healthy':
-    print(f"⚠️  Service degraded: {info.status}")
-    print(f"Backend: {info.backend}")
-    print(f"Memory count: {info.count}")
-else:
-    print(f"✅ Service healthy ({info.count} memories in {info.backend})")
+    ...
 ```
 
-### Error Handling
+### 错误处理
 
 ```python
-from mcp_memory_service.api import search, store
-
 try:
-    # Store with validation
-    if not content.strip():
-        raise ValueError("Content cannot be empty")
-
     hash_val = store(content, tags=["test"])
-
-    # Search with error handling
     results = search("query", limit=5)
-
-    if results.total == 0:
-        print("No results found")
-    else:
-        for m in results.memories:
-            print(f"{m.hash}: {m.preview}")
-
 except ValueError as e:
-    print(f"Validation error: {e}")
-except RuntimeError as e:
-    print(f"Storage error: {e}")
+    ...
 ```
 
-## Performance Optimization
+## 性能优化
 
-### Connection Reuse
+- **连接复用**：内部自动缓存存储连接，首次约 50ms，之后 5-20ms。
+- **控制 limit**：`limit=3` 约 240 tokens，`limit=20` 约 1,470 tokens，可按场景取舍。
 
-The API automatically reuses storage connections for optimal performance:
+## 向后兼容
+
+代码执行 API 与现有 MCP 工具可并存：
+- MCP 工具继续可用，无需迁移；
+- 可渐进式改造；
+- 当代码执行失败时仍可回退至工具。
+
+## 迁移示例
+
+**Before：**MCP 工具（Node.js）调用 `retrieve_memory`。
+
+**After：**Python 直接调用 `search('architecture', limit=5)`，Token 从 2,625 降至 385。
+
+## 故障排查
+
+### 存储初始化失败
 
 ```python
-from mcp_memory_service.api import search, store
-
-# First call: ~50ms (initialization)
-store("First memory", tags=["test"])
-
-# Subsequent calls: ~10ms (reuses connection)
-store("Second memory", tags=["test"])
-store("Third memory", tags=["test"])
-
-# Search also reuses connection: ~5ms
-results = search("test", limit=5)
-```
-
-### Limit Result Count
-
-```python
-# For quick checks, use small limits
-results = search("query", limit=3)  # ~240 tokens
-
-# For comprehensive results, use larger limits
-results = search("query", limit=20)  # ~1,470 tokens
-```
-
-## Backward Compatibility
-
-The Code Execution API works alongside existing MCP tools without breaking changes:
-
-- **MCP tools continue working** - No deprecation or removal
-- **Gradual migration** - Adopt code execution incrementally
-- **Fallback mechanism** - Tools available if code execution fails
-
-## Migration Guide
-
-### From MCP Tools to Code Execution
-
-**Before (MCP Tool):**
-```javascript
-// Node.js hook using MCP client
-const result = await mcpClient.callTool('retrieve_memory', {
-    query: 'architecture',
-    limit: 5,
-    similarity_threshold: 0.7
-});
-// Result: ~2,625 tokens
-```
-
-**After (Code Execution):**
-```python
-# Python code in hook
-from mcp_memory_service.api import search
-results = search('architecture', limit=5)
-# Result: ~385 tokens (85% reduction)
-```
-
-## Troubleshooting
-
-### Storage Initialization Errors
-
-```python
-from mcp_memory_service.api import health
-
 info = health()
 if info.status == 'error':
     print(f"Storage backend {info.backend} not available")
-    # Check configuration:
-    # - DATABASE_PATH set correctly
-    # - Storage backend initialized
-    # - Permissions on database directory
 ```
+- 检查 `DATABASE_PATH`、权限、后端配置。
 
-### Import Errors
+### ImportError
 
 ```bash
-# Ensure mcp-memory-service is installed
 pip list | grep mcp-memory-service
-
-# Verify version (requires 8.18.2+)
-python -c "import mcp_memory_service; print(mcp_memory_service.__version__)"
+python - <<'PY'
+import mcp_memory_service
+print(mcp_memory_service.__version__)
+PY
 ```
 
-### Performance Issues
+### 性能异常
 
 ```python
-import time
-from mcp_memory_service.api import search
-
-# Measure performance
 start = time.perf_counter()
 results = search("query", limit=5)
-duration_ms = (time.perf_counter() - start) * 1000
-
-if duration_ms > 100:
-    print(f"⚠️  Slow search: {duration_ms:.1f}ms (expected: <50ms)")
-    # Possible causes:
-    # - Cold start (first call after initialization)
-    # - Large database requiring optimization
-    # - Embedding model not cached
 ```
+- 超过 100ms 时检查是否冷启动、数据库规模或模型缓存。
 
-## Future Enhancements (Roadmap)
+## 路线图
 
-### Phase 2: Extended Operations
-- `search_by_tag()` - Tag-based filtering
-- `recall()` - Natural language time queries
-- `delete()` - Delete by content hash
-- `update()` - Update memory metadata
+### Phase 2
+- `search_by_tag()`
+- `recall()`
+- `delete()`
+- `update()`
 
-### Phase 3: Advanced Features
-- `store_batch()` - Batch store operations
-- `search_iter()` - Streaming search results
-- Document ingestion API
-- Memory consolidation triggers
+### Phase 3
+- `store_batch()`
+- `search_iter()`
+- 文档采集 API
+- 记忆归并触发器
 
-## Related Documentation
+## 相关文档
+- `docs/research/code-execution-interface-implementation.md`
+- `docs/research/code-execution-interface-summary.md`
+- Issue #206、`CLAUDE.md`
 
-- [Research Document](/docs/research/code-execution-interface-implementation.md)
-- [Implementation Summary](/docs/research/code-execution-interface-summary.md)
-- [Issue #206](https://github.com/doobidoo/mcp-memory-service/issues/206)
-- [CLAUDE.md](/CLAUDE.md) - Project instructions
+## 支持
+- GitHub Issues：https://github.com/doobidoo/mcp-memory-service/issues
+- 文档 Wiki：https://github.com/doobidoo/mcp-memory-service/wiki
 
-## Support
-
-For issues, questions, or contributions:
-- GitHub Issues: https://github.com/doobidoo/mcp-memory-service/issues
-- Documentation: https://github.com/doobidoo/mcp-memory-service/wiki
-
-## License
-
-Copyright 2024 Heinrich Krupp
-Licensed under the Apache License, Version 2.0
+## 许可
+Copyright 2024 Heinrich Krupp · Apache 2.0 License

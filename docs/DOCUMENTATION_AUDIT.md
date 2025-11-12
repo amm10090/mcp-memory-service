@@ -1,110 +1,82 @@
-# Documentation Audit Report
-**Date**: 2025-07-26  
-**Branch**: feature/http-sse-sqlite-vec  
-**Purpose**: Consolidation analysis for unified installer merge
+# 文档审计报告
+**日期**：2025-07-26  
+**分支**：feature/http-sse-sqlite-vec  
+**目的**：为统一安装器合并进行整体系文档分析
 
-## Current Documentation Inventory
+## 当前文档清单
 
-### Installation-Related Documentation
-- `README.md` (root) - Main installation instructions, needs backend choice integration
-- `docs/guides/installation.md` - Detailed installation guide (12KB)
-- `docs/guides/windows-setup.md` - Windows-specific setup (4KB)
-- `docs/guides/UBUNTU_SETUP.md` - Ubuntu-specific setup
-- `docs/sqlite-vec-backend.md` - SQLite-vec backend guide
-- `MIGRATION_GUIDE.md` (root) - ChromaDB to SQLite-vec migration
-- `scripts/install_windows.py` - Windows installer script
-- `scripts/installation/install.py` - Alternative installer script
+### 安装相关
+- `README.md`（根目录）—— 主要安装说明，需补充后端选择指引。
+- `docs/guides/installation.md` —— 详细安装指南（12KB）。
+- `docs/guides/windows-setup.md` —— Windows 专用步骤（4KB）。
+- `docs/guides/UBUNTU_SETUP.md` —— Ubuntu 专用步骤。
+- `docs/sqlite-vec-backend.md` —— SQLite-vec 后端指南。
+- `MIGRATION_GUIDE.md`（根目录）—— ChromaDB → SQLite-vec 迁移。
+- `scripts/install_windows.py` —— Windows 安装脚本。
+- `scripts/installation/install.py` —— 另一套安装脚本。
 
-### Platform-Specific Documentation
-- `docs/integration/homebrew/` (7 files) - Homebrew PyTorch integration
-  - `HOMEBREW_PYTORCH_README.md` - Main Homebrew integration
-  - `HOMEBREW_PYTORCH_SETUP.md` - Setup instructions
-  - `TROUBLESHOOTING_GUIDE.md` - Homebrew troubleshooting
-- `docs/guides/windows-setup.md` - Windows platform guide
-- `docs/guides/UBUNTU_SETUP.md` - Linux platform guide
+### 平台专用
+- `docs/integration/homebrew/`（7 个文件）—— Homebrew PyTorch 集成：
+  - `HOMEBREW_PYTORCH_README.md` —— 主文档。
+  - `HOMEBREW_PYTORCH_SETUP.md` —— 步骤。
+  - `TROUBLESHOOTING_GUIDE.md` —— 故障排查。
+- `docs/guides/windows-setup.md` —— Windows 指南。
+- `docs/guides/UBUNTU_SETUP.md` —— Linux 指南。
 
-### API and Technical Documentation
-- `docs/IMPLEMENTATION_PLAN_HTTP_SSE.md` - HTTP/SSE implementation plan
-- `docs/guides/claude_integration.md` - Claude Desktop integration
-- `docs/guides/invocation_guide.md` - Usage guide
-- `docs/technical/` - Technical implementation details
+### API / 技术
+- `docs/IMPLEMENTATION_PLAN_HTTP_SSE.md` —— HTTP/SSE 实施计划。
+- `docs/guides/claude_integration.md` —— Claude Desktop 集成。
+- `docs/guides/invocation_guide.md` —— 使用方式。
+- `docs/technical/` —— 各类技术细节。
 
-### Migration and Troubleshooting
-- `MIGRATION_GUIDE.md` - ChromaDB to SQLite-vec migration
-- `docs/guides/migration.md` - General migration guide
-- `docs/guides/troubleshooting.md` - General troubleshooting
-- `docs/integration/homebrew/TROUBLESHOOTING_GUIDE.md` - Homebrew-specific
+### 迁移与排障
+- `MIGRATION_GUIDE.md`。
+- `docs/guides/migration.md`。
+- `docs/guides/troubleshooting.md`。
+- `docs/integration/homebrew/TROUBLESHOOTING_GUIDE.md`。
 
-## Documentation Gaps Identified
+## 发现的缺口
 
-### 1. Master Installation Guide Missing
-- No single source of truth for installation
-- Backend selection guidance scattered
-- Hardware-specific optimization not documented coherently
+1. **缺少主安装指南**：无单一真源，后端选择分散，硬件优化缺乏统一说明。
+2. **旧硬件支持不足**：2015 MacBook Pro 没有明确流程，Intel Mac 路线模糊，Homebrew 指南隐蔽。
+3. **存储后端对比缺失**：没有 ChromaDB vs SQLite-vec 的全面比较，也缺少显著的迁移说明。
+4. **HTTP/SSE API 文档不完整**：仅有实施计划，缺乏面向用户的 API 说明与示例。
 
-### 2. Legacy Hardware Support Documentation
-- 2015 MacBook Pro scenario not explicitly documented
-- Older Intel Mac optimization path unclear
-- Homebrew PyTorch integration buried in subdirectory
+## 整合策略
 
-### 3. Storage Backend Comparison
-- No comprehensive comparison between ChromaDB and SQLite-vec
-- Selection criteria not clearly documented
-- Migration paths not prominently featured
+### 阶段 1：创建主文档
+1. `docs/guides/INSTALLATION_MASTER.md` —— 综合安装指南。
+2. `docs/guides/STORAGE_BACKENDS.md` —— 后端对比与选择建议。
+3. `docs/guides/HARDWARE_OPTIMIZATION.md` —— 各平台优化建议。
+4. `docs/api/HTTP_SSE_API.md` —— 完整 API 文档。
 
-### 4. HTTP/SSE API Documentation
-- Implementation plan exists but user-facing API docs missing
-- Integration examples needed
-- SSE event documentation incomplete
+### 阶段 2：平台整合
+1. `docs/platforms/macos-intel-legacy.md` —— 2015 MacBook Pro 场景。
+2. `docs/platforms/macos-modern.md` —— 新款 Mac。
+3. `docs/platforms/windows.md` —— Windows 合并指南。
+4. `docs/platforms/linux.md` —— Linux 合并指南。
 
-## Consolidation Strategy
+### 阶段 3：合并与重构
+1. 去除重复内容并相互引用。
+2. 更新 `README.md` 指向新结构。
+3. 归档或删除过时文档。
 
-### Phase 1: Create Master Documents
-1. **docs/guides/INSTALLATION_MASTER.md** - Comprehensive installation guide
-2. **docs/guides/STORAGE_BACKENDS.md** - Backend comparison and selection
-3. **docs/guides/HARDWARE_OPTIMIZATION.md** - Platform-specific optimizations
-4. **docs/api/HTTP_SSE_API.md** - Complete API documentation
+## 高优任务
+1. ✅ 完成本审计。
+2. ⏳ 撰写主安装指南。
+3. ⏳ 整合平台指南。
+4. ⏳ 记录硬件智能矩阵。
+5. ⏳ 汇总迁移文档。
+6. ⏳ 更新 README 结构。
 
-### Phase 2: Platform-Specific Consolidation
-1. **docs/platforms/macos-intel-legacy.md** - Your 2015 MacBook Pro use case
-2. **docs/platforms/macos-modern.md** - Recent Mac configurations
-3. **docs/platforms/windows.md** - Consolidated Windows guide
-4. **docs/platforms/linux.md** - Consolidated Linux guide
+## 内容质量评估
 
-### Phase 3: Merge and Reorganize
-1. Consolidate duplicate content
-2. Create cross-references between related docs
-3. Update README.md to point to new structure
-4. Archive or remove obsolete documentation
+**优秀（保留/增强）**：`MIGRATION_GUIDE.md`、`docs/sqlite-vec-backend.md`、Homebrew 主文档。  
+**需改进**：`README.md`（后端选择不突出）、`docs/guides/installation.md`（缺乏硬件维度）、多个排障文档重复。  
+**重复待并**：安装说明、Windows 步骤、Homebrew 文档。
 
-## High-Priority Actions
-
-1. ✅ Create this audit document
-2. ⏳ Create master installation guide
-3. ⏳ Consolidate platform-specific guides
-4. ⏳ Document hardware intelligence matrix
-5. ⏳ Create migration consolidation guide
-6. ⏳ Update README.md with new structure
-
-## Content Quality Assessment
-
-### Good Documentation (Keep/Enhance)
-- `MIGRATION_GUIDE.md` - Well structured, clear steps
-- `docs/sqlite-vec-backend.md` - Comprehensive backend guide
-- `docs/integration/homebrew/HOMEBREW_PYTORCH_README.md` - Good Homebrew integration
-
-### Needs Improvement
-- `README.md` - Lacks backend choice prominence
-- `docs/guides/installation.md` - Too generic, needs hardware-specific paths
-- Multiple troubleshooting guides need consolidation
-
-### Duplicated Content (Consolidate)
-- Installation instructions repeated across multiple files
-- Windows setup scattered between guides and scripts
-- Homebrew integration documentation fragmented
-
-## Next Steps
-1. Begin creating master installation guide
-2. Merge hardware-specific content from various sources
-3. Create clear user journey documentation
-4. Test documentation accuracy with actual installations
+## 下一步
+1. 撰写主安装指南。
+2. 整合硬件相关内容。
+3. 明确用户旅程。
+4. 实机验证文档准确性。

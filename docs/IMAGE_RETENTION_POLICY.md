@@ -1,209 +1,78 @@
-# Docker Image Retention Policy
+# Docker 镜像保留策略
 
-## Overview
+## 概览
 
-This document describes the automated image retention and cleanup policies for the MCP Memory Service Docker images across Docker Hub and GitHub Container Registry (GHCR).
+本文描述 MCP Memory Service 在 Docker Hub 与 GHCR 的镜像清理策略（`.github/workflows/cleanup-images.yml` 自动执行）。目标：
+- 降低存储成本（≈70%）。
+- 仅保留有效版本，移除潜在漏洞镜像。
+- 加速 CI/CD。
 
-## Automated Cleanup
+## 保留规则
 
-The `.github/workflows/cleanup-images.yml` workflow automatically manages Docker image retention to:
-- Reduce storage costs (~70% reduction)
-- Maintain a clean registry with only relevant versions
-- Remove potentially vulnerable old images
-- Optimize CI/CD performance
+**永久保留**：`latest`、`slim`、`main`、`stable`。  
+**语义版本**（`v6.6.0`）：保留最近 5 个。  
+**Major.Minor / Major 标签**：永久保留。  
+**临时标签**：`buildcache-*`（7 天）、`test-*`/`dev-*`（30 天）、SHA/无标签（30 天/立即删除）。
 
-## Retention Rules
+## 触发方式
+1. 发布完成后。
+2. 每周日 02:00 UTC。
+3. 手动触发（可设 `dry_run`、`keep_versions`、`delete_untagged`）。
 
-### Protected Tags (Never Deleted)
-- `latest` - Current stable release
-- `slim` - Lightweight version
-- `main` - Latest development build
-- `stable` - Stable production release
+## Registry 细节
+- **Docker Hub**：API v2 + Python 脚本，需 `DOCKER_USERNAME/PASSWORD`，限速 100 req/6h。
+- **GHCR**：使用 `actions/delete-package-versions` + `container-retention-policy`，仓库拥有者无限速。
 
-### Version Tags
-- **Semantic versions** (`v6.6.0`, `6.6.0`): Keep last 5 versions
-- **Major.Minor tags** (`v6.6`, `6.6`): Always kept
-- **Major tags** (`v6`, `6`): Always kept
+## 成本与安全
+- 镜像数量约 15-20 个，体积 3-5GB。
+- 自动移除旧 CVE 镜像，缩小攻击面。
+- 所有删除记录保存在 Actions 日志中。
 
-### Temporary Tags
-- **Build cache** (`buildcache-*`): Deleted after 7 days
-- **Test/Dev tags** (`test-*`, `dev-*`): Deleted after 30 days
-- **SHA/Digest tags**: Deleted after 30 days
-- **Untagged images**: Deleted immediately
+## 监控
+- 每次运行输出：删除/保留数量、各 registry 状态、策略摘要。
+- 关注指标：执行耗时、删除数量、存储趋势、失败次数。
 
-## Cleanup Schedule
-
-### Automatic Triggers
-1. **Post-Release**: After successful release workflows
-2. **Weekly**: Every Sunday at 2 AM UTC
-3. **Manual**: Via GitHub Actions UI with options
-
-### Manual Cleanup Options
-```yaml
-dry_run: true/false       # Test without deleting
-keep_versions: 5          # Number of versions to keep
-delete_untagged: true     # Remove untagged images
-```
-
-## Registry-Specific Behavior
-
-### Docker Hub
-- Uses Docker Hub API v2 for cleanup
-- Requires `DOCKER_USERNAME` and `DOCKER_PASSWORD` secrets
-- Custom Python script for granular control
-- Rate limits: 100 requests per 6 hours
-
-### GitHub Container Registry (GHCR)
-- Uses GitHub's native package API
-- Leverages `actions/delete-package-versions` action
-- Additional cleanup with `container-retention-policy` action
-- No rate limits for repository owner
-
-## Storage Impact
-
-| Metric | Before Policy | After Policy | Savings |
-|--------|--------------|--------------|---------|
-| Total Images | ~50-100 | ~15-20 | 70-80% |
-| Storage Size | ~10-20 GB | ~3-5 GB | 70-75% |
-| Monthly Cost | $5-10 | $1-3 | 70-80% |
-
-## Security Benefits
-
-1. **Vulnerability Reduction**: Old images with known CVEs are automatically removed
-2. **Attack Surface**: Fewer images mean smaller attack surface
-3. **Compliance**: Ensures only supported versions are available
-4. **Audit Trail**: All deletions are logged in GitHub Actions
-
-## Monitoring
-
-### Cleanup Reports
-Each cleanup run generates a summary report including:
-- Number of images deleted
-- Number of images retained
-- Cleanup status for each registry
-- Applied retention policy
-
-### Viewing Reports
-1. Go to Actions tab in GitHub
-2. Select "Cleanup Old Docker Images" workflow
-3. Click on a run to see the summary
-
-### Metrics to Monitor
-- Cleanup execution time
-- Number of images deleted per run
-- Storage usage trends
-- Failed cleanup attempts
-
-## Manual Intervention
-
-### Triggering Manual Cleanup
+## 手动操作
 ```bash
-# Via GitHub CLI
 gh workflow run cleanup-images.yml \
   -f dry_run=true \
   -f keep_versions=5 \
   -f delete_untagged=true
 ```
+或在 Actions UI 直接配置。若需保护特定标签，将其加入 `protected_tags` 或遵循匹配规则。
 
-### Via GitHub UI
-1. Navigate to Actions → Cleanup Old Docker Images
-2. Click "Run workflow"
-3. Configure parameters
-4. Click "Run workflow" button
+## 回滚
+- 30 天内可联系 registry 支持恢复缓存。
+- 否则用对应 git tag 重新构建，或从备份恢复。
+- 如需停用，将 workflow 重命名或改 cron 为无效值。
 
-### Emergency Tag Protection
-To protect a specific tag from deletion:
-1. Add it to the `protected_tags` list in the cleanup script
-2. Or use tag naming convention that matches protection rules
+## 最佳实践
+1. 先 `dry_run` 验证。
+2. 上线首周密切监控。
+3. 根据使用情况调整 `keep_versions`。
+4. 记录特殊标签。
+5. 每季度复审策略。
 
-## Rollback Procedures
+## 常见问题
+- **鉴权失败**：检查 Docker Hub 凭证/权限。
+- **保护标签被删**：确认命名匹配规则，并查看 dry run 输出。
+- **执行时间长**：降低频率或提高 `days_to_keep`。
 
-### If Needed Images Were Deleted
-1. **Recent deletions** (< 30 days): May be recoverable from registry cache
-2. **Rebuild from source**: Use git tags to rebuild specific versions
-3. **Restore from backup**: If registry backups are enabled
-
-### Disable Cleanup
+## 配置参考
 ```bash
-# Temporarily disable by removing workflow
-mv .github/workflows/cleanup-images.yml .github/workflows/cleanup-images.yml.disabled
-
-# Or modify schedule to never run
-# schedule:
-#   - cron: '0 0 31 2 *'  # February 31st (never)
+DOCKER_USERNAME
+DOCKER_PASSWORD
+DOCKER_REPOSITORY=doobidoo/mcp-memory-service
+DRY_RUN=false
+KEEP_VERSIONS=5
+DAYS_TO_KEEP=30
 ```
+工作流 inputs：`dry_run`（默认 true）、`keep_versions`（默认 5）、`delete_untagged`（默认 true）。
 
-## Best Practices
+## 支持
+- 先查阅本文档与 Actions 日志。
+- 若仍有问题，提 `docker-cleanup` 标签的 Issue 或联系维护者。
 
-1. **Test with Dry Run**: Always test policy changes with `dry_run=true`
-2. **Monitor First Week**: Closely monitor the first week after enabling
-3. **Adjust Retention**: Tune `keep_versions` based on usage patterns
-4. **Document Exceptions**: Document any tags that need special handling
-5. **Regular Reviews**: Review retention policy quarterly
-
-## Troubleshooting
-
-### Common Issues
-
-#### Cleanup Fails with Authentication Error
-- Verify `DOCKER_USERNAME` and `DOCKER_PASSWORD` secrets are set
-- Check if Docker Hub credentials are valid
-- Ensure account has permission to delete images
-
-#### Protected Tags Get Deleted
-- Check the `protected_tags` list in the cleanup script
-- Verify tag naming matches protection patterns
-- Review the dry run output before actual deletion
-
-#### Cleanup Takes Too Long
-- Reduce frequency of cleanup runs
-- Increase `days_to_keep` to reduce images to process
-- Consider splitting cleanup across multiple jobs
-
-## Configuration Reference
-
-### Environment Variables
-```bash
-DOCKER_USERNAME       # Docker Hub username
-DOCKER_PASSWORD       # Docker Hub password or token
-DOCKER_REPOSITORY     # Repository name (default: doobidoo/mcp-memory-service)
-DRY_RUN              # Test mode without deletions (default: false)
-KEEP_VERSIONS        # Number of versions to keep (default: 5)
-DAYS_TO_KEEP         # Age threshold for cleanup (default: 30)
-```
-
-### Workflow Inputs
-```yaml
-inputs:
-  dry_run:
-    description: 'Dry run (no deletions)'
-    type: boolean
-    default: true
-  keep_versions:
-    description: 'Number of versions to keep'
-    type: string
-    default: '5'
-  delete_untagged:
-    description: 'Delete untagged images'
-    type: boolean
-    default: true
-```
-
-## Support
-
-For issues or questions about the retention policy:
-1. Check this documentation first
-2. Review workflow run logs in GitHub Actions
-3. Open an issue with the `docker-cleanup` label
-4. Contact the repository maintainers
-
-## Policy Updates
-
-This retention policy is reviewed quarterly and updated as needed based on:
-- Storage costs
-- Usage patterns
-- Security requirements
-- Performance metrics
-
-Last Updated: 2024-08-24
-Next Review: 2024-11-24
+## 策略更新
+- 每季度依据成本、使用、安全、性能指标调整。
+- 最后更新：2024-08-24；下次评审：2024-11-24。

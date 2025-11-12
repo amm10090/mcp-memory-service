@@ -1,414 +1,75 @@
-# Memory Maintenance Guide
+# 记忆维护指南
 
-A comprehensive guide for maintaining and organizing your MCP Memory Service knowledge base through systematic review, analysis, and re-categorization processes.
+系统性维护 MCP Memory Service 知识库的实用手册，涵盖排查、分析、重打标签与记录流程。
 
-## 🎯 Overview
+## 🎯 概述
 
-Memory maintenance is essential for keeping your knowledge base organized, searchable, and valuable over time. This guide provides practical workflows for identifying poorly organized memories and transforming them into a well-structured knowledge system.
+定期维护可保持知识库结构化、可检索、长期有价值。本指南提供可复制的维护工作流，帮助识别并修整标签缺失或结构不良的记忆。
 
-## 📋 Quick Start
+## 📋 快速开始
 
-### Basic Maintenance Session
+1. 搜索未打标签记忆：`retrieve_memory({"query": "untagged memories", "n_results": 20})`
+2. 分析内容主题：项目、技术、活动、状态；
+3. 套用标准标签；
+4. 创建带标签的新记忆并删除旧条目；
+5. 记录维护日志。
 
-1. **Identify untagged memories**: `retrieve_memory({"query": "untagged memories", "n_results": 20})`
-2. **Analyze content themes**: Look for projects, technologies, activities, status indicators
-3. **Apply standardized tags**: Use consistent categorization schema
-4. **Replace old memories**: Create new tagged version, delete old untagged version
-5. **Document results**: Store summary of maintenance session
+建议节奏：每周回顾近 7 天记忆、每月全面检查、每季度做健康体检。
 
-### Maintenance Schedule Recommendations
+## 🔍 分阶段流程
 
-- **Weekly**: Review memories from past 7 days
-- **Monthly**: Comprehensive review of recent memories + spot check older ones
-- **Quarterly**: Full database health check and optimization
+### Phase 1：评估
+- `check_database_health()` 了解健康度、总量、指标；
+- 使用多种查询抓取未打标签或标签薄弱的记忆；
+- 按优先级（关键项目/近期记忆/历史参考）分类。
 
-## 🔍 Step-by-Step Maintenance Process
+### Phase 2：分析
+- 确认项目上下文、技术栈、活动类型、内容形态、状态；
+- 为常见场景设定标签模式（项目 + 技术 + 活动 + 内容类型 + 状态）。
 
-### Phase 1: Assessment and Planning
-
-#### 1.1 Database Health Check
-
+### Phase 3：实施
 ```javascript
-// Check overall database status
-check_database_health()
+store_memory({...})  // 写入新记忆
+delete_memory({"content_hash": "旧哈希"})
 ```
-
-**What to look for:**
-- Total memory count
-- Database health status
-- Recent activity patterns
-- Error indicators
-
-#### 1.2 Identify Untagged Memories
-
-**Search Strategy:**
-```javascript
-// Primary search for untagged memories
-retrieve_memory({
-  "n_results": 15,
-  "query": "untagged memories without tags minimal tags single tag"
-})
-
-// Alternative searches
-retrieve_memory({"query": "test memory basic simple concept", "n_results": 20})
-recall_memory({"query": "memories from last week", "n_results": 25})
-```
-
-**Identification Criteria:**
-- Memories with no tags
-- Memories with only generic tags (`test`, `memory`, `note`)
-- Memories with inconsistent tag formats
-- Old memories that predate tag standardization
-
-#### 1.3 Categorize by Priority
-
-**High Priority:**
-- Frequently accessed memories
-- Critical project information
-- Recent important developments
-
-**Medium Priority:**
-- Historical documentation
-- Reference materials
-- Tutorial content
-
-**Low Priority:**
-- Test memories (evaluate for deletion)
-- Outdated information
-- Duplicate content
-
-### Phase 2: Analysis and Categorization
-
-#### 2.1 Content Theme Analysis
-
-For each identified memory, analyze:
-
-**Project Context:**
-- Which project does this relate to?
-- Is it part of a larger initiative?
-- What's the project phase/status?
-
-**Technology Stack:**
-- Programming languages mentioned
-- Frameworks and libraries
-- Tools and platforms
-- Databases and services
-
-**Activity Type:**
-- Development work
-- Testing and debugging
-- Documentation
-- Research and planning
-- Issue resolution
-
-**Content Classification:**
-- Concept or idea
-- Tutorial or guide
-- Reference material
-- Troubleshooting solution
-- Best practice
-
-#### 2.2 Tag Assignment Strategy
-
-**Multi-Category Tagging:**
-Apply tags from multiple categories for comprehensive organization:
-
-```javascript
-// Example: Well-tagged memory
-{
-  "tags": [
-    "mcp-memory-service",     // Project
-    "python", "chromadb",     // Technologies
-    "debugging", "testing",   // Activities
-    "resolved",               // Status
-    "backend",               // Domain
-    "troubleshooting"        // Content type
-  ]
-}
-```
-
-**Tag Selection Guidelines:**
-
-1. **Start with Project/Context**: What's the main project or domain?
-2. **Add Technology Tags**: What tools, languages, or frameworks?
-3. **Include Activity Tags**: What was being done?
-4. **Specify Status**: What's the current state?
-5. **Add Content Type**: What kind of information is this?
-
-### Phase 3: Implementation
-
-#### 3.1 Memory Re-tagging Process
-
-**For each memory to be re-tagged:**
-
-1. **Copy Content**: Preserve exact content
-2. **Create New Memory**: With improved tags
-3. **Verify Storage**: Confirm new memory exists
-4. **Delete Old Memory**: Remove untagged version
-5. **Document Change**: Record in maintenance log
-
-**Example Implementation:**
-```javascript
-// Step 1: Create properly tagged memory
-store_memory({
-  "content": "TEST: Timestamp debugging memory created for issue #7 investigation",
-  "metadata": {
-    "tags": ["test", "debugging", "issue-7", "timestamp-test", "mcp-memory-service", "verification"],
-    "type": "debug-test"
-  }
-})
-
-// Step 2: Delete old untagged memory
-delete_memory({
-  "content_hash": "b3f874baee0c1261907c8f80c3e33d1977485f66c17078ed611b6f1c744cb1f8"
-})
-```
-
-#### 3.2 Batch Processing Tips
-
-**Efficiency Strategies:**
-- Group similar memories for consistent tagging
-- Use template patterns for common memory types
-- Process one category at a time (e.g., all test memories)
-- Take breaks between batches to maintain quality
-
-**Quality Control:**
-- Double-check tag spelling and format
-- Verify content hasn't been modified
-- Confirm old memory deletion
-- Test search functionality with new tags
-
-### Phase 4: Verification and Documentation
-
-#### 4.1 Verification Checklist
-
-**After each memory:**
-- [ ] New memory stored successfully
-- [ ] Tags applied correctly
-- [ ] Old memory deleted
-- [ ] Search returns new memory
-
-**After maintenance session:**
-- [ ] All targeted memories processed
-- [ ] Database health check passed
-- [ ] No orphaned or broken memories
-- [ ] Search functionality improved
-
-#### 4.2 Session Documentation
-
-**Create maintenance summary memory:**
-```javascript
-store_memory({
-  "content": "Memory Maintenance Session - [Date]: Successfully processed X memories...",
-  "metadata": {
-    "tags": ["memory-maintenance", "session-summary", "tag-management"],
-    "type": "maintenance-record"
-  }
-})
-```
-
-**Include in summary:**
-- Number of memories processed
-- Categories addressed
-- Tag patterns applied
-- Time investment
-- Quality improvements
-- Next steps identified
-
-## 🎯 Common Maintenance Scenarios
-
-### Scenario 1: Test Memory Cleanup
-
-**Situation**: Numerous test memories from development work
-
-**Approach:**
-1. Identify all test-related memories
-2. Evaluate each for permanent value
-3. Re-tag valuable tests with specific context
-4. Delete obsolete or redundant tests
-
-**Example tags for valuable tests:**
-```
-["test", "verification", "issue-7", "timestamp-test", "mcp-memory-service", "quality-assurance"]
-```
-
-### Scenario 2: Project Documentation Organization
-
-**Situation**: Project memories scattered without clear organization
-
-**Approach:**
-1. Group by project phase (planning, development, deployment)
-2. Add temporal context (month/quarter)
-3. Include status information
-4. Link related memories with consistent tags
-
-**Tag patterns:**
-```
-Project memories: ["project-name", "phase", "technology", "status", "domain"]
-Meeting notes: ["meeting", "project-name", "date", "decisions", "action-items"]
-```
-
-### Scenario 3: Technical Solution Archive
-
-**Situation**: Troubleshooting solutions need better organization
-
-**Approach:**
-1. Categorize by technology/platform
-2. Add problem domain tags
-3. Include resolution status
-4. Tag with difficulty/complexity
-
-**Example organization:**
-```
-["troubleshooting", "python", "chromadb", "connection-issues", "resolved", "backend"]
-```
-
-## 🛠️ Maintenance Tools and Scripts
-
-### Helper Queries
-
-**Find potentially untagged memories:**
-```javascript
-// Various search approaches
-retrieve_memory({"query": "test simple basic example", "n_results": 20})
-recall_memory({"query": "memories from last month", "n_results": 30})
-search_by_tag({"tags": ["test"]}) // Review generic tags
-```
-
-**Content pattern analysis:**
-```javascript
-// Look for specific patterns that need organization
-retrieve_memory({"query": "TODO FIXME DEBUG ERROR", "n_results": 15})
-retrieve_memory({"query": "issue bug problem solution", "n_results": 15})
-```
-
-### Batch Processing Templates
-
-**Standard test memory re-tagging:**
-```javascript
-const testMemoryPattern = {
-  "tags": ["test", "[specific-function]", "[project]", "[domain]", "verification"],
-  "type": "test-record"
-}
-```
-
-**Documentation memory pattern:**
-```javascript
-const documentationPattern = {
-  "tags": ["documentation", "[project]", "[topic]", "[technology]", "reference"],
-  "type": "documentation"
-}
-```
-
-## 📊 Maintenance Metrics
-
-### Success Indicators
-
-**Quantitative Metrics:**
-- Percentage of tagged memories
-- Search result relevance improvement
-- Time to find specific information
-- Memory retrieval accuracy
-
-**Qualitative Metrics:**
-- Ease of knowledge discovery
-- Consistency of organization
-- Usefulness of search results
-- Overall system usability
-
-### Progress Tracking
-
-**Session Metrics:**
-- Memories processed per hour
-- Categories organized
-- Tag patterns established
-- Quality improvements achieved
-
-**Long-term Tracking:**
-- Monthly maintenance time investment
-- Database organization score
-- Knowledge retrieval efficiency
-- User satisfaction with search
-
-## 🔄 Recurring Maintenance
-
-### Weekly Maintenance (15-30 minutes)
-
-```
-Weekly Memory Maintenance:
-1. Recall memories from 'last week'
-2. Identify any untagged or poorly tagged items
-3. Apply quick categorization
-4. Focus on recent work and current projects
-5. Update any status changes (resolved issues, completed tasks)
-```
-
-### Monthly Maintenance (1-2 hours)
-
-```
-Monthly Memory Maintenance:
-1. Comprehensive review of recent memories
-2. Spot check older memories for organization
-3. Update project status tags
-4. Consolidate related memories
-5. Archive or delete obsolete information
-6. Generate maintenance summary report
-```
-
-### Quarterly Maintenance (2-4 hours)
-
-```
-Quarterly Memory Maintenance:
-1. Full database health assessment
-2. Tag schema review and updates
-3. Memory consolidation and cleanup
-4. Performance optimization
-5. Backup and archival processes
-6. Strategic knowledge organization review
-```
-
-## 🎯 Best Practices
-
-### Do's
-
-✅ **Process regularly**: Small, frequent sessions beat large overhauls
-✅ **Use consistent patterns**: Develop standard approaches for common scenarios
-✅ **Document decisions**: Record maintenance choices for future reference
-✅ **Verify thoroughly**: Always confirm changes worked as expected
-✅ **Focus on value**: Prioritize high-impact memories first
-
-### Don'ts
-
-❌ **Rush the process**: Quality categorization takes time
-❌ **Change content**: Only modify tags and metadata, preserve original content
-❌ **Delete without backup**: Ensure new memory is stored before deleting old
-❌ **Ignore verification**: Always test that maintenance improved functionality
-❌ **Work when tired**: Categorization quality suffers with fatigue
-
-## 🚀 Advanced Techniques
-
-### Automated Assistance
-
-**Use semantic search for tag suggestions:**
-```javascript
-// Find similar memories for tag pattern ideas
-retrieve_memory({"query": "[memory content excerpt]", "n_results": 5})
-```
-
-**Pattern recognition:**
-```javascript
-// Identify common themes for standardization
-search_by_tag({"tags": ["technology-name"]})  // See existing patterns
-```
-
-### Integration Workflows
-
-**Connect with external tools:**
-- Export tagged memories for documentation systems
-- Sync with project management tools
-- Generate reports for team sharing
-- Create knowledge graphs from tag relationships
+- 每处理一条：复制原内容→新建记忆→确认成功→删除旧条目→记录。
+
+### Phase 4：验证与记录
+- 检查新记忆是否可检索；
+- 运行健康检测；
+- `store_memory` 写入维护总结，包含数量、耗时、标签策略与后续行动。
+
+## 🛠️ 常见场景
+
+- **测试记忆清理**：区分有价值的测试与可删除的占位条目；
+- **项目文档整理**：按项目阶段/时间线/状态组织；
+- **技术方案归档**：根据问题域、技术栈、解决状态标注。
+
+## 工具与模板
+- 查询助手：多种 `retrieve_memory`/`recall_memory` 组合；
+- 标签模板：测试类、文档类、概念类等预设模式；
+- 批处理建议：分组处理、统一模式、质量复核。
+
+## 监控指标
+- 标记率、检索相关度、定位时间；
+- 每次维护的处理量、耗时、改进点；
+- 月度/季度趋势、用户满意度等。
+
+## 维护计划
+- **每周 15-30 分钟**：快速整理近期记忆；
+- **每月 1-2 小时**：完整回顾 + Spot Check；
+- **每季度 2-4 小时**：全面优化、备份与策略复盘。
+
+## 最佳实践
+- ✅ 小步快跑、保持一致、记录决策、专注高价值；
+- ❌ 不要匆忙操作、不要修改原文、删除前确保备份、疲劳时暂停。
+
+## 进阶技巧
+- 结合语义搜索建议标签；
+- 利用标签共现分析整理模板；
+- 与外部工具联动（项目管理、知识图谱）；
+- 生成自动化维护脚本或定期报告。
 
 ---
 
-*This guide provides the foundation for maintaining a professional-grade knowledge management system. Regular maintenance ensures your MCP Memory Service continues to provide maximum value as your knowledge base grows.*
+持续维护可让 MCP Memory Service 成为结构化、易查询的知识资产库。照此流程操作，可将零散信息转化为可复用、可扩展的知识体系。

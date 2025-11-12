@@ -1,70 +1,68 @@
-# Memory Metadata Enhancement API
+# 记忆元数据增强 API
 
-## Overview
+## 概述
 
-The Memory Metadata Enhancement API provides efficient memory metadata updates without requiring complete memory recreation. This addresses the core limitation identified in Issue #10 where updating memory metadata required deleting and recreating entire memory entries.
+Memory Metadata Enhancement API 用于在不重建记忆的前提下高效更新元数据，解决 Issue #10 中“更新元数据必须删除并重建整条记忆”的瓶颈。
 
-## API Method
+## API 方法
 
 ### `update_memory_metadata`
 
-Updates memory metadata while preserving the original memory content, embeddings, and optionally timestamps.
+在保留原始内容、嵌入乃至时间戳（可选）的情况下更新记忆元数据。
 
-**Signature:**
+**函数签名：**
 ```python
 async def update_memory_metadata(
-    content_hash: str, 
-    updates: Dict[str, Any], 
+    content_hash: str,
+    updates: Dict[str, Any],
     preserve_timestamps: bool = True
 ) -> Tuple[bool, str]
 ```
 
-**Parameters:**
-- `content_hash` (string, required): The content hash of the memory to update
-- `updates` (object, required): Dictionary of metadata fields to update
-- `preserve_timestamps` (boolean, optional): Whether to preserve original created_at timestamp (default: true)
+**参数说明：**
+- `content_hash`（必填）：目标记忆的内容哈希；
+- `updates`（必填）：包含要修改字段的字典；
+- `preserve_timestamps`（默认 True）：是否保留原 `created_at`。
 
-**Returns:**
-- `success` (boolean): Whether the update was successful
-- `message` (string): Summary of updated fields or error message
+**返回值：**
+- `success`：布尔值，指示是否成功；
+- `message`：更新摘要或错误信息。
 
-## Supported Update Fields
+## 支持更新的字段
 
-### Core Metadata Fields
+### 核心字段
 
-1. **tags** (array of strings)
-   - Replaces existing tags completely
-   - Example: `"tags": ["important", "reference", "new-tag"]`
+1. **tags**（字符串数组）
+   - 完全替换原标签；
+   - 示例：`"tags": ["important", "reference", "new-tag"]`。
 
-2. **memory_type** (string)
-   - Updates the memory type classification
-   - Example: `"memory_type": "reminder"`
+2. **memory_type**
+   - 更新记忆类型，示例：`"memory_type": "reminder"`。
 
-3. **metadata** (object)
-   - Merges with existing custom metadata
-   - Example: `"metadata": {"priority": "high", "due_date": "2024-01-15"}`
+3. **metadata**（对象）
+   - 与原自定义元数据合并；
+   - 示例：`"metadata": {"priority": "high", "due_date": "2024-01-15"}`。
 
-### Custom Fields
+### 自定义字段
 
-Any other fields not in the protected list can be updated directly:
+除受保护字段外，其余键均可直接更新，例如：
 - `"priority": "urgent"`
 - `"status": "active"`
 - `"category": "work"`
-- Custom application-specific fields
+- 业务自定义键值。
 
-### Protected Fields
+### 受保护字段
 
-These fields cannot be modified through this API:
-- `content` - Memory content is immutable
-- `content_hash` - Content hash is immutable  
-- `embedding` - Embeddings are preserved automatically
-- `created_at` / `created_at_iso` - Preserved unless `preserve_timestamps=false`
-- Internal timestamp fields (`timestamp`, `timestamp_float`, `timestamp_str`)
+禁止修改以下字段：
+- `content`
+- `content_hash`
+- `embedding`
+- `created_at` / `created_at_iso`（除非 `preserve_timestamps=false`）
+- 内部时间戳（`timestamp`、`timestamp_float`、`timestamp_str`）
 
-## Usage Examples
+## 使用示例
 
-### Example 1: Add Tags to Memory
-
+### 示例 1：添加标签
 ```json
 {
   "content_hash": "abc123def456...",
@@ -74,8 +72,7 @@ These fields cannot be modified through this API:
 }
 ```
 
-### Example 2: Update Memory Type and Custom Metadata
-
+### 示例 2：更新记忆类型与自定义元数据
 ```json
 {
   "content_hash": "abc123def456...",
@@ -90,8 +87,7 @@ These fields cannot be modified through this API:
 }
 ```
 
-### Example 3: Update Custom Fields Directly
-
+### 示例 3：直接更新自定义字段
 ```json
 {
   "content_hash": "abc123def456...",
@@ -104,8 +100,7 @@ These fields cannot be modified through this API:
 }
 ```
 
-### Example 4: Update with Timestamp Reset
-
+### 示例 4：重置时间戳
 ```json
 {
   "content_hash": "abc123def456...",
@@ -116,197 +111,117 @@ These fields cannot be modified through this API:
 }
 ```
 
-## Timestamp Behavior
+## 时间戳策略
 
-### Default Behavior (preserve_timestamps=true)
+### 默认（`preserve_timestamps=true`）
+- `created_at` / `created_at_iso` 保留旧值；
+- `updated_at` / `updated_at_iso` 更新为当前时间；
+- 兼容旧字段同步更新。
 
-- `created_at` and `created_at_iso` are preserved from original memory
-- `updated_at` and `updated_at_iso` are set to current time
-- Legacy timestamp fields are updated for backward compatibility
+### 重置（`preserve_timestamps=false`）
+- 所有时间戳均设为当前值；
+- 适合标记“刷新/重新激活”记忆。
 
-### Reset Behavior (preserve_timestamps=false)
+## 实现细节
 
-- All timestamp fields are set to current time
-- Useful for marking memories as "refreshed" or "re-activated"
+### 存储层
+1. **抽象接口**（`storage/base.py`）：定义统一方法；
+2. **ChromaDB**（`storage/chroma.py`）：通过高效 upsert 保留嵌入，并校验/合并元数据；
+3. **其他后端**：未来 sqlite-vec 等将复用同一接口。
 
-## Implementation Details
+### MCP 协议
+1. **工具注册**：暴露为 `update_memory_metadata`；
+2. **输入校验**：严格验证参数；
+3. **错误处理**：返回可读错误；
+4. **日志**：详细记录，便于审计。
 
-### Storage Layer
+## 性能优势
 
-The API is implemented in the storage abstraction layer:
+### 效率
+1. **无需重处理内容**：不重新生成嵌入，保持向量引用；
+2. **最小网络传输**：仅发送变更字段；
+3. **数据库友好**：一次更新替代删除+重建，降低事务成本。
 
-1. **Base Storage Interface** (`storage/base.py`)
-   - Abstract method definition
-   - Consistent interface across storage backends
+### 资源节省
+- 内存：无需加载完整内容；
+- CPU：无嵌入重算；
+- IO：最少数据库操作；
+- 网络：仅传元数据差异。
 
-2. **ChromaDB Implementation** (`storage/chroma.py`)
-   - Efficient upsert operation preserving embeddings
-   - Metadata merging with validation
-   - Timestamp synchronization
+## 错误处理
 
-3. **Future Storage Backends**
-   - sqlite-vec implementation will follow same interface
-   - Other storage backends can implement consistently
+### 常见错误
+1. **记忆不存在**：`Memory with hash ... not found`；
+2. **updates 不是字典**；
+3. **标签格式错误**：必须是字符串数组；
+4. **存储未初始化**：需先初始化集合。
 
-### MCP Protocol Integration
+### 恢复策略
+- 错误信息清晰可追溯；
+- 失败时回滚事务；
+- 原始记忆保持不变；
+- 详细日志可供排查。
 
-The API is exposed via the MCP protocol:
+## 迁移与兼容
 
-1. **Tool Registration** - Available as `update_memory_metadata` tool
-2. **Input Validation** - Comprehensive parameter validation
-3. **Error Handling** - Clear error messages for debugging
-4. **Logging** - Detailed operation logging for monitoring
+### 向后兼容
+- 旧记忆无需调整即可使用；
+- 历史时间戳字段仍保留；
+- 不会破坏现有 API。
 
-## Performance Benefits
+### 采用策略
+1. **即时可用**：部署后直接调用；
+2. **渐进迁移**：可按模块分批使用；
+3. **回退方案**：仍可通过“删+增”方式；
+4. **上线前验证**：建议充分测试。
 
-### Efficiency Gains
+## 典型场景
 
-1. **No Content Re-processing**
-   - Original content remains unchanged
-   - No need to regenerate embeddings
-   - Preserves vector database relationships
+### 记忆组织
+1. **标签治理**：补充/替换标签，实现批量分类；
+2. **优先级管理**：动态标注高/低优先级；
+3. **状态跟踪**：标记已处理、待复查等状态。
 
-2. **Minimal Network Transfer**
-   - Only metadata changes are transmitted
-   - Reduced bandwidth usage
-   - Faster operation completion
+### 高阶能力
+1. **记忆关联**：添加引用/层级关系；
+2. **生命周期**：记录过期/清理策略；
+3. **访问控制**：记录所有者、共享策略、权限等。
 
-3. **Database Optimization**
-   - Single update operation vs delete+insert
-   - Maintains database indices and relationships
-   - Reduces transaction overhead
+## 测试与验证
 
-### Resource Savings
+### 单元测试
+- 覆盖所有更新场景；
+- 校验错误分支；
+- 验证时间戳更新逻辑；
+- 合并元数据的准确性。
 
-- **Memory Usage**: No need to load full memory content
-- **CPU Usage**: No embedding regeneration required
-- **Storage I/O**: Minimal database operations
-- **Network**: Reduced data transfer
+### 集成测试
+- MCP 端到端调用；
+- 各存储后端兼容性；
+- 性能基准；
+- 跨平台验证。
 
-## Error Handling
+### 性能测试
+- 大数据批量更新；
+- 并发写入；
+- 监控内存使用；
+- 响应时延统计。
 
-### Common Error Scenarios
+## 未来计划
 
-1. **Memory Not Found**
-   ```
-   Error: Memory with hash abc123... not found
-   ```
+### 功能增强
+1. **批量更新**：一次更新多条记忆；
+2. **条件更新**：满足条件才写入；
+3. **元数据 Schema 校验**；
+4. **更新时间线**：记录变更历史；
+5. **选择性更新**：仅更新指定字段。
 
-2. **Invalid Updates Format**
-   ```
-   Error: updates must be a dictionary
-   ```
+### 后端支持
+- sqlite-vec（Issue #40）
+- 其他向量数据库
+- 跨后端统一接口
+- 针对不同后端定制优化
 
-3. **Invalid Tags Format**
-   ```
-   Error: Tags must be provided as a list of strings
-   ```
+## 总结
 
-4. **Storage Not Initialized**
-   ```
-   Error: Collection not initialized, cannot update memory metadata
-   ```
-
-### Error Recovery
-
-- Detailed error messages for debugging
-- Transaction rollback on failures
-- Original memory remains unchanged on errors
-- Logging for troubleshooting
-
-## Migration and Compatibility
-
-### Backward Compatibility
-
-- Existing memories work without modification
-- Legacy timestamp fields are maintained
-- No breaking changes to existing APIs
-
-### Migration Strategy
-
-1. **Immediate Availability** - API available immediately after deployment
-2. **Gradual Adoption** - Can be adopted incrementally
-3. **Fallback Support** - Original store/delete pattern still works
-4. **Validation** - Comprehensive testing before production use
-
-## Use Cases
-
-### Memory Organization
-
-1. **Tag Management**
-   - Add organizational tags over time
-   - Categorize memories as understanding improves
-   - Apply bulk tagging for organization
-
-2. **Priority Updates**
-   - Mark memories as high/low priority
-   - Update urgency as contexts change
-   - Implement memory lifecycle management
-
-3. **Status Tracking**
-   - Track memory processing status
-   - Mark memories as reviewed/processed
-   - Implement workflow states
-
-### Advanced Features
-
-1. **Memory Linking**
-   - Add relationship metadata
-   - Create memory hierarchies
-   - Implement reference systems
-
-2. **Time-to-Live Management**
-   - Add expiration metadata
-   - Implement memory aging
-   - Schedule automatic cleanup
-
-3. **Access Control**
-   - Add ownership metadata
-   - Implement sharing controls
-   - Track access permissions
-
-## Testing and Validation
-
-### Unit Tests
-
-- Comprehensive test coverage for all update scenarios
-- Error condition testing
-- Timestamp behavior validation
-- Metadata merging verification
-
-### Integration Tests
-
-- End-to-end MCP protocol testing
-- Storage backend compatibility testing
-- Performance benchmarking
-- Cross-platform validation
-
-### Performance Testing
-
-- Large dataset updates
-- Concurrent update operations
-- Memory usage monitoring
-- Response time measurement
-
-## Future Enhancements
-
-### Planned Improvements
-
-1. **Batch Updates** - Update multiple memories in single operation
-2. **Conditional Updates** - Update only if conditions are met  
-3. **Metadata Validation** - Schema validation for metadata fields
-4. **Update History** - Track metadata change history
-5. **Selective Updates** - Update only specific metadata fields
-
-### Storage Backend Support
-
-- sqlite-vec implementation (Issue #40)
-- Other vector database backends
-- Consistent API across all backends
-- Performance optimization per backend
-
-## Conclusion
-
-The Memory Metadata Enhancement API provides a robust, efficient solution for memory metadata management. It enables sophisticated memory organization features while maintaining excellent performance and backward compatibility.
-
-This implementation forms the foundation for advanced memory management features like re-tagging systems (Issue #45) and memory consolidation (Issue #11).
+该 API 提供了高效的记忆元数据管理能力，同时保持性能与兼容性，是后续再标签系统（Issue #45）与记忆归并（Issue #11）的基础模块。

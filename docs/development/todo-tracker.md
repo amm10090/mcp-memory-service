@@ -1,44 +1,39 @@
-# TODO Tracker
+# TODO 追踪
 
-**Last Updated:** 2025-11-08 10:25:25
-**Scan Directory:** src
-**Total TODOs:** 5
+- **更新时间**：2025-11-08 10:25:25
+- **扫描目录**：`src`
+- **TODO 数量**：5
 
-## Summary
-
-| Priority | Count | Description |
-|----------|-------|-------------|
-| CRITICAL (P0) | 1 | Security, data corruption, blocking bugs |
-| HIGH (P1) | 2 | Performance, user-facing, incomplete features |
-| MEDIUM (P2) | 2 | Code quality, optimizations, technical debt |
-| LOW (P3) | 0
-0 | Documentation, cosmetic, nice-to-haves |
+| 优先级 | 数量 | 说明 |
+| --- | --- | --- |
+| CRITICAL (P0) | 1 | 安全 / 数据损坏 / 阻塞型缺陷 |
+| HIGH (P1) | 2 | 性能 / 用户可见 / 未完成功能 |
+| MEDIUM (P2) | 2 | 质量优化 / 技术债 |
+| LOW (P3) | 0 | 文档 / 外观 / Nice-to-have |
 
 ---
 
 ## CRITICAL (P0)
-- `src/mcp_memory_service/web/api/analytics.py:625` - Period filtering is not implemented, leading to incorrect analytics data.
+- `src/mcp_memory_service/web/api/analytics.py:625` —— 周期过滤未实现，导致统计数据错误。
 
 ## HIGH (P1)
-- `src/mcp_memory_service/storage/cloudflare.py:185` - Lack of a fallback for embedding generation makes the service vulnerable to external API failures.
-- `src/mcp_memory_service/web/api/manage.py:231` - Inefficient queries can cause significant performance bottlenecks, especially with large datasets.
+- `src/mcp_memory_service/storage/cloudflare.py:185` —— 缺少嵌入生成兜底，外部 API 故障会放大影响。
+- `src/mcp_memory_service/web/api/manage.py:231` —— 查询低效，在大数据量下造成瓶颈。
 
 ## MEDIUM (P2)
-- `src/mcp_memory_service/web/api/documents.py:592` - Using a deprecated FastAPI event handler; should be migrated to the modern `lifespan` context manager to reduce technical debt.
-- `src/mcp_memory_service/web/api/analytics.py:213` - The `storage.get_stats()` method is missing a data point, leading to API inconsistency.
+- `src/mcp_memory_service/web/api/documents.py:592` —— 使用 FastAPI 旧式事件钩子，应迁移至 `lifespan`。
+- `src/mcp_memory_service/web/api/analytics.py:213` —— `storage.get_stats()` 缺少字段，导致 API 不一致。
 
 ## LOW (P3)
-*(None in this list)*
+- 无。
 
 ---
 
-## How to Address
+## 处理优先顺序
+1. **P0**：立即修复，必要时阻止发布；
+2. **P1**：纳入当前/下个迭代；
+3. **P2**：加入技术债 Backlog，重构期处理；
+4. **P3**：视情况顺手处理。
 
-1. **CRITICAL**: Address immediately, block releases if necessary
-2. **HIGH**: Schedule for current/next sprint
-3. **MEDIUM**: Add to backlog, address in refactoring sprints
-4. **LOW**: Address opportunistically or when touching related code
-
-## Updating This Tracker
-
-Run: `bash scripts/maintenance/scan_todos.sh`
+## 更新方式
+运行 `bash scripts/maintenance/scan_todos.sh` 重新生成本列表。
