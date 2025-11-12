@@ -1,67 +1,46 @@
-# Dashboard Development Workflow
+# 仪表盘开发工作流
 
-This guide documents the essential workflow for developing the interactive dashboard UI to prevent repetitive trial-and-error cycles.
+记录互动式仪表盘的关键流程，避免反复踩坑。
 
-## Critical Workflow Requirements
+## 1. 静态文件修改后务必重启服务 ⚠️
+- FastAPI/uvicorn 会缓存 CSS/JS/HTML；
+- 不重启会导致浏览器一直加载旧版脚本/样式。
 
-### 1. Server Restart After Static File Changes ⚠️
-
-**Problem**: FastAPI/uvicorn caches static files (CSS, JS, HTML) in memory. Changes to these files won't appear in the browser until the server is restarted.
-
-**Symptoms of Forgetting**:
-- Modified JavaScript still shows old console.log statements
-- CSS changes don't appear in browser
-- File modification time is recent but browser serves old version
-
-**Solution**:
 ```bash
-# Restart HTTP server
+# 重启 HTTP 服务
 systemctl --user restart mcp-memory-http.service
-
-# Then hard refresh browser to clear cache
-# Ctrl+Shift+R (Linux/Windows) or Cmd+Shift+R (macOS)
+# 浏览器强制刷新
+Ctrl+Shift+R（Win/Linux）或 Cmd+Shift+R（macOS）
 ```
 
-### 2. Automated Hooks (Claude Code) ✅
-
-To eliminate manual restarts, configure automation hooks in `.claude/settings.local.json`:
-
+## 2. Claude Code 自动化 Hook ✅
+在 `.claude/settings.local.json` 加入：
 ```json
 {
   "hooks": {
     "PostToolUse": [
       {
-        "matchers": [
-          "Write(file_path:**/web/static/*.css)",
-          "Edit(file_path:**/web/static/*.css)",
-          "Write(file_path:**/web/static/*.js)",
-          "Edit(file_path:**/web/static/*.js)",
-          "Write(file_path:**/web/static/*.html)",
-          "Edit(file_path:**/web/static/*.html)"
-        ],
+        "matchers": ["Write(file_path:**/web/static/*.css)", ...],
         "hooks": [
           {
             "type": "command",
             "command": "bash",
             "args": [
               "-c",
-              "systemctl --user restart mcp-memory-http.service && echo '\n⚠️  REMINDER: Hard refresh browser (Ctrl+Shift+R) to clear cache!'"
+              "systemctl --user restart mcp-memory-http.service && echo '\n⚠️  REMINDER: Hard refresh browser (Ctrl+Shift+R)!'"
             ]
           }
         ]
       },
       {
-        "matchers": [
-          "Write(file_path:**/web/static/*.css)",
-          "Edit(file_path:**/web/static/*.css)"
-        ],
+        "matchers": ["Write(file_path:**/web/static/*.css)", "Edit(file_path:**/web/static/*.css)"],
         "hooks": [
           {
             "type": "command",
             "command": "bash",
             "args": [
               "-c",
-              "if grep -E 'background.*:.*white|background.*:.*#fff|color.*:.*white|color.*:.*#fff' /home/hkr/repositories/mcp-memory-service/src/mcp_memory_service/web/static/style.css | grep -v 'dark-mode'; then echo '\n⚠️  WARNING: Found hardcoded light colors in CSS. Check if body.dark-mode overrides are needed!'; fi"
+              "if grep -E 'background.*:.*white|#fff|color.*:.*white' src/mcp_memory_service/web/static/style.css | grep -v 'dark-mode'; then echo '\n⚠️  WARNING: Hardcoded light colors, remember dark-mode overrides!'; fi"
             ]
           }
         ]
@@ -70,108 +49,59 @@ To eliminate manual restarts, configure automation hooks in `.claude/settings.lo
   }
 }
 ```
+**作用**：
+- 修改 CSS/JS/HTML 自动重启 HTTP；
+- 控制台提示“记得硬刷新”；
+- 扫描硬编码浅色，提醒补 dark-mode。
 
-**What This Automates**:
-- ✅ Auto-restart HTTP server when CSS/JS/HTML files are modified
-- ✅ Display reminder to hard refresh browser
-- ✅ Check for hardcoded light colors that need dark mode overrides
-- ✅ Prevent the exact issue we had with chunk backgrounds
-
-### 3. Dark Mode Compatibility Checklist
-
-When adding new UI components, always verify dark mode compatibility:
-
-**Common Issues**:
-- Hardcoded `background: white` or `color: white`
-- Hardcoded hex colors like `#fff` or `#000`
-- Missing `body.dark-mode` overrides for new elements
-
-**Example Fix** (from PR #164):
+## 3. 深色模式检查表
+- 禁止硬编码 `background: white`、`color: #fff`；
+- 新增组件需提供 `body.dark-mode` 覆盖；
+- 代码示例：
 ```css
-/* BAD: Hardcoded light background */
-.chunk-content {
-    background: white;
-    color: #333;
-}
-
-/* GOOD: Dark mode override */
-body.dark-mode .chunk-content {
-    background: #111827 !important;
-    color: #d1d5db !important;
-}
+.chunk-content { background: white; }
+body.dark-mode .chunk-content { background: #111827 !important; color: #d1d5db !important; }
 ```
 
-**Automation Hook**: The CSS hook automatically scans for hardcoded colors and warns if dark mode overrides might be needed.
+## 4. 浏览器缓存
+- 强制刷新：Ctrl+Shift+R / Cmd+Shift+R；
+- URL 加 `?nocache=timestamp`；
+- DevTools 开启 “Disable cache”。
 
-### 4. Browser Cache Management
+## 开发清单
+- [ ] 修改过 CSS/JS/HTML；
+- [ ] 已重启 HTTP 服务；
+- [ ] 浏览器硬刷新；
+- [ ] 检查 console；
+- [ ] 验证 dark/light 模式。
 
-**Cache-Busting Techniques**:
+## 性能目标（v7.2.2 验证）
+| 项目 | 目标 | 常见值 |
+| --- | --- | --- |
+| 页面加载 | <2s | 25ms |
+| Memory 操作 | <1s | ~26ms |
+| Tag 搜索 | <500ms | <100ms |
 
-1. **Hard Refresh**: Ctrl+Shift+R (Linux/Windows) or Cmd+Shift+R (macOS)
-2. **URL Parameter**: Add `?nocache=timestamp` to force reload
-3. **DevTools**: Keep DevTools open with "Disable cache" enabled during development
+若性能下降：
+1. DevTools Network 查慢请求；
+2. 查看服务器日志；
+3. DevTools Profiler 分析 JS。
 
-**Why This Matters**: Even after server restart, browsers aggressively cache static files. You must force a cache clear to see changes.
-
-## Development Checklist
-
-Before testing dashboard changes:
-
-- [ ] Modified CSS/JS/HTML files
-- [ ] Restarted HTTP server (`systemctl --user restart mcp-memory-http.service`)
-- [ ] Hard refreshed browser (Ctrl+Shift+R)
-- [ ] Checked console for JavaScript errors
-- [ ] Verified dark mode compatibility (if CSS changes)
-- [ ] Tested both light and dark mode
-
-## Performance Benchmarks
-
-Dashboard performance targets (validated v7.2.2):
-
-| Component | Target | Typical |
-|-----------|--------|---------|
-| Page Load | <2s | ~25ms |
-| Memory Operations | <1s | ~26ms |
-| Tag Search | <500ms | <100ms |
-
-If performance degrades:
-1. Check browser DevTools Network tab for slow requests
-2. Verify server logs for backend delays
-3. Profile JavaScript execution in DevTools
-
-## Testing with browser-mcp
-
-For UI investigation and debugging:
-
+## 使用 browser-mcp 调试
 ```bash
-# Navigate to dashboard
 mcp__browsermcp__browser_navigate http://127.0.0.1:8888/
-
-# Take screenshot
 mcp__browsermcp__browser_screenshot
-
-# Get console logs
 mcp__browsermcp__browser_get_console_logs
-
-# Click elements (requires ref from snapshot)
-mcp__browsermcp__browser_click
 ```
 
-## Common Pitfalls
+## 常见坑
+1. 忘记重启服务 → 用 Hook；
+2. 忘记清缓存；
+3. 未测深色模式；
+4. 忽视 console 报错；
+5. 未测 768px/1024px 响应式。
 
-1. **Forgetting server restart** → Use automation hooks!
-2. **Missing browser cache clear** → Always hard refresh
-3. **Dark mode not tested** → Check both themes for every UI change
-4. **Console errors ignored** → Always check browser console
-5. **Mobile responsiveness** → Test at 768px and 1024px breakpoints
-
-## Related Documentation
-
-- **Interactive Dashboard**: See `CLAUDE.md` section "Interactive Dashboard (v7.2.2+)"
-- **Performance**: `docs/implementation/performance.md`
-- **API Endpoints**: `CLAUDE.md` section "Key Endpoints"
-- **Troubleshooting**: Wiki troubleshooting guide
-
----
-
-**Note**: These automation hooks eliminate 95% of repetitive trial-and-error during dashboard development. Always verify hooks are configured in your local `.claude/settings.local.json`.
+## 参考
+- `CLAUDE.md`：Interactive Dashboard 章节；
+- `docs/implementation/performance.md`；
+- Wiki Troubleshooting。

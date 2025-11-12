@@ -1,192 +1,52 @@
-# Dual Service Deployment - FastMCP + HTTP Dashboard
+# 双服务部署（FastMCP + HTTP Dashboard）
 
-## Overview
+## 架构概览
+1. **FastMCP 服务**（端口 8001）：面向 Claude 等 MCP 客户端，JSON-RPC over SSE；
+2. **HTTP Dashboard**（端口 8080）：Web 控制台与 REST API。
 
-This deployment provides both **FastMCP Protocol** and **HTTP Dashboard** services running simultaneously, eliminating Node.js SSL issues while maintaining full functionality.
-
-## Architecture
-
-### Service 1: FastMCP Server (Port 8001)
-
-- **Purpose**: Native MCP protocol for Claude Code clients
-- **Protocol**: JSON-RPC 2.0 over Server-Sent Events
-- **Access**: `http://[IP]:8001/mcp`
-- **Service**: `mcp-memory.service`
-
-### Service 2: HTTP Dashboard (Port 8080)
-
-- **Purpose**: Web dashboard and HTTP API
-- **Protocol**: Standard HTTP/REST
-- **Access**: `http://[IP]:8080/`
-- **API**: `http://[IP]:8080/api/*`
-- **Service**: `mcp-http-dashboard.service`
-
-## Deployment
-
-### Quick Deploy
-
+## 快速部署
 ```bash
 ./deploy_dual_services.sh
 ```
+或手动：复制 systemd 单元 → `systemctl enable/start mcp-memory mcp-http-dashboard`。
 
-### Manual Setup
+## 访问
+- MCP：`http://SERVER_IP:8001/mcp`
+- Dashboard：`http://SERVER_IP:8080/`
+- API：`/api/health`、`/api/memories`、`/api/search`
 
+## 管理
 ```bash
-# Install FastMCP service
-sudo cp /tmp/fastmcp-server-with-mdns.service /etc/systemd/system/mcp-memory.service
-
-# Install HTTP Dashboard service
-sudo cp /tmp/mcp-http-dashboard.service /etc/systemd/system/mcp-http-dashboard.service
-
-# Enable and start services
-sudo systemctl daemon-reload
-sudo systemctl enable mcp-memory mcp-http-dashboard
-sudo systemctl start mcp-memory mcp-http-dashboard
+sudo systemctl status|start|stop|restart mcp-memory mcp-http-dashboard
+sudo journalctl -u mcp-memory -f
+sudo journalctl -u mcp-http-dashboard -f
 ```
 
-## Access URLs
-
-Replace `[IP]` with your actual server IP address (e.g., `10.0.1.30`):
-
-- **FastMCP Protocol**: `http://[IP]:8001/mcp` (for Claude Code)
-- **Web Dashboard**: `http://[IP]:8080/` (for monitoring)
-- **Health API**: `http://[IP]:8080/api/health`
-- **Memory API**: `http://[IP]:8080/api/memories`
-- **Search API**: `http://[IP]:8080/api/search`
-
-## Service Management
-
-### Status Checks
-
+## mDNS
 ```bash
-sudo systemctl status mcp-memory          # FastMCP server
-sudo systemctl status mcp-http-dashboard  # HTTP dashboard
-```
-
-### View Logs
-
-```bash
-sudo journalctl -u mcp-memory -f          # FastMCP logs
-sudo journalctl -u mcp-http-dashboard -f  # Dashboard logs
-```
-
-### Control Services
-
-```bash
-# Start services
-sudo systemctl start mcp-memory mcp-http-dashboard
-
-# Stop services
-sudo systemctl stop mcp-memory mcp-http-dashboard
-
-# Restart services
-sudo systemctl restart mcp-memory mcp-http-dashboard
-```
-
-## mDNS Discovery
-
-Both services advertise via mDNS for network discovery:
-
-```bash
-# Browse HTTP services
 avahi-browse -t _http._tcp
-
-# Browse MCP services (if supported)
 avahi-browse -t _mcp._tcp
-
-# Resolve hostname
-avahi-resolve-host-name memory.local
 ```
+Advertise：`MCP Memory Dashboard._http._tcp.local.` / `MCP Memory FastMCP._mcp._tcp.local.`
 
-**Services Advertised:**
+## 依赖
+`mcp`、`fastapi`、`uvicorn`、`zeroconf`、`aiohttp`、`sqlite-vec`、`sentence-transformers`。
 
-- `MCP Memory Dashboard._http._tcp.local.` (port 8080)
-- `MCP Memory FastMCP._mcp._tcp.local.` (port 8001)
-
-## Dependencies
-
-Ensure these packages are installed in the virtual environment:
-
-- `mcp` - MCP Protocol support
-- `fastapi` - Web framework
-- `uvicorn` - ASGI server
-- `zeroconf` - mDNS advertising
-- `aiohttp` - HTTP client/server
-- `sqlite-vec` - Vector database
-- `sentence-transformers` - Embeddings
-
-## Configuration
-
-### Environment Variables
-
+## 配置
 - `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`
 - `MCP_MDNS_ENABLED=true`
 - `MCP_HTTP_ENABLED=true`
-- `MCP_SERVER_HOST=0.0.0.0`
 - `MCP_SERVER_PORT=8001`
 - `MCP_HTTP_PORT=8080`
+- 数据库共用 `~/.local/share/mcp-memory/sqlite_vec.db`。
 
-### Storage
+## 故障排查
+- 无法访问：检查服务状态、端口监听、IP/防火墙；
+- mDNS 失效：确认 `avahi-daemon` 与 `zeroconf` 依赖；
+- FastMCP 异常：确保访问 `/mcp`，客户端支持 SSE/JSON-RPC。
 
-Both services share the same SQLite-vec database:
+## 客户端
+- Claude：配置 MCP URL 为 `http://SERVER_IP:8001/mcp`；
+- curl 示例：`curl http://SERVER_IP:8080/api/health`、POST `/api/memories`、`/api/search`。
 
-- **Path**: `~/.local/share/mcp-memory/sqlite_vec.db`
-- **Backend**: `sqlite_vec`
-- **Model**: `all-MiniLM-L6-v2`
-
-## Troubleshooting
-
-### Services Not Accessible
-
-1. Check if services are running: `systemctl status [service]`
-2. Verify ports are listening: `ss -tlnp | grep -E ":800[08]"`
-3. Test direct IP access instead of hostname
-4. Check firewall rules if accessing remotely
-
-### mDNS Not Working
-
-1. Ensure avahi-daemon is running: `systemctl status avahi-daemon`
-2. Install missing dependencies: `pip install zeroconf aiohttp`
-3. Restart services after installing dependencies
-
-### FastMCP Protocol Issues
-
-1. Ensure client accepts `text/event-stream` headers
-2. Use JSON-RPC 2.0 format for requests
-3. Access `/mcp` endpoint, not root `/`
-
-## Client Configuration
-
-### Claude Code
-
-Configure MCP client to use:
-
-```
-http://[SERVER_IP]:8001/mcp
-```
-
-### curl Examples
-
-```bash
-# Health check
-curl http://[SERVER_IP]:8080/api/health
-
-# Store memory
-curl -X POST http://[SERVER_IP]:8080/api/memories \
-  -H "Content-Type: application/json" \
-  -d '{"content": "test memory", "tags": ["test"]}'
-
-# Search memories
-curl -X POST http://[SERVER_IP]:8080/api/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "test", "limit": 5}'
-```
-
-## Benefits
-
-✅ **No Node.js SSL Issues** - Pure Python implementation
-✅ **Dual Protocol Support** - Both MCP and HTTP available
-✅ **Network Discovery** - mDNS advertising for easy access
-✅ **Production Ready** - systemd managed services
-✅ **Backward Compatible** - HTTP API preserved for existing tools
-✅ **Claude Code Ready** - Native MCP protocol support
+✅ 纯 Python 实现，规避 Node SSL；✅ MCP + HTTP 双协议；✅ systemd/ mDNS 生产可用。EOF

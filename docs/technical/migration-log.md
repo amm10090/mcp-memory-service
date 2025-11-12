@@ -1,113 +1,54 @@
-# FastAPI MCP Server Migration Log
+# FastAPI MCP 服务器迁移日志
 
-## Architecture Decision Record
+- **日期**：2025-08-03  
+- **分支**：`feature/fastapi-mcp-native-v4`  
+- **版本**：4.0.0-alpha.1
 
-**Date**: 2025-08-03
-**Branch**: `feature/fastapi-mcp-native-v4`
-**Version**: 4.0.0-alpha.1
+## 架构决策：从 Node.js 网桥切换到原生 FastAPI MCP 服务器
 
-### Decision: Migrate from Node.js Bridge to Native FastAPI MCP Server
+| 问题 | 方案 |
+|------|------|
+| Node.js HTTP→MCP 网桥在自签名证书场景下握手失败，远端访问不稳定 | 使用 FastAPI + 官方 MCP Python SDK，构建原生 MCP 服务器 |
 
-**Problem**: Node.js HTTP-to-MCP bridge has SSL handshake issues with self-signed certificates, preventing reliable remote memory service access.
+### 技术发现
+1. **Node.js SSL 问题**：即使自定义 HTTPS Agent 或关闭验证，依旧无法稳定通过自签名证书；Slash 命令可用，但 MCP 工具失败。
+2. **FastAPI MCP 优势**：
+   - 原生 MCP 协议实现（FastMCP 框架）；
+   - Python SSL 更适配自签证书；
+   - 移除桥接层，降低复杂度；
+   - 与现有存储后端无缝集成。
 
-**Solution**: Replace Node.js bridge with native FastAPI MCP server using official MCP Python SDK.
+### 实施状态
+- 5709be1：完成基础 FastAPI MCP 结构、5 个核心操作（store/retrieve/search_by_tag/delete/health）、新增入口 `mcp-memory-server`；
+- c0a0a45：双服务部署（FastMCP 8001 + HTTP Dashboard 8080）上线，SSL 问题解决，标准 MCP 客户端验证完成。
 
-### Technical Findings
+### 限制
+- Claude Code SSE 客户端有特定要求，暂与 FastMCP 不兼容；建议 Claude Code 用户暂用 HTTP Dashboard 或其他 MCP 客户端。
 
-1. **Node.js SSL Issues**:
+### 后续工作
+1. 调研自定义 SSE 客户端以兼容 Claude Code；
+2. 扩展剩余 17 个记忆操作；
+3. 监控双服务性能并优化；
+4. 提供多语言 MCP 客户端 SDK；
+5. 完善客户端兼容性矩阵文档。
 
-   - Node.js HTTPS client fails SSL handshake with self-signed certificates
-   - Issue persists despite custom HTTPS agents and disabled certificate validation
-   - Workaround: Slash commands using curl work, but direct MCP tools fail
+### Dashboard 工具排除说明
+- MCP 服务器聚焦 Claude Code 场景，Dashboard 功能由 `mcp-memory-dashboard` 负责，避免重复；
+- 排除工具：`dashboard_check_health`、`dashboard_recall_memory` … 等 8 个 Dashboard 专用操作。
 
-2. **FastAPI MCP Benefits**:
-   - Native MCP protocol support via FastMCP framework
-   - Python SSL stack handles self-signed certificates more reliably
-   - Eliminates bridging complexity and failure points
-   - Direct integration with existing storage backends
+### 架构对比
+| 维度 | Node.js 网桥 | FastAPI MCP |
+|------|--------------|-------------|
+| 协议栈 | Claude → 网桥 → HTTP → Memory | Claude → MCP Server |
+| SSL | Node.js HTTPS（问题多） | Python SSL（稳定） |
+| 复杂度 | 三层 | 两层 |
+| 维护 | 多个代码库 | Python 单栈 |
+| 远端访问 | 依赖网桥 | 原生支持 |
 
-### Implementation Status
+### 成功指标
+- ✅ SSL/HTTPS 连通无须额外配置；
+- ✅ 性能与旧方案持平或更优；
+- ✅ 远端多客户端接入成功；
+- ⚠️ Claude Code 需后续解决 SSE 兼容。
 
-#### ✅ Completed (Commit: 5709be1)
-
-- [x] Created feature branch `feature/fastapi-mcp-native-v4`
-- [x] Updated GitHub issues #71 and #72 with migration plan
-- [x] Implemented basic FastAPI MCP server structure
-- [x] Added 5 core memory operations: store, retrieve, search_by_tag, delete, health
-- [x] Version bump to 4.0.0-alpha.1
-- [x] Added new script entry point: `mcp-memory-server`
-
-#### ✅ Migration Completed (Commit: c0a0a45)
-
-- [x] Dual-service architecture deployed successfully
-- [x] FastMCP server (port 8001) + HTTP dashboard (port 8080)
-- [x] SSL issues completely resolved
-- [x] Production deployment to memory.local verified
-- [x] Standard MCP client compatibility confirmed
-- [x] Documentation and deployment scripts completed
-
-#### 🚧 Known Limitations
-
-- **Claude Code SSE Compatibility**: Claude Code's SSE client has specific requirements incompatible with FastMCP implementation
-- **Workaround**: Claude Code users can use HTTP dashboard or alternative MCP clients
-- **Impact**: Core migration objectives achieved; this is a client-specific limitation
-
-#### 📋 Future Development
-
-1. **Claude Code Compatibility**: Investigate custom SSE client implementation
-2. **Tool Expansion**: Add remaining 17 memory operations as needed
-3. **Performance Optimization**: Monitor and optimize dual-service performance
-4. **Client Library**: Develop Python/JavaScript MCP client libraries
-5. **Documentation**: Expand client compatibility matrix
-
-### Dashboard Tools Exclusion
-
-**Decision**: Exclude 8 dashboard-specific tools from FastAPI MCP server.
-
-**Rationale**:
-
-- HTTP dashboard at https://github.com/doobidoo/mcp-memory-dashboard provides superior web interface
-- MCP server should focus on Claude Code integration, not duplicate dashboard functionality
-- Clear separation of concerns: MCP for Claude Code, HTTP for administration
-
-**Excluded Tools**:
-
-- dashboard_check_health, dashboard_recall_memory, dashboard_retrieve_memory
-- dashboard_search_by_tag, dashboard_get_stats, dashboard_optimize_db
-- dashboard_create_backup, dashboard_delete_memory
-
-### Architecture Comparison
-
-| Aspect         | Node.js Bridge                       | FastAPI MCP                  |
-| -------------- | ------------------------------------ | ---------------------------- |
-| Protocol       | HTTP→MCP translation                 | Native MCP                   |
-| SSL Handling   | Node.js HTTPS (problematic)          | Python SSL (reliable)        |
-| Complexity     | 3 layers (Claude→Bridge→HTTP→Memory) | 2 layers (Claude→MCP Server) |
-| Maintenance    | Multiple codebases                   | Unified Python               |
-| Remote Access  | SSL issues                           | Direct support               |
-| Mobile Support | Limited by bridge                    | Full MCP compatibility       |
-
-### Success Metrics
-
-- [x] ~~All MCP tools function correctly with Claude Code~~ **Standard MCP clients work; Claude Code has SSE compatibility issue**
-- [x] SSL/HTTPS connectivity works without workarounds
-- [x] Performance equals or exceeds Node.js bridge
-- [x] Remote access works from multiple clients
-- [x] Easy deployment without local bridge requirements
-
-### Project Completion Summary
-
-**Status**: ✅ **MIGRATION SUCCESSFUL**
-
-**Date Completed**: August 3, 2025
-**Final Commit**: c0a0a45
-**Deployment Status**: Production-ready dual-service architecture
-
-The FastAPI MCP migration has successfully achieved its primary objectives:
-
-1. **SSL Issues Eliminated**: Node.js SSL handshake problems completely resolved
-2. **Architecture Simplified**: Removed complex bridging layers
-3. **Standard Compliance**: Full MCP protocol compatibility with standard clients
-4. **Production Ready**: Deployed and tested dual-service architecture
-
-**Note**: Claude Code SSE client compatibility remains a separate issue to be addressed in future development.
+**结论**：迁移成功，双服务架构已投入生产。下一步聚焦 Claude Code SSE 兼容与工具扩展。

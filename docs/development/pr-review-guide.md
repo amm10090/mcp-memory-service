@@ -1,487 +1,146 @@
-# Pull Request Review Guide
+# Pull Request 审查指南
 
-This guide provides reviewers with a structured checklist for evaluating pull requests. It ensures consistent review quality and helps catch issues before merging.
+面向评审者的结构化 checklist，确保 PR 质量一致且在合并前捕获风险。
 
-## Review Workflow
-
-1. **Initial Triage** (2 minutes) - Check PR template compliance
-2. **Code Review** (10-30 minutes) - Review changes for quality and correctness
-3. **Testing Verification** (5-15 minutes) - Validate tests and coverage
-4. **Documentation Check** (5 minutes) - Ensure docs are updated
-5. **Gemini Review** (optional) - Use `/gemini review` for additional analysis
-6. **Approval or Request Changes** - Provide clear, actionable feedback
-
----
-
-## 1. PR Template Compliance
-
-### ✅ Description Quality
-
-- [ ] **Summary Section Present**
-  - Clear description of what changes and why
-  - Reference to related issue(s): "Fixes #123", "Closes #456"
-  - Breaking changes clearly marked
-
-- [ ] **Changes Section Complete**
-  - Bullet list of specific changes
-  - Technical details for reviewers
-  - Impact on existing functionality documented
-
-- [ ] **Testing Section Detailed**
-  - Test strategy explained
-  - Manual testing steps included (if applicable)
-  - Test coverage metrics (if changed)
-
-- [ ] **Screenshots/Examples** (if UI/API changes)
-  - Before/after screenshots for UI changes
-  - API request/response examples for new endpoints
-  - CLI output for new commands
-
-### ✅ Metadata
-
-- [ ] **Labels Applied**
-  - `bug`, `feature`, `enhancement`, `docs`, `performance`, etc.
-  - `breaking-change` if API/behavior changes
-  - `needs-release-notes` if user-visible changes
-
-- [ ] **Milestone Set** (if applicable)
-  - Target release version assigned
-  - Aligns with project roadmap
-
-- [ ] **Reviewers Assigned**
-  - At least one maintainer requested
-  - Subject matter experts tagged (if specialized change)
+## 审查流程
+1. **初步分诊（~2 分钟）**：核对 PR 模板是否完整；
+2. **代码审查（10-30 分钟）**：关注正确性与质量；
+3. **测试验证（5-15 分钟）**：确认测试与覆盖率；
+4. **文档检查（~5 分钟）**：确认文档同步更新；
+5. **Gemini Review（可选）**：`/gemini review` 做额外分析；
+6. **批准或请求修改**：输出明确、可执行的反馈。
 
 ---
 
-## 2. Code Review Standards
+## 1. PR 模板与元数据
 
-### ✅ Type Safety & Documentation
+### ✅ 描述质量
+- [ ] **Summary**：说明改了什么、为什么；引用 Issue（Fixes/Closes #123）；Breaking change 明示；
+- [ ] **Changes**：用条目列出具体改动、技术细节、影响范围；
+- [ ] **Testing**：说明测试策略、手工步骤（若有）、覆盖率变化；
+- [ ] **UI/API 变更**：附前后对比截图、API 请求/响应示例或 CLI 输出。
 
-- [ ] **Type Hints Present**
-  ```python
-  # ✅ Good
-  async def store_memory(
-      content: str,
-      tags: Optional[List[str]] = None,
-      metadata: Optional[Dict[str, Any]] = None
-  ) -> Dict[str, Any]:
-
-  # ❌ Bad - no type hints
-  async def store_memory(content, tags=None, metadata=None):
-  ```
-
-- [ ] **Docstrings Complete**
-  - All public functions/classes documented
-  - Google-style docstrings with Args/Returns/Raises
-  - Complex logic explained
-
-- [ ] **Async Patterns Correct**
-  - `async def` for I/O operations
-  - `await` used for all async calls
-  - No blocking calls in async functions
-
-### ✅ Error Handling
-
-- [ ] **Specific Exception Types**
-  ```python
-  # ✅ Good
-  try:
-      result = await storage.store(memory)
-  except StorageError as e:
-      logger.error(f"Failed to store memory: {e}")
-      raise MemoryServiceError(f"Storage operation failed: {e}") from e
-
-  # ❌ Bad - bare except
-  try:
-      result = await storage.store(memory)
-  except:
-      pass  # Silently fails
-  ```
-
-- [ ] **Error Messages Helpful**
-  - Include context (what operation failed)
-  - Suggest remediation if possible
-  - Don't expose sensitive information
-
-- [ ] **Logging Appropriate**
-  - Errors logged with full context
-  - Debug logging for troubleshooting
-  - No secrets logged
-
-### ✅ Performance Considerations
-
-- [ ] **Database Operations Efficient**
-  - Batch operations where possible
-  - Indexes used for filters
-  - No N+1 query patterns
-
-- [ ] **Caching Appropriate**
-  - Global caches (models, embeddings) reused
-  - Cache invalidation handled correctly
-  - Memory leaks prevented
-
-- [ ] **Async Operations Optimal**
-  - Concurrent operations where safe
-  - `asyncio.gather()` for parallel tasks
-  - Proper timeout handling
-
-### ✅ Security
-
-- [ ] **Input Validation**
-  - All user inputs validated
-  - SQL injection prevented (parameterized queries)
-  - Path traversal prevented (for file operations)
-
-- [ ] **Secrets Management**
-  - No hardcoded credentials
-  - Environment variables for sensitive config
-  - API keys redacted in logs
-
-- [ ] **Authentication/Authorization**
-  - API key validation for HTTP endpoints
-  - MCP protocol security maintained
-  - No bypass vulnerabilities
+### ✅ 元数据
+- [ ] **标签**：`bug`/`feature`/`docs` 等；涉及行为变更加 `breaking-change`；可见性变更加 `needs-release-notes`；
+- [ ] **Milestone**：若有发布计划，设置目标版本；
+- [ ] **评审人**：至少一位维护者 + 相关领域 SME。
 
 ---
 
-## 3. Testing Verification
+## 2. 代码评审标准
 
-### ✅ Test Coverage
+### ✅ 类型与文档
+- [ ] **类型标注齐全**，避免 `def foo(a, b):`；
+- [ ] **Docstring** 使用 Google/NumPy 风格，说明 Args/Returns/Raises；
+- [ ] **异步规范**：I/O 用 `async def` + `await`，避免阻塞调用。
 
-- [ ] **Tests Exist for New Code**
-  - Unit tests for new functions/classes
-  - Integration tests for API changes
-  - Regression tests if fixing a bug
-
-- [ ] **Test Quality**
-  - Tests are readable and maintainable
-  - Mock external dependencies (HTTP, DB, etc.)
-  - Test edge cases and error conditions
-
-- [ ] **Coverage Metrics** (aim for >80%)
-  ```bash
-  pytest --cov=mcp_memory_service tests/
-  # Check coverage report for changed files
-  ```
-
-### ✅ Test Execution
-
-- [ ] **All Tests Pass**
-  - Local: `pytest tests/`
-  - CI: All GitHub Actions workflows green
-  - No flaky tests introduced
-
-- [ ] **Manual Testing** (if complex change)
-  - Reviewer reproduces test scenarios
-  - Manual verification of user-facing features
-  - Platform-specific testing (if applicable)
-
-### ✅ Regression Prevention
-
-- [ ] **Existing Tests Still Pass**
-  - No tests removed or disabled without justification
-  - Test fixtures updated if data model changed
-
-- [ ] **Performance Tests** (if performance-critical)
-  - Benchmarks show no degradation
-  - Scalability verified (e.g., 10K+ memories)
-
----
-
-## 4. Documentation Updates
-
-### ✅ Code Documentation
-
-- [ ] **CLAUDE.md Updated** (if workflow changes)
-  - New commands/scripts documented
-  - Essential commands section updated
-  - Configuration examples added
-
-- [ ] **CHANGELOG.md Updated**
-  - Entry in appropriate section (Added/Fixed/Changed)
-  - Follows [Keep a Changelog](https://keepachangelog.com/) format
-  - Breaking changes marked clearly
-
-- [ ] **API Documentation** (if API changes)
-  - New endpoints documented
-  - Request/response examples provided
-  - Error codes and messages documented
-
-### ✅ User-Facing Documentation
-
-- [ ] **README.md** (if setup/installation changes)
-  - Installation steps updated
-  - Configuration examples current
-  - Troubleshooting tips added
-
-- [ ] **Wiki Pages** (if major feature)
-  - Detailed guide created/updated
-  - Examples and use cases provided
-  - Cross-linked to related docs
-
-### ✅ Migration Guides
-
-- [ ] **Breaking Changes Documented**
-  - Migration path clearly explained
-  - Before/after code examples
-  - Database migration scripts (if applicable)
-
-- [ ] **Deprecation Notices**
-  - Timeline specified (e.g., "removed in v9.0.0")
-  - Alternatives recommended
-  - Warnings added to deprecated code
-
----
-
-## 5. Gemini Review Integration
-
-### When to Use `/gemini review`
-
-**Recommended for:**
-- Large PRs (>500 lines changed)
-- Complex algorithm changes
-- Security-critical code
-- Performance optimizations
-- First-time contributors
-
-**How to Use:**
-1. Comment `/gemini review` on the PR
-2. Wait ~1 minute for Gemini analysis
-3. Review Gemini's findings alongside manual review
-4. Address valid concerns, dismiss false positives
-
-### Gemini Review Workflow
-
-**Iteration Cycle:**
-1. Contributor pushes changes
-2. Maintainer comments with code review feedback
-3. `/gemini review` for automated analysis
-4. Wait 1 minute for Gemini response
-5. Repeat until both human and Gemini reviews pass
-
-**Gemini Strengths:**
-- Catches common anti-patterns
-- Identifies potential security issues
-- Suggests performance improvements
-- Validates test coverage
-
-**Gemini Limitations:**
-- May flag project-specific patterns as issues
-- Context awareness limited (doesn't know full codebase)
-- Final decision always with human reviewers
-
----
-
-## 6. Merge Criteria
-
-### ✅ Must-Have Before Merge
-
-**Code Quality:**
-- [ ] All reviewer feedback addressed
-- [ ] No unresolved conversations
-- [ ] Code follows project style guide
-
-**Testing:**
-- [ ] All tests pass (local + CI)
-- [ ] New code has adequate test coverage
-- [ ] Manual testing completed (if applicable)
-
-**Documentation:**
-- [ ] CHANGELOG.md updated
-- [ ] User-facing docs updated
-- [ ] Breaking changes documented with migration path
-
-**Process:**
-- [ ] Branch up-to-date with `main`
-- [ ] No merge conflicts
-- [ ] Commits follow semantic format
-
-### ✅ Approval Process
-
-**Required Approvals:**
-- 1 maintainer approval minimum
-- 2 approvals for breaking changes
-- Security team approval for security-related changes
-
-**Before Approving:**
-- [ ] Reviewer has actually read the code (not just glanced)
-- [ ] Tests have been run locally or CI verified
-- [ ] Documentation checked for accuracy
-
-### ✅ Merge Method
-
-**Use "Squash and Merge" when:**
-- Multiple small commits (WIP, fix typos, etc.)
-- Commit history is messy
-- Single logical change
-
-**Use "Create a Merge Commit" when:**
-- Multiple distinct features in PR
-- Each commit is meaningful and well-documented
-- Preserving contributor attribution important
-
-**Never use "Rebase and Merge"** (causes issues with CI history)
-
----
-
-## 7. Common Review Pitfalls
-
-### ❌ Issues to Watch For
-
-**Performance:**
-- N+1 queries (loop calling DB for each item)
-- Synchronous operations in async code
-- Memory leaks (unclosed connections, large caches)
-
-**Security:**
-- SQL injection (string concatenation in queries)
-- Path traversal (user input in file paths)
-- Secrets in code/logs
-
-**Error Handling:**
-- Bare `except:` clauses
-- Ignoring errors silently
-- Cryptic error messages
-
-**Testing:**
-- Tests that don't actually test anything
-- Flaky tests (timing-dependent, random failures)
-- Missing edge cases
-
-**Documentation:**
-- Outdated examples
-- Missing API documentation
-- Breaking changes not highlighted
-
----
-
-## 8. Providing Effective Feedback
-
-### ✅ Good Feedback Practices
-
-**Be Specific:**
-```markdown
-# ✅ Good
-This function could cause database locks if called concurrently.
-Consider adding `PRAGMA busy_timeout=15000` before connection.
-
-# ❌ Bad
-This might have issues.
+### ✅ 错误处理
+- [ ] 捕获具体异常并加上下文：
+```python
+try:
+    result = await storage.store(memory)
+except StorageError as e:
+    logger.error("store failed", extra={"memory": memory.id, "err": str(e)})
+    raise MemoryServiceError("Storage operation failed") from e
 ```
+- [ ] 错误信息含操作背景，不泄露敏感数据；
+- [ ] 日志级别合适（错误/警告/调试）。
 
-**Provide Examples:**
-```markdown
-# ✅ Good
-Consider using async context manager:
-\`\`\`python
-async with storage.transaction():
-    await storage.store(memory)
-\`\`\`
+### ✅ 性能
+- [ ] DB 操作批量化，避免 N+1；必要时新增索引；
+- [ ] 模型/嵌入缓存复用，注意过期策略；
+- [ ] 充分利用 `asyncio.gather`、超时控制。
 
-# ❌ Bad
-Use a transaction here.
-```
-
-**Distinguish Required vs. Optional:**
-```markdown
-# ✅ Good
-**Required:** Add type hints to this function.
-**Optional (nit):** Consider renaming `tmp` to `temporary_result` for clarity.
-
-# ❌ Bad
-Fix these things... [list of both critical and trivial items mixed]
-```
-
-**Be Constructive:**
-```markdown
-# ✅ Good
-This implementation works but may be slow with large datasets.
-Could we batch the operations? See `batch_store()` in storage.py for an example.
-
-# ❌ Bad
-This is terrible, completely wrong approach.
-```
-
-### ✅ Review Comment Structure
-
-**For Issues:**
-1. State the problem clearly
-2. Explain why it's a problem
-3. Suggest a solution (or ask for discussion)
-4. Link to relevant docs/examples
-
-**For Nitpicks:**
-- Prefix with `nit:` or `optional:`
-- Don't block merge on nitpicks
-- Focus on critical issues first
-
-**For Questions:**
-- Ask for clarification on complex logic
-- Request comments/docs if unclear
-- Verify assumptions
+### ✅ 安全
+- [ ] 输入校验（类型、范围、长度）；SQL 参数化；防止 Path Traversal；
+- [ ] 不硬编码凭据，敏感信息来自环境变量且日志已脱敏；
+- [ ] HTTP/API 需验证 API Key / OAuth；MCP 协议安全约束未破坏。
 
 ---
 
-## 9. Review Checklist Summary
+## 3. 测试验证
 
-Copy this checklist into your PR review comment:
+### ✅ 覆盖范围
+- [ ] 新功能有对应单测/集成测试/回归测试；
+- [ ] 测试可读、可维护，必要时 mock 外部依赖；
+- [ ] 边界条件、异常路径均覆盖。
 
+### ✅ 执行情况
+- [ ] 本地 `pytest` 全绿；CI Workflow 全部通过；
+- [ ] 复杂改动需要手工验证（附步骤或截图）；
+- [ ] 若改动影响性能，大规模数据场景需验证。
+
+### ✅ 防回归
+- [ ] 未无故删除/禁用旧测试；
+- [ ] Fixture 与数据模型同步更新；
+- [ ] 如修复缺陷，添加针对性回归用例。
+
+---
+
+## 4. 文档同步
+
+- [ ] **CLAUDE.md**：新增命令/脚本/流程需更新；
+- [ ] **CHANGELOG.md**：按 Keep a Changelog 结构记录（Added/Changed/Fixed），Breaking 变更突出；
+- [ ] **README / Wiki**：安装、配置、故障排查若受影响需同步；
+- [ ] **API 文档**：新增/修改端点需附请求/响应示例、错误码；
+- [ ] **迁移指南**：Breaking 变更给出迁移路径、前后对比、脚本等；
+- [ ] **Deprecation**：标明生效版本与替代方案。
+
+---
+
+## 5. Gemini Review（`/gemini review`）
+- **推荐场景**：500+ 行改动、复杂算法、安全/性能关键、首次贡献者；
+- **流程**：提交 `/gemini review` → 等 1 分钟 → 将结果与人工点评一并反馈；
+- **擅长**：常见反模式、安全隐患、性能建议、测试覆盖提醒；
+- **局限**：对项目上下文了解有限，最终决策仍由维护者把控。
+
+---
+
+## 6. 合并条件
+
+### ✅ Merge 前必备
+- [ ] 评审意见均处理完毕，讨论 resolved；
+- [ ] 本地/CI 测试均通过；
+- [ ] 新代码有充足测试；
+- [ ] 文档/Changelog 更新；
+- [ ] Breaking 变更附迁移方案；
+- [ ] 分支已 rebase/merge 最新 `main`，无冲突；
+- [ ] 提交信息遵循语义化（`feat: ...`）。
+
+### ✅ 审批流程
+- 常规：≥1 维护者；
+- Breaking：≥2 人；
+- 安全相关需安全负责人确认。
+
+### ✅ Merge 方式
+- **Squash and Merge**：多次 WIP 提交或历史混乱时使用；
+- **Merge Commit**：多个独立特性或需保留细粒度历史；
+- **禁止 Rebase and Merge**（影响 CI 历史）。
+
+---
+
+## 7. 常见问题清单
+- 性能：N+1、同步阻塞、缓存泄漏；
+- 安全：SQL 拼接、路径注入、日志泄密；
+- 错误处理：`except:` 全吞、无日志、信息含糊；
+- 测试：形式化测试、不可重复、遗漏边界；
+- 文档：示例过期、API 未更新、未披露 Breaking。
+
+---
+
+## 8. 高效反馈技巧
+- **具体**：指出风险及原因，避免“可能有问题”；
+- **示例**：提供建议代码片段；
+- **区分优先级**：标记必改 vs. Nit；
+- **建设性**：说明更佳实践或参考实现；
+- **尊重且专业**：目标是提升代码，而非挑错。
+
+示例：
 ```markdown
-## Review Checklist
-
-### Template Compliance
-- [ ] Description complete with issue references
-- [ ] Testing section detailed
-- [ ] Labels and milestone set
-
-### Code Quality
-- [ ] Type hints and docstrings present
-- [ ] Error handling robust
-- [ ] Performance considerations addressed
-- [ ] Security reviewed (input validation, secrets)
-
-### Testing
-- [ ] Tests exist and pass
-- [ ] Coverage adequate (>80% for changed code)
-- [ ] Manual testing completed (if applicable)
-
-### Documentation
-- [ ] CHANGELOG.md updated
-- [ ] CLAUDE.md updated (if workflow changes)
-- [ ] User-facing docs updated
-- [ ] Breaking changes documented
-
-### Process
-- [ ] Branch up-to-date with main
-- [ ] All CI checks passing
-- [ ] Gemini review completed (if applicable)
-
-**Approval Decision:** [ ] Approve | [ ] Request Changes | [ ] Comment
+**Required:** DB 查询在循环里会导致 N+1，可改成一次性 fetch。
+**Optional:** 变量名 `tmp` 不够语义化，可考虑 `temporary_result`。
 ```
 
 ---
 
-## 10. Resources
-
-**Project Documentation:**
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
-- [CLAUDE.md](../../CLAUDE.md) - Development workflow
-- [Release Checklist](release-checklist.md) - Pre-release testing
-
-**External Resources:**
-- [Python Type Hints](https://docs.python.org/3/library/typing.html)
-- [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
-- [Keep a Changelog](https://keepachangelog.com/)
-- [Semantic Versioning](https://semver.org/)
-
-**Tools:**
-- [Gemini Code Assist for GitHub](https://cloud.google.com/products/gemini/code-assist)
-- [MCP Inspector](https://github.com/modelcontextprotocol/inspector) - Test MCP protocol compliance
-- [pytest-cov](https://pytest-cov.readthedocs.io/) - Coverage reporting
-
----
-
-**Last Updated:** 2025-11-05
-**Version:** 1.0
-**Related:** [Issue Management Guide](issue-management.md), [Release Checklist](release-checklist.md)
+借助上述 checklist，可显著提升 PR 审查效率，并保持交付质量一致。EOF
