@@ -1,211 +1,34 @@
-# Refactoring: handle_get_prompt() - Phase 2, Function #5
+# Phase 2A: getPrompt 处理方案（摘要）
 
-## Summary
-Refactored `server.py::handle_get_prompt()` to reduce cyclomatic complexity and improve maintainability through Extract Method pattern.
+## 问题
+- 某些客户端在调用 `getPrompt` 时遇到质量评分缺失或延迟，导致上下文不稳定。
 
-**Metrics:**
-- **Original Complexity:** 33
-- **Refactored Main Function:** Complexity 6 (82% reduction)
-- **Original Lines:** 208
-- **Refactored Main Function:** 41 lines
-- **Helper Functions Created:** 5
+## 目标
+- 确保 `getPrompt` 返回的上下文已包含最新质量元数据。
+- 降低调用时延，避免阻塞主流程。
 
-## Refactoring Strategy: Extract Method Pattern
+## 方案要点
+1) **异步质量评分**：保持后台评分，不阻塞 `getPrompt`；若无分数则回退 0.5。
+2) **缓存**：在内存中缓存最近的质量分与 provider，TTL 可配置（默认 5 分钟）。
+3) **幂等更新**：重复调用不重复触发评分任务。
+4) **调试标记**：`debug_info` 返回质量来源与是否重排。
 
-The function contained a long if/elif/else chain handling 5 different prompt types. Each prompt type required 25-40 lines of specialized logic with high nesting and branching.
+## 实施步骤
+- API 层：`getPrompt` 增加质量元数据字段（score/provider/updated_at）。
+- 服务层：添加轻量缓存，命中则直接返回；未命中触发异步评分任务。
+- 错误处理：评分失败时记录日志，不影响主响应。
 
-### Helper Functions Extracted
-
-#### 1. `_prompt_memory_review()` - CC: 5
-**Purpose:** Handle "memory_review" prompt type
-**Responsibilities:**
-- Parse time_period and focus_area arguments
-- Retrieve memories from specified time period
-- Format memories as prompt text with tags
-
-**Location:** Lines ~1320-1347
-**Input:** arguments dict
-**Output:** List of PromptMessage objects
-
----
-
-#### 2. `_prompt_memory_analysis()` - CC: 8
-**Purpose:** Handle "memory_analysis" prompt type  
-**Responsibilities:**
-- Parse tags and time_range arguments
-- Retrieve relevant memories
-- Analyze patterns (tag counts, memory types)
-- Build analysis report text
-
-**Location:** Lines ~1349-1388
-**Input:** arguments dict
-**Output:** List of PromptMessage objects
-**Complexity Source:** Double-nested loops for pattern analysis (2 for loops)
-
----
-
-#### 3. `_prompt_knowledge_export()` - CC: 8
-**Purpose:** Handle "knowledge_export" prompt type
-**Responsibilities:**
-- Parse format_type and filter criteria
-- Retrieve memories based on filter
-- Format export in JSON/Markdown/Text based on format_type
-- Build export text
-
-**Location:** Lines ~1390-1428
-**Input:** arguments dict
-**Output:** List of PromptMessage objects
-**Complexity Source:** Multiple format branches (if/elif/else)
-
----
-
-#### 4. `_prompt_memory_cleanup()` - CC: 6
-**Purpose:** Handle "memory_cleanup" prompt type
-**Responsibilities:**
-- Parse cleanup parameters
-- Find duplicate memories
-- Build cleanup report
-- Provide recommendations
-
-**Location:** Lines ~1430-1458
-**Input:** arguments dict
-**Output:** List of PromptMessage objects
-**Complexity Source:** Nested loop for duplicate detection
-
----
-
-#### 5. `_prompt_learning_session()` - CC: 5
-**Purpose:** Handle "learning_session" prompt type
-**Responsibilities:**
-- Parse topic, key_points, and questions
-- Create structured learning note
-- Store as memory
-- Return formatted response
-
-**Location:** Lines ~1460-1494
-**Input:** arguments dict
-**Output:** List of PromptMessage objects
-
----
-
-## Refactored `handle_get_prompt()` Function - CC: 6
-
-**New Structure:**
-```python
-async def handle_get_prompt(self, name: str, arguments: dict):
-    await self._ensure_storage_initialized()
-    
-    # Simple dispatch to specialized handlers
-    if name == "memory_review":
-        messages = await self._prompt_memory_review(arguments)
-    elif name == "memory_analysis":
-        messages = await self._prompt_memory_analysis(arguments)
-    # ... etc
-    else:
-        messages = [unknown_prompt_message]
-    
-    return GetPromptResult(description=..., messages=messages)
+## 配置
+```bash
+export MCP_QUALITY_PROMPT_CACHE_TTL_SECONDS=300
+export MCP_QUALITY_PROMPT_FALLBACK_SCORE=0.5
 ```
 
-**Lines:** 41 (vs 208 original)
-**Control Flow:** Reduced from 33 branches to 6 (if/elif chain only)
+## 验收
+- `getPrompt` 在无分数时返回 fallback，后续评分写回。
+- 调试信息可看到是否使用缓存、是否触发重排。
+- 时延对比：启用缓存后 P95 < 80ms。
 
-## Benefits
-
-### Code Quality
-- ✅ **Single Responsibility:** Each function handles one prompt type
-- ✅ **Testability:** Each prompt type can be unit tested independently
-- ✅ **Readability:** Main function is now a simple dispatcher
-- ✅ **Maintainability:** Changes to one prompt type isolated to its handler
-- ✅ **Extensibility:** Adding new prompt types requires just another elif
-
-### Complexity Distribution
-```
-handle_get_prompt:         CC 6   (dispatcher)
-_prompt_memory_review:     CC 5   (simple retrieval + format)
-_prompt_memory_analysis:   CC 8   (pattern analysis)
-_prompt_knowledge_export:  CC 8   (multiple format branches)
-_prompt_memory_cleanup:    CC 6   (duplicate detection)
-_prompt_learning_session:  CC 5   (create + store)
-```
-
-**Total distributed complexity:** 38 (vs 33 monolithic)
-**Max function complexity:** 8 (vs 33 monolithic) - 75% reduction in peak complexity
-
-### Maintainability Improvements
-- Prompt handlers are now 27-39 lines each (vs 208 for entire function)
-- Clear naming convention (`_prompt_<type>`) makes intent obvious
-- Easier to locate specific prompt logic
-- Reduces cognitive load when reading main function
-- New developers can understand each handler independently
-
-## Backward Compatibility
-
-✅ **Fully compatible** - No changes to:
-- Function signature: `handle_get_prompt(name, arguments) -> GetPromptResult`
-- Return values: Same GetPromptResult structure
-- Argument processing: Same argument parsing
-- All prompt types: Same behavior
-
-## Testing Recommendations
-
-### Unit Tests
-- `test_prompt_memory_review()` - Test memory retrieval + formatting
-- `test_prompt_memory_analysis()` - Test pattern analysis logic
-- `test_prompt_knowledge_export()` - Test each format (JSON/MD/text)
-- `test_prompt_memory_cleanup()` - Test duplicate detection
-- `test_prompt_learning_session()` - Test storage logic
-
-### Integration Tests  
-- Test all 5 prompt types through handle_get_prompt()
-- Verify error handling for unknown prompts
-- Test with various argument combinations
-
-## Related Issues
-
-- **Issue #246:** Code Quality Phase 2 - Reduce Function Complexity
-- **Phase 2 Progress:** 4/27 high-risk functions completed
-  - ✅ `install.py::main()` - Complexity 62 → ~8
-  - ✅ `sqlite_vec.py::initialize()` - Complexity 38 → Reduced
-  - ✅ `install_package()` - Complexity 33 → 7
-  - ✅ `handle_get_prompt()` - Complexity 33 → 6 (THIS REFACTORING)
-
-## Files Modified
-
-- `src/mcp_memory_service/server.py`: Refactored `handle_get_prompt()` with 5 helper methods
-
-## Git Commit
-
-Use semantic commit message:
-```
-refactor: reduce handle_get_prompt() complexity from 33 to 6 (82% reduction)
-
-Extract prompt type handlers:
-- _prompt_memory_review (CC 5) - Memory retrieval + formatting
-- _prompt_memory_analysis (CC 8) - Pattern analysis
-- _prompt_knowledge_export (CC 8) - Multi-format export
-- _prompt_memory_cleanup (CC 6) - Duplicate detection
-- _prompt_learning_session (CC 5) - Learning note creation
-
-Main dispatcher now 41 lines (vs 208 original) with CC 6.
-All handlers individually testable and maintainable.
-Addresses issue #246 Phase 2, function #5 in refactoring plan.
-```
-
-## Code Review Checklist
-
-- [x] Code compiles without errors
-- [x] All handlers extract correctly
-- [x] Dispatcher logic correct
-- [x] No changes to external API
-- [x] Backward compatible
-- [x] Complexity reduced
-- [ ] All tests pass (manual verification needed)
-- [ ] Integration tested
-
-## Future Improvements
-
-1. **Prompt Registry:** Create a dictionary-based prompt registry for even simpler dispatch
-2. **Configuration:** Make prompt definitions configurable
-3. **Validation:** Add argument schema validation for each prompt type
-4. **Documentation:** Auto-generate prompt documentation from handler implementations
+## 后续
+- 与混合评分（Phase 2B）对接，统一质量来源。
+- 在 UI 中暴露“质量准备状态”以提升可观测性。

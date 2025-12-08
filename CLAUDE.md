@@ -113,93 +113,50 @@ Web interface at `http://127.0.0.1:8000/` with CRUD operations, semantic/tag/tim
 
 ## Memory Quality System 🆕 (v8.45.0+)
 
-**AI-driven automatic quality scoring** with local-first design for zero-cost, privacy-preserving memory evaluation.
+本地优先、零成本的自动质量评分体系，用于检索重排与整合决策。
 
-### Architecture
+### 架构
+- **一级（默认）**：本地 ONNX 交叉编码器 `ms-marco-MiniLM-L-6-v2`，23MB，CPU 50-100ms / GPU 10-20ms，$0，完全离线。  
+- **二/三层（可选）**：Groq / Gemini，需显式开启。  
+- **四层（回退）**：隐式信号（访问频次、最近性、排名）。
 
-**Tier 1 (Primary)**: Local SLM via ONNX
-- Model: `ms-marco-MiniLM-L-6-v2` cross-encoder (23MB)
-- Cost: **$0** (runs locally, CPU/GPU)
-- Latency: 50-100ms (CPU), 10-20ms (GPU with CUDA/MPS/DirectML)
-- Privacy: ✅ Full (no external API calls)
-- Offline: ✅ Works without internet
-- **⚠️ Requires meaningful query-memory pairs** (designed for relevance ranking, not absolute quality)
+### 重要限制（v8.48.3 实测）
+- 模型训练目标是**相关性排序**，不适合绝对质量判定。  
+- **自匹配偏置 ~25%**：标签生成查询会让分数虚高至 1.0。  
+- **双峰分布**：平均分 0.469（期望 0.6-0.7），大量 1.0 与 0.0。  
+- **缺少人工验证**：高分不一定高质，低分可能误杀。  
+- 结论：只用于**相对排序**，不要用作硬阈值或自动归档。  
+- 详见评估报告与改进计划： [评估 Wiki](https://github.com/doobidoo/mcp-memory-service/wiki/Memory-Quality-System-Evaluation) · [Issue #268](https://github.com/doobidoo/mcp-memory-service/issues/268)。
 
-**Tier 2-3 (Optional)**: Groq/Gemini APIs (user opt-in only)
-**Tier 4 (Fallback)**: Implicit signals (access patterns)
+### 关键能力
+1) **自动评分**：检索时异步打分，0.0-1.0，结合 AI + 使用模式。  
+2) **质量增强搜索**：`0.7×语义 + 0.3×质量`，默认关闭，可按次开启。  
+3) **基于质量的整合**：高分保留更久，低分更易归档（需人工复核）。  
+4) **控制台可视化**：质量徽章、分布、Top/Bottom 列表。
 
-**⚠️ IMPORTANT ONNX Limitations (v8.48.3 Evaluation):**
-- The ONNX ranker (`ms-marco-MiniLM-L-6-v2`) is a cross-encoder trained for document relevance ranking, NOT absolute quality assessment
-- **Self-matching bias**: Tag-generated queries produce artificially high scores (~1.0) for ~25% of memories
-- **Bimodal distribution**: Average score 0.469 (expected: 0.6-0.7) with clustering at 1.0 and 0.0
-- **No ground truth**: Cannot validate if high scores represent actual quality without user feedback
-- **Use for relative ranking only** - Do not use for absolute quality thresholds or archival decisions
-- **Full evaluation**: [Memory Quality System Evaluation Wiki](https://github.com/doobidoo/mcp-memory-service/wiki/Memory-Quality-System-Evaluation)
-- **Improvements planned**: [Issue #268](https://github.com/doobidoo/mcp-memory-service/issues/268) (Hybrid scoring, user feedback, LLM-as-judge)
-
-### Key Features
-
-1. **Automatic Quality Scoring**
-   - Evaluates every retrieved memory (0.0-1.0 score)
-   - Combines AI evaluation + usage patterns
-   - Non-blocking (async background scoring)
-
-2. **Quality-Boosted Search**
-   - Reranks results: `0.7 × semantic + 0.3 × quality`
-   - Over-fetches 3×, returns top N by composite score
-   - Opt-in via `MCP_QUALITY_BOOST_ENABLED=true`
-
-3. **Quality-Based Forgetting**
-   - High quality (≥0.7): Preserved 365 days inactive
-   - Medium (0.5-0.7): Preserved 180 days inactive
-   - Low (<0.5): Archived 30-90 days inactive
-
-4. **Dashboard Integration**
-   - Quality badges on all memory cards (color-coded)
-   - Analytics view with distribution charts
-   - Top/bottom performers lists
-
-### Configuration
-
+### 配置速览
 ```bash
-# Quality System (Local-First Defaults)
-export MCP_QUALITY_SYSTEM_ENABLED=true         # Default: enabled
-export MCP_QUALITY_AI_PROVIDER=local           # local|groq|gemini|auto|none
-export MCP_QUALITY_LOCAL_MODEL=ms-marco-MiniLM-L-6-v2
-export MCP_QUALITY_LOCAL_DEVICE=auto           # auto|cpu|cuda|mps|directml
-
-# Quality-Boosted Search (Opt-In)
-export MCP_QUALITY_BOOST_ENABLED=false         # Default: disabled (opt-in)
-export MCP_QUALITY_BOOST_WEIGHT=0.3            # 0.3 = 30% quality, 70% semantic
-
-# Quality-Based Retention
-export MCP_QUALITY_RETENTION_HIGH=365          # Days for quality ≥0.7
-export MCP_QUALITY_RETENTION_MEDIUM=180        # Days for 0.5-0.7
-export MCP_QUALITY_RETENTION_LOW_MIN=30        # Min days for <0.5
+export MCP_QUALITY_SYSTEM_ENABLED=true          # 默认开启
+export MCP_QUALITY_AI_PROVIDER=local            # local|groq|gemini|auto|none
+export MCP_QUALITY_BOOST_ENABLED=false          # 质量增强默认关
+export MCP_QUALITY_BOOST_WEIGHT=0.3             # 开启时质量权重
+export MCP_QUALITY_RETENTION_HIGH=365           # ≥0.7 保留 365 天
+export MCP_QUALITY_RETENTION_MEDIUM=180         # 0.5-0.7
+export MCP_QUALITY_RETENTION_LOW_MIN=30         # <0.5 最少 30 天
 ```
 
-### MCP Tools
+### MCP 工具
+- `rate_memory`（-1/0/1 手工评分）
+- `get_memory_quality`（查看质量指标）
+- `analyze_quality_distribution`（分布/Top/Bottom）
+- `retrieve_with_quality_boost`（按次质量重排）
 
-- `rate_memory(content_hash, rating, feedback)` - Manual quality rating (-1/0/1)
-- `get_memory_quality(content_hash)` - Retrieve quality metrics
-- `analyze_quality_distribution(min_quality, max_quality)` - System-wide analytics
-- `retrieve_with_quality_boost(query, n_results, quality_weight)` - Quality-boosted search
-
-### Success Metrics (Phase 1 Results - v8.48.3)
-
-**Achieved:**
-- ✅ **<100ms search latency** with quality boost (45ms avg, +17% overhead)
-- ✅ **$0 monthly cost** (local SLM default, zero API calls)
-- ✅ **75% local SLM usage** (3,570 of 4,762 memories)
-- ✅ **95% quality score coverage** (4,521 of 4,762 memories scored)
-
-**Challenges Identified:**
-- ⚠️ Average quality score 0.469 (target: 0.6+)
-- ⚠️ Self-matching bias affects ~25% of scores
-- ⚠️ Quality boost provides minimal ranking improvement (0-3%)
-- ⚠️ No user feedback validation
-
-**Next Phase:** See [Issue #268](https://github.com/doobidoo/mcp-memory-service/issues/268) for improvements (hybrid scoring, user feedback, LLM-as-judge)
+### Phase 1 结果（v8.48.3）
+- ✅ 搜索含质量增强 <100ms（45ms，+17%）  
+- ✅ $0 月成本（本地默认）  
+- ✅ 质量覆盖率 95%（4521/4762）  
+- ⚠️ 平均分 0.469，**自匹配偏置 ~25%**，质量增强提升 0-3%  
+- 下一步：混合评分、用户反馈、LLM 评审（Issue #268）
 
 ### Hooks Integration (v8.45.3+)
 

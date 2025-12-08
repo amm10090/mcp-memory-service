@@ -1,5 +1,7 @@
 # Historic Changelog
 
+> 说明：本文件覆盖 v7.x 与 v8.0.0-8.23.0 的历史版本，正文保留英文原文；若需中文概要，请先查看最新 [CHANGELOG.md](./CHANGELOG.md)。
+
 **Historic releases for MCP Memory Service (v8.0.0 - v8.23.0 and v7.x)**
 
 For recent releases (v8.24.0+), see [CHANGELOG.md](./CHANGELOG.md).
