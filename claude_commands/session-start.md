@@ -1,10 +1,3 @@
-# session-start.md（中文说明）
-
-说明 /session-start 命令：手动初始化会话，加载记忆上下文（含 Windows workaround）。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Display Session Memory Context
 
 Run the session-start memory awareness hook manually to display relevant memories, project context, and git analysis.

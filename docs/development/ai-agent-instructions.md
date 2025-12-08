@@ -1,117 +1,193 @@
-# AI Agent 指南
+# AI Agent Instructions
 
-面向 MCP Memory Service 的 AI 编码代理说明——该项目实现 MCP 语义记忆服务，支持 SQLite-vec / Cloudflare 等多后端，适配 Claude Desktop、VS Code、Cursor、Continue 等 13+ 应用。
+AI coding agent instructions for MCP Memory Service - a universal memory service providing semantic search and persistent storage for AI assistants.
 
-## 项目概览
-- MCP Memory Service 提供语义检索与持久存储能力；
-- MCP 接口 + HTTP API + Dashboard；
-- 核心后端：SQLite-vec（默认）/ ChromaDB / Cloudflare D1+Vectorize。
+## Project Overview
 
-## 环境与启动
+MCP Memory Service implements the Model Context Protocol (MCP) to provide semantic memory capabilities for AI assistants. It supports multiple storage backends (SQLite-vec, ChromaDB, Cloudflare) and works with 13+ AI applications including Claude Desktop, VS Code, Cursor, and Continue.
+
+## Setup Commands
+
+**⚠️ CRITICAL FOR DEVELOPMENT**: Always use editable install to avoid stale package issues:
+
 ```bash
-# 必须使用 editable 安装，否则代码修改不会生效
-pip install -e .          # 或 uv pip install -e .
+# Install dependencies in EDITABLE mode (REQUIRED for development)
+pip install -e .
 
-# 确认安装位置（应指向源码目录）
+# Or with uv (faster, also editable)
+uv pip install -e .
+
+# Verify editable install (critical check!)
 pip show mcp-memory-service | grep Location
+# Expected: Location: /path/to/mcp-memory-service/src
+# NOT: Location: /path/to/venv/lib/python3.x/site-packages
 
-# 检查版本一致性，排查陈旧 venv
+# Verify version consistency (detects stale venv)
 python scripts/validation/check_dev_setup.py
 
-# 启动 MCP 服务
+# Start development server
 uv run memory server
 
-# 使用 MCP Inspector 调试
+# Run with inspector for debugging
 npx @modelcontextprotocol/inspector uv run memory server
 
-# 启动 HTTP（Dashboard: https://localhost:8443）
+# Start HTTP API server (dashboard at https://localhost:8443)
 uv run memory server --http --port 8443
 ```
-> 若版本输出与代码不符（如服务仍是 v8.5.3），执行 `pip install -e . --force-reinstall`。
 
-## 测试
+**Why `-e` flag matters**: MCP servers load from `site-packages`, not source files. Without editable install, source code changes won't take effect until you reinstall. System restart won't help - it just relaunches with the same stale package.
+
+**Common symptom**: Code shows v8.23.0 but server reports v8.5.3 → Run `pip install -e . --force-reinstall`
+
+## Testing
+
 ```bash
-pytest tests/                       # 全量
-pytest tests/test_server.py        # Server 相关
-pytest tests/test_storage.py       # 存储层
+# Run all tests
+pytest tests/
+
+# Run specific test categories
+pytest tests/test_server.py          # Server tests
+pytest tests/test_storage.py         # Storage backend tests
+pytest tests/test_embeddings.py      # Embedding tests
+
+# Run with coverage
 pytest --cov=mcp_memory_service tests/
+
+# Verify environment setup
 python scripts/validation/verify_environment.py
+
+# Check database health
 python scripts/database/db_health_check.py
 ```
 
-## 代码规范
-- Python 3.10+、全量类型标注；
-- I/O 必须 async/await；
-- Black（88 列）+ isort；
-- Docstring 采用 Google 风格；
-- 仅捕获特定异常，日志为结构化输出。
+## Code Style
 
-## 目录结构
+- **Python 3.10+** with type hints everywhere
+- **Async/await** for all I/O operations
+- **Black** formatter with 88-char line length
+- **Import order**: stdlib, third-party, local (use `isort`)
+- **Docstrings**: Google style for all public functions
+- **Error handling**: Always catch specific exceptions
+- **Logging**: Use structured logging with appropriate levels
+
+## Project Structure
+
 ```
 src/mcp_memory_service/
-├── server.py          # MCP Server 入口
-├── mcp_server.py      # MCP 工具实现
-├── storage/           # 存储后端
-├── embeddings/        # 嵌入模型
-├── consolidation/     # 记忆归并算法
-└── web/               # FastAPI & Dashboard
+├── server.py           # Main MCP server implementation
+├── mcp_server.py       # MCP protocol handler
+├── storage/            # Storage backend implementations
+│   ├── base.py        # Abstract base class
+│   ├── sqlite_vec.py  # SQLite-vec backend (default)
+│   ├── chroma.py      # ChromaDB backend
+│   └── cloudflare.py  # Cloudflare D1/Vectorize backend
+├── embeddings/         # Embedding model implementations
+├── consolidation/      # Memory consolidation algorithms
+└── web/               # FastAPI dashboard and REST API
 ```
 
-## 关键文件
-- `server.py`：服务初始化；
-- `storage/base.py`：后端抽象；
-- `web/app.py`：HTTP/仪表盘；
-- `pyproject.toml`：依赖与配置；
-- `install.py`：跨平台安装脚本。
+## Key Files to Understand
 
-## 常见任务
-- **新增存储后端**：实现 `BaseStorage`，注册到 `STORAGE_BACKENDS`，补 `tests/test_storage.py`；
-- **修改 MCP 工具**：编辑 `mcp_server.py`，用 MCP Inspector 验证，更新 `docs/api/tools.md`；
-- **新增环境变量**：`config.py` 定义，README/CLAUDE/Docker/验证脚本同步；
-- **迁移脚本**：使用 `scripts/migration/*.py` 运行验证。
+- `src/mcp_memory_service/server.py` - Entry point and server initialization
+- `src/mcp_memory_service/storage/base.py` - Storage interface all backends must implement
+- `src/mcp_memory_service/web/app.py` - FastAPI application for HTTP mode
+- `pyproject.toml` - Project dependencies and configuration
+- `install.py` - Platform-aware installer script
 
-## 性能要点
-- 嵌入缓存全局复用；
-- 多记录操作使用 Batch；
-- 后端连接池 + Async；
-- 自动检测 CUDA/MPS/DirectML/ROCm。
+## Common Development Tasks
 
-## 安全实践
-- 不提交密钥，使用环境变量；
-- 所有输入需校验；
-- SQLite 使用参数化查询；
-- HTTP API 需 API Key / OAuth；
-- File 操作防止路径穿越；
-- 日志不输出完整记忆内容。
+### Adding a New Storage Backend
+1. Create new file in `src/mcp_memory_service/storage/`
+2. Inherit from `BaseStorage` abstract class
+3. Implement all required methods
+4. Add backend to `STORAGE_BACKENDS` in `server.py`
+5. Write tests in `tests/test_storage.py`
 
-## 调试
+### Modifying MCP Tools
+1. Edit tool definitions in `src/mcp_memory_service/mcp_server.py`
+2. Update tool handlers in the same file
+3. Test with MCP inspector: `npx @modelcontextprotocol/inspector uv run memory server`
+4. Update documentation in `docs/api/tools.md`
+
+### Adding Environment Variables
+1. Define in `src/mcp_memory_service/config.py`
+2. Document in README.md and CLAUDE.md
+3. Add to Docker configurations in `tools/docker/`
+4. Update `scripts/validation/verify_environment.py`
+
+### Database Migrations
 ```bash
+# Check for needed migrations
+python scripts/migration/verify_mcp_timestamps.py
+
+# Migrate from ChromaDB to SQLite-vec
+python scripts/migration/migrate_chroma_to_sqlite.py
+
+# Validate existing memories
+python scripts/validation/validate_memories.py
+```
+
+## Performance Considerations
+
+- **Embedding caching**: Models are cached globally to avoid reloading
+- **Batch operations**: Use batch methods for multiple memory operations
+- **Connection pooling**: Storage backends use connection pools
+- **Async operations**: All I/O is async to prevent blocking
+- **Hardware acceleration**: Auto-detects CUDA, MPS, DirectML, ROCm
+
+## Security Guidelines
+
+- **Never commit secrets**: API keys, tokens must use environment variables
+- **Input validation**: Always validate and sanitize user inputs
+- **SQL injection**: Use parameterized queries in SQLite backend
+- **API authentication**: HTTP mode requires API key authentication
+- **Path traversal**: Validate all file paths before operations
+- **Memory content**: Never log full memory content (may contain sensitive data)
+
+## Debugging Tips
+
+```bash
+# Enable debug logging
 export LOG_LEVEL=DEBUG
+
+# Check service health
 curl https://localhost:8443/api/health
+
+# Monitor logs
 tail -f ~/.mcp-memory-service/logs/service.log
+
+# Inspect MCP communication
 npx @modelcontextprotocol/inspector uv run memory server
+
+# Database debugging
 sqlite3 ~/.mcp-memory-service/sqlite_vec.db ".tables"
 ```
 
-## 发布流程（简版）
-1. 更新 `pyproject.toml` 版本；
-2. 更新 `CHANGELOG.md`；
-3. `pytest tests/`；
-4. `git tag -a vX.Y.Z` 并 `git push origin vX.Y.Z`；
-5. GitHub Actions 自动发布 PyPI / Docker。
+## Release Process
 
-## 常见问题
-- macOS SQLite 扩展失败 → 使用 Homebrew Python 或 pyenv `--enable-loadable-sqlite-extensions`；
-- 模型下载慢 → 检查网络（约 25MB）；
-- ImportError → 运行 `python install.py`；
-- MCP 连接失败 → 重启 Claude Desktop；
-- 记忆未持久化 → 检查 `~/.mcp-memory-service/` 权限。
+1. Update version in `pyproject.toml`
+2. Update CHANGELOG.md with changes
+3. Run full test suite: `pytest tests/`
+4. Create git tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+5. Push tag: `git push origin vX.Y.Z`
+6. GitHub Actions will handle PyPI release
 
-## 贡献
-- 遵循现有代码风格；
-- 新特性必须附测试；
-- API 变更更新文档；
-- 语义化 commit；
-- 提 PR 前跑完测试。
+## Common Issues and Solutions
 
-> 本文件遵循 [agents.md](https://agents.md/) 的 AI Agent 指令规范。
+- **SQLite extension errors on macOS**: Use Homebrew Python or pyenv with `--enable-loadable-sqlite-extensions`
+- **Model download hangs**: Check network connectivity, models are ~25MB
+- **Import errors**: Run `python install.py` to ensure all dependencies installed
+- **MCP connection fails**: Restart Claude Desktop to refresh MCP connections
+- **Memory not persisting**: Check file permissions in `~/.mcp-memory-service/`
+
+## Contributing
+
+- Follow existing code patterns and conventions
+- Add tests for new features
+- Update documentation for API changes
+- Use semantic commit messages
+- Run tests before submitting PRs
+
+---
+
+*This file follows the [agents.md](https://agents.md/) standard for AI coding agent instructions.*

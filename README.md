@@ -1,6 +1,6 @@
 # MCP Memory Service
 
-[English](README.md) | [简体中文](README-zh-cn.md)
+[English](README.md) | [简体中文](README_zh-cn.md)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/mcp-memory-service?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/mcp-memory-service/)

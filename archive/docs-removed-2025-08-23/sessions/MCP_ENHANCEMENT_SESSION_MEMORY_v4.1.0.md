@@ -1,6 +1,3 @@
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
-> 中文摘要：本文档保留英文原文，概述「MCP Memory Service Enhancement Session - v4.1.0 Complete MCP Specification Compliance」的背景与要点，供历史记录与快速阅览。
-
 # MCP Memory Service Enhancement Session - v4.1.0 Complete MCP Specification Compliance
 
 **Session Date**: August 6, 2025  

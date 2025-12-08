@@ -1,248 +1,828 @@
-# 基于 GraphQL 的 PR 线程管理
+# PR Review Thread Management with GraphQL
 
-**状态**：✅ 已在 v8.20.0 实现  
-**动机**：免去手动点击 “Mark as resolved”，降低评审摩擦  
-**收益**：修复代码后自动结案线程
-
----
-
-## 目录
-1. [概览](#概览)  
-2. [为什么选择 GraphQL](#为什么选择-graphql)  
-3. [组件](#组件)  
-4. [使用指南](#使用指南)  
-5. [自动化集成](#自动化集成)  
-6. [故障排查](#故障排查)  
-7. [API 参考](#api-参考)
+**Status:** ✅ Implemented in v8.20.0
+**Motivation:** Eliminate manual "mark as resolved" clicks, reduce PR review friction
+**Key Benefit:** Automatic thread resolution when code is fixed
 
 ---
 
-## 概览
+## Table of Contents
 
-该系统依赖 GitHub GraphQL API 实现 **PR 审查线程自动管理**：
+1. [Overview](#overview)
+2. [Why GraphQL?](#why-graphql)
+3. [Components](#components)
+4. [Usage Guide](#usage-guide)
+5. [Integration with Automation](#integration-with-automation)
+6. [Troubleshooting](#troubleshooting)
+7. [API Reference](#api-reference)
 
-1. **检测** 哪些代码改动响应了审查意见。
-2. **自动解决** 已修复的线程。
-3. **附加说明**（引用修复 commit）。
-4. **跟踪线程状态**，贯穿多个审查回合。
+---
 
-### 痛点对比
+## Overview
 
-**过去**：
+This system provides **automated PR review thread management** using GitHub's GraphQL API. It eliminates the manual work of resolving review threads by:
+
+1. **Detecting** which code changes address review comments
+2. **Automatically resolving** threads for fixed code
+3. **Adding explanatory comments** with commit references
+4. **Tracking thread status** across review iterations
+
+### Problem Solved
+
+**Before:**
 ```bash
-1. Gemini 审查并生成 30 条行级评论
-2. 你修复后 push
-3. 在 GitHub UI 里手点 “Resolve” ×30
-4. 运行 gh pr comment $PR --body "/gemini review"
-5. 循环...
+# Manual workflow (time-consuming, error-prone)
+1. Gemini reviews code → creates 30 inline comments
+2. You fix all issues → push commit
+3. Manually click "Resolve" 30 times on GitHub web UI
+4. Trigger new review: gh pr comment $PR --body "/gemini review"
+5. Repeat...
 ```
 
-**现在**：
+**After:**
 ```bash
-1. Gemini 审查
-2. 你修复并 push
-3. 一条命令：bash scripts/pr/resolve_threads.sh $PR HEAD --auto
-4. 再次触发审查：gh pr comment $PR --body "/gemini review"
-5. 循环...
+# Automated workflow (zero manual clicks)
+1. Gemini reviews code → creates 30 inline comments
+2. You fix all issues → push commit
+3. Auto-resolve: bash scripts/pr/resolve_threads.sh $PR HEAD --auto
+4. Trigger new review: gh pr comment $PR --body "/gemini review"
+5. Repeat...
 ```
 
-或直接使用 `auto_review.sh`，每次修复后自动结案线程。
+Even better with `auto_review.sh` - it auto-resolves threads after each fix iteration!
 
 ---
 
-## 为什么选择 GraphQL
+## Why GraphQL?
 
-### REST API 限制
+### GitHub API Limitation
 
-GitHub REST API **无法** 解决审查线程：
+**Critical discovery:** GitHub's REST API **cannot** resolve PR review threads.
+
 ```bash
-# ❌ 仅能列出评论，无法 resolve
-gh api repos/OWNER/REPO/pulls/PR/comments
+# ❌ REST API - No thread resolution endpoint
+gh api repos/OWNER/REPO/pulls/PR_NUMBER/comments
+# Can list comments, but cannot resolve threads
 
-# ✅ GraphQL 可完全管理线程
+# ✅ GraphQL API - Full thread management
 gh api graphql -f query='mutation { resolveReviewThread(...) }'
+# Can query threads, resolve them, add replies
 ```
 
-### GraphQL 优势
+### GraphQL Advantages
 
-| 能力 | REST | GraphQL |
-| --- | --- | --- |
-| 列出评论 | ✅ | ✅ |
-| 获取线程状态 | ❌ | ✅ (`isResolved`/`isOutdated`) |
-| 线程结案 | ❌ | ✅ (`resolveReviewThread`) |
-| 添加回复 | ❌ | ✅ (`addPullRequestReviewThreadReply`) |
-| 读取元数据 | ❌ | ✅ |
+| Feature | REST API | GraphQL API |
+|---------|----------|-------------|
+| **List review comments** | ✅ Yes | ✅ Yes |
+| **Get thread status** | ❌ No | ✅ Yes (`isResolved`, `isOutdated`) |
+| **Resolve threads** | ❌ No | ✅ Yes (`resolveReviewThread` mutation) |
+| **Add thread replies** | ❌ Limited | ✅ Yes (`addPullRequestReviewThreadReply`) |
+| **Thread metadata** | ❌ No | ✅ Yes (line, path, diffSide) |
 
 ---
 
-## 组件
+## Components
 
-### 1. GraphQL Helpers
-- **位置**：`scripts/pr/lib/graphql_helpers.sh`
-- **作用**：封装常用 GraphQL 操作。
+### 1. GraphQL Helpers Library
 
-主要方法：
+**File:** `scripts/pr/lib/graphql_helpers.sh`
+**Purpose:** Reusable GraphQL operations for PR review threads
+
+**Key Functions:**
+
 ```bash
-get_review_threads <PR>
+# Get all review threads for a PR
+get_review_threads <PR_NUMBER>
+
+# Resolve a thread (with optional comment)
 resolve_review_thread <THREAD_ID> [COMMENT]
+
+# Add a reply to a thread
 add_thread_reply <THREAD_ID> <COMMENT>
-was_line_modified <FILE> <LINE> <COMMIT>
-get_thread_stats <PR>
-count_unresolved_threads <PR>
+
+# Check if a line was modified in a commit
+was_line_modified <FILE_PATH> <LINE_NUMBER> <COMMIT_SHA>
+
+# Get thread statistics
+get_thread_stats <PR_NUMBER>
+count_unresolved_threads <PR_NUMBER>
+
+# Verify gh CLI supports GraphQL
 check_graphql_support
 ```
 
-核心查询示例：
-```graphql
-query($pr:Int!,$owner:String!,$repo:String!){
-  repository(owner:$owner,name:$repo){
-    pullRequest(number:$pr){
-      reviewThreads(first:100){
-        nodes{ id isResolved isOutdated path line }
-      }
-    }
-  }
-}
-```
+**GraphQL Queries Used:**
 
-```graphql
-mutation($threadId:ID!){
-  resolveReviewThread(input:{threadId:$threadId}){
-    thread{ id isResolved }
-  }
-}
-```
+1. **Query review threads:**
+   ```graphql
+   query($pr: Int!, $owner: String!, $repo: String!) {
+     repository(owner: $owner, name: $repo) {
+       pullRequest(number: $pr) {
+         reviewThreads(first: 100) {
+           nodes {
+             id
+             isResolved
+             isOutdated
+             path
+             line
+             comments(first: 10) {
+               nodes {
+                 id
+                 author { login }
+                 body
+                 createdAt
+               }
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
 
-### 2. 智能线程结案工具
-- **位置**：`scripts/pr/resolve_threads.sh`
-- **用途**：识别修复的线程并自动 resolve。
+2. **Resolve a thread:**
+   ```graphql
+   mutation($threadId: ID!) {
+     resolveReviewThread(input: {threadId: $threadId}) {
+       thread {
+         id
+         isResolved
+       }
+     }
+   }
+   ```
+
+3. **Add thread reply:**
+   ```graphql
+   mutation($threadId: ID!, $body: String!) {
+     addPullRequestReviewThreadReply(input: {
+       pullRequestReviewThreadId: $threadId
+       body: $body
+     }) {
+       comment { id }
+     }
+   }
+   ```
+
+### 2. Smart Thread Resolution Tool
+
+**File:** `scripts/pr/resolve_threads.sh`
+**Purpose:** Automatically resolve threads when code is fixed
+
+**Usage:**
 
 ```bash
-bash scripts/pr/resolve_threads.sh <PR> [COMMIT]
-# 自动模式
-bash scripts/pr/resolve_threads.sh <PR> HEAD --auto
+# Interactive mode (prompts for each thread)
+bash scripts/pr/resolve_threads.sh <PR_NUMBER> [COMMIT_SHA]
+
+# Automatic mode (no prompts)
+bash scripts/pr/resolve_threads.sh <PR_NUMBER> HEAD --auto
+
+# Example
+bash scripts/pr/resolve_threads.sh 212 HEAD --auto
 ```
 
-决策流程：
-```
-每个未结案线程：
-  若文件在本次提交中被改动：
-    若对应行发生变化 → 结案并添加说明
-    否则 → 跳过
-  若文件未改动但线程被 GitHub 标记为 outdated → 结案
-  其余情况 → 跳过
+**Decision Logic:**
+
+```bash
+For each unresolved thread:
+  1. Is the file modified in this commit?
+     → Yes: Check if the specific line was changed
+        → Yes: Resolve with "Line X modified in commit ABC"
+        → No: Skip
+     → No: Check if thread is marked "outdated" by GitHub
+        → Yes: Resolve with "Thread outdated by subsequent commits"
+        → No: Skip
 ```
 
-自动评论模板：
+**Resolution Comment Format:**
+
 ```markdown
 ✅ Resolved: Line 123 in file.py was modified in commit abc1234
+
+Verified by automated thread resolution script.
 ```
 
-### 3. 线程状态展示
-- **位置**：`scripts/pr/thread_status.sh`
-- **命令**：
+### 3. Thread Status Display
+
+**File:** `scripts/pr/thread_status.sh`
+**Purpose:** Display comprehensive thread status with filtering
+
+**Usage:**
+
 ```bash
-bash scripts/pr/thread_status.sh <PR> [--unresolved|--resolved|--outdated]
+# Show all threads with summary
+bash scripts/pr/thread_status.sh <PR_NUMBER>
+
+# Show only unresolved threads
+bash scripts/pr/thread_status.sh <PR_NUMBER> --unresolved
+
+# Show only resolved threads
+bash scripts/pr/thread_status.sh <PR_NUMBER> --resolved
+
+# Show only outdated threads
+bash scripts/pr/thread_status.sh <PR_NUMBER> --outdated
+
+# Example
+bash scripts/pr/thread_status.sh 212 --unresolved
 ```
-- **输出**：总览、统计、逐条详情。
 
-### 4. auto_review.sh 集成
-- 检查 GraphQL 能力。
-- 每轮显示线程统计。
-- push 后自动 resolve。
+**Output Format:**
 
-### 5. watch_reviews.sh 集成
-- 启动时检测 GraphQL。
-- 每轮轮询展示线程状态。
-- 新审查抵达时输出未结案线程。
+```
+========================================
+  PR Review Thread Status
+========================================
+PR Number: #212
+Filter: unresolved
+
+========================================
+  Summary
+========================================
+Total Threads:      45
+Resolved:           39
+Unresolved:         6
+Outdated:           12
+
+========================================
+  Thread Details
+========================================
+
+○ Thread #1
+  Status: UNRESOLVED | OUTDATED
+  File: scripts/pr/auto_review.sh:89
+  Side: RIGHT
+  Author: gemini-code-assist[bot]
+  Created: 2025-11-08T12:30:45Z
+  Comments: 1
+  "Variable $review_comments is undefined. Define it before use..."
+  Thread ID: MDEyOlB1bGxSZXF1ZXN...
+
+...
+```
+
+### 4. Integration with Auto-Review
+
+**File:** `scripts/pr/auto_review.sh` (enhanced)
+**Added functionality:**
+
+1. **Startup:** Check GraphQL availability
+   ```bash
+   GraphQL Thread Resolution: Enabled
+   ```
+
+2. **Per-iteration:** Display thread stats
+   ```bash
+   Review Threads: 45 total, 30 resolved, 15 unresolved
+   ```
+
+3. **After pushing fixes:** Auto-resolve threads
+   ```bash
+   Resolving review threads for fixed code...
+   ✅ Review threads auto-resolved (8 threads)
+   ```
+
+### 5. Integration with Watch Mode
+
+**File:** `scripts/pr/watch_reviews.sh` (enhanced)
+**Added functionality:**
+
+1. **Startup:** Check GraphQL availability
+   ```bash
+   GraphQL Thread Tracking: Enabled
+   ```
+
+2. **Per-check:** Display thread stats
+   ```bash
+   Review Threads: 45 total, 30 resolved, 15 unresolved
+   ```
+
+3. **On new review:** Show unresolved thread details
+   ```bash
+   Thread Status:
+   [Displays thread_status.sh --unresolved output]
+
+   Options:
+     1. View detailed thread status:
+        bash scripts/pr/thread_status.sh 212
+     ...
+   ```
 
 ---
 
-## 使用指南
+## Usage Guide
 
-### 基础流程
-1. 查看线程：`bash scripts/pr/thread_status.sh 212`
-2. 修复并 push。
-3. 自动结案：`bash scripts/pr/resolve_threads.sh 212 HEAD --auto`
-4. 触发新审查：`gh pr comment 212 --body "/gemini review"`
+### Basic Workflow
 
-### 推荐流程
+**1. Check thread status:**
 
-`auto_review.sh`：
+```bash
+bash scripts/pr/thread_status.sh 212
+```
+
+**2. Fix issues and push:**
+
+```bash
+# Fix code based on review comments
+git add .
+git commit -m "fix: address review feedback"
+git push
+```
+
+**3. Resolve threads for fixed code:**
+
+```bash
+# Automatic resolution
+bash scripts/pr/resolve_threads.sh 212 HEAD --auto
+
+# Interactive resolution (with prompts)
+bash scripts/pr/resolve_threads.sh 212 HEAD
+```
+
+**4. Trigger new review:**
+
+```bash
+gh pr comment 212 --body "/gemini review"
+```
+
+### Integrated Workflow (Recommended)
+
+**Use auto_review.sh - it handles everything:**
+
 ```bash
 bash scripts/pr/auto_review.sh 212 5 true
 ```
 
-`watch_reviews.sh`：
+This will:
+- Fetch review feedback
+- Categorize issues
+- Generate fixes
+- Apply and push fixes
+- **Auto-resolve threads** ← New!
+- Wait for next review
+- Repeat
+
+**Use watch_reviews.sh for monitoring:**
+
 ```bash
 bash scripts/pr/watch_reviews.sh 212 120
 ```
 
-### 进阶
-- 自定义评论：交互模式逐条输入。
-- 程序化查询：`source scripts/pr/lib/graphql_helpers.sh` 后调用 `get_review_threads`。
-- 针对某文件筛选：`get_unresolved_threads_for_file`。
+This will:
+- Check for new reviews every 120s
+- **Display thread status** ← New!
+- Show unresolved threads when reviews arrive
+- Optionally trigger auto_review.sh
 
----
+### Advanced Usage
 
-## 自动化集成
+**Manual thread resolution with custom comment:**
 
-### Gemini PR Automator
-- **Phase 1**：创建 PR 后开启 watch 模式。
-- **Phase 2**：`auto_review.sh` 自动修复 + resolve + 触发新审查。
-- **Phase 3**：手动修复后同样运行 `resolve_threads.sh`。
-
-### 未来：pre-commit 提醒
-在 `.git/hooks/pre-commit` 中检测未结案线程，必要时阻止提交。
-
----
-
-## 故障排查
-
-| 问题 | 现象 | 解决 |
-| --- | --- | --- |
-| 缺少 helpers | `thread auto-resolution disabled` | 检查 `scripts/pr/lib` 是否存在，必要时从 main 拉取 |
-| gh CLI 版本过低 | “GraphQL support requires v2.20.0+” | `gh upgrade` |
-| resolve 失败 | `Failed to resolve` | 检查线程 ID、网络、权限 (`gh auth status`) |
-
-更多排障命令：
 ```bash
-gh api graphql -f query='query { viewer { login } }'
+# Interactive mode allows custom comments
+bash scripts/pr/resolve_threads.sh 212 HEAD
+
+# When prompted:
+Resolve this thread? (y/N): y
+Add custom comment? (leave empty for auto): Fixed by refactoring storage backend
+
+# Result:
+✅ Fixed by refactoring storage backend
+```
+
+**Query thread info programmatically:**
+
+```bash
+# Source the helpers
+source scripts/pr/lib/graphql_helpers.sh
+
+# Get all threads as JSON
+threads=$(get_review_threads 212)
+
+# Extract specific data
+echo "$threads" | jq '.data.repository.pullRequest.reviewThreads.nodes[] |
+  select(.isResolved == false) |
+  {file: .path, line: .line, comment: .comments.nodes[0].body}'
+```
+
+**Check specific file's threads:**
+
+```bash
+source scripts/pr/lib/graphql_helpers.sh
+
+# Get threads for specific file
+get_unresolved_threads_for_file 212 "scripts/pr/auto_review.sh"
 ```
 
 ---
 
-## API 参考
+## Integration with Automation
 
-- `get_review_threads`：返回线程 JSON。
-- `resolve_review_thread`：执行 GraphQL mutation。
-- `add_thread_reply`：追加回复。
-- `count_unresolved_threads`：统计未结案数量。
+### Gemini PR Automator Agent
+
+The gemini-pr-automator agent (`.claude/agents/gemini-pr-automator.md`) now includes GraphQL thread management:
+
+**Phase 1: Initial PR Creation**
+```bash
+# After creating PR, start watch mode with GraphQL tracking
+bash scripts/pr/watch_reviews.sh $PR_NUMBER 180 &
+```
+
+**Phase 2: Review Iteration**
+```bash
+# Auto-review now auto-resolves threads
+bash scripts/pr/auto_review.sh $PR_NUMBER 5 true
+# Includes:
+# - Fix issues
+# - Push commits
+# - Resolve threads  ← Automatic!
+# - Trigger new review
+```
+
+**Phase 3: Manual Fixes**
+```bash
+# After manual fixes
+git push
+bash scripts/pr/resolve_threads.sh $PR_NUMBER HEAD --auto
+gh pr comment $PR_NUMBER --body "/gemini review"
+```
+
+### Pre-commit Integration (Future)
+
+**Potential enhancement:** Warn about unresolved threads before allowing new commits
+
+```bash
+# In .git/hooks/pre-commit
+if [ -n "$PR_BRANCH" ]; then
+  unresolved=$(bash scripts/pr/thread_status.sh $PR_NUMBER --unresolved | grep "Unresolved:" | awk '{print $2}')
+
+  if [ "$unresolved" -gt 0 ]; then
+    echo "⚠️  Warning: $unresolved unresolved review threads"
+    echo "Consider resolving before committing new changes"
+  fi
+fi
+```
 
 ---
 
-## 最佳实践
+## Troubleshooting
 
-1. **谨慎自动结案**：仅在确认修复完成时使用。
-2. **描述性评论**：用简洁句子解释修复（避免 “Done”）。
-3. **先 dry run**：`resolve_threads.sh 212 HEAD` 预览，再 `--auto`。
-4. **持续监控**：定期运行 `thread_status.sh`。
+### Issue 1: GraphQL helpers not found
+
+**Symptom:**
+```
+Warning: GraphQL helpers not available, thread auto-resolution disabled
+```
+
+**Cause:** `scripts/pr/lib/graphql_helpers.sh` not found
+
+**Fix:**
+```bash
+# Verify file exists
+ls -la scripts/pr/lib/graphql_helpers.sh
+
+# If missing, re-pull from main branch
+git checkout main -- scripts/pr/lib/
+```
+
+### Issue 2: gh CLI doesn't support GraphQL
+
+**Symptom:**
+```
+Error: GitHub CLI version X.Y.Z is too old
+GraphQL support requires v2.20.0 or later
+```
+
+**Fix:**
+```bash
+# Update gh CLI
+gh upgrade
+
+# Or install latest from https://cli.github.com/
+```
+
+### Issue 3: Thread resolution fails
+
+**Symptom:**
+```
+❌ Failed to resolve
+```
+
+**Causes and fixes:**
+
+1. **Invalid thread ID:**
+   ```bash
+   # Verify thread exists
+   bash scripts/pr/thread_status.sh $PR_NUMBER
+   ```
+
+2. **Network issues:**
+   ```bash
+   # Check GitHub connectivity
+   gh auth status
+   gh api graphql -f query='query { viewer { login } }'
+   ```
+
+3. **Permissions:**
+   ```bash
+   # Ensure you have write access to the repository
+   gh repo view --json viewerPermission
+   ```
+
+### Issue 4: Threads not auto-resolving during auto_review
+
+**Symptom:**
+Auto-review runs but threads remain unresolved
+
+**Debug steps:**
+
+1. **Check GraphQL availability:**
+   ```bash
+   bash scripts/pr/auto_review.sh 212 1 true 2>&1 | grep "GraphQL"
+   # Should show: GraphQL Thread Resolution: Enabled
+   ```
+
+2. **Verify thread resolution script works:**
+   ```bash
+   bash scripts/pr/resolve_threads.sh 212 HEAD --auto
+   # Should resolve threads if any changes match
+   ```
+
+3. **Check commit SHA detection:**
+   ```bash
+   git rev-parse HEAD
+   # Should return valid SHA
+   ```
+
+### Issue 5: "No threads needed resolution" when threads exist
+
+**Symptom:**
+```
+ℹ️  No threads needed resolution
+```
+
+**Cause:** Threads reference lines that weren't modified in the commit
+
+**Explanation:**
+
+The tool only resolves threads for **code that was actually changed**:
+
+```bash
+# Thread on line 89 of file.py
+# Your commit modified lines 100-120
+# → Thread NOT resolved (line 89 unchanged)
+
+# Thread on line 105 of file.py
+# Your commit modified lines 100-120
+# → Thread RESOLVED (line 105 changed)
+```
+
+**Fix:** Either:
+1. Modify the code that the thread references
+2. Manually resolve via GitHub web UI if thread is no longer relevant
+3. Wait for thread to become "outdated" (GitHub marks it automatically after subsequent commits)
 
 ---
 
-## 性能
+## API Reference
 
-- GraphQL 速率限制：5,000 point/小时；典型 PR（30 线程）仅 ~40 point。
-- 单次 API 延迟 200-500ms；自动结案 30 线程约 1-2 秒。
+### GraphQL Helper Functions
+
+#### `get_review_threads <PR_NUMBER>`
+
+**Description:** Fetch all review threads for a PR
+
+**Returns:** JSON with thread data
+
+**Example:**
+```bash
+source scripts/pr/lib/graphql_helpers.sh
+threads=$(get_review_threads 212)
+echo "$threads" | jq '.data.repository.pullRequest.reviewThreads.nodes | length'
+# Output: 45
+```
+
+#### `resolve_review_thread <THREAD_ID> [COMMENT]`
+
+**Description:** Resolve a review thread with optional comment
+
+**Parameters:**
+- `THREAD_ID`: GraphQL node ID (e.g., `MDEyOlB1bGxSZXF1ZXN...`)
+- `COMMENT`: Optional explanatory comment
+
+**Returns:** 0 on success, 1 on failure
+
+**Example:**
+```bash
+resolve_review_thread "MDEyOlB1bGxSZXF1ZXN..." "Fixed in commit abc1234"
+```
+
+#### `add_thread_reply <THREAD_ID> <COMMENT>`
+
+**Description:** Add a reply to a thread without resolving
+
+**Parameters:**
+- `THREAD_ID`: GraphQL node ID
+- `COMMENT`: Reply text (required)
+
+**Returns:** 0 on success, 1 on failure
+
+**Example:**
+```bash
+add_thread_reply "MDEyOlB1bGxSZXF1ZXN..." "Working on this now, will fix in next commit"
+```
+
+#### `was_line_modified <FILE_PATH> <LINE_NUMBER> <COMMIT_SHA>`
+
+**Description:** Check if a specific line was modified in a commit
+
+**Parameters:**
+- `FILE_PATH`: Relative path to file
+- `LINE_NUMBER`: Line number to check
+- `COMMIT_SHA`: Commit to check (e.g., `HEAD`, `abc1234`)
+
+**Returns:** 0 if modified, 1 if not
+
+**Example:**
+```bash
+if was_line_modified "scripts/pr/auto_review.sh" 89 "HEAD"; then
+  echo "Line 89 was modified"
+fi
+```
+
+#### `get_thread_stats <PR_NUMBER>`
+
+**Description:** Get summary statistics for PR review threads
+
+**Returns:** JSON with counts
+
+**Example:**
+```bash
+stats=$(get_thread_stats 212)
+echo "$stats" | jq '.unresolved'
+# Output: 6
+```
+
+#### `count_unresolved_threads <PR_NUMBER>`
+
+**Description:** Get count of unresolved threads
+
+**Returns:** Integer count
+
+**Example:**
+```bash
+count=$(count_unresolved_threads 212)
+echo "Unresolved threads: $count"
+# Output: Unresolved threads: 6
+```
 
 ---
 
-## 未来增强
+## Best Practices
 
-1. **批量线程操作**：一次 GraphQL mutation 结案多条线程。
-2. **智能过滤**：按作者、时间、文件筛选。
-3. **线程 Diff 视图**：自动展示改动前后差异。
+### 1. Use Auto-Resolution Conservatively
+
+**Do auto-resolve when:**
+- ✅ You fixed the exact code mentioned in the comment
+- ✅ The commit directly addresses the review feedback
+- ✅ Tests pass after the fix
+
+**Don't auto-resolve when:**
+- ❌ Unsure if the fix fully addresses the concern
+- ❌ The review comment asks a question (not a fix request)
+- ❌ Breaking changes involved (needs discussion)
+
+### 2. Add Meaningful Comments
+
+**Good resolution comments:**
+```
+✅ Fixed: Refactored using async/await pattern as suggested
+✅ Resolved: Added type hints for all parameters
+✅ Addressed: Extracted helper function to reduce complexity
+```
+
+**Bad resolution comments:**
+```
+❌ Done
+❌ Fixed
+❌ OK
+```
+
+### 3. Verify Before Auto-Resolving
+
+```bash
+# 1. Check what will be resolved
+bash scripts/pr/resolve_threads.sh 212 HEAD
+
+# Review the prompts, then run in auto mode
+bash scripts/pr/resolve_threads.sh 212 HEAD --auto
+```
+
+### 4. Monitor Thread Status
+
+```bash
+# Regular check during review cycle
+bash scripts/pr/thread_status.sh 212 --unresolved
+
+# Track progress
+bash scripts/pr/thread_status.sh 212
+# Shows: 45 total, 39 resolved, 6 unresolved
+```
 
 ---
 
-通过 GraphQL，我们用自动化取代重复点击，让 PR 审查更高效、可靠。
+## Performance Considerations
+
+### API Rate Limits
+
+GitHub GraphQL API has rate limits:
+- **Authenticated:** 5,000 points per hour
+- **Points per query:** ~1 point for simple queries, ~10 for complex
+
+**Our usage:**
+- `get_review_threads`: ~5 points (fetches 100 threads with comments)
+- `resolve_review_thread`: ~1 point
+- `get_thread_stats`: ~5 points
+
+**Typical PR with 30 threads:**
+- Initial status check: 5 points
+- Resolve 30 threads: 30 points
+- Final status check: 5 points
+- **Total: ~40 points** (0.8% of hourly limit)
+
+**Conclusion:** Rate limits not a concern for typical PR workflows.
+
+### Network Latency
+
+- GraphQL API calls: ~200-500ms each
+- Auto-resolving 30 threads: ~1-2 seconds total
+- Minimal impact on review cycle time
+
+---
+
+## Future Enhancements
+
+### 1. Bulk Thread Operations
+
+**Idea:** Resolve all threads for a file in one mutation
+
+```bash
+# Current: 30 API calls for 30 threads
+for thread in $threads; do
+  resolve_review_thread "$thread"
+done
+
+# Future: 1 API call for 30 threads
+resolve_threads_batch "${thread_ids[@]}"
+```
+
+### 2. Smart Thread Filtering
+
+**Idea:** Only show threads relevant to recent commits
+
+```bash
+bash scripts/pr/thread_status.sh 212 --since="2 hours ago"
+bash scripts/pr/thread_status.sh 212 --author="gemini-code-assist[bot]"
+```
+
+### 3. Thread Diff View
+
+**Idea:** Show what changed for each thread
+
+```bash
+bash scripts/pr/thread_diff.sh 212
+# Shows:
+# Thread #1: scripts/pr/auto_review.sh:89
+#   Before: review_comments=$(undefined)
+#   After:  review_comments=$(gh api "repos/$REPO/pulls/$PR_NUMBER/comments" | ...)
+#   Status: Fixed ✅
+```
+
+### 4. Pre-Push Hook Integration
+
+**Idea:** Warn before pushing if unresolved threads exist
+
+```bash
+# .git/hooks/pre-push
+unresolved=$(count_unresolved_threads $PR_NUMBER)
+if [ "$unresolved" -gt 0 ]; then
+  echo "⚠️  $unresolved unresolved threads"
+  read -p "Continue? (y/N): " response
+fi
+```
+
+---
+
+## Related Documentation
+
+- **Gemini PR Automator:** `.claude/agents/gemini-pr-automator.md`
+- **Code Quality Guard:** `.claude/agents/code-quality-guard.md`
+- **Auto-Review Script:** `scripts/pr/auto_review.sh`
+- **Watch Mode Script:** `scripts/pr/watch_reviews.sh`
+- **GitHub GraphQL API:** https://docs.github.com/en/graphql
+
+---
+
+**Last Updated:** 2025-11-08
+**Version:** 8.20.0
+**Maintainer:** MCP Memory Service Team

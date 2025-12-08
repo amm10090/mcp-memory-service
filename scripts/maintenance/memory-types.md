@@ -1,10 +1,3 @@
-# memory-types.md（中文说明）
-
-维护脚本：记忆类型定义与治理说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Memory Type Taxonomy (Updated Nov 2025)
 
 Database consolidated from 342 fragmented types to 128 organized types. Use these **24 core types** for all new memories.

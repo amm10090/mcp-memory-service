@@ -1,58 +1,73 @@
-# Claude Code 会话 Hook 改进
+# Claude Code Session Hook Improvements
 
-## 概览
-会话启动 Hook 现已优先返回近期记忆，并提供更丰富的上下文，提升 Claude Code 体验。
+## Overview
+Enhanced the session start hook to prioritize recent memories and provide better context awareness for Claude Code sessions.
 
-## 关键改动
+## Key Improvements Made
 
-1. **多阶段检索**：
-   - 阶段 1：最近 7 天，占 60%。
-   - 阶段 2：带关键标签（architecture/decisions）。
-   - 阶段 3：不足时回退至项目上下文。
+### 1. Multi-Phase Memory Retrieval
+- **Phase 1**: Recent memories (last week) - 60% of available slots
+- **Phase 2**: Important tagged memories (architecture, decisions) - remaining slots
+- **Phase 3**: Fallback to general project context if needed
 
-2. **强化时序权重**：
-   - 近期记忆优先。
-   - 指示符：🕒 今日、📅 本周、日期表示更久。
-   - 支持 `last-week`、`last-2-weeks`、`last-month`。
+### 2. Enhanced Recency Prioritization
+- Recent memories get higher priority in initial search
+- Time-based indicators: 🕒 today, 📅 this week, regular dates for older
+- Configurable time windows (`last-week`, `last-2-weeks`, `last-month`)
 
-3. **分类优化**：
-   - 新增 “Recent Work”。
-   - 顺序：Recent → Decisions → Architecture → Insights → Features → Context。
+### 3. Better Memory Categorization
+- New "Recent Work" category for memories from last 7 days
+- Improved categorization: Recent → Decisions → Architecture → Insights → Features → Context
+- Visual indicators for recency in CLI output
 
-4. **语义查询增强**：
-   - 注入 Git 信息（分支、提交）。
-   - 框架/语言上下文。
-   - 结合用户输入。
+### 4. Enhanced Semantic Queries  
+- Git context integration (branch, recent commits)
+- Framework and language context in queries
+- User message context when available
 
-5. **配置项**：
+### 5. Improved Configuration
 ```json
 {
   "memoryService": {
-    "recentFirstMode": true,
-    "recentMemoryRatio": 0.6,
-    "recentTimeWindow": "last-week",
-    "fallbackTimeWindow": "last-month"
+    "recentFirstMode": true,           // Enable multi-phase retrieval
+    "recentMemoryRatio": 0.6,          // 60% for recent memories
+    "recentTimeWindow": "last-week",   // Time window for recent search
+    "fallbackTimeWindow": "last-month" // Fallback time window
   },
   "output": {
-    "showMemoryDetails": true,
-    "showRecencyInfo": true,
-    "showPhaseDetails": true
+    "showMemoryDetails": true,         // Show detailed memory info
+    "showRecencyInfo": true,           // Show recency indicators
+    "showPhaseDetails": true           // Show search phase details
   }
 }
 ```
 
-6. **可视化反馈**：
-   - 分阶段日志。
-   - 时序标记。
-   - 得分展示带时间旗标。
-   - 去重提示。
+### 6. Better Visual Feedback
+- Phase-by-phase search reporting
+- Recency indicators in memory display
+- Enhanced scoring display with time flags
+- Better deduplication reporting
 
-## 效果对比
-- 过去：单次查询、无时序、上下文少、分类粗略。
-- 现在：多阶段时序优先、Git/框架感知、显示 “Recent Work” 分类及完整上下文。
+## Expected Impact
 
-## 使用说明
-默认开启，向后兼容。如需关闭：
+### Before
+- Single query for all memories
+- No recency prioritization
+- Limited context in queries
+- Basic categorization
+- Truncated output
+
+### After  
+- Multi-phase approach prioritizing recent memories
+- Smart time-based retrieval
+- Git and framework-aware queries
+- Enhanced categorization with "Recent Work"
+- Full context display with recency indicators
+
+## Usage
+
+The improvements are **backward compatible** - existing installations will automatically use the enhanced system. To disable, set:
+
 ```json
 {
   "memoryService": {
@@ -61,19 +76,22 @@
 }
 ```
 
-## 关联文件
-1. `claude-hooks/core/session-start.js`
-2. `claude-hooks/utilities/context-formatter.js`
-3. `claude-hooks/config.json`
-4. `test-hook.js`
+## Files Modified
 
-## 测试
-运行 `node test-hook.js`，可验证：
-- 项目识别与上下文构建。
-- 多阶段记忆检索。
-- 分类与显示。
-- Git 上下文注入。
-- 时间窗口配置。
+1. `claude-hooks/core/session-start.js` - Multi-phase retrieval logic
+2. `claude-hooks/utilities/context-formatter.js` - Enhanced display and categorization  
+3. `claude-hooks/config.json` - New configuration options
+4. `test-hook.js` - Test script for validation
 
-## 结果
-会话 Hook 现在能优先呈现近期工作，又不遗漏重要架构与历史决策，确保上下文连续性。
+## Testing
+
+Run `node test-hook.js` to test the enhanced hook with mock context. The test demonstrates:
+- Project detection and context building
+- Multi-phase memory retrieval
+- Enhanced categorization and display
+- Git context integration
+- Configurable time windows
+
+## Result
+
+Session hooks now provide more relevant, recent context while maintaining access to important historical decisions and architecture information. Users get better continuity with their recent work while preserving long-term project memory.

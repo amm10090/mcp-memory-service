@@ -1,97 +1,99 @@
-# HTTP/SSE + SQLite-vec 实施计划
+# HTTP/SSE + SQLite-vec Implementation Plan
 
-**日期**：2025-07-25  
-**状态**：摘自历史规划会议  
-**背景**：Issue #57 - 为 MCP Memory Service 增加 HTTP/SSE 接口
+**Date**: 2025-07-25  
+**Status**: Extracted from previous planning session  
+**Context**: Issue #57 - Add HTTP/SSE interface to MCP Memory Service
 
-## 摘要
+## Executive Summary
 
-在保留全部 MCP 能力的前提下，引入 HTTP REST API 与 Server-Sent Events（SSE）接口，并使用现有的 sqlite-vec 后端取代 ChromaDB，打造轻量、易部署、适合边缘环境的方案。
+Implement HTTP REST API and Server-Sent Events (SSE) interface for the MCP Memory Service using the existing sqlite-vec backend instead of ChromaDB. This creates a lightweight, edge-ready solution that maintains all existing MCP functionality while adding modern web capabilities.
 
-## 关键决策
+## Key Architectural Decision
 
-选择 **HTTP/SSE + sqlite-vec** 的组合（而非 ChromaDB），原因：
+**Combine HTTP/SSE with sqlite-vec backend** instead of ChromaDB for:
+- Simplified deployment (single file database)
+- Better performance (10x faster operations)
+- Edge-ready deployment (Cloudflare Workers, Vercel)
+- No external dependencies
+- Instant SSE updates via SQLite triggers
 
-- 部署简单（单文件数据库）。
-- 性能更优（操作快 10 倍）。
-- 适合边缘部署（Cloudflare Workers、Vercel）。
-- 无外部依赖。
-- 借助 SQLite 触发器即可即时推送 SSE。
+## Implementation Phases
 
-## 实施阶段
+### Phase 1: Foundation (Week 1)
+- ✅ Create feature branch from sqlite-vec-backend
+- ✅ Create PROJECT_STATUS.md tracking file
+- [ ] Validate sqlite-vec functionality
+- [ ] Add FastAPI dependencies
+- [ ] Set up development environment
 
-### 阶段 1：基础（第 1 周）
-- ✅ 从 sqlite-vec-backend 分支创建 Feature Branch。
-- ✅ 创建 PROJECT_STATUS.md。
-- [ ] 验证 sqlite-vec 功能。
-- [ ] 添加 FastAPI 依赖。
-- [ ] 完成开发环境搭建。
+### Phase 2: HTTP Implementation (Week 2)
+- [ ] Create web server structure
+- [ ] Implement health check endpoint
+- [ ] Add memory CRUD endpoints
+- [ ] Add search endpoints
+- [ ] OpenAPI documentation
 
-### 阶段 2：HTTP（第 2 周）
-- [ ] 构建 Web Server 结构。
-- [ ] 健康检查端点。
-- [ ] 记忆 CRUD。
-- [ ] 搜索端点。
-- [ ] OpenAPI 文档。
+### Phase 3: SSE Implementation (Week 3)
+- [ ] Design SSE event architecture
+- [ ] Implement SQLite triggers
+- [ ] Create /events endpoint
+- [ ] Connection management
+- [ ] Real-time update testing
 
-### 阶段 3：SSE（第 3 周）
-- [ ] 设计 SSE 事件架构。
-- [ ] SQLite 触发器。
-- [ ] `/events` 端点。
-- [ ] 连接管理。
-- [ ] 实时更新测试。
+### Phase 4: Dashboard (Week 4)
+- [ ] Minimal UI design (vanilla JS)
+- [ ] Memory visualization
+- [ ] SSE connection handling
+- [ ] Search interface
+- [ ] Responsive design
 
-### 阶段 4：Dashboard（第 4 周）
-- [ ] 轻量 UI（Vanilla JS）。
-- [ ] 记忆可视化。
-- [ ] SSE 连接管理。
-- [ ] 搜索界面。
-- [ ] 响应式设计。
+## Technical Architecture
 
-## 技术架构
-
+### Directory Structure
 ```
 src/mcp_memory_service/
 ├── web/
-│   ├── app.py        # FastAPI 应用
-│   ├── sse.py        # SSE 处理
+│   ├── __init__.py
+│   ├── app.py          # FastAPI application
+│   ├── sse.py          # SSE event handling
 │   ├── api/
-│   │   ├── memories.py  # CRUD
-│   │   ├── search.py    # 检索
-│   │   └── health.py    # 健康
+│   │   ├── __init__.py
+│   │   ├── memories.py # Memory CRUD
+│   │   ├── search.py   # Search operations
+│   │   └── health.py   # Health monitoring
 │   └── static/
-│       ├── index.html
-│       ├── app.js
-│       └── style.css
+│       ├── index.html  # Dashboard
+│       ├── app.js      # Frontend JS
+│       └── style.css   # Styling
 ├── storage/
-│   ├── sqlite_vec.py
-│   └── sqlite_sse.py   # 新增：触发器
+│   ├── sqlite_vec.py   # Existing
+│   └── sqlite_sse.py   # New: SSE triggers
 ```
 
-### 运行模式
-1. MCP 模式：原生 stdio（保持不变）。
-2. HTTP 模式：FastAPI + SSE。
-3. Hybrid：两种协议同时开启。
+### Server Modes
+1. **MCP Mode**: Original stdio protocol (unchanged)
+2. **HTTP Mode**: FastAPI server with SSE
+3. **Hybrid Mode**: Both protocols simultaneously
 
-### SSE 事件
-- `memory_stored`
-- `memory_deleted`
-- `search_completed`
-- `backup_status`
-- `health_update`
+### SSE Events
+- `memory_stored`: New memory added
+- `memory_deleted`: Memory removed
+- `search_completed`: Search results ready
+- `backup_status`: Backup progress
+- `health_update`: System status changes
 
-### API 端点
-- `GET /api/health`
-- `GET /api/memories`
-- `POST /api/memories`
-- `GET /api/memories/{id}`
-- `DELETE /api/memories/{id}`
-- `POST /api/search`
-- `POST /api/search/by-tag`
-- `POST /api/search/by-time`
-- `GET /events`
+### API Endpoints
+- `GET /api/health` - Health check
+- `GET /api/memories` - List memories (paginated)
+- `POST /api/memories` - Store new memory
+- `GET /api/memories/{id}` - Get specific memory
+- `DELETE /api/memories/{id}` - Delete memory
+- `POST /api/search` - Semantic search
+- `POST /api/search/by-tag` - Tag search
+- `POST /api/search/by-time` - Time-based recall
+- `GET /events` - SSE endpoint
 
-## 依赖
+## Dependencies to Add
 ```
 fastapi>=0.115.0
 uvicorn>=0.30.0
@@ -100,63 +102,65 @@ sse-starlette>=2.1.0
 aiofiles>=23.2.1
 ```
 
-## 配置
+## Configuration
 ```python
+# New environment variables
 HTTP_ENABLED = 'MCP_HTTP_ENABLED'
-HTTP_PORT = 'MCP_HTTP_PORT'  # 默认 8001
-HTTP_HOST = 'MCP_HTTP_HOST'  # 默认 0.0.0.0
+HTTP_PORT = 'MCP_HTTP_PORT' (default: 8000)
+HTTP_HOST = 'MCP_HTTP_HOST' (default: 0.0.0.0)
 CORS_ORIGINS = 'MCP_CORS_ORIGINS'
-SSE_HEARTBEAT_INTERVAL = 'MCP_SSE_HEARTBEAT'  # 默认 30s
-API_KEY = 'MCP_API_KEY'  # 可选
+SSE_HEARTBEAT_INTERVAL = 'MCP_SSE_HEARTBEAT' (default: 30s)
+API_KEY = 'MCP_API_KEY' (optional auth)
 ```
 
-## 性能指标
-- 写入 <50ms（ChromaDB 约 500ms）。
-- 1M 记忆检索 <100ms。
-- SSE 延迟 <10ms。
-- 启动 <1s（ChromaDB 需 5-10s）。
+## Performance Targets
+- Memory storage: <50ms (vs ChromaDB ~500ms)
+- Search response: <100ms for 1M memories
+- SSE latency: <10ms from write to event
+- Startup time: <1s (vs ChromaDB 5-10s)
 
-## 测试策略
-- HTTP 端点单测。
-- SSE 集成测试。
-- 与 ChromaDB 的性能对比。
-- 浏览器兼容性。
-- 边缘部署验证。
+## Testing Strategy
+- Unit tests for all HTTP endpoints
+- Integration tests for SSE connections
+- Performance benchmarks vs ChromaDB
+- Browser compatibility testing
+- Edge deployment validation
 
-## 安全
-- 可选 API Key 认证。
-- CORS 配置。
-- 限流。
-- 输入校验。
-- SSL/TLS 文档。
+## Security Considerations
+- Optional API key authentication
+- CORS configuration
+- Rate limiting
+- Input validation
+- SSL/TLS documentation
 
-## 迁移
-- 原 MCP 用户：无需变更。
-- ChromaDB 用户：提供迁移脚本。
-- 新用户：HTTP 模式默认 sqlite-vec。
+## Migration Path
+- Existing MCP users: No changes required
+- ChromaDB users: Migration script provided
+- New users: SQLite-vec as default for HTTP mode
 
-## 收益
-- 简洁：单文件数据库。
-- 性能：数量级提升。
-- 便携：可运行在任意 Python 环境。
-- 稳定：依赖 SQLite。
-- 现代：HTTP/SSE/REST。
-- 高效：资源占用低。
-- 边缘友好：可部署到 CDN Edge。
+## Benefits
+- **Simplicity**: Single file database, no external services
+- **Performance**: Orders of magnitude faster
+- **Portability**: Runs anywhere Python runs
+- **Reliability**: SQLite's proven track record
+- **Modern**: HTTP/SSE/REST for web integration
+- **Efficient**: Minimal resource usage
+- **Edge-ready**: Deploy to CDN edge locations
 
-## 后续可能
-- 搭配 Litestream 的分布式 SQLite。
-- Cloudflare Workers + D1。
-- 基于 WASM 的离线 PWA。
-- 多实例联邦。
+## Future Possibilities
+- Distributed SQLite with Litestream replication
+- Cloudflare Workers deployment with D1
+- Offline-first PWA with WASM SQLite
+- Federation between multiple instances
 
-## 成功标准
-- HTTP/SSE 满足性能目标。
-- Dashboard 提供直观管理体验。
-- 文档指导部署无障碍。
-- ChromaDB 迁移顺畅。
-- 边缘部署可在主流平台运行。
+## Success Metrics
+- HTTP endpoints respond within performance targets
+- SSE connections maintain real-time updates <10ms
+- Dashboard provides intuitive memory management
+- Documentation enables easy deployment
+- Migration from ChromaDB is seamless
+- Edge deployment works on major platforms
 
 ---
 
-该计划在保持向后兼容的同时，带来显著架构升级。
+This plan represents a significant architectural improvement while maintaining full backward compatibility with existing MCP usage patterns.

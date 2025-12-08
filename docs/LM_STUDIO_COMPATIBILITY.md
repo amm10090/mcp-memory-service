@@ -1,67 +1,106 @@
-# LM Studio 兼容性指南
+# LM Studio Compatibility Guide
 
-## 问题描述
+## Issue Description
 
-在 LM Studio 或 Claude Desktop 中使用 MCP Memory Service 时，取消/超时操作可能触发以下错误：
+When using MCP Memory Service with LM Studio or Claude Desktop, you may encounter errors when operations are cancelled or timeout:
 
-1. **LM Studio 验证错误**：
+### Error Types
+
+1. **Validation Error (LM Studio)**:
 ```
 pydantic_core._pydantic_core.ValidationError: 5 validation errors for ClientNotification
 ProgressNotification.method
   Input should be 'notifications/progress' [type=literal_error, input_value='notifications/cancelled', input_type=str]
 ```
 
-2. **Claude Desktop 超时错误**：
+2. **Timeout Error (Claude Desktop)**:
 ```
 Message from client: {"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":0,"reason":"McpError: MCP error -32001: Request timed out"}}
 Server transport closed unexpectedly, this is likely due to the process exiting early.
 ```
 
-原因：
-- LM Studio / Claude Desktop 会发送非标准的 `notifications/cancelled`。
-- 该消息不在 MCP（Model Context Protocol）规范内。
-- Windows 上若超时，服务可能提早退出。
+These occur because:
+- LM Studio and Claude Desktop send non-standard `notifications/cancelled` messages
+- These messages aren't part of the official MCP (Model Context Protocol) specification
+- Timeouts can cause the server to exit prematurely on Windows systems
 
-## 解决方案
+## Solution
 
-服务现已自带兼容补丁：
-- 自动检测 `notifications/cancelled`。
-- 记录取消原因并转为安全通知，避免崩溃。
-- Windows 下默认超时延长至 30 秒，增强信号处理。
+The MCP Memory Service now includes an automatic compatibility patch that handles LM Studio's non-standard notifications. This patch is applied automatically when the server starts.
 
-无需额外操作，启动服务即自动生效。
+### How It Works
 
-## 日志验证
+1. **Automatic Detection**: The server detects when clients send `notifications/cancelled` messages
+2. **Graceful Handling**: Instead of crashing, the server handles these gracefully:
+   - Logs the cancellation reason (including timeouts)
+   - Converts to harmless notifications that don't cause validation errors
+   - Continues operation normally
+3. **Platform Optimizations**: 
+   - **Windows**: Extended timeouts (30s vs 15s) due to security software interference
+   - **Cross-platform**: Enhanced signal handling for graceful shutdowns
+
+### What You Need to Do
+
+**Nothing!** The compatibility patch is applied automatically when you start the MCP Memory Service.
+
+### Verifying the Fix
+
+You can verify the patch is working by checking the server logs. You should see:
+
 ```
 Applied enhanced LM Studio/Claude Desktop compatibility patch for notifications/cancelled
-Intercepted cancelled notification (ID: 0): McpError: MCP error -32001: Request timed out
 ```
-出现上述日志即代表补丁在工作，服务将继续运行。
 
-## 技术细节
-- 位于 `src/mcp_memory_service/lm_studio_compat.py`。
-- Monkey patch `ClientNotification.model_validate`。
-- 识别并记录超时。
-- 将非标准通知转为合法的 `InitializedNotification`。
-- Windows：延长超时、改进信号处理。
-- 如有必要，可退而修改 session 接收循环。
+When operations are cancelled or timeout, you'll see:
 
-## Windows 专属优化
-- 初始化超时：30s。
-- 兼容 Defender / 杀毒软件的延迟。
-- 更优 SIGTERM/SIGINT 处理。
-- 超时后可平滑恢复。
+```
+Intercepted cancelled notification (ID: 0): McpError: MCP error -32001: Request timed out
+Operation timeout detected: McpError: MCP error -32001: Request timed out
+```
 
-## 限制
-- 补丁仅绕过客户端的非标准行为。
-- 服务器端不会真正取消操作，只是抑制异常通知。
-- 操作超时后可能仍在后台完成。
+Instead of a crash, the server will continue running.
 
-## 未来方向
-1. LM Studio 遵循 MCP 规范。
-2. MCP 库原生支持厂商扩展。
+## Technical Details
 
-## 排障
-1. 确保使用最新版本。
-2. 检查日志是否出现补丁提示。
-3. 附完整日志开 issue 反馈。
+The compatibility layer is implemented in `src/mcp_memory_service/lm_studio_compat.py` and:
+
+1. **Notification Patching**: Monkey-patches the MCP library's `ClientNotification.model_validate` method
+2. **Timeout Detection**: Identifies and logs timeout scenarios vs regular cancellations
+3. **Graceful Substitution**: Converts `notifications/cancelled` to valid `InitializedNotification` objects
+4. **Platform Optimization**: Uses extended timeouts on Windows (30s vs 15s)
+5. **Signal Handling**: Adds Windows-specific signal handlers for graceful shutdowns
+6. **Alternative Patching**: Fallback approach modifies the session receive loop if needed
+
+## Windows-Specific Improvements
+
+- **Extended Timeouts**: 30-second timeout for storage initialization (vs 15s on other platforms)
+- **Security Software Compatibility**: Accounts for Windows Defender and antivirus delays
+- **Signal Handling**: Enhanced SIGTERM/SIGINT handling for clean shutdowns
+- **Timeout Recovery**: Better recovery from initialization timeouts
+
+## Limitations
+
+- **Workaround Nature**: This addresses non-standard client behavior, not a server issue
+- **Cancelled Operations**: Operations aren't truly cancelled server-side, just client notifications are handled
+- **Timeout Recovery**: While timeouts are handled gracefully, the original operation may still complete
+
+## Future Improvements
+
+Ideally, this should be fixed in one of two ways:
+
+1. **LM Studio Update**: LM Studio should follow the MCP specification and not send non-standard notifications
+2. **MCP Library Update**: The MCP library could be updated to handle vendor-specific extensions gracefully
+
+## Troubleshooting
+
+If you still experience issues:
+
+1. Ensure you're using the latest version of MCP Memory Service
+2. Check that the patch is being applied (look for the log message)
+3. Report the issue with full error logs to the repository
+
+## Related Issues
+
+- This is a known compatibility issue between LM Studio and the MCP protocol
+- Similar issues may occur with other non-standard MCP clients
+- The patch specifically handles LM Studio's behavior and may need updates for other clients

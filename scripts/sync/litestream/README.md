@@ -1,10 +1,3 @@
-# README.md（中文说明）
-
-Litestream 同步脚本与注意事项。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Litestream Sync - Local Network HTTP API Synchronization
 
 Git-like staging workflow for syncing local SQLite-vec database to a central HTTP API server on your local network.

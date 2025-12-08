@@ -1,4 +1,3 @@
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Deprecated Docker Files
 
 The following Docker files are deprecated as of v5.0.4 and will be removed in v6.0.0:

@@ -1,10 +1,3 @@
-# README-phase2.md（中文说明）
-
-Hooks Phase 2 规划与实现说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Claude Code Memory Awareness - Phase 2: Intelligent Context Updates
 
 ## Overview

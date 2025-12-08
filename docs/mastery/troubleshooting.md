@@ -1,88 +1,88 @@
-# MCP Memory Service — 故障排查指南
+# MCP Memory Service — Troubleshooting Guide
 
-列举本地或 CI 运行时常见问题及解决方案。
+Common issues and proven fixes when running locally or in CI.
 
-## 无法加载 sqlite-vec 扩展
+## sqlite-vec Extension Loading Fails
 
-**症状：**
+Symptoms:
 
-- 报错提示 `SQLite extension loading not supported`、`enable_load_extension not available`；
-- 日志出现 `Failed to load sqlite-vec extension`。
+- Errors like: `SQLite extension loading not supported` or `enable_load_extension not available`.
+- `Failed to load sqlite-vec extension`.
 
-**原因：**
+Causes:
 
-- 当前 Python 内置的 `sqlite3` 未开启可加载扩展（macOS 系统自带 Python 最常见）。
+- Python’s `sqlite3` not compiled with loadable extensions (macOS system Python is common culprit).
 
-**解决方案：**
+Fixes:
 
-- macOS：
-  - 使用 Homebrew Python：`brew install python`；
-  - 或通过 pyenv 启用扩展：`PYTHON_CONFIGURE_OPTS='--enable-loadable-sqlite-extensions' pyenv install 3.12.x`。
-- Linux：
-  - 安装开发头文件：`apt install python3-dev sqlite3`；
-  - 确保 Python 编译时启用 `--enable-loadable-sqlite-extensions`。
-- Windows：
-  - 优先使用 python.org 官方安装包或 conda 发行版。
-- 备选方案：切换后端 `export MCP_MEMORY_STORAGE_BACKEND=chromadb`（详见迁移说明）。
+- macOS:
+  - `brew install python` and use Homebrew Python.
+  - Or install via pyenv with extensions: `PYTHON_CONFIGURE_OPTS='--enable-loadable-sqlite-extensions' pyenv install 3.12.x`.
+- Linux:
+  - Install dev headers: `apt install python3-dev sqlite3` and ensure Python was built with `--enable-loadable-sqlite-extensions`.
+- Windows:
+  - Prefer official python.org installer or conda distribution.
+- Alternative: switch backend: `export MCP_MEMORY_STORAGE_BACKEND=chromadb` (see migration notes).
 
-## 缺少 `sentence-transformers` / `torch`
+## `sentence-transformers`/`torch` Not Available
 
-**症状：**
+Symptoms:
 
-- 日志提示未找到嵌入模型，语义检索结果为空。
+- Warnings about no embedding model; semantic search returns empty.
 
-**解决方案：**
+Fixes:
 
-- 安装 ML 依赖：`pip install sentence-transformers torch`（或使用 `uv add`）；
-- 对资源受限环境，可先安装依赖后再进行语义检索；若未安装，标签/元数据操作仍可使用。
+- Install ML deps: `pip install sentence-transformers torch` (or `uv add` equivalents).
+- For constrained environments, semantic search can still run once deps are installed; tag-based and metadata operations work without embeddings.
 
-## 首次运行模型下载
+## First-Run Model Downloads
 
-**症状：**
+Symptoms:
 
-- 日志出现 `Using TRANSFORMERS_CACHE is deprecated`、`No snapshots directory` 等警告。
+- Warnings like: `Using TRANSFORMERS_CACHE is deprecated` or `No snapshots directory`.
 
-**状态说明：**
+Status:
 
-- 首次运行会下载 `all-MiniLM-L6-v2`（约 25MB），属于预期行为；后续运行将直接使用缓存。
+- Expected on first run while downloading `all-MiniLM-L6-v2` (~25MB). Subsequent runs use cache.
 
-## Cloudflare 后端启动失败
+## Cloudflare Backend Fails on Boot
 
-**症状：**
+Symptoms:
 
-- 服务启动即退出并提示 `Missing required environment variables for Cloudflare backend`。
+- Immediate exit with `Missing required environment variables for Cloudflare backend`.
 
-**解决方案：**
+Fixes:
 
-- 设置以下环境变量：`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`、`CLOUDFLARE_VECTORIZE_INDEX`、`CLOUDFLARE_D1_DATABASE_ID`，可选 `CLOUDFLARE_R2_BUCKET`；
-- 通过 Wrangler 或 Cloudflare 控制台核实资源配置，详见 `docs/cloudflare-setup.md`。
+- Set all required envs: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_VECTORIZE_INDEX`, `CLOUDFLARE_D1_DATABASE_ID`. Optional: `CLOUDFLARE_R2_BUCKET`.
+- Validate resources via Wrangler or dashboard; see `docs/cloudflare-setup.md`.
 
-## 端口或协同冲突
+## Port/Coordination Conflicts
 
-**症状：**
+Symptoms:
 
-- 多客户端模式无法启动 HTTP 协调服务，或退回到 direct 模式。
+- Multi-client mode cannot start HTTP server, or falls back to direct mode.
 
-**说明 / 解决方案：**
+Status/Fixes:
 
-- 服务器会自动检测并尝试：`http_client`（连接）、`http_server`（启动）或 `direct`（WAL）。如果协调端口被占用，会回退到 direct；可更换端口或停止占用服务。
+- The server auto-detects: `http_client` (connect), `http_server` (start), else `direct` (WAL). If the coordination port is in use by another service, expect direct fallback; adjust port or stop the conflicting service.
 
-## 路径权限或写入失败
+## File Permission or Path Errors
 
-**症状：**
+Symptoms:
 
-- 在 `BASE_DIR` 或备份目录进行写入测试时失败。
+- Path write tests failing under `BASE_DIR` or backup directories.
 
-**解决方案：**
+Fixes:
 
-- 确保 `MCP_MEMORY_BASE_DIR` 指向可写路径；服务会自动创建目录，并通过 `.write_test` 文件进行写入验证（带重试）。
+- Ensure `MCP_MEMORY_BASE_DIR` points to a writable location; the service validates and creates directories and test-writes `.write_test` files with retries.
 
-## 查询缓慢或 CPU 占用高
+## Slow Queries or High CPU
 
-**排查清单：**
+Checklist:
 
-- 确认嵌入模型已成功加载（首次调用后具备预热效果）；
-- 低内存或 Windows + CUDA 场景可尝试：
+- Ensure embeddings are available and model loaded once (warmup).
+- For low RAM or Windows CUDA:
   - `PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128`
-  - 调整模型缓存，参考 `server.py` 中的 `configure_environment()`；
-- 通过 `MCP_MEMORY_SQLITE_PRAGMAS` 微调 SQLite 参数。
+  - Reduce model cache sizes; see `configure_environment()` in `server.py`.
+- Tune SQLite pragmas via `MCP_MEMORY_SQLITE_PRAGMAS`.
+

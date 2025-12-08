@@ -1,177 +1,269 @@
-# Claude Code 快速参考（MCP Memory Service）
+# Claude Code Quick Reference for MCP Memory Service
 
-**一页速查表，助你高效使用 Claude Code 开发 MCP Memory Service。**
-
----
-
-## 🎯 关键快捷键
-
-| 按键 | 功能 | 场景 |
-| --- | --- | --- |
-| `Shift+Tab` | 接受建议 | 快速应用 Claude 修改 |
-| `Esc` | 取消操作 | 终止不需要的动作 |
-| `Ctrl+R` | 详细输出 | 调试故障 |
-| `#` | 创建记忆 | 记录重要决策 |
-| `@` | 添加上下文 | 引入文件/目录（`@src/`、`@tests/`） |
-| `!` | Bash 模式 | 直接执行 Shell 命令 |
+**One-page cheat sheet for efficient development with Claude Code**
 
 ---
 
-## 🚀 常见任务
+## 🎯 Essential Keybindings
 
-### 记忆操作
+| Key | Action | Use Case |
+|-----|--------|----------|
+| `Shift+Tab` | Auto-accept edits | Fast iteration on suggested changes |
+| `Esc` | Cancel operation | Stop unwanted actions |
+| `Ctrl+R` | Verbose output | Debug when things go wrong |
+| `#` | Create memory | Store important decisions |
+| `@` | Add to context | Include files/dirs (`@src/`, `@tests/`) |
+| `!` | Bash mode | Quick shell commands |
+
+---
+
+## 🚀 Common Tasks
+
+### Memory Operations
+
 ```bash
+# Store information
 /memory-store "Hybrid backend uses SQLite primary + Cloudflare secondary"
+
+# Retrieve information
 /memory-recall "how to configure Cloudflare backend"
+
+# Check service health
 /memory-health
 ```
 
-### 开发流程
+### Development Workflow
+
 ```bash
+# 1. Start with context
 @src/mcp_memory_service/storage/
 @tests/test_storage.py
+
+# 2. Make changes incrementally
+# Accept suggestions with Shift+Tab
+
+# 3. Test immediately
 pytest tests/test_storage.py -v
+
+# 4. Document decisions
 /memory-store "Changed X because Y"
 ```
 
-### 后端配置
+### Backend Configuration
+
 ```bash
+# Check current backend
 python scripts/server/check_http_server.py -v
+
+# Validate configuration
 python scripts/validation/validate_configuration_complete.py
+
+# Diagnose issues
 python scripts/validation/diagnose_backend_config.py
 ```
 
-### 同步
+### Synchronization
+
 ```bash
+# Check sync status
 python scripts/sync/sync_memory_backends.py --status
+
+# Preview sync (dry run)
 python scripts/sync/sync_memory_backends.py --dry-run
+
+# Execute sync
 python scripts/sync/sync_memory_backends.py --direction bidirectional
 ```
 
 ---
 
-## 🏗️ 项目上下文
+## 🏗️ Project-Specific Context
 
-### 常加文件
-| 目的 | 推荐添加 |
-| --- | --- |
-| 存储后端 | `@src/mcp_memory_service/storage/`
-| MCP 协议 | `@src/mcp_memory_service/server.py`
-| Web | `@src/mcp_memory_service/web/`
-| 配置 | `@.env.example`, `@src/mcp_memory_service/config.py`
-| 测试 | `@tests/test_*.py`
-| 脚本 | `@scripts/server/`, `@scripts/sync/`
+### Key Files to Add
 
-### 调试套路
+| Purpose | Files to Include |
+|---------|-----------------|
+| **Storage backends** | `@src/mcp_memory_service/storage/` |
+| **MCP protocol** | `@src/mcp_memory_service/server.py` |
+| **Web interface** | `@src/mcp_memory_service/web/` |
+| **Configuration** | `@.env.example`, `@src/mcp_memory_service/config.py` |
+| **Tests** | `@tests/test_*.py` |
+| **Scripts** | `@scripts/server/`, `@scripts/sync/` |
+
+### Common Debugging Patterns
+
 ```bash
+# 1. HTTP Server not responding
 python scripts/server/check_http_server.py -v
+tasklist | findstr python  # Check if running
+scripts/server/start_http_server.bat  # Restart
+
+# 2. Wrong backend active
 python scripts/validation/diagnose_backend_config.py
+# Check: .env file, environment variables, Claude Desktop config
+
+# 3. Missing memories
 python scripts/sync/sync_memory_backends.py --status
-@http_server.log
+# Compare: Cloudflare count vs SQLite count
+
+# 4. Service logs
+@http_server.log  # Add to context for troubleshooting
 ```
 
 ---
 
-## 📚 架构速览
+## 📚 Architecture Quick Reference
 
-### 存储后端
-| 后端 | 性能 | 场景 | 环境变量 |
-| --- | --- | --- | --- |
-| Hybrid ⭐ | 5ms | 生产首选 | `MCP_MEMORY_STORAGE_BACKEND=hybrid`
-| SQLite-vec | 5ms | 开发/单人 | `=sqlite_vec`
-| Cloudflare | 视网络而定 | 纯云遗留 | `=cloudflare`
+### Storage Backends
 
-### 目录结构
+| Backend | Performance | Use Case | Config Variable |
+|---------|-------------|----------|-----------------|
+| **Hybrid** ⭐ | 5ms read | Production (recommended) | `MCP_MEMORY_STORAGE_BACKEND=hybrid` |
+| **SQLite-vec** | 5ms read | Development, single-user | `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec` |
+| **Cloudflare** | Network-dependent | Legacy cloud-only | `MCP_MEMORY_STORAGE_BACKEND=cloudflare` |
+
+### Key Directories
+
 ```
-src/mcp_memory_service/
-├── server.py
-├── storage/
-├── web/
-└── config.py
-scripts/
-tests/
+mcp-memory-service/
+├── src/mcp_memory_service/
+│   ├── server.py              # MCP protocol implementation
+│   ├── storage/
+│   │   ├── base.py            # Abstract storage interface
+│   │   ├── sqlite_vec.py      # SQLite-vec backend
+│   │   ├── cloudflare.py      # Cloudflare backend
+│   │   └── hybrid.py          # Hybrid backend (recommended)
+│   ├── web/
+│   │   ├── app.py             # FastAPI server
+│   │   └── static/            # Dashboard UI
+│   └── config.py              # Configuration management
+├── scripts/
+│   ├── server/                # HTTP server management
+│   ├── sync/                  # Backend synchronization
+│   └── validation/            # Configuration validation
+└── tests/                     # Test suite
 ```
 
 ---
 
-## 🔧 环境变量（`.env`）
+## 🔧 Environment Variables
+
+**Essential Configuration** (in `.env` file):
+
 ```bash
-MCP_MEMORY_STORAGE_BACKEND=hybrid
-CLOUDFLARE_API_TOKEN=...
-CLOUDFLARE_ACCOUNT_ID=...
-CLOUDFLARE_D1_DATABASE_ID=...
-CLOUDFLARE_VECTORIZE_INDEX=...
-MCP_HYBRID_SYNC_INTERVAL=300
+# Backend Selection
+MCP_MEMORY_STORAGE_BACKEND=hybrid  # hybrid|sqlite_vec|cloudflare
+
+# Cloudflare (required for hybrid/cloudflare backends)
+CLOUDFLARE_API_TOKEN=your-token
+CLOUDFLARE_ACCOUNT_ID=your-account
+CLOUDFLARE_D1_DATABASE_ID=your-d1-id
+CLOUDFLARE_VECTORIZE_INDEX=mcp-memory-index
+
+# Hybrid-Specific
+MCP_HYBRID_SYNC_INTERVAL=300      # 5 minutes
 MCP_HYBRID_BATCH_SIZE=50
 MCP_HYBRID_SYNC_ON_STARTUP=true
+
+# HTTP Server
 MCP_HTTP_ENABLED=true
 MCP_HTTPS_ENABLED=true
-MCP_API_KEY=...
+MCP_API_KEY=your-generated-key
 ```
 
 ---
 
-## 🐛 排障清单
+## 🐛 Troubleshooting Checklist
 
-### HTTP Server
-- `python scripts/server/check_http_server.py -v`
-- 查看 `@http_server.log`
-- `scripts/server/start_http_server.bat`
-- `netstat -ano | findstr :8001`
+### HTTP Server Issues
+- [ ] Check if server is running: `python scripts/server/check_http_server.py -v`
+- [ ] Review logs: `@http_server.log`
+- [ ] Restart server: `scripts/server/start_http_server.bat`
+- [ ] Verify port 8000 is free: `netstat -ano | findstr :8000`
 
-### 后端配置
-- `python scripts/validation/diagnose_backend_config.py`
-- 检查 `.env`
-- 校验 Cloudflare 凭据
-- 观察启动日志
+### Backend Configuration Issues
+- [ ] Run diagnostic: `python scripts/validation/diagnose_backend_config.py`
+- [ ] Check `.env` file exists and has correct values
+- [ ] Verify Cloudflare credentials are valid
+- [ ] Confirm environment variables loaded: check server startup logs
 
-### 记忆缺失
-- `python scripts/sync/sync_memory_backends.py --status`
-- 对比云端与本地数量
-- `--dry-run` 预演同步
-- 检查内容哈希是否重复
+### Missing Memories
+- [ ] Check sync status: `python scripts/sync/sync_memory_backends.py --status`
+- [ ] Compare memory counts: Cloudflare vs SQLite
+- [ ] Run manual sync: `python scripts/sync/sync_memory_backends.py --dry-run`
+- [ ] Check for duplicates: Look for content hash matches
 
-### 性能
-- Hybrid 读取应 ~5ms。
-- 磁盘剩余足够（Litestream）。
-- 查看 `http_server.log` 中的同步。
-- 确认嵌入模型只加载一次。
+### Performance Issues
+- [ ] Verify backend: Hybrid should show ~5ms read times
+- [ ] Check disk space: Litestream requires adequate space
+- [ ] Monitor background sync: Check `http_server.log` for sync logs
+- [ ] Review embedding model cache: Should be loaded once
 
 ---
 
-## 💡 提示
+## 💡 Pro Tips
 
-### 上下文管理
+### Efficient Context Management
+
 ```bash
-@src/.../hybrid.py   # 精确
-@src/.../storage/    # 扩展
-Esc 取消多余上下文
+# Start specific, expand as needed
+@src/mcp_memory_service/storage/hybrid.py  # Specific file
+@src/mcp_memory_service/storage/           # Whole module if needed
+
+# Remove context when done
+# Use Esc to cancel unnecessary context additions
 ```
 
-### TodoWrite
-- 复杂任务使用 TodoWrite 生成步骤。
-- 示例：实现新后端 → 调研、实现、配置、测试、文档。
+### Multi-Step Tasks
 
-### 测试策略
 ```bash
+# Always use TodoWrite for complex tasks
+# Claude will create and manage task list automatically
+
+# Example: "Implement new backend"
+# 1. Research existing backends
+# 2. Create new backend class
+# 3. Implement abstract methods
+# 4. Add configuration
+# 5. Write tests
+# 6. Update documentation
+```
+
+### Testing Strategy
+
+```bash
+# Test incrementally
 pytest tests/test_storage.py::TestHybridBackend -v
+
+# Run full suite before committing
 pytest tests/ -v
+
+# Check coverage
 pytest tests/ --cov=src/mcp_memory_service --cov-report=term
 ```
 
-### Git 协作
+### Git Workflow with Claude Code
+
 ```bash
-git status
-git diff
+# Let Claude help with commits
+git status  # Claude reviews changes
+git diff    # Claude explains changes
+
+# Use semantic commits
 git commit -m "feat: add new backend support"
+git commit -m "fix: resolve sync timing issue"
+git commit -m "docs: update configuration guide"
 ```
 
 ---
 
-## 📖 额外资源
-- `@CLAUDE.md`（项目指南）
-- `~/.claude/CLAUDE.md`（全局规范）
-- Wiki：https://github.com/doobidoo/mcp-memory-service/wiki
-- 故障排除：Wiki 专章
+## 📖 Additional Resources
 
-**最后更新**：2025-10-08
+- **Full Documentation**: `@CLAUDE.md` (project-specific guide)
+- **Global Best Practices**: `~/.claude/CLAUDE.md` (cross-project)
+- **Wiki**: https://github.com/doobidoo/mcp-memory-service/wiki
+- **Troubleshooting**: See Wiki for comprehensive troubleshooting guide
+
+---
+
+**Last Updated**: 2025-10-08

@@ -1,6 +1,3 @@
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
-> 中文摘要：本文档保留英文原文，概述「MCP Memory Service Authentication Guide」的背景与要点，供历史记录与快速阅览。
-
 # MCP Memory Service Authentication Guide
 
 This guide provides comprehensive information about API key authentication in MCP Memory Service, including setup, configuration, security best practices, and troubleshooting.

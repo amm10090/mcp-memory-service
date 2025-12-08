@@ -1,10 +1,3 @@
-# memory-health.md（中文说明）
-
-说明 /memory-health 命令：检查 MCP Memory Service 安装与数据库健康。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Check Memory Service Health
 
 I'll help you check the health and status of your MCP Memory Service, providing detailed diagnostics and statistics about your memory storage and service connectivity.

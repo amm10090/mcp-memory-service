@@ -1,6 +1,3 @@
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
-> 中文摘要：本文档保留英文原文，概述「Distributed Memory Synchronization Guide」的背景与要点，供历史记录与快速阅览。
-
 # Distributed Memory Synchronization Guide
 
 This guide provides comprehensive documentation for the distributed memory synchronization system introduced in MCP Memory Service v6.3.0.

@@ -1,10 +1,3 @@
-# memory-ingest.md（中文说明）
-
-说明 /memory-ingest 命令：导入单个文件或网址到记忆库。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # memory-ingest
 
 Ingest a document file into the MCP Memory Service database.

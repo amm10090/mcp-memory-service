@@ -1,10 +1,3 @@
-# README.md（中文说明）
-
-同步脚本使用说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Database Synchronization Scripts
 
 This directory contains scripts for synchronizing SQLite-vec databases across multiple machines using JSON export/import and Litestream replication.

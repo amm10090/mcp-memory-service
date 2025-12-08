@@ -1,93 +1,149 @@
-# Amp CLI 桥接（半自动流程）
+# Amp CLI Bridge (Semi-Automated Workflow)
 
-**目标**：通过文件队列，让 Claude Code 调用 Amp CLI（研究/代码分析/搜索）而不消耗 Claude Code 额度，仅需手动执行 `amp @prompt` 命令。
+**Purpose**: Leverage Amp CLI capabilities (research, code analysis, web search) from Claude Code without consuming Claude Code credits, using a semi-automated file-based workflow.
 
-## 快速流程
-1. **Claude Code 生成请求**：
+## Quick Start
+
+**1. Claude Code creates prompt**:
 ```
-你：@agent-amp-bridge 调研 TypeScript 5.0 特性
-Claude：写入 prompt 文件并提示 amp 命令
+You: "Use @agent-amp-bridge to research TypeScript 5.0 features"
+Claude: [Creates prompt file and shows command]
 ```
-2. **手动执行提示命令**：
+
+**2. Run the command shown**:
 ```bash
 amp @.claude/amp/prompts/pending/research-xyz.json
 ```
-3. **Amp 自动写入响应文件**。
-4. **Claude Code 读取结果并继续**。
 
-## 架构
+**3. Amp processes and writes response automatically**
+
+**4. Claude Code continues automatically**
+
+## Architecture
+
 ```
-Claude Code → prompts/pending/{uuid}.json
-你运行 amp → amp 输出 responses/ready/{uuid}.json
-Claude Code 读取响应 → 继续对话
+Claude Code (@agent-amp-bridge) → .claude/amp/prompts/pending/{uuid}.json
+                                            ↓
+                          You run: amp @prompts/pending/{uuid}.json
+                                            ↓
+                          Amp writes: responses/ready/{uuid}.json
+                                            ↓
+                   Claude Code reads response ← Workflow continues
 ```
 
-## 目录结构
+## File Structure
+
 ```
 .claude/amp/
-├── prompts/pending        # 待处理请求
-├── responses/ready        # Amp 生成的结果
-├── responses/consumed     # 已使用归档
-└── README.md
+├── prompts/
+│   └── pending/        # Prompts waiting for you to process
+├── responses/
+│   ├── ready/          # Responses written by Amp
+│   └── consumed/       # Archive of processed responses
+└── README.md           # Documentation
 ```
 
-## 消息格式
-**Prompt**：
+## Message Format
+
+**Prompt** (`.claude/amp/prompts/pending/{uuid}.json`):
 ```json
 {
-  "id": "uuid",
-  "timestamp": "2025-11-04T20:00:00Z",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2025-11-04T20:00:00.000Z",
   "prompt": "Research async/await best practices in Python",
-  "context": {"project": "mcp-memory-service", "cwd": "/path/to"},
-  "options": {"timeout": 300000, "format": "markdown"}
+  "context": {
+    "project": "mcp-memory-service",
+    "cwd": "/path/to/project"
+  },
+  "options": {
+    "timeout": 300000,
+    "format": "markdown"
+  }
 }
 ```
-**Response**：
+
+**Response** (`.claude/amp/responses/ready/{uuid}.json`):
 ```json
 {
-  "id": "uuid",
-  "timestamp": "2025-11-04T20:05:00Z",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2025-11-04T20:05:00.000Z",
   "success": true,
-  "output": "## Async/Await Best Practices...",
+  "output": "## Async/Await Best Practices\n\n...",
   "error": null,
   "duration": 300000
 }
 ```
 
-## 配置 `.claude/amp/config.json`
+## Configuration
+
+**File**: `.claude/amp/config.json`
+
 ```json
 {
-  "pollInterval": 1000,
-  "timeout": 300000,
-  "debug": false,
-  "ampCommand": "amp"
+  "pollInterval": 1000,      // Check for new prompts every 1s
+  "timeout": 300000,          // 5 minute timeout per prompt
+  "debug": false,             // Enable debug logging
+  "ampCommand": "amp"         // Amp CLI command
 }
 ```
 
-## 典型场景
-- Web 研究：React 18 新特性。
-- 架构分析：Storage backend 设计。
-- 文档生成：MCP API 说明。
-- 代码生成：TypeScript 类型。
-- 最佳实践：OAuth 2.1 安全建议。
+## Use Cases
 
-## 手动检查
+- Web Research: "Research latest React 18 features"
+- Code Analysis: "Analyze our storage backend architecture"
+- Documentation: "Generate API docs for MCP tools"
+- Code Generation: "Create TypeScript type definitions"
+- Best Practices: "Find OAuth 2.1 security recommendations"
+
+## Manual Inspection (Optional)
+
 ```bash
+# List pending prompts
 ls -lt .claude/amp/prompts/pending/
+
+# View prompt content
 cat .claude/amp/prompts/pending/{uuid}.json | jq -r '.prompt'
 ```
 
-## 故障排查
-- **Amp 额度/鉴权**：直接运行 `amp`，或检查官网额度。
-- **无响应文件**：`ls -lt .claude/amp/responses/ready/`。
-- **权限问题**：确认目录存在并可写。
+## Troubleshooting
 
-## 优点
-- 不占 Claude Code 额度，可用 Amp 免费配额。
-- 文件队列具备容错、可审计、可重放。
-- 完全由用户掌控执行时机。
+**Amp CLI credit errors:**
+```bash
+# Test if Amp is authenticated
+amp
 
-## 限制
-- 需手动运行 `amp @...`。
-- Amp 仍消耗自身额度。
-- 适合异步调研场景，不适合实时对话。
+# If credits exhausted, check status
+# https://ampcode.com/settings
+```
+
+**Response not appearing:**
+```bash
+# Verify Amp wrote the file
+ls -lt .claude/amp/responses/ready/
+```
+
+**Permission issues:**
+```bash
+# Ensure directories exist
+ls -la .claude/amp/
+
+# Check write permissions
+touch .claude/amp/responses/ready/test.json && rm .claude/amp/responses/ready/test.json
+```
+
+## Benefits
+
+- Zero Claude Code Credits: Uses your separate Amp session
+- Uses Free Tier: Works with Amp's free tier (when credits available)
+- Simple Workflow: No background processes
+- Full Control: You decide when/what to process
+- Fault Tolerant: File-based queue survives crashes
+- Audit Trail: All prompts/responses saved
+- Reusable: Can replay prompts or review past responses
+
+## Limitations
+
+- Manual Step Required: You must run the `amp @` command
+- Amp Credits: Still consumes Amp API credits
+- Semi-Async: Claude Code waits for you to process
+- Best for Research: Optimized for async research tasks, not real-time chat

@@ -1,92 +1,93 @@
-# 首次运行指南
+# First-Time Setup Guide
 
-本文档说明首次启动 MCP Memory Service 时会发生什么，以及如何判断服务是否正常工作。
+This guide explains what to expect when running MCP Memory Service for the first time.
 
-## 🎯 首次启动会看到什么
+## 🎯 What to Expect on First Run
 
-第一次启动服务时，终端会输出若干警告与提示。**这些都是初始化过程中的正常现象**，表示服务正在下载必需组件并完成配置。
+When you start the MCP Memory Service for the first time, you'll see several warnings and messages. **This is completely normal behavior** as the service initializes and downloads necessary components.
 
-## 📋 常见的首次启动警告
+## 📋 Normal First-Time Warnings
 
-### 1. Snapshots 目录警告
+### 1. Snapshots Directory Warning
 ```
 WARNING:mcp_memory_service.storage.sqlite_vec:Failed to load from cache: No snapshots directory
 ```
 
-**含义：**
-- 服务会检查是否已有下载过的嵌入向量模型；
-- 首次运行尚无缓存，因此会提示找不到目录；
-- 随后服务会自动下载模型。
+**What it means:** 
+- The service is checking for previously downloaded embedding models
+- On first run, no cache exists yet, so this warning appears
+- The service will automatically download the model
 
-**是否正常：** ✅ 首次运行必然出现。
+**This is normal:** ✅ Expected on first run
 
-### 2. TRANSFORMERS_CACHE 警告
+### 2. TRANSFORMERS_CACHE Warning
 ```
 WARNING: Using TRANSFORMERS_CACHE is deprecated
 ```
 
-**含义：**
-- 来自 Hugging Face 库的信息性提示；
-- 不影响服务功能；
-- 服务内部会自行处理缓存。
+**What it means:**
+- This is an informational warning from the Hugging Face library
+- It doesn't affect the service functionality
+- The service handles caching internally
 
-**是否正常：** ✅ 可忽略。
+**This is normal:** ✅ Can be safely ignored
 
-### 3. 模型下载提示
+### 3. Model Download Progress
 ```
 Downloading model 'all-MiniLM-L6-v2'...
 ```
 
-**含义：**
-- 服务正在下载嵌入模型（约 25MB）；
-- 仅首次运行需要下载；
-- 在普通网络环境下约 1-2 分钟完成。
+**What it means:**
+- The service is downloading the embedding model (approximately 25MB)
+- This happens only once on first setup
+- Download time: 1-2 minutes on average internet connection
 
-**是否正常：** ✅ 一次性操作。
+**This is normal:** ✅ One-time download
 
-## 🚦 成功启动的关键信息
+## 🚦 Success Indicators
 
-若一切顺利，可看到类似日志：
+After successful first-time setup, you should see:
+
 ```
 INFO: SQLite-vec storage initialized successfully with embedding dimension: 384
 INFO: Memory service started on port 8443
 INFO: Ready to accept connections
 ```
 
-## 📊 首次启动时间线
+## 📊 First-Time Setup Timeline
 
-| 步骤 | 耗时 | 说明 |
-| --- | --- | --- |
-| 1. 启动服务 | 即时 | 加载配置 |
-| 2. 检查缓存 | 1-2 秒 | 查找已下载模型 |
-| 3. 下载模型 | 1-2 分钟 | 获取嵌入模型（约 25MB） |
-| 4. 加载模型 | 5-10 秒 | 将模型载入内存 |
-| 5. 初始化数据库 | 2-3 秒 | 创建数据库结构 |
-| 6. 准备就绪 | - | 服务可正常使用 |
+| Step | Duration | What's Happening |
+|------|----------|-----------------|
+| 1. Service Start | Instant | Loading configuration |
+| 2. Cache Check | 1-2 seconds | Checking for existing models |
+| 3. Model Download | 1-2 minutes | Downloading embedding model (~25MB) |
+| 4. Model Loading | 5-10 seconds | Loading model into memory |
+| 5. Database Init | 2-3 seconds | Creating database structure |
+| 6. Ready | - | Service is ready to use |
 
-**首次启动总耗时约 2-3 分钟。**
+**Total first-time setup:** 2-3 minutes
 
-## 🔄 后续启动
+## 🔄 Subsequent Runs
 
-完成首次运行后：
-- 不再出现下载相关警告；
-- 模型从缓存加载，仅需 5-10 秒；
-- 整体启动时间缩短至约 10-15 秒。
+After the first successful run:
+- No download warnings will appear
+- Model loads from cache (5-10 seconds)
+- Service starts much faster (10-15 seconds total)
 
-## 🐍 Python 3.13 兼容性
+## 🐍 Python 3.13 Compatibility
 
-### 已知问题
-使用 Python 3.13 时，**sqlite-vec** 可能因为缺乏预编译 wheel 而安装失败。安装脚本已内置多种回退策略：
+### Known Issues
+Python 3.13 users may encounter installation issues with **sqlite-vec** due to missing pre-built wheels. The installer now includes automatic fallback methods:
 
-1. **自动重试**：尝试多种安装方式；
-2. **源码构建**：若无 wheel，则尝试从源码编译；
-3. **GitHub 安装**：直接从仓库安装；
-4. **后端切换**：必要时可切换至 ChromaDB 后端。
+1. **Automatic Retry Logic**: Tries multiple installation strategies
+2. **Source Building**: Attempts to build from source if wheels unavailable
+3. **GitHub Installation**: Falls back to installing directly from repository
+4. **Backend Switching**: Option to switch to ChromaDB if sqlite-vec fails
 
-### 推荐解决方案
-若你在 Python 3.13 上遇到 sqlite-vec 安装失败：
+### Recommended Solutions
+If you encounter sqlite-vec installation failures on Python 3.13:
 
-**方案 1：改用 Python 3.12（推荐）**
+**Option 1: Use Python 3.12 (Recommended)**
 ```bash
 # macOS
 brew install python@3.12
@@ -101,55 +102,65 @@ source .venv/bin/activate
 python install.py
 ```
 
-**方案 2：切换 ChromaDB 后端**
+**Option 2: Use ChromaDB Backend**
 ```bash
 python install.py --storage-backend chromadb
 ```
 
-**方案 3：手动安装 sqlite-vec**
+**Option 3: Manual sqlite-vec Installation**
 ```bash
-# 从源码构建
+# Try building from source
 pip install --no-binary :all: sqlite-vec
 
-# 或直接从 GitHub 安装
+# Or install from GitHub
 pip install git+https://github.com/asg017/sqlite-vec.git#subdirectory=python
 ```
 
-## 🍎 macOS SQLite 扩展问题
+## 🍎 macOS SQLite Extension Issues
 
-### 常见报错：`AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`
+### Problem: `AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`
 
-发生在 **使用系统自带 Python 的 macOS** 上，因为默认编译参数未开启 SQLite 扩展。
+This error occurs on **macOS with system Python** because it's not compiled with SQLite extension support.
 
-**原因：**
-- macOS 系统自带 Python 未启用 `--enable-loadable-sqlite-extensions`；
-- 随附的 SQLite 不允许加载扩展；
-- 这是出于安全策略的默认配置。
+**Why this happens:**
+- macOS system Python lacks `--enable-loadable-sqlite-extensions`
+- The bundled SQLite library doesn't support loadable extensions
+- This is a security-focused default configuration
 
-**解决方案：**
+**Solutions:**
 
-**方案 1：Homebrew Python（推荐）**
+**Option 1: Homebrew Python (Recommended)**
 ```bash
+# Install Python via Homebrew (includes extension support)
 brew install python
-hash -r
-python3 --version  # 确认已切换到 Homebrew Python
+hash -r  # Refresh command cache
+python3 --version  # Verify you're using Homebrew Python
+
+# Then install MCP Memory Service
 python3 install.py
 ```
 
-**方案 2：使用 pyenv 并开启扩展**
+**Option 2: pyenv with Extension Support**
 ```bash
+# Install pyenv if not already installed
 brew install pyenv
+
+# Install Python with extension support
 PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.12.0
 pyenv local 3.12.0
+
+# Verify extension support
 python3 -c "import sqlite3; conn=sqlite3.connect(':memory:'); conn.enable_load_extension(True); print('Extensions supported!')"
 ```
 
-**方案 3：改用 ChromaDB 后端**
+**Option 3: Use ChromaDB Backend**
 ```bash
+# ChromaDB doesn't require SQLite extensions
 python3 install.py --storage-backend chromadb
 ```
 
-**扩展支持自检：**
+### Verification
+Check if your Python supports extensions:
 ```bash
 python3 -c "
 import sqlite3
@@ -158,65 +169,76 @@ print('✅ Extension support available' if hasattr(conn, 'enable_load_extension'
 "
 ```
 
-## 🐧 Ubuntu/Linux 注意事项
+## 🐧 Ubuntu/Linux Specific Notes
 
-### 依赖安装
+For Ubuntu 24 and other Linux distributions:
+
+### Prerequisites
 ```bash
+# System dependencies
 sudo apt update
 sudo apt install python3.10 python3.10-venv python3.10-dev python3-pip
 sudo apt install build-essential libblas3 liblapack3 liblapack-dev libblas-dev gfortran
 ```
 
-### 推荐流程
+### Recommended Setup
 ```bash
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
+
+# Install the service
 python install.py
+
+# Start the service
 uv run memory server
 ```
 
-## 🔧 首次运行常见问题
+## 🔧 Troubleshooting First-Time Issues
 
-### 问题：下载失败
-**解决方案：**
-- 检查网络连接；
-- 确认防火墙/代理设置；
-- 清理缓存后重试：`rm -rf ~/.cache/huggingface`。
+### Issue: Download Fails
+**Solution:**
+- Check internet connection
+- Verify firewall/proxy settings
+- Clear cache and retry: `rm -rf ~/.cache/huggingface`
 
-### 问题：提示 `No module named 'sentence_transformers'`
-**解决方案：**
+### Issue: "No module named 'sentence_transformers'"
+**Solution:**
 ```bash
 pip install sentence-transformers torch
 ```
 
-### 问题：权限不足
-**解决方案：**
+### Issue: Permission Denied
+**Solution:**
 ```bash
+# Fix permissions
 chmod +x scripts/*.sh
 sudo chown -R $USER:$USER ~/.mcp_memory_service/
 ```
 
-### 问题：下载完成后服务仍无法启动
-**解决方案：**
-1. 查看调试日志：`uv run memory server --debug`
-2. 运行环境检查：`python scripts/verify_environment.py`
-3. 清理后重启：
+### Issue: Service Doesn't Start After Download
+**Solution:**
+1. Check logs: `uv run memory server --debug`
+2. Verify installation: `python scripts/verify_environment.py`
+3. Restart with clean state: 
    ```bash
    rm -rf ~/.mcp_memory_service
    uv run memory server
    ```
 
-## ✅ 验证服务是否可用
+## ✅ Verification
+
+To verify successful setup:
 
 ```bash
-# 健康检查
+# Check service health
 curl -k https://localhost:8443/api/health
 
-# CLI 方式
+# Or using the CLI
 uv run memory health
 ```
 
-期望响应：
+Expected response:
 ```json
 {
   "status": "healthy",
@@ -225,23 +247,23 @@ uv run memory health
 }
 ```
 
-## 🎉 恭喜完成初始化！
+## 🎉 Setup Complete!
 
-当你看到成功日志且后续启动不再出现首次下载提示时，说明 MCP Memory Service 已就绪。
+Once you see the success indicators and the warnings have disappeared on subsequent runs, your MCP Memory Service is fully operational and ready to use!
 
-### 下一步：
-- [配置 Claude Desktop](../README.md#claude-desktop-集成)
-- [写入第一条记忆](../README.md#基础用法)
-- [探索 API 与更深入的文档](https://github.com/doobidoo/mcp-memory-service/wiki)
+### Next Steps:
+- [Configure Claude Desktop](../README.md#claude-desktop-integration)
+- [Store your first memory](../README.md#basic-usage)
+- [Explore the API](https://github.com/doobidoo/mcp-memory-service/wiki)
 
-## 📝 额外说明
+## 📝 Notes
 
-- 模型下载仅需执行一次；
-- 模型缓存位于 `~/.cache/huggingface/`；
-- 服务数据库位于 `~/.mcp_memory_service/`；
-- 首次启动出现的警告均为预期行为；
-- 若出现其他错误（非警告），请查阅 [Troubleshooting Guide](troubleshooting/general.md)。
+- The model download is a one-time operation
+- Downloaded models are cached in `~/.cache/huggingface/`
+- The service creates a database in `~/.mcp_memory_service/`
+- All warnings shown during first-time setup are expected behavior
+- If you see different errors (not warnings), check the [Troubleshooting Guide](troubleshooting/general.md)
 
 ---
 
-请牢记：**首次运行时的警告属于正常现象**，它们表明服务正在为高性能运行做好准备。祝使用顺利！
+Remember: **First-time warnings are normal!** The service is working correctly and setting itself up for optimal performance.

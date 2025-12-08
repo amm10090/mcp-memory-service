@@ -1,103 +1,446 @@
-# 维护脚本说明（Maintenance Scripts）
+# Maintenance Scripts
 
-> 本目录包含 MCP Memory Service 的维护与诊断脚本。以下按用途/性能/场景快速索引，详细用法见各节。
+This directory contains maintenance and diagnostic scripts for the MCP Memory Service database.
 
-## 快速索引
+## Quick Reference
 
-| 脚本 | 作用 | 性能 | 适用场景 |
-|------|------|------|-----------|
-| [`check_memory_types.py`](#check_memory_typespy) | 查看类型分布 | <1s | 健康检查，整合前/后对比 |
-| [`consolidate_memory_types.py`](#consolidate_memory_typespy) | 归并碎片类型 | ~5s/1000 更新 | 类型治理、降噪 |
-| [`regenerate_embeddings.py`](#regenerate_embeddingspy) | 重算全部嵌入 | ~5min/2600 条 | 迁移后或嵌入损坏 |
-| [`fast_cleanup_duplicates.sh`](#fast_cleanup_duplicatessh) | 快速去重 | <5s/100+ | 批量清理重复 |
-| [`find_all_duplicates.py`](#find_all_duplicatespy) | 扫描近似重复 | <2s/2000 | 重复检测与分析 |
-| [`find_duplicates.py`](#find_duplicatespy) | API 去重 | ~90s/条 | 需精细判定的重复 |
-| [`repair_sqlite_vec_embeddings.py`](#repair_sqlite_vec_embeddingspy) | 修复嵌入损坏 | 视规模 | SQLite-vec 修复 |
-| [`repair_zero_embeddings.py`](#repair_zero_embeddingspy) | 修复全零嵌入 | 视规模 | 嵌入异常修复 |
-| [`cleanup_corrupted_encoding.py`](#cleanup_corrupted_encodingpy) | 修复编码问题 | 视规模 | 编码损坏修复 |
+| Script | Purpose | Performance | Use Case |
+|--------|---------|-------------|----------|
+| [`check_memory_types.py`](#check_memory_typespy-new) | Display type distribution | <1s | Quick health check, pre/post-consolidation validation |
+| [`consolidate_memory_types.py`](#consolidate_memory_typespy-new) | Consolidate fragmented types | ~5s for 1000 updates | Type taxonomy cleanup, reduce fragmentation |
+| [`regenerate_embeddings.py`](#regenerate_embeddingspy) | Regenerate all embeddings | ~5min for 2600 memories | After cosine migration or embedding corruption |
+| [`fast_cleanup_duplicates.sh`](#fast_cleanup_duplicatessh) | Fast duplicate removal | <5s for 100+ duplicates | Bulk duplicate cleanup |
+| [`find_all_duplicates.py`](#find_all_duplicatespy) | Detect near-duplicates | <2s for 2000 memories | Duplicate detection and analysis |
+| [`find_duplicates.py`](#find_duplicatespy) | API-based duplicate finder | Slow (~90s/duplicate) | Detailed duplicate analysis via API |
+| [`repair_sqlite_vec_embeddings.py`](#repair_sqlite_vec_embeddingspy) | Fix embedding corruption | Varies | Repair corrupted embeddings |
+| [`repair_zero_embeddings.py`](#repair_zero_embeddingspy) | Fix zero-valued embeddings | Varies | Repair zero embeddings |
+| [`cleanup_corrupted_encoding.py`](#cleanup_corrupted_encodingpy) | Fix encoding issues | Varies | Repair encoding corruption |
 
-## 详细说明
+## Detailed Documentation
 
-### `check_memory_types.py`
-**用途**：快速统计数据库中的记忆类型分布。  
-**推荐时机**：整合前后对比、常规健康检查、排查类型碎片。  
-**用法**：
+### `check_memory_types.py` 🆕
+
+**Purpose**: Quick diagnostic tool to display memory type distribution in the database.
+
+**When to Use**:
+- Before running consolidation to see what needs cleanup
+- After consolidation to verify results
+- Regular health checks to monitor type fragmentation
+- When investigating memory organization issues
+
+**Usage**:
 ```bash
+# Display type distribution (Windows)
 python scripts/maintenance/check_memory_types.py
-# macOS/Linux 如需修改脚本内数据库路径
-```
-**特性**：前 30 热门类型、总数/唯一数、空类型标记 `(empty/NULL)`，只读安全。
 
-### `consolidate_memory_types.py`
-**用途**：将碎片化类型归并到标准 24 类。  
-**何时使用**：
-- 同义类型混杂（bug-fix/bugfix/technical-fix 等）
-- 大量仅 1-2 条的稀疏类型
-- 外部导入后命名不一致
-- 定期治理（建议月度）
-**用法**：
+# On macOS/Linux, update the database path in the script first
+```
+
+**Output Example**:
+```
+Memory Type Distribution
+============================================================
+Total memories: 1,978
+Unique types: 128
+
+Memory Type                              Count      %
+------------------------------------------------------------
+note                                       609  30.8%
+session                                     89   4.5%
+fix                                         67   3.4%
+milestone                                   60   3.0%
+reference                                   45   2.3%
+...
+```
+
+**Performance**: < 1 second for any database size (read-only SQL query)
+
+**Features**:
+- Shows top 30 types by frequency
+- Displays total memory count and unique type count
+- Identifies NULL/empty types as "(empty/NULL)"
+- Percentage calculation for easy analysis
+- Zero risk (read-only operation)
+
+**Workflow Integration**:
+1. Run `check_memory_types.py` to identify fragmentation
+2. If types > 150, consider running consolidation
+3. Run `consolidate_memory_types.py --dry-run` to preview
+4. Execute `consolidate_memory_types.py` to clean up
+5. Run `check_memory_types.py` again to verify improvement
+
+### `consolidate_memory_types.py` 🆕
+
+**Purpose**: Consolidates fragmented memory types into a standardized 24-type taxonomy.
+
+**When to Use**:
+- Type fragmentation (e.g., `bug-fix`, `bugfix`, `technical-fix` all coexisting)
+- Many types with only 1-2 memories
+- Inconsistent naming across similar concepts
+- After importing memories from external sources
+- Monthly maintenance to prevent type proliferation
+
+**Usage**:
 ```bash
-# 预览（只读）
+# Preview changes (safe, read-only)
 python scripts/maintenance/consolidate_memory_types.py --dry-run
-# 执行
+
+# Execute consolidation
 python scripts/maintenance/consolidate_memory_types.py
-# 自定义映射
+
+# Use custom mapping configuration
 python scripts/maintenance/consolidate_memory_types.py --config custom_mappings.json
 ```
-**性能**：约 5s/1000 更新（2025-11 实测 1,049 更新用时 5s）。  
-**安全**：自动备份、dry-run、事务回滚、锁检测、HTTP 服务警告、磁盘空间检查。  
-**标准 24 类**：
-- 内容：`note`, `reference`, `document`, `guide`
-- 活动：`session`, `implementation`, `analysis`, `troubleshooting`, `test`
-- 产物：`fix`, `feature`, `release`, `deployment`
-- 进度：`milestone`, `status`
-- 基础设施：`configuration`, `infrastructure`, `process`, `security`, `architecture`
-- 其他：`documentation`, `solution`, `achievement`, `technical`
+
+**Performance**: ~5 seconds for 1,000 memory updates (Nov 2025 real-world test: 1,049 updates in 5s)
+
+**Safety Features**:
+- ✅ Automatic timestamped backup before execution
+- ✅ Dry-run mode shows preview without changes
+- ✅ Transaction safety (atomic with rollback on error)
+- ✅ Database lock detection (prevents concurrent access)
+- ✅ HTTP server warning (recommends stopping before execution)
+- ✅ Disk space verification (needs 2x database size)
+- ✅ Backup verification (size and existence checks)
+
+**Standard 24-Type Taxonomy**:
+
+**Content Types:** `note`, `reference`, `document`, `guide`
+**Activity Types:** `session`, `implementation`, `analysis`, `troubleshooting`, `test`
+**Artifact Types:** `fix`, `feature`, `release`, `deployment`
+**Progress Types:** `milestone`, `status`
+**Infrastructure Types:** `configuration`, `infrastructure`, `process`, `security`, `architecture`
+**Other Types:** `documentation`, `solution`, `achievement`, `technical`
+
+**Example Consolidations**:
+- NULL/empty → `note`
+- `bug-fix`, `bugfix`, `technical-fix` → `fix`
+- `session-summary`, `session-checkpoint` → `session`
+- `project-milestone`, `development-milestone` → `milestone`
+- All `technical-*` → base type (remove prefix)
+- All `project-*` → base type (remove prefix)
+
+**Typical Results** (from production database, Nov 2025):
+```
+Before: 342 unique types, 609 NULL/empty, fragmented naming
+After:  128 unique types (63% reduction), all valid types
+Updated: 1,049 memories (59% of database)
+Time: ~5 seconds
+```
+
+**Configuration**:
+
+Edit `consolidation_mappings.json` to customize behavior:
+```json
+{
+  "mappings": {
+    "old-type-name": "new-type-name",
+    "bug-fix": "fix",
+    "technical-solution": "solution"
+  }
+}
+```
+
+**Prerequisites**:
+```bash
+# 1. Stop HTTP server
+systemctl --user stop mcp-memory-http.service
+
+# 2. Disconnect MCP clients (Claude Code: /mcp command)
+
+# 3. Verify disk space (need 2x database size)
+df -h ~/.local/share/mcp-memory/
+```
+
+**Recovery**:
+```bash
+# If something goes wrong, restore from automatic backup
+cp ~/.local/share/mcp-memory/sqlite_vec.db.backup-TIMESTAMP ~/.local/share/mcp-memory/sqlite_vec.db
+
+# Verify restoration
+sqlite3 ~/.local/share/mcp-memory/sqlite_vec.db "SELECT COUNT(*), COUNT(DISTINCT memory_type) FROM memories;"
+```
+
+**Notes**:
+- Creates timestamped backup automatically (e.g., `sqlite_vec.db.backup-20251101-202042`)
+- No data loss - only type reassignment
+- Safe to run multiple times (idempotent for same mappings)
+- Comprehensive reporting shows before/after statistics
+- See `consolidation_mappings.json` for full mapping list
+
+**Maintenance Schedule**:
+- Run `--dry-run` monthly to check fragmentation
+- Execute when unique types exceed 150
+- Review custom mappings quarterly
+
+---
 
 ### `regenerate_embeddings.py`
-**用途**：重算全部嵌入（向量化）。  
-**场景**：更换模型 / 余弦迁移后 / 嵌入损坏。  
-**性能**：约 5 分钟处理 2600 条（依赖模型与硬件）。
+
+**Purpose**: Regenerates embeddings for all memories in the database after schema migrations or corruption.
+
+**When to Use**:
+- After cosine distance migration
+- When embeddings table is dropped but memories are preserved
+- After embedding corruption detected
+
+**Usage**:
+```bash
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/regenerate_embeddings.py
+```
+
+**Performance**: ~5 minutes for 2600 memories with all-MiniLM-L6-v2 model
+
+**Notes**:
+- Uses configured storage backend (hybrid, cloudflare, or sqlite_vec)
+- Creates embeddings using sentence-transformers model
+- Shows progress every 100 memories
+- Safe to run multiple times (idempotent)
+
+---
 
 ### `fast_cleanup_duplicates.sh`
-**用途**：快速删除明显重复。  
-**场景**：批量清理，目标是“速度优先”。
+
+**Purpose**: Fast duplicate removal using direct SQL access instead of API calls.
+
+**When to Use**:
+- Bulk duplicate cleanup after detecting duplicates
+- When API-based deletion is too slow (>1min per duplicate)
+- Production cleanup without extended downtime
+
+**Usage**:
+```bash
+bash scripts/maintenance/fast_cleanup_duplicates.sh
+```
+
+**Performance**: <5 seconds for 100+ duplicates
+
+**How It Works**:
+1. Stops HTTP server to avoid database locking
+2. Uses direct SQL DELETE with timestamp normalization
+3. Keeps newest copy of each duplicate group
+4. Restarts HTTP server automatically
+
+**Warnings**:
+- ⚠️ Requires systemd HTTP server setup (`mcp-memory-http.service`)
+- ⚠️ Brief service interruption during cleanup
+- ⚠️ Direct database access bypasses Cloudflare sync (background sync handles it later)
+
+---
 
 ### `find_all_duplicates.py`
-**用途**：基于内容相似度寻找近似重复，速度快，适合初筛。  
-**性能**：<2s/2000 条。
+
+**Purpose**: Fast duplicate detection using content normalization and hash comparison.
+
+**When to Use**:
+- Regular duplicate audits
+- Before running cleanup operations
+- Investigating duplicate memory issues
+
+**Usage**:
+```bash
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/find_all_duplicates.py
+```
+
+**Performance**: <2 seconds for 2000 memories
+
+**Detection Method**:
+- Normalizes content by removing timestamps (dates, ISO timestamps)
+- Groups memories by MD5 hash of normalized content
+- Reports duplicate groups with counts
+
+**Output**:
+```
+Found 23 groups of duplicates
+Total memories to delete: 115
+Total memories after cleanup: 1601
+```
+
+---
 
 ### `find_duplicates.py`
-**用途**：通过 API 逐条确认的重复检测，精度高但慢（~90s/条）。
+
+**Purpose**: Comprehensive duplicate detection via HTTP API with detailed analysis.
+
+**When to Use**:
+- Need detailed duplicate analysis with full metadata
+- API-based workflow required
+- Integration with external tools
+
+**Usage**:
+```bash
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/find_duplicates.py
+```
+
+**Performance**: Slow (~90 seconds per duplicate deletion)
+
+**Features**:
+- Loads configuration from Claude hooks config
+- Supports self-signed SSL certificates
+- Pagination support for large datasets
+- Detailed duplicate grouping and reporting
+
+**Notes**:
+- 15K script with comprehensive error handling
+- Useful for API integration scenarios
+- Slower than `find_all_duplicates.py` due to network overhead
+
+---
 
 ### `repair_sqlite_vec_embeddings.py`
-**用途**：修复 sqlite-vec 嵌入损坏。  
-**注意**：耗时随数据量变化，建议先备份。
+
+**Purpose**: Repairs corrupted embeddings in the sqlite-vec virtual table.
+
+**When to Use**:
+- Embedding corruption detected
+- vec0 extension errors
+- Database integrity issues
+
+**Usage**:
+```bash
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/repair_sqlite_vec_embeddings.py
+```
+
+**Warnings**:
+- ⚠️ Requires vec0 extension to be properly installed
+- ⚠️ May drop and recreate embeddings table
+
+---
 
 ### `repair_zero_embeddings.py`
-**用途**：修复全零嵌入记录。  
-**使用**：在发现 0 向量时运行。
+
+**Purpose**: Detects and fixes memories with zero-valued embeddings.
+
+**When to Use**:
+- Search results showing 0% similarity scores
+- After embedding regeneration failures
+- Embedding quality issues
+
+**Usage**:
+```bash
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/repair_zero_embeddings.py
+```
+
+---
 
 ### `cleanup_corrupted_encoding.py`
-**用途**：修复文本编码损坏。  
-**适用**：导入含异常编码的历史数据时。
 
-## 通用前置
+**Purpose**: Fixes encoding corruption issues in memory content.
+
+**When to Use**:
+- UTF-8 encoding errors
+- Display issues with special characters
+- After data migration from different encoding
+
+**Usage**:
 ```bash
-# 停止 HTTP 服务（如使用）
+/home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/cleanup_corrupted_encoding.py
+```
+
+---
+
+## Best Practices
+
+### Before Running Maintenance Scripts
+
+1. **Backup your database**:
+   ```bash
+   cp ~/.local/share/mcp-memory/sqlite_vec.db ~/.local/share/mcp-memory/sqlite_vec.db.backup
+   ```
+
+2. **Check memory count**:
+   ```bash
+   sqlite3 ~/.local/share/mcp-memory/sqlite_vec.db "SELECT COUNT(*) FROM memories"
+   ```
+
+3. **Stop HTTP server if needed** (for direct database access):
+   ```bash
+   systemctl --user stop mcp-memory-http.service
+   ```
+
+### After Running Maintenance Scripts
+
+1. **Verify results**:
+   ```bash
+   sqlite3 ~/.local/share/mcp-memory/sqlite_vec.db "SELECT COUNT(*) FROM memories"
+   ```
+
+2. **Check for duplicates**:
+   ```bash
+   /home/hkr/repositories/mcp-memory-service/venv/bin/python scripts/maintenance/find_all_duplicates.py
+   ```
+
+3. **Restart HTTP server**:
+   ```bash
+   systemctl --user start mcp-memory-http.service
+   ```
+
+4. **Test search functionality**:
+   ```bash
+   curl -s "http://127.0.0.1:8000/api/health"
+   ```
+
+### Performance Comparison
+
+| Operation | API-based | Direct SQL | Speedup |
+|-----------|-----------|------------|---------|
+| Delete 1 duplicate | ~90 seconds | ~0.05 seconds | **1800x faster** |
+| Delete 100 duplicates | ~2.5 hours | <5 seconds | **1800x faster** |
+| Find duplicates | ~30 seconds | <2 seconds | **15x faster** |
+
+**Recommendation**: Use direct SQL scripts (`fast_cleanup_duplicates.sh`, `find_all_duplicates.py`) for production maintenance. API-based scripts are useful for integration and detailed analysis.
+
+## Troubleshooting
+
+### "Database is locked"
+
+**Cause**: HTTP server or MCP server has open connection
+
+**Solution**:
+```bash
+# Stop HTTP server
 systemctl --user stop mcp-memory-http.service
-# 断开 MCP 客户端（Claude Code /mcp）
-# 确认磁盘空间 >= 数据库 2 倍
+
+# Disconnect MCP server in Claude Code
+# Type: /mcp
+
+# Run maintenance script
+bash scripts/maintenance/fast_cleanup_duplicates.sh
+
+# Restart services
+systemctl --user start mcp-memory-http.service
 ```
 
-## 故障恢复
+### "No such module: vec0"
+
+**Cause**: Python sqlite3 module doesn't load vec0 extension automatically
+
+**Solution**: Use scripts that work with the vec0-enabled environment:
+- ✅ Use: `fast_cleanup_duplicates.sh` (bash wrapper with Python)
+- ✅ Use: `/venv/bin/python` with proper storage backend
+- ❌ Avoid: Direct `sqlite3` Python module for virtual table operations
+
+### Slow API Performance
+
+**Cause**: Hybrid backend syncs each operation to Cloudflare
+
+**Solution**: Use direct SQL scripts for bulk operations:
 ```bash
-# 自动备份恢复
-cp ~/.local/share/mcp-memory/sqlite_vec.db.backup-TIMESTAMP    ~/.local/share/mcp-memory/sqlite_vec.db
+bash scripts/maintenance/fast_cleanup_duplicates.sh  # NOT Python API scripts
 ```
 
-## 关联文档
-- `scripts/maintenance/memory-types.md`
-- `scripts/sync/check_drift.py`
-- `docs/guides/memory-consolidation-guide.md`
-- `docs/features/association-quality-boost.md`
+## Related Documentation
+
+- [Database Schema](../../docs/database-schema.md) - sqlite-vec table structure
+- [Storage Backends](../../CLAUDE.md#storage-backends) - Hybrid, Cloudflare, SQLite-vec
+- [Troubleshooting](../../docs/troubleshooting.md) - Common issues and solutions
+
+## Contributing
+
+When adding new maintenance scripts:
+
+1. Add comprehensive docstring explaining purpose and usage
+2. Include progress indicators for long-running operations
+3. Add error handling and validation
+4. Document in this README with performance characteristics
+5. Test with both sqlite_vec and hybrid backends

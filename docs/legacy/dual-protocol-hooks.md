@@ -1,8 +1,11 @@
-# 双协议记忆 Hook（Legacy）
+# Dual Protocol Memory Hooks (Legacy)
 
-> 已被 Natural Memory Triggers v7.1.3+ 取代，此文档仅作存档。
+> **Note**: This feature has been superseded by Natural Memory Triggers v7.1.3+. This documentation is kept for reference only.
 
-Dual Protocol Hooks (v7.0.0+) 会自动选择 MCP ↔ HTTP ↔ 环境兜底，配置示例：
+**Dual Protocol Memory Hooks** (v7.0.0+) provide intelligent memory awareness with automatic protocol detection:
+
+## Configuration
+
 ```json
 {
   "memoryService": {
@@ -17,7 +20,7 @@ Dual Protocol Hooks (v7.0.0+) 会自动选择 MCP ↔ HTTP ↔ 环境兜底，�
     },
     "mcp": {
       "serverCommand": ["uv", "run", "memory", "server", "-s", "cloudflare"],
-      "serverWorkingDir": "/path/to/mcp-memory-service",
+      "serverWorkingDir": "/Users/yourname/path/to/mcp-memory-service",
       "connectionTimeout": 5000,
       "toolCallTimeout": 10000
     }
@@ -25,15 +28,26 @@ Dual Protocol Hooks (v7.0.0+) 会自动选择 MCP ↔ HTTP ↔ 环境兜底，�
 }
 ```
 
-## 协议策略
-- `auto`：MCP → HTTP → 环境兜底；
-- `http`：仅 HTTP；
-- `mcp`：仅直接 MCP。
+## Protocol Options
 
-## 特性回顾
-- 多协议兜底提高可靠性；
-- 本地可走 MCP，远端可走 HTTP；
-- 与旧配置兼容。
+- `"auto"`: Smart detection (MCP → HTTP → Environment fallback)
+- `"http"`: HTTP-only mode (web server at localhost:8443)
+- `"mcp"`: MCP-only mode (direct server process)
 
-## 迁移建议
-建议迁移到 Natural Memory Triggers v7.1.3+，获得：85%+ 触发准确率、多层性能管理、CLI 设置、Git 感知与自适应学习。详见主 `CLAUDE.md`。
+## Benefits
+
+- **Reliability**: Multiple connection methods ensure hooks always work
+- **Performance**: MCP direct for speed, HTTP for stability
+- **Flexibility**: Works with local development or remote deployments
+- **Compatibility**: Full backward compatibility with existing configurations
+
+## Migration to Natural Memory Triggers
+
+If you're using Dual Protocol Hooks, consider migrating to Natural Memory Triggers v7.1.3+ which offers:
+- 85%+ trigger accuracy
+- Multi-tier performance optimization
+- CLI management system
+- Git-aware context integration
+- Adaptive learning
+
+See main CLAUDE.md for migration instructions.

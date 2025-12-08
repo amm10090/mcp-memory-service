@@ -1,184 +1,191 @@
-# MCP Memory Service 贡献指南
+# Contributing to MCP Memory Service
 
-感谢你关注 MCP Memory Service！🎉
+Thank you for your interest in contributing to MCP Memory Service! 🎉
 
-本项目通过模型上下文协议（Model Context Protocol, MCP）为 AI 助手提供语义记忆与持久化存储。我们欢迎各种形式的贡献——无论是缺陷修复、功能增强、文档完善还是测试补充。
+This project provides semantic memory and persistent storage for AI assistants through the Model Context Protocol. We welcome contributions of all kinds - from bug fixes and features to documentation and testing.
 
-## 目录
+## Table of Contents
 
-- [行为准则](#行为准则)
-- [贡献方式](#贡献方式)
-- [快速上手](#快速上手)
-- [开发流程](#开发流程)
-- [编码规范](#编码规范)
-- [测试要求](#测试要求)
-- [文档规范](#文档规范)
-- [提交变更](#提交变更)
-- [问题反馈](#问题反馈)
-- [社区与支持](#社区与支持)
-- [贡献者致谢](#贡献者致谢)
+- [Code of Conduct](#code-of-conduct)
+- [Ways to Contribute](#ways-to-contribute)
+- [Getting Started](#getting-started)
+- [Development Process](#development-process)
+- [Coding Standards](#coding-standards)
+- [Testing Requirements](#testing-requirements)
+- [Documentation](#documentation)
+- [Submitting Changes](#submitting-changes)
+- [Reporting Issues](#reporting-issues)
+- [Community & Support](#community--support)
+- [Recognition](#recognition)
 
-## 行为准则
+## Code of Conduct
 
-我们致力于营造友好、包容的协作环境，请：
+We are committed to providing a welcoming and inclusive environment for all contributors. Please:
 
-- 在所有交流中保持尊重和体谅；
-- 欢迎新伙伴并主动提供帮助；
-- 关注建设性的反馈与共同解决问题；
-- 尊重不同观点与经历；
-- 避免任何形式的骚扰、歧视或不当行为。
+- Be respectful and considerate in all interactions
+- Welcome newcomers and help them get started
+- Focus on constructive criticism and collaborative problem-solving
+- Respect differing viewpoints and experiences
+- Avoid harassment, discrimination, or inappropriate behavior
 
-## 贡献方式
+## Ways to Contribute
 
-### 🐛 缺陷报告
-提供详尽信息，帮助我们重现并修复问题。
+### 🐛 Bug Reports
+Help us identify and fix issues by reporting bugs with detailed information.
 
-### ✨ 功能需求
-提出新功能或对现有功能的改进建议。
+### ✨ Feature Requests
+Suggest new features or improvements to existing functionality.
 
-### 📝 文档完善
-改进 README、Wiki、代码注释或 API 文档。
+### 📝 Documentation
+Improve README, Wiki pages, code comments, or API documentation.
 
-### 🧪 测试补充
-编写或改进测试用例，协助手动验证。
+### 🧪 Testing
+Write tests, improve test coverage, or help with manual testing.
 
-### 💻 代码贡献
-修复缺陷、实现新特性或提升性能。
+### 💻 Code Contributions
+Fix bugs, implement features, or improve performance.
 
-### 🌍 翻译工作
-协助多语言文档（当前 zh-CN 分支正进行中）。
+### 🌍 Translations
+Help make the project accessible to more users (future goal).
 
-### 💬 社区支持
-在 Issues、Discussions 中回答问题或帮助其他用户。
+### 💬 Community Support
+Answer questions in Issues, Discussions, or help other users.
 
-## 快速上手
+## Getting Started
 
-### 前置要求
+### Prerequisites
 
-- Python 3.10 或以上版本
+- Python 3.10 or higher
 - Git
-- 各平台额外依赖：
-  - **macOS**：建议使用 Homebrew Python 以启用 SQLite 扩展
-  - **Windows**：部分依赖需要 Visual Studio Build Tools
-  - **Linux**：需要安装 build-essential 等基础构建工具
+- Platform-specific requirements:
+  - **macOS**: Homebrew Python recommended for SQLite extension support
+  - **Windows**: Visual Studio Build Tools for some dependencies
+  - **Linux**: Build essentials package
 
-### 开发环境配置
+### Setting Up Your Development Environment
 
-1. **Fork 仓库**（GitHub）
-2. **克隆 Fork**：
+1. **Fork the repository** on GitHub
+
+2. **Clone your fork**:
    ```bash
    git clone https://github.com/YOUR_USERNAME/mcp-memory-service.git
    cd mcp-memory-service
    ```
-3. **安装依赖**：
+
+3. **Install dependencies**:
    ```bash
    python install.py
    ```
-   脚本会自动识别平台并安装适配依赖。
-4. **验证安装**：
+   This will automatically detect your platform and install appropriate dependencies.
+
+4. **Verify installation**:
    ```bash
    python scripts/verify_environment.py
    ```
-5. **启动服务**：
+
+5. **Run the service**:
    ```bash
    uv run memory server
    ```
-6. **使用 MCP Inspector（可选）**：
+
+6. **Test with MCP Inspector** (optional):
    ```bash
    npx @modelcontextprotocol/inspector uv run memory server
    ```
 
-### Docker 方案
+### Alternative: Docker Setup
 
-如需容器化环境：
+For a containerized environment:
 ```bash
-docker-compose up -d  # MCP 模式
-
-docker-compose -f docker-compose.http.yml up -d  # HTTP API 模式
+docker-compose up -d  # For MCP mode
+docker-compose -f docker-compose.http.yml up -d  # For HTTP API mode
 ```
 
-## 开发流程
+## Development Process
 
-### 1. 创建特性分支
+### 1. Create a Feature Branch
 
 ```bash
 git checkout -b feature/your-feature-name
-# 或
+# or
 git checkout -b fix/issue-description
 ```
 
-分支命名建议：
-- `feature/`：新功能
-- `fix/`：缺陷修复
-- `docs/`：文档改动
-- `test/`：测试强化
-- `refactor/`：重构
+Use descriptive branch names:
+- `feature/` for new features
+- `fix/` for bug fixes
+- `docs/` for documentation
+- `test/` for test improvements
+- `refactor/` for code refactoring
 
-### 2. 实施改动
+### 2. Make Your Changes
 
-- 编写简洁、易读的代码；
-- 遵循下方编码规范；
-- 根据需要添加/更新测试；
-- 涉及功能变化时更新文档；
-- 保持提交粒度清晰、聚焦。
+- Write clean, readable code
+- Follow the coding standards (see below)
+- Add/update tests as needed
+- Update documentation if applicable
+- Keep commits focused and atomic
 
-### 3. 运行测试
+### 3. Test Your Changes
 
 ```bash
-# 运行全部测试
+# Run all tests
 pytest tests/
 
-# 运行指定测试文件
+# Run specific test file
 pytest tests/test_server.py
 
-# 带覆盖率执行
+# Run with coverage
 pytest --cov=mcp_memory_service tests/
 ```
 
-### 4. 提交代码
+### 4. Commit Your Changes
 
-推荐使用语义化提交信息：
+Use semantic commit messages:
 ```bash
 git commit -m "feat: add memory export functionality"
 git commit -m "fix: resolve timezone handling in memory search"
 git commit -m "docs: update installation guide for Windows"
 git commit -m "test: add coverage for storage backends"
 ```
-格式：`<type>: <description>`。常见类型：
-- `feat`：新功能
-- `fix`：缺陷修复
-- `docs`：文档更新
-- `test`：测试调整
-- `refactor`：代码重构
-- `perf`：性能提升
-- `chore`：日常维护
 
-### 5. 推送到个人仓库
+Format: `<type>: <description>`
+
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `test`: Test additions or changes
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `chore`: Maintenance tasks
+
+### 5. Push to Your Fork
 
 ```bash
 git push origin your-branch-name
 ```
 
-### 6. 创建 Pull Request
+### 6. Create a Pull Request
 
-在主仓库发起 PR 并包含：
-- 清晰的标题，概述改动内容；
-- 描述改动动机、细节与影响；
-- 引用相关 Issue；
-- 如有必要附截图或示例。
+Open a PR from your fork to the main repository with:
+- Clear title describing the change
+- Description of what and why
+- Reference to any related issues
+- Screenshots/examples if applicable
 
-## 编码规范
+## Coding Standards
 
-### Python 风格
+### Python Style Guide
 
-- 基于 PEP 8，并采用以下约定：
-  - 行宽 88 字符（Black 默认）；
-  - 字符串使用双引号。
-- 所有函数签名需加类型注解；
-- 使用具象、易懂的变量/函数名；
-- 公共函数/类需编写 Google 风格 docstring。
+- Follow PEP 8 with these modifications:
+  - Line length: 88 characters (Black formatter default)
+  - Use double quotes for strings
+- Use type hints for all function signatures
+- Write descriptive variable and function names
+- Add docstrings to all public functions/classes (Google style)
 
-### 代码组织示例
+### Code Organization
 
 ```python
 # Import order
@@ -202,12 +209,12 @@ async def process_memory(content: str) -> Dict[str, Any]:
     # Implementation
 ```
 
-### 错误处理
+### Error Handling
 
-- 捕获具体异常类型；
-- 提供明确的错误信息；
-- 合理记录日志；
-- 避免静默失败。
+- Use specific exception types
+- Provide helpful error messages
+- Log errors appropriately
+- Never silently fail
 
 ```python
 try:
@@ -217,17 +224,17 @@ except StorageError as e:
     raise MemoryServiceError(f"Storage operation failed: {e}") from e
 ```
 
-## 测试要求
+## Testing Requirements
 
-### 编写测试
+### Writing Tests
 
-- 测试文件置于 `tests/` 目录；
-- 文件名以 `test_` 前缀命名；
-- 使用具描述性的测试函数名；
-- 同时覆盖正向与异常场景；
-- 外部依赖请适当 mock。
+- Place tests in `tests/` directory
+- Name test files with `test_` prefix
+- Use descriptive test names
+- Include both positive and negative test cases
+- Mock external dependencies
 
-示例：
+Example test:
 ```python
 import pytest
 from mcp_memory_service.storage import SqliteVecStorage
@@ -241,147 +248,161 @@ async def test_store_memory_success():
     assert "hash" in result
 ```
 
-### 覆盖率
+### Test Coverage
 
-- 目标覆盖率 ≥80%；
-- 重点覆盖关键路径与边界场景；
-- 包括错误处理与集成测试。
+- Aim for >80% code coverage
+- Focus on critical paths and edge cases
+- Test error handling scenarios
+- Include integration tests where appropriate
 
-## 文档规范
+## Documentation
 
-### 代码文档
+### Code Documentation
 
-- 公共 API 必须有 docstring；
-- 使用类型注解；
-- 在 docstring 中提供必要示例；
-- 保持注释简洁、直指要点。
+- Add docstrings to all public APIs
+- Include type hints
+- Provide usage examples in docstrings
+- Keep comments concise and relevant
 
-### 项目文档
+### Project Documentation
 
-当功能或流程发生变化时：
+When adding features or making significant changes:
 
-1. 视情况更新 README.md；
-2. 在 Wiki 补充详细指南；
-3. 按 Keep a Changelog 规范更新 CHANGELOG.md；
-4. 若开发流程改变，更新 AGENTS.md 或 CLAUDE.md。
+1. Update README.md if needed
+2. Add/update Wiki pages for detailed guides
+3. Update CHANGELOG.md following Keep a Changelog format
+4. Update AGENTS.md or CLAUDE.md if development workflow changes
 
-**高级工作流自动化**：
-- 参考 [Context Provider Workflow Automation](https://github.com/doobidoo/mcp-memory-service/wiki/Context-Provider-Workflow-Automation)，利用智能模式自动化开发流程。
+**Advanced Workflow Automation**:
+- See [Context Provider Workflow Automation](https://github.com/doobidoo/mcp-memory-service/wiki/Context-Provider-Workflow-Automation) for automating development workflows with intelligent patterns
 
-### API 文档
+### API Documentation
 
-- 在 `docs/api/tools.md` 记录新增 MCP 工具；
-- 列出参数说明与使用示例；
-- 若存在破坏性变更需特别标注。
+- Document new MCP tools in `docs/api/tools.md`
+- Include parameter descriptions and examples
+- Note any breaking changes
 
-## 提交变更
+## Submitting Changes
 
-### Pull Request 指南
+### Pull Request Guidelines
 
-1. **标题格式**：使用语义化描述，例如 `feat: add batch memory operations`。
-2. **描述模板**：
+1. **PR Title**: Use semantic format (e.g., "feat: add batch memory operations")
+
+2. **PR Description Template**:
    ```markdown
    ## Description
-   简述改动内容
+   Brief description of changes
 
    ## Motivation
-   为什么需要此改动
+   Why these changes are needed
 
    ## Changes
-   - 具体改动列表
-   - 是否包含破坏性改动
+   - List of specific changes
+   - Breaking changes (if any)
 
    ## Testing
-   - 测试方式
-   - 新增覆盖率说明
+   - How you tested the changes
+   - Test coverage added
 
    ## Screenshots
-   (如适用)
+   (if applicable)
 
    ## Related Issues
    Fixes #123
    ```
-3. **检查清单**：
-   - [ ] 本地测试通过
-   - [ ] 符合编码规范
-   - [ ] 文档已更新
-   - [ ] CHANGELOG.md 已更新
-   - [ ] 未引入敏感信息
 
-### 评审流程
+3. **PR Checklist**:
+   - [ ] Tests pass locally
+   - [ ] Code follows style guidelines
+   - [ ] Documentation updated
+   - [ ] CHANGELOG.md updated
+   - [ ] No sensitive data exposed
 
-- 每个 PR 至少需要一名维护者审核；
-- 请及时响应评审意见并保持讨论聚焦；
-- 审核可能需要数日，敬请耐心等待。
+### Review Process
 
-## 问题反馈
+- PRs require at least one review
+- Address review feedback promptly
+- Keep discussions focused and constructive
+- Be patient - reviews may take a few days
 
-### 缺陷报告
+## Reporting Issues
 
-请提供以下信息：
+### Bug Reports
 
-1. **环境信息**：
-   - 操作系统与版本；
-   - Python 版本；
-   - MCP Memory Service 版本；
-   - 安装方式（pip、Docker、源码等）。
-2. **复现步骤**：
-   - 最小复现代码；
-   - 执行命令；
-   - 使用的配置。
-3. **预期与实际行为**：
-   - 预期结果；
-   - 实际结果；
-   - 错误信息/堆栈。
-4. **补充信息**：
-   - 截图（如有）；
-   - 相关日志；
-   - 关联 Issue。
+When reporting bugs, include:
 
-### 功能请求
+1. **Environment**:
+   - OS and version
+   - Python version
+   - MCP Memory Service version
+   - Installation method (pip, Docker, source)
 
-请描述：
+2. **Steps to Reproduce**:
+   - Minimal code example
+   - Exact commands run
+   - Configuration used
 
-- 想解决的问题；
-- 期望的方案；
-- 考虑过的替代方案；
-- 对现有功能的潜在影响。
+3. **Expected vs Actual Behavior**:
+   - What you expected to happen
+   - What actually happened
+   - Error messages/stack traces
 
-## 社区与支持
+4. **Additional Context**:
+   - Screenshots if applicable
+   - Relevant log output
+   - Related issues
 
-### 获取帮助
+### Feature Requests
 
-- **文档**：优先查阅 [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki)。
-- **问题**：新建 Issue 前先搜索现有 [issues](https://github.com/doobidoo/mcp-memory-service/issues)。
-- **讨论**：使用 [GitHub Discussions](https://github.com/doobidoo/mcp-memory-service/discussions) 提问。
-- **响应时间**：维护者通常会在 2-3 天内回复。
+For feature requests, describe:
 
-### 沟通渠道
+- The problem you're trying to solve
+- Your proposed solution
+- Alternative approaches considered
+- Potential impact on existing functionality
 
-- **GitHub Issues**：缺陷报告、功能需求；
-- **GitHub Discussions**：一般问题与社区交流；
-- **Pull Requests**：代码贡献与评审。
+## Community & Support
 
-### 给 AI 助手的提示
+### Getting Help
 
-- 查阅 [AGENTS.md](AGENTS.md) 获取通用指引；
-- 阅读 [CLAUDE.md](CLAUDE.md) 了解 Claude 专属约定；
-- 参考 [Context Provider Workflow Automation](https://github.com/doobidoo/mcp-memory-service/wiki/Context-Provider-Workflow-Automation) 自动化开发流程。
+- **Documentation**: Check the [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki) first
+- **Issues**: Search existing [issues](https://github.com/doobidoo/mcp-memory-service/issues) before creating new ones
+- **Discussions**: Use [GitHub Discussions](https://github.com/doobidoo/mcp-memory-service/discussions) for questions
+- **Response Time**: Maintainers typically respond within 2-3 days
 
-## 贡献者致谢
+### Communication Channels
 
-我们感谢所有贡献者：
+- **GitHub Issues**: Bug reports and feature requests
+- **GitHub Discussions**: General questions and community discussion
+- **Pull Requests**: Code contributions and reviews
 
-- 在发布说明中点名感谢；
-- 在 CHANGELOG.md 中记录贡献；
-- 合并提交时保留原作者信息；
-- 欢迎未来建立 CONTRIBUTORS 文件以展示贡献者名单。
+### For AI Agents
 
-### 表彰类型
+If you're an AI coding assistant, also check:
+- [AGENTS.md](AGENTS.md) - Generic AI agent instructions
+- [CLAUDE.md](CLAUDE.md) - Claude-specific guidelines
+- [Context Provider Workflow Automation](https://github.com/doobidoo/mcp-memory-service/wiki/Context-Provider-Workflow-Automation) - Automate development workflows with intelligent patterns
 
-- 🐛 提供高质量缺陷报告；
-- 💻 提交代码改进；
-- 📝 完善文档；
-- 🧪 编写或审阅测试。
+## Recognition
 
-期待你的加入，让 MCP Memory Service 更加出色！
+We value all contributions! Contributors are:
+
+- Listed in release notes for their contributions
+- Mentioned in CHANGELOG.md entries
+- Credited in commit messages when providing fixes/solutions
+- Welcome to add themselves to a CONTRIBUTORS file (future)
+
+### Types of Recognition
+
+- 🐛 Bug reporters who provide detailed, reproducible issues
+- 💻 Code contributors who submit PRs
+- 📝 Documentation improvers
+- 🧪 Test writers and reviewers
+- 💬 Community helpers who support other users
+- 🎨 UI/UX improvers (for dashboard contributions)
+
+---
+
+Thank you for contributing to MCP Memory Service! Your efforts help make AI assistants more capable and useful for everyone. 🚀
+
+If you have questions not covered here, please open a [Discussion](https://github.com/doobidoo/mcp-memory-service/discussions) or check our [Wiki](https://github.com/doobidoo/mcp-memory-service/wiki).

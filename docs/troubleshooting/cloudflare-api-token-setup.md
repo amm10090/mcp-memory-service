@@ -1,62 +1,66 @@
-# MCP Memory Service — Cloudflare API Token 配置
+# Cloudflare API Token Configuration for MCP Memory Service
 
-本指南帮助你为 Cloudflare 后端创建并配置具有正确权限的 API Token。
+This guide helps you create and configure a Cloudflare API token with the correct permissions for the MCP Memory Service Cloudflare backend.
 
-## 所需权限
+## Required API Token Permissions
 
-使用 Cloudflare 后端时，API Token 需具备以下权限：
+To use the Cloudflare backend, your API token must have these permissions:
 
-### 核心权限
+### Essential Permissions
 
-#### D1 数据库
-- **权限**：`Cloudflare D1:Edit`
-- **用途**：存储记忆元数据、标签与关联关系
-- **必要**：是
+#### D1 Database
+- **Permission**: `Cloudflare D1:Edit`
+- **Purpose**: Storing memory metadata, tags, and relationships
+- **Required**: Yes
 
-#### Vectorize 索引
-- **权限**：`AI Gateway:Edit` 或 `Vectorize:Edit`
-- **用途**：写入与查询记忆向量
-- **必要**：是
+#### Vectorize Index
+- **Permission**: `AI Gateway:Edit` or `Vectorize:Edit`
+- **Purpose**: Storing and querying memory embeddings
+- **Required**: Yes
 
 #### Workers AI
-- **权限**：`AI Gateway:Read` 或 `Workers AI:Read`
-- **用途**：调用 Cloudflare AI 模型生成嵌入（默认使用 `@cf/baai/bge-base-en-v1.5`）
-- **必要**：是
+- **Permission**: `AI Gateway:Read` or `Workers AI:Read`
+- **Purpose**: Generating embeddings using Cloudflare's AI models
+- **Model Used**: `@cf/baai/bge-base-en-v1.5`
+- **Required**: Yes
 
-#### 账户访问
-- **权限**：`Account:Read`
-- **用途**：基础账户级操作
-- **必要**：是
+#### Account Access
+- **Permission**: `Account:Read`
+- **Purpose**: Basic account-level operations
+- **Required**: Yes
 
-#### R2 存储（可选）
-- **权限**：`R2:Edit`
-- **用途**：存储大于 1MB 的大文件内容
-- **必要**：仅在启用 R2 时需要
+#### R2 Storage (Optional)
+- **Permission**: `R2:Edit`
+- **Purpose**: Large content storage (files > 1MB)
+- **Required**: Only if using R2 for large content storage
 
-## 创建 Token 步骤
+## Token Creation Steps
 
-1. **进入 Cloudflare 控制台**  
-   https://dash.cloudflare.com/profile/api-tokens
+1. **Navigate to Cloudflare Dashboard**
+   - Go to: https://dash.cloudflare.com/profile/api-tokens
 
-2. **创建自定义 Token**  
-   点击 “Create Token” → 选择 “Custom token”。
+2. **Create Custom Token**
+   - Click "Create Token" > "Custom token"
 
-3. **配置权限**  
-   - **Token 名称**：例如 `MCP Memory Service Token`；
-   - **Permissions**：按上文添加所有必需权限；
-   - **Account Resources**：选择目标 Cloudflare 账户；
-   - **Zone Resources**：可选择所有 Zone 或仅需的 Zone；
-   - **IP 限制**：一般留空以提升兼容性；
-   - **TTL**：根据安全策略设置过期时间。
+3. **Configure Token Permissions**
+   - **Token name**: `MCP Memory Service Token` (or similar)
+   - **Permissions**: Add all required permissions listed above
+   - **Account resources**: Include your Cloudflare account
+   - **Zone resources**: Include required zones (or all zones)
+   - **IP address filtering**: Leave blank for maximum compatibility
+   - **TTL**: Set appropriate expiration date
 
-4. **保存并复制 Token**  
-   点击 “Continue to summary” → “Create Token”，并立即复制 Token（后续无法再次查看）。
+4. **Save and Copy Token**
+   - Click "Continue to summary" > "Create Token"
+   - **Important**: Copy the token immediately - it won't be shown again
 
-## 配置环境变量
+## Environment Configuration
 
-### 方式一：项目 `.env`
+Add the token to your environment configuration:
+
+### Option 1: Project .env File
 ```bash
-# 项目根目录 .env
+# Add to .env file in project root
 MCP_MEMORY_STORAGE_BACKEND=cloudflare
 CLOUDFLARE_API_TOKEN=your_new_token_here
 CLOUDFLARE_ACCOUNT_ID=your_account_id
@@ -64,7 +68,7 @@ CLOUDFLARE_D1_DATABASE_ID=your_d1_database_id
 CLOUDFLARE_VECTORIZE_INDEX=your_vectorize_index_name
 ```
 
-### 方式二：Claude Desktop 配置
+### Option 2: Claude Desktop Configuration
 ```json
 {
   "mcpServers": {
@@ -86,14 +90,19 @@ CLOUDFLARE_VECTORIZE_INDEX=your_vectorize_index_name
 }
 ```
 
-## 验证 Token
+## Verification
+
+Test your token configuration:
 
 ```bash
+# Navigate to project directory
 cd path/to/mcp-memory-service
 
+# Test the configuration
 uv run python -c "
-import asyncio, os
+import asyncio
 from src.mcp_memory_service.storage.cloudflare import CloudflareStorage
+import os
 
 async def test():
     storage = CloudflareStorage(
@@ -109,54 +118,75 @@ asyncio.run(test())
 "
 ```
 
-## 常见鉴权问题
+## Common Authentication Issues
 
-### 错误代码及处理
+### Error Codes and Solutions
 
-#### Error 9109：位置限制
-- **现象**：提示 “Cannot use the access token from location: [IP]”
-- **原因**：Token 设置了 IP 白名单或黑名单
-- **解决**：移除 IP 限制或将当前 IP 加入允许列表
+#### Error 9109: Location Restriction
+- **Symptom**: "Cannot use the access token from location: [IP]"
+- **Cause**: Token has IP address restrictions
+- **Solution**: Remove IP restrictions or add current IP to allowlist
 
-#### Error 7403：权限不足
-- **现象**：提示 “The given account is not valid or is not authorized”
-- **原因**：缺少 D1、Vectorize、Workers AI 等权限
-- **解决**：为 Token 增补缺失权限
+#### Error 7403: Insufficient Permissions
+- **Symptom**: "The given account is not valid or is not authorized"
+- **Cause**: Token lacks required service permissions
+- **Solution**: Add missing permissions (D1, Vectorize, Workers AI)
 
-#### Error 10000：鉴权错误
-- **现象**：针对某个服务返回 “Authentication error”
-- **原因**：该服务对应权限未授权
-- **解决**：检查并补齐所需权限
+#### Error 10000: Authentication Error
+- **Symptom**: "Authentication error" for specific services
+- **Cause**: Token missing permissions for specific services
+- **Solution**: Verify all required permissions are granted
 
-#### Error 1000：Token 无效
-- **现象**：提示 “Invalid API Token”
-- **原因**：Token 格式错误或已过期
-- **解决**：重新生成 Token 或确认格式正确
+#### Error 1000: Invalid API Token
+- **Symptom**: "Invalid API Token"
+- **Cause**: Token may be malformed or expired
+- **Solution**: Create a new token or check token format
 
-### Google SSO 账户
+### Google SSO Accounts
 
-若使用 Google SSO 登录 Cloudflare：
+If you use Google SSO for Cloudflare:
 
-1. 设置账户密码：进入 **My Profile → Authentication**，点击 **Set Password**；
-2. 可选方案：使用 Global API Key，路径为 **My Profile → API Tokens → Global API Key**。
+1. **Set Account Password**
+   - Go to **My Profile** → **Authentication**
+   - Click **"Set Password"** to add a password to your account
+   - Use this password when prompted during token creation
 
-## 安全建议
+2. **Alternative: Global API Key**
+   - Go to **My Profile** → **API Tokens**
+   - Scroll to **"Global API Key"** section
+   - Use Global API Key + email for authentication
 
-1. **最小权限原则**：仅授予必要权限；
-2. **定期轮换**：建议每 90 天滚动更新 Token；
-3. **环境变量管理**：严禁将 Token 提交至版本控制；
-4. **IP 限制**：生产环境可结合 IP 白名单使用；
-5. **监控**：在 Cloudflare 控制台监控 Token 使用情况；
-6. **设置过期时间**：避免无限期 Token。
+## Security Best Practices
 
-## 排障流程
+1. **Minimal Permissions**: Only grant permissions required for your use case
+2. **Token Rotation**: Regularly rotate API tokens (e.g., every 90 days)
+3. **Environment Variables**: Never commit tokens to version control
+4. **IP Restrictions**: Use IP restrictions in production environments
+5. **Monitoring**: Monitor token usage in Cloudflare dashboard
+6. **Expiration**: Set reasonable TTL for tokens
 
-若仍然鉴权失败：
+## Troubleshooting Steps
 
-1. **检查配置**：确认环境变量是否正确，资源 ID（账户、数据库、索引）是否准确；
-2. **逐一测试服务**：先验证账户访问，再逐项验证 D1、Vectorize、Workers AI；
-3. **查看 Cloudflare 日志**：在控制台查看 API 使用日志，定位具体错误；
-4. **核对权限**：确保权限同时包含读写；
-5. **网络检查**：确认网络可访问 Cloudflare API，并排除防火墙阻断。
+If authentication continues to fail:
 
-更多说明请参阅 [Cloudflare Setup Guide](../cloudflare-setup.md) 或主故障排查文档（见目录）。
+1. **Verify Configuration**
+   - Check all environment variables are set correctly
+   - Confirm resource IDs (account, database, index) are accurate
+
+2. **Test Individual Services**
+   - Test account access first
+   - Then test each service (D1, Vectorize, Workers AI) individually
+
+3. **Check Cloudflare Logs**
+   - Review API usage logs in Cloudflare dashboard
+   - Look for specific error messages and timestamps
+
+4. **Validate Permissions**
+   - Double-check all required permissions are selected
+   - Ensure permissions include both read and write access where needed
+
+5. **Network Issues**
+   - Verify network connectivity to Cloudflare APIs
+   - Check if corporate firewall blocks API access
+
+For additional help, see the [Cloudflare Setup Guide](../cloudflare-setup.md) or the main [troubleshooting documentation](./README.md).

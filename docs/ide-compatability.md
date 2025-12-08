@@ -1,4 +1,4 @@
-## IDE 兼容性
+## IDE Compatibility
 
 [![Works with Claude](https://img.shields.io/badge/Works%20with-Claude-blue)](https://claude.ai)
 [![Works with Cursor](https://img.shields.io/badge/Works%20with-Cursor-orange)](https://cursor.sh)
@@ -6,22 +6,49 @@
 [![Works with Cline](https://img.shields.io/badge/Works%20with-Cline-purple)](https://github.com/saoudrizwan/claude-dev)
 [![Works with RooCode](https://img.shields.io/badge/Works%20with-RooCode-red)](https://roo.ai)
 
-截至 2025 年 6 月，MCP 已成为 AI IDE 集成的标准协议，MCP Memory Service 对主流 IDE 均提供完整支持：
+As of June 2025, MCP (Model Context Protocol) has become the standard for AI-IDE integrations. The MCP Memory Service is **fully compatible** with all major AI-powered development environments:
 
-| IDE | MCP 支持 | 配置位置 | 备注 |
-| --- | --- | --- | --- |
-| Claude Desktop | ✅ | `claude_desktop_config.json` | 官方原生 |
-| Claude Code | ✅ | CLI | 官方原生 |
-| Cursor | ✅ | `.cursor/mcp.json` 或全局配置 | 支持 stdio/SSE/HTTP |
-| WindSurf | ✅ | MCP 配置文件 | 内置服务管理 |
-| Cline | ✅ | VS Code MCP 配置 | 可共享服务器 |
-| RooCode | ✅ | IDE 配置 | 完整 MCP 客户端 |
-| VS Code | ✅ | `.vscode/mcp.json` | 通过 MCP 扩展 |
-| Zed | ✅ | IDE 内置 | 原生 MCP |
+### Supported IDEs
 
-### 快速配置示例
+| IDE | MCP Support | Configuration Location | Notes |
+|-----|------------|----------------------|--------|
+| **Claude Desktop** | ✅ Full | `claude_desktop_config.json` | Official MCP support |
+| **Claude Code** | ✅ Full | CLI configuration | Official MCP support |
+| **Cursor** | ✅ Full | `.cursor/mcp.json` or global config | Supports stdio, SSE, HTTP |
+| **WindSurf** | ✅ Full | MCP config file | Built-in server management |
+| **Cline** | ✅ Full | VS Code MCP config | Can create/share MCP servers |
+| **RooCode** | ✅ Full | IDE config | Full MCP client implementation |
+| **VS Code** | ✅ Full | `.vscode/mcp.json` | Via MCP extension |
+| **Zed** | ✅ Full | Built-in config | Native MCP support |
 
-**Cursor**（`/path/to` 换成仓库路径）：
+### Quick Setup for Popular IDEs
+
+#### Cursor
+Add to `.cursor/mcp.json` in your project or global Cursor config:
+
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/mcp-memory-service",
+        "run",
+        "memory"
+      ],
+      "env": {
+        "MCP_MEMORY_CHROMA_PATH": "/path/to/chroma_db",
+        "MCP_MEMORY_BACKUPS_PATH": "/path/to/backups"
+      }
+    }
+  }
+}
+```
+
+#### WindSurf
+WindSurf offers the easiest setup with built-in server management. Add to your WindSurf MCP configuration:
+
 ```json
 {
   "mcpServers": {
@@ -37,13 +64,19 @@
 }
 ```
 
-**WindSurf**：配置格式与 Cursor 相同，可通过 GUI 添加。
+#### Cline (VS Code)
+1. Open the Cline extension in VS Code
+2. Click the MCP Servers icon
+3. Click "Configure MCP Servers"
+4. Add the memory service configuration (same format as above)
 
-**Cline（VS Code）**：在扩展面板选择 MCP Servers → Configure → 贴入上述配置。
+#### RooCode
+RooCode uses a similar configuration format. Refer to RooCode's MCP documentation for the exact config file location.
 
-**RooCode**：参考其 MCP 文档，配置结构一致。
+### Working with Multiple MCP Servers
 
-### 多 MCP 服务器示例
+MCP servers are designed to be composable. You can use the Memory Service alongside other popular MCP servers:
+
 ```json
 {
   "mcpServers": {
@@ -54,7 +87,9 @@
     "github": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": { "GITHUB_TOKEN": "your-token" }
+      "env": {
+        "GITHUB_TOKEN": "your-github-token"
+      }
     },
     "task-master": {
       "command": "npx",
@@ -64,25 +99,59 @@
 }
 ```
 
-### 替代安装方式
-- `npx -y @doobidoo/mcp-memory-service`
-- 或 `python /path/to/memory_wrapper.py`
+### Alternative Installation Methods
 
-### 为什么选 MCP Memory Service？
-- 跨 IDE 共享记忆。
-- 持久化，重启 IDE 不丢失。
-- 语义检索、时间自然语言查询、标签组织。
-- 跨平台：macOS / Windows / Linux。
+#### Using NPX (if published to npm)
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@doobidoo/mcp-memory-service"]
+    }
+  }
+}
+```
 
-### 连接问题排查
-1. `python scripts/test_installation.py`。
-2. 查看 IDE MCP 日志面板。
-3. `uv run memory` 独立测试。
-4. 配置使用绝对路径。
-5. 确保 IDE 能访问对应 Python 环境。
+#### Using Python directly
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "command": "python",
+      "args": ["/path/to/mcp-memory-service/memory_wrapper.py"]
+    }
+  }
+}
+```
 
-### IDE 小贴士
-- **Cursor**：注意 MCP 数量上限，按需排序。
-- **WindSurf**：善用图形化服务管理。
-- **Cline**：检查绿色状态标识。
-- **VS Code**：安装官方 MCP 扩展体验更佳。
+### Why Choose MCP Memory Service?
+
+Unlike IDE-specific memory solutions, MCP Memory Service offers:
+
+- **Cross-IDE Compatibility**: Your memories work across ALL supported IDEs
+- **Persistent Storage**: Memories survive IDE restarts and updates
+- **Semantic Search**: Find memories by meaning, not just keywords
+- **Natural Language Time Queries**: "What did I work on last week?"
+- **Tag-based Organization**: Organize memories with flexible tagging
+- **Cross-Platform**: Works on macOS, Windows, and Linux
+
+### Troubleshooting IDE Connections
+
+If the memory service isn't connecting in your IDE:
+
+1. **Verify Installation**: Run `python scripts/test_installation.py`
+2. **Check Logs**: Most IDEs show MCP server logs in their output panels
+3. **Test Standalone**: Try running the server directly: `uv run memory`
+4. **Path Issues**: Use absolute paths in your configuration
+5. **Python Environment**: Ensure the IDE can access your Python environment
+
+### IDE-Specific Tips
+
+**Cursor**: If using multiple MCP servers, be aware of Cursor's server limit. Prioritize based on your needs.
+
+**WindSurf**: Take advantage of WindSurf's built-in server management UI for easier configuration.
+
+**Cline**: Cline can display MCP server status - check for green indicators after configuration.
+
+**VS Code with MCP Extension**: Install the official MCP extension from the marketplace for better integration.

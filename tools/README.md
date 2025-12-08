@@ -1,18 +1,3 @@
-# tools 目录说明（中文）
-
-- 收录开发/调试/部署辅助工具。
-- Docker 相关详见 `tools/docker/README.md`。
-- 如无特殊说明，使用前请在虚拟环境或容器内运行，避免污染宿主。
-
----
-
-# README.md（中文说明）
-
-工具目录说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Development Tools and Utilities
 
 This directory contains development tools, build utilities, and deployment configurations for MCP Memory Service.

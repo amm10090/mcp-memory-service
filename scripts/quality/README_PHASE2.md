@@ -1,10 +1,3 @@
-# README_PHASE2.md（中文说明）
-
-质量流程 Phase 2 说明与使用步骤。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Phase 2 Complexity Reduction - Quick Reference
 
 ## Overview

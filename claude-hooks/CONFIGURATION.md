@@ -1,19 +1,27 @@
-# Memory Hooks 配置指南
+# Memory Hooks Configuration Guide
 
-本文档列出 Claude Code 记忆感知 Hooks 的全部配置项，并解释各字段的行为与影响。
+## Overview
 
-## 配置层级
-`config.json` 采用层级式结构：
-1. **memoryService**：连接方式与协议偏好。
-2. **projectDetection**：如何识别项目上下文。
-3. **memoryScoring**：记忆排序与打分策略。
-4. **gitAnalysis**：Git 仓库上下文的使用方式。
-5. **timeWindows**：查询的时间窗口/范围。
-6. **output**：日志、展示与调试相关选项。
+This guide documents all configuration properties for the Claude Code memory awareness hooks, with detailed explanations of their behavior and impact on memory retrieval.
+
+## Configuration Structure
+
+The hooks are configured via `config.json` in the hooks directory. Configuration follows this hierarchy:
+
+1. **Memory Service** - Connection and protocol settings
+2. **Project Detection** - How projects are identified
+3. **Memory Scoring** - How memories are ranked for relevance
+4. **Git Analysis** - Repository context integration
+5. **Time Windows** - Temporal scoping for queries
+6. **Output** - Display and logging options
 
 ---
 
-## 1. Memory Service 连接
+## Memory Service Connection Configuration
+
+### `memoryService` Object
+
+Controls how the hooks connect to the MCP Memory Service.
 
 ```json
 "memoryService": {
@@ -35,101 +43,584 @@
 }
 ```
 
-### HTTP 设置
-- **endpoint**：HTTP 服务地址。
-  - `http://` 仅适合本地开发（明文）；
-  - `https://` 用于远端或需 TLS 场景（自签证书需提前信任 CA）。
-- **apiKey**：访问凭据，建议通过环境变量注入。
-- **healthCheckTimeout** / **useDetailedHealthCheck**：健康检查超时与是否返回详细指标。
+#### HTTP Configuration
 
-### MCP 设置
-- **serverCommand**：启动本地 MCP 服务器的命令，可根据后端改 `-s hybrid|cloudflare|sqlite_vec|chromadb`；
-- **serverWorkingDir**：命令执行目录，`../` 适用于 `project/claude-hooks/` 结构；
-- **connectionTimeout** / **toolCallTimeout**：连接与 MCP 调用的超时时间（毫秒）。
+**`endpoint`** (String): URL of the HTTP memory service.
 
-> 若目录结构不同，可改为绝对路径或利用环境变量如 `process.env.MCP_MEMORY_PROJECT_ROOT`。
+**Security Considerations:**
+- **HTTP (`http://`)**: Default for local development. Traffic is **unencrypted** - only use for localhost connections.
+- **HTTPS (`https://`)**: Recommended if connecting to remote servers or when encryption-in-transit is required.
+  - For self-signed certificates, your system must trust the certificate authority.
+  - The hooks enforce certificate validation - `rejectUnauthorized` is always enabled for security.
+
+**`apiKey`** (String): API key for authenticating with the memory service.
+- **Default**: Empty string `""` - the application will validate and prompt for a valid key on startup
+- **Best practice**: Set via environment variable or secure configuration file
+- **Security**: Never commit actual API keys to version control
+
+#### MCP Configuration
+
+**`serverCommand`** (Array): Command to launch the MCP memory service locally.
+- Example: `["uv", "run", "memory", "server", "-s", "hybrid"]`
+- Adjust storage backend flag (`-s`) as needed: `hybrid`, `cloudflare`, `sqlite_vec`, `chromadb`
+
+**`serverWorkingDir`** (String): Working directory for the MCP server process.
+- **Relative paths**: `"../"` assumes hooks are in a subdirectory (e.g., `project/claude-hooks/`)
+- **Absolute paths**: Use full path for explicit configuration
+- **Environment variables**: Consider using `process.env.MCP_MEMORY_PROJECT_ROOT` for flexibility
+
+**Directory Structure Assumption (for `../` relative path):**
+```
+project-root/
+├── src/                    # MCP Memory Service code
+├── claude-hooks/           # This hooks directory
+│   ├── config.json
+│   └── utilities/
+└── pyproject.toml
+```
+
+If your structure differs, update `serverWorkingDir` accordingly or use an absolute path.
+
+**`connectionTimeout`** (Number): Milliseconds to wait for MCP server connection (default: 2000).
+
+**`toolCallTimeout`** (Number): Milliseconds to wait for MCP tool call responses (default: 3000).
 
 ---
 
-## 2. Memory Scoring
+## Memory Scoring Configuration
 
-### `memoryScoring.weights`
+### `memoryScoring` Object
+
+Controls how memories are scored and ranked for relevance to the current session.
+
+#### `weights` (Object)
+
+Relative importance of different scoring factors. These weights are applied to individual component scores (0.0-1.0 each), then summed together with additive bonuses (typeBonus, recencyBonus). The final score is clamped to [0, 1].
+
+**Note**: Weights don't need to sum to exactly 1.0 since additional bonuses are added separately and the final score is normalized by clamping. The weights shown below sum to 1.00 for the base scoring (without conversation context) or 1.25 when conversation context is enabled.
+
 ```json
 "weights": {
-  "timeDecay": 0.40,
-  "tagRelevance": 0.25,
-  "contentRelevance": 0.15,
-  "contentQuality": 0.20,
-  "conversationRelevance": 0.25
+  "timeDecay": 0.40,           // Recency weight (default: 0.40)
+  "tagRelevance": 0.25,        // Tag matching weight (default: 0.25)
+  "contentRelevance": 0.15,    // Content keyword weight (default: 0.15)
+  "contentQuality": 0.20,      // Quality assessment weight (default: 0.20)
+  "conversationRelevance": 0.25 // Conversation context weight (default: 0.25, only when enabled)
 }
 ```
-- **timeDecay**：时间衰减权重（0.35~0.45 推荐），较高时近期记忆优先；
-- **tagRelevance**：标签匹配权重（0.20~0.30），提升规范打标的记忆排名；
-- **contentRelevance**：关键词匹配权重；
-- **contentQuality**：根据记忆质量（长度、关键字）加权；
-- **conversationRelevance**：会话上下文匹配，需开启对话信号时使用。
 
-### 其他参数
-- **minRelevanceScore**：过滤低分记忆（默认 0.4，0.3 = 宽松，0.5 = 严格）。
-- **timeDecayRate**：指数衰减速率，`score = e^(-rate * days)`，0.05 时 30 天后得分≈0.22。
+**Property Details:**
 
-### 类型/状态加成
-- **typeBonus**：对 `implementation`/`decision` 等类型追加分值；
-- **recencyBonus**：在关键操作、recent tags 命中时额外加分；
-- **projectMatchBonus**：项目名一致时提高得分。
+- **`timeDecay`** (0.0-1.0, recommended: 0.35-0.45)
+  - Weight given to memory age in scoring
+  - Higher values prioritize recent memories
+  - Lower values allow older, high-quality memories to rank higher
+  - **Impact**: At 0.40, a 7-day-old memory with perfect tags can outscore a 60-day-old memory with perfect tags and high quality
+  - **Recommendation**: Set to 0.40-0.45 for active development, 0.25-0.35 for research/reference work
+
+- **`tagRelevance`** (0.0-1.0, recommended: 0.20-0.30)
+  - Weight given to tag matching with project context
+  - Higher values favor well-tagged memories
+  - **Impact**: Tags like `projectName`, `language`, `framework` significantly boost scores
+  - **Trade-off**: High tag weight can cause old, well-documented memories to dominate over recent work
+  - **Recommendation**: Set to 0.25 for balanced tag importance, 0.20 if recency is critical
+
+- **`contentRelevance`** (0.0-1.0, recommended: 0.10-0.20)
+  - Weight for keyword matching in memory content
+  - Matches against project name, language, frameworks, technical terms
+  - **Impact**: Memories mentioning project-specific terms rank higher
+  - **Recommendation**: Keep at 0.15 unless doing very keyword-focused work
+
+- **`contentQuality`** (0.0-1.0, recommended: 0.15-0.25)
+  - Weight for assessed content quality (length, diversity, meaningful indicators)
+  - Penalizes generic session summaries
+  - **Impact**: Filters out low-quality auto-generated content
+  - **Quality Indicators**: "decided", "implemented", "fixed", "because", "approach", "solution"
+  - **Recommendation**: Set to 0.20 to balance quality with other factors
+
+- **`conversationRelevance`** (0.0-1.0, recommended: 0.20-0.30)
+  - Weight for matching current conversation topics and intent
+  - Only active when conversation context is available
+  - **Impact**: Dynamically adjusts based on what user is discussing
+  - **Recommendation**: Keep at 0.25 for adaptive context awareness
+
+#### `minRelevanceScore` (Number)
+
+Minimum score threshold for a memory to be included in context.
+
+```json
+"minRelevanceScore": 0.4  // Default: 0.4
+```
+
+**Details:**
+- Range: 0.0 to 1.0
+- Memories below this threshold are filtered out entirely
+- **Impact on Quality**:
+  - `0.3`: Permissive, may include generic old content
+  - `0.4`: Balanced, filters most low-quality memories (recommended)
+  - `0.5`: Strict, only high-relevance memories
+- **Trade-off**: Higher threshold = fewer but higher quality memories
+
+#### `timeDecayRate` (Number)
+
+Rate of exponential decay for time-based scoring.
+
+```json
+"timeDecayRate": 0.05  // Default: 0.05
+```
+
+**Formula**: `score = e^(-rate * days)`
+
+**Details:**
+- Range: 0.01 to 0.2 (practical range)
+- Lower rate = gentler decay (memories age slower)
+- Higher rate = aggressive decay (memories age faster)
+
+**Decay Examples**:
+
+| Days Old | Rate 0.05 | Rate 0.10 | Rate 0.15 |
+|----------|-----------|-----------|-----------|
+| 7 days   | 0.70      | 0.50      | 0.35      |
+| 14 days  | 0.50      | 0.25      | 0.12      |
+| 30 days  | 0.22      | 0.05      | 0.01      |
+| 60 days  | 0.05      | 0.002     | ~0        |
+
+**Recommendation**:
+- `0.05`: Balanced, keeps 2-4 week memories relevant (recommended)
+- `0.10`: Aggressive, prioritizes last 1-2 weeks only
+- `0.03`: Gentle, treats 1-2 month memories as still valuable
+
+#### `enableConversationContext` (Boolean)
+
+Whether to use conversation analysis for dynamic memory scoring.
+
+```json
+"enableConversationContext": true  // Default: true
+```
 
 ---
 
-## 3. 项目检测 `projectDetection`
-- **mode**：`auto`（默认，根据 git/目录推断）或 `manual`；
-- **defaultProjectName**：自动失败时的兜底项目名；
-- **detectFromGitRemote**：是否使用远端 URL/分支名；
-- **maxDirectoryDepth**：向上搜索项目根目录的层数；
-- **fallbackTags**：当无法识别项目时自动追加的标签。
+## Git Analysis Configuration
 
----
+### `gitAnalysis` Object
 
-## 4. Git 分析 `gitAnalysis`
+Controls how git repository context influences memory retrieval.
+
 ```json
 "gitAnalysis": {
   "enabled": true,
-  "historyDepth": 20,
-  "diffContext": 80,
-  "detectIssueRefs": true,
-  "ignoredPaths": ["tests/generated/"]
+  "commitLookback": 14,
+  "maxCommits": 20,
+  "includeChangelog": true,
+  "maxGitMemories": 3,
+  "gitContextWeight": 1.8
 }
 ```
-- **enabled**：是否读取 Git 状态；
-- **historyDepth**：读取最近 commit 数（影响 “最近活动” 报告）；
-- **diffContext**：一次展示的 diff 行数；
-- **detectIssueRefs**：是否解析 `#123` 引用；
-- **ignoredPaths**：忽略的路径模式，减少噪声。
 
-Git 分析会影响项目判定、记忆评分的 tag matching，以及输出文案（如 “最近修改文件”）。
+#### `gitContextWeight` (Number)
+
+Multiplier applied to memories derived from git context queries.
+
+**Details:**
+- Range: 1.0 to 2.5 (practical range)
+- Applied multiplicatively to base memory score
+- **Impact Examples**:
+  - Base score 0.5 × weight 1.2 = final 0.6
+  - Base score 0.5 × weight 1.8 = final 0.9
+
+**Behavior by Value**:
+- `1.0`: No boost (git context treated equally)
+- `1.2`: Small boost (git-aware memories slightly favored)
+- `1.8`: Strong boost (git-aware memories highly prioritized) ✅ **Recommended**
+- `2.0+`: Very strong boost (git context dominates)
+
+**Use Cases**:
+- **Active development** (`1.8`): Prioritize memories matching recent commits/keywords
+- **Maintenance work** (`1.2-1.5`): Balance git context with other signals
+- **Research/planning** (`1.0`): Disable git preference
+
+#### Other Git Properties
+
+- **`commitLookback`** (Number, default: 14): Days of git history to analyze
+- **`maxCommits`** (Number, default: 20): Maximum commits to process
+- **`includeChangelog`** (Boolean, default: true): Parse CHANGELOG.md for context
+- **`maxGitMemories`** (Number, default: 3): Max memories from git-context phase
 
 ---
 
-## 5. 时间窗口 `timeWindows`
-- **recentActivityDays**：近期活动（默认 7 天）；
-- **recentMemoryDays**：调用搜索时限定的记忆时间范围；
-- **maxWindowDays**：当用户查询指定时间段时允许的最大窗口；
-- **defaultSessionLookbackMinutes**：Session Start Hook 回溯历史会话的分钟数。
+## Time Windows Configuration
+
+### Memory Service Time Windows
+
+Controls temporal scoping for memory queries.
+
+```json
+"memoryService": {
+  "recentTimeWindow": "last-month",      // Default: "last-month"
+  "fallbackTimeWindow": "last-3-months"  // Default: "last-3-months"
+}
+```
+
+#### `recentTimeWindow` (String)
+
+Time window for Phase 1 recent memory queries.
+
+**Supported Values:**
+- `"last-day"`: Last 24 hours
+- `"last-week"`: Last 7 days
+- `"last-2-weeks"`: Last 14 days
+- `"last-month"`: Last 30 days ✅ **Recommended**
+- `"last-3-months"`: Last 90 days
+
+**Impact:**
+- **Narrow window** (`last-week`): Only very recent memories, may miss context during development gaps
+- **Balanced window** (`last-month`): Captures recent sprint/iteration cycle
+- **Wide window** (`last-3-months`): Includes seasonal patterns, may dilute recency focus
+
+**Recommendation**:
+- Active development: `"last-month"`
+- Periodic/seasonal work: `"last-3-months"`
+
+#### `fallbackTimeWindow` (String)
+
+Time window for fallback queries when recent memories are insufficient.
+
+**Supported Values:** Same as `recentTimeWindow`
+
+**Purpose:** Ensures minimum context when recent work is sparse.
+
+**Recommendation**: Set 2-3× wider than recent window (e.g., `last-month` → `last-3-months`)
 
 ---
 
-## 6. 输出 `output`
-- **logLevel**：`info`/`debug`/`warn` 等；
-- **showScoringBreakdown**：是否在日志/调试中打印打分细节；
-- **maxMemoriesShown**：插入上下文的最大记忆数量；
-- **highlightTags**：在输出中高亮的标签集合。
+## Recency Bonus System
+
+### Automatic Recency Bonuses
+
+The memory scorer applies explicit additive bonuses based on memory age (implemented in `memory-scorer.js`):
+
+```javascript
+// Automatic bonuses (no configuration needed)
+< 7 days:  +0.15 bonus  // Strong boost for last week
+< 14 days: +0.10 bonus  // Moderate boost for last 2 weeks
+< 30 days: +0.05 bonus  // Small boost for last month
+> 30 days: 0 bonus      // No bonus for older memories
+```
+
+**How It Works:**
+- Applied **additively** (not multiplicatively) to final score
+- Ensures very recent memories get absolute advantage
+- Creates clear tier separation (weekly/biweekly/monthly)
+
+**Example Impact:**
+```
+Memory A (5 days old):
+  Base score: 0.50
+  Recency bonus: +0.15
+  Final score: 0.65
+
+Memory B (60 days old):
+  Base score: 0.60 (higher quality/tags)
+  Recency bonus: 0
+  Final score: 0.60
+
+Result: Recent memory wins despite lower base score
+```
+
+**Design Rationale:**
+- Compensates for aggressive time decay
+- Prevents old, well-tagged memories from dominating
+- Aligns with user expectation that recent work is most relevant
 
 ---
 
-## 常见问题与建议
-1. **HTTP 401**：确认 `apiKey` 与服务端配置一致；
-2. **MCP 启动失败**：检查 `serverCommand` 与 `serverWorkingDir`；
-3. **记忆重复或质量差**：调高 `minRelevanceScore`，合理调整各权重；
-4. **老记忆覆盖新记忆**：降低 `tagRelevance` 或提高 `timeDecayRate`；
-5. **找不到项目**：切换 `mode=manual` 并手动配置 `projectName`。
+## Complete Configuration Example
 
-通过以上配置，可按照团队需求定制 Hook 的检索策略、上下文感知与输出方式，确保 Claude Code 在不同项目中都能准确加载记忆。EOF
+### Optimized for Active Development (Recommended)
+
+```json
+{
+  "memoryService": {
+    "maxMemoriesPerSession": 8,
+    "recentFirstMode": true,
+    "recentMemoryRatio": 0.6,
+    "recentTimeWindow": "last-month",
+    "fallbackTimeWindow": "last-3-months"
+  },
+  "memoryScoring": {
+    "weights": {
+      "timeDecay": 0.40,
+      "tagRelevance": 0.25,
+      "contentRelevance": 0.15,
+      "contentQuality": 0.20,
+      "conversationRelevance": 0.25
+    },
+    "minRelevanceScore": 0.4,
+    "timeDecayRate": 0.05,
+    "enableConversationContext": true
+  },
+  "gitAnalysis": {
+    "enabled": true,
+    "commitLookback": 14,
+    "maxCommits": 20,
+    "includeChangelog": true,
+    "maxGitMemories": 3,
+    "gitContextWeight": 1.8
+  }
+}
+```
+
+### Optimized for Research/Reference Work
+
+```json
+{
+  "memoryService": {
+    "recentTimeWindow": "last-month",
+    "fallbackTimeWindow": "last-3-months"
+  },
+  "memoryScoring": {
+    "weights": {
+      "timeDecay": 0.25,
+      "tagRelevance": 0.35,
+      "contentRelevance": 0.20,
+      "contentQuality": 0.30,
+      "conversationRelevance": 0.20
+    },
+    "minRelevanceScore": 0.3,
+    "timeDecayRate": 0.03
+  },
+  "gitAnalysis": {
+    "gitContextWeight": 1.0
+  }
+}
+```
+
+---
+
+## Tuning Guide
+
+### Problem: Recent work not appearing in context
+
+**Symptoms:**
+- Old documentation/decisions dominate
+- Recent bug fixes/features missing
+- Context feels outdated
+
+**Solutions:**
+1. Increase `timeDecay` weight: `0.40` → `0.45`
+2. Increase `gitContextWeight`: `1.8` → `2.0`
+3. Widen `recentTimeWindow`: `"last-week"` → `"last-month"`
+4. Reduce `tagRelevance` weight: `0.25` → `0.20`
+
+### Problem: Too many low-quality memories
+
+**Symptoms:**
+- Generic session summaries in context
+- Duplicate or trivial information
+- Context feels noisy
+
+**Solutions:**
+1. Increase `minRelevanceScore`: `0.4` → `0.5`
+2. Increase `contentQuality` weight: `0.20` → `0.25`
+3. Reduce `maxMemoriesPerSession`: `8` → `5`
+
+### Problem: Missing important old architectural decisions
+
+**Symptoms:**
+- Lose context of foundational decisions
+- Architectural rationale missing
+- Only seeing recent tactical work
+
+**Solutions:**
+1. Reduce `timeDecay` weight: `0.40` → `0.30`
+2. Increase `tagRelevance` weight: `0.25` → `0.30`
+3. Gentler `timeDecayRate`: `0.05` → `0.03`
+4. Tag important decisions with `"architecture"`, `"decision"` tags
+
+### Problem: Git context overwhelming other signals
+
+**Symptoms:**
+- Only git-keyword memories showing up
+- Missing memories that don't match commit messages
+- Over-focused on recent commits
+
+**Solutions:**
+1. Reduce `gitContextWeight`: `1.8` → `1.4`
+2. Reduce `maxGitMemories`: `3` → `2`
+3. Disable git analysis temporarily: `"enabled": false`
+
+### Problem: "No relevant memories found" despite healthy database
+
+**Symptoms:**
+- Hooks show "No relevant memories found" or "No active connection available"
+- HTTP server is running and healthy
+- Database contains many memories
+- Hook logs show connection failures or wrong endpoint
+
+**Root Causes:**
+
+1. **Port Mismatch**: Config endpoint doesn't match actual HTTP server port
+   ```json
+   // WRONG - Server runs on 8000, config shows 8889
+   "endpoint": "http://127.0.0.1:8889"
+   ```
+
+2. **Stale Configuration**: Config not updated after reinstalling hooks or changing server port
+
+**Solutions:**
+
+1. **Verify HTTP server port**:
+   ```bash
+   # Check what port the server is actually running on
+   lsof -i :8000    # Linux/macOS
+   netstat -ano | findstr "8000"  # Windows
+
+   # Or check server logs
+   systemctl --user status mcp-memory-http.service  # Linux systemd
+   ```
+
+2. **Fix endpoint in config** (`~/.claude/hooks/config.json`):
+   ```json
+   {
+     "memoryService": {
+       "http": {
+         "endpoint": "http://127.0.0.1:8000",  // Match actual server port!
+         "apiKey": "your-api-key"
+       }
+     }
+   }
+   ```
+
+3. **Test connection manually**:
+   ```bash
+   curl http://127.0.0.1:8000/api/health
+   # Should return: {"status":"healthy","version":"..."}
+   ```
+
+4. **Verify configuration is loaded**:
+   ```bash
+   # Run a hook manually and check the output
+   node ~/.claude/hooks/core/session-start.js
+   # Look for connection protocol and storage info in output
+   ```
+
+**Related Configuration Issues:**
+
+After updating from repository, verify these settings match your preferences:
+- `recentTimeWindow`: Repository default is `"last week"` (not `"last 3 days"`)
+- `fallbackTimeWindow`: Repository default is `"last 2 weeks"` (not `"last week"`)
+- `timeDecay` weight: Repository default is `0.50` (not `0.60`)
+- `minRelevanceScore`: Repository default is `0.4` (not `0.25`)
+- `commitLookback`: Repository default is `14` days (not `7`)
+
+**See also:** [CLAUDE.md § Configuration Management](../../CLAUDE.md#configuration-management) for complete troubleshooting guide.
+
+---
+
+## Migration from Previous Versions
+
+### v1.0 → v2.0 (Recency Optimization)
+
+**Breaking Changes:**
+- `timeDecay` weight increased from `0.25` to `0.40`
+- `tagRelevance` weight decreased from `0.35` to `0.25`
+- `timeDecayRate` decreased from `0.10` to `0.05`
+- `minRelevanceScore` increased from `0.3` to `0.4`
+- `gitContextWeight` increased from `1.2` to `1.8`
+
+**Impact:** Recent memories (< 30 days) will rank significantly higher. Adjust weights if you need more historical context.
+
+**Migration Steps:**
+1. Backup current `config.json`
+2. Update weights to new defaults
+3. Test with `test-recency-scoring.js`
+4. Fine-tune based on your workflow
+
+---
+
+## Advanced: Scoring Algorithm Details
+
+### Final Score Calculation
+
+```javascript
+// Step 1: Calculate base score (weighted sum of components + bonuses)
+let baseScore =
+  (timeDecayScore * timeDecayWeight) +
+  (tagRelevanceScore * tagRelevanceWeight) +
+  (contentRelevanceScore * contentRelevanceWeight) +
+  (contentQualityScore * contentQualityWeight) +
+  typeBonus +
+  recencyBonus
+
+// Step 2: Add conversation context if enabled (additive)
+if (conversationContextEnabled) {
+  baseScore += (conversationRelevanceScore * conversationRelevanceWeight)
+}
+
+// Step 3: Apply git context boost (multiplicative - boosts ALL components)
+// Note: This multiplies the entire score including conversation relevance
+// Implementation: Applied in session-start.js after scoring, not in memory-scorer.js
+if (isGitContextMemory) {
+  baseScore *= gitContextWeight
+}
+
+// Step 4: Apply quality penalty for very low quality (multiplicative)
+if (contentQualityScore < 0.2) {
+  baseScore *= 0.5
+}
+
+// Step 5: Normalize to [0, 1]
+finalScore = clamp(baseScore, 0, 1)
+```
+
+### Score Component Ranges
+
+- **Time Decay**: 0.01 - 1.0 (exponential decay based on age)
+- **Tag Relevance**: 0.1 - 1.0 (0.3 default if no tags)
+- **Content Relevance**: 0.1 - 1.0 (0.3 default if no keywords)
+- **Content Quality**: 0.05 - 1.0 (0.3 default for normal content)
+- **Type Bonus**: -0.1 - 0.3 (based on memory type)
+- **Recency Bonus**: 0 - 0.15 (tiered based on age)
+
+### Type Bonuses
+
+```javascript
+{
+  'decision': 0.3,      // Architectural decisions
+  'architecture': 0.3,  // Architecture docs
+  'reference': 0.2,     // Reference materials
+  'session': 0.15,      // Session summaries
+  'insight': 0.2,       // Insights
+  'bug-fix': 0.15,      // Bug fixes
+  'feature': 0.1,       // Feature descriptions
+  'note': 0.05,         // General notes
+  'temporary': -0.1     // Temporary notes (penalized)
+}
+```
+
+---
+
+## Testing Configuration Changes
+
+Use the included test script to validate your configuration:
+
+```bash
+cd /path/to/claude-hooks
+node test-recency-scoring.js
+```
+
+This will show:
+- Time decay calculations for different ages
+- Recency bonus application
+- Final scoring with your config weights
+- Ranking of test memories
+
+Expected output should show recent memories (< 7 days) in top 3 positions.
+
+---
+
+## See Also
+
+- [README.md](./README.md) - General hooks documentation
+- [MIGRATION.md](./MIGRATION.md) - Migration guides
+- [README-NATURAL-TRIGGERS.md](./README-NATURAL-TRIGGERS.md) - Natural triggers documentation

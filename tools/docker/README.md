@@ -1,19 +1,3 @@
-# Docker 使用指南（中文）
-
-- 包含多种构建/运行方案：standalone、uv、pythonpath、slim、glama 等 compose 文件。
-- 关键脚本：`test-docker-modes.sh` 用于验证不同模式；Dockerfile* 对应不同配置。
-- 基本流程：`docker-compose -f docker-compose.yml up`，根据需要切换 HTTP/MCP/混合模式。
-- 更多参数与环境变量见下方英文原文。
-
----
-
-# README.md（中文说明）
-
-Docker 构建/运行/调试说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Docker Setup for MCP Memory Service
 
 ## 🚀 Quick Start

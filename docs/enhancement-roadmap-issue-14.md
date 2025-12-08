@@ -1,14 +1,15 @@
-# 记忆感知增强路线图（Issue #14）
+# Memory Awareness Enhancement Roadmap - Issue #14
 
-## 摘要
+## Executive Summary
 
-本路线图描述如何将 GitHub Issue #14 从一个基础外部工具演进为具备记忆感知能力的 Claude Code 体验，充分利用 hooks、项目感知与 MCP 深度集成。
+This roadmap outlines the transformation of GitHub issue #14 from a basic external utility to a sophisticated memory-aware Claude Code experience leveraging advanced features like hooks, project awareness, and MCP deep integration.
 
-## 阶段 1：自动记忆感知（第 1-2 周）
+## Phase 1: Automatic Memory Awareness (Weeks 1-2)
 
-### 1.1 会话启动 Hook
-**目标**：启动 Claude Code 会话时自动注入相关记忆。
+### 1.1 Session Startup Hooks
+**Goal**: Automatically inject relevant memories when starting a Claude Code session
 
+**Implementation**:
 ```javascript
 // claude-hooks/session-start.js
 export async function onSessionStart(context) {
@@ -28,40 +29,46 @@ export async function onSessionStart(context) {
 }
 ```
 
-**特性**：
-- 基于 Git 仓库与目录结构的项目检测。
-- 依据项目与时间窗口的智能记忆筛选。
-- 无需人工操作即可自动注入上下文。
+**Features**:
+- Project detection based on git repository and directory structure
+- Smart memory filtering by project relevance and recency
+- Automatic context injection without user intervention
 
-### 1.2 项目感知记忆选择
-**目标**：根据当前项目上下文智能挑选记忆。
+### 1.2 Project-Aware Memory Selection
+**Goal**: Intelligently select memories based on current project context
 
+**Implementation**:
 ```python
+# Enhanced memory retrieval with project awareness
 class ProjectAwareMemoryRetrieval:
     def select_relevant_memories(self, project_context):
+        # Score memories by relevance to current project
         memories = self.memory_service.search_by_tags([
             project_context.name,
             f"tech:{project_context.language}",
             "decisions", "architecture", "bugs-fixed"
         ])
+        
+        # Apply relevance scoring
         scored_memories = self.score_by_relevance(memories, project_context)
         return scored_memories[:10]
 ```
 
-### 1.3 对话上下文注入
-**目标**：将记忆上下文无缝嵌入对话流。
+### 1.3 Conversation Context Injection
+**Goal**: Seamlessly inject memory context into conversation flow
 
-交付物：
-- 会话初始化 hook。
-- 项目上下文检测算法。
-- 记忆相关性打分系统。
-- 上下文格式化与注入工具集。
+**Deliverables**:
+- Session initialization hooks
+- Project context detection algorithm
+- Memory relevance scoring system
+- Context formatting and injection utilities
 
-## 阶段 2：智能上下文更新（第 3-4 周）
+## Phase 2: Intelligent Context Updates (Weeks 3-4)
 
-### 2.1 动态记忆加载
-**目标**：随对话主题变化更新记忆上下文。
+### 2.1 Dynamic Memory Loading
+**Goal**: Update memory context as conversation topics evolve
 
+**Implementation**:
 ```javascript
 // claude-hooks/topic-change.js
 export async function onTopicChange(context, newTopics) {
@@ -80,19 +87,29 @@ export async function onTopicChange(context, newTopics) {
 }
 ```
 
-### 2.2 会话连续性
-- 目标：跨多次会话保持连续体验。
-- 特性：跨会话关联、会话结果整合、持久线程管理。
+### 2.2 Conversation Continuity
+**Goal**: Link conversations across sessions for seamless continuity
 
-### 2.3 智能记忆过滤
-- 目标：基于对话分析自动筛选记忆。
-- 技术：话题抽取、语义匹配、相关性衰减模型、用户偏好学习。
+**Features**:
+- Cross-session conversation linking
+- Session outcome consolidation
+- Persistent conversation threads
 
-## 阶段 3：高级集成功能（第 5-6 周）
+### 2.3 Smart Memory Filtering
+**Goal**: AI-powered memory selection based on conversation analysis
 
-### 3.1 会话自动打标
-**目标**：自动归档会话结论并打标签。
+**Implementation**:
+- Natural language processing for topic extraction
+- Semantic similarity matching
+- Relevance decay algorithms
+- User preference learning
 
+## Phase 3: Advanced Integration Features (Weeks 5-6)
+
+### 3.1 Auto-Tagging Conversations
+**Goal**: Automatically categorize and tag conversation outcomes
+
+**Implementation**:
 ```javascript
 // claude-hooks/session-end.js
 export async function onSessionEnd(context) {
@@ -107,51 +124,113 @@ export async function onSessionEnd(context) {
 }
 ```
 
-### 3.2 记忆整合系统
-- 目标：智能整理会话洞察。
-- 特性：重复检测与合并、洞察提取、知识图谱构建、记忆全生命周期管理。
+### 3.2 Memory Consolidation System
+**Goal**: Intelligent organization of session insights and outcomes
 
-### 3.3 跨会话智能
-- 目标：在不同编码会话中维持知识连贯。
-- 方法：会话关系映射、渐进式记忆构建、上下文演进跟踪、模式学习。
+**Features**:
+- Duplicate detection and merging
+- Insight extraction and categorization
+- Knowledge graph building
+- Memory lifecycle management
 
-## 技术架构
+### 3.3 Cross-Session Intelligence
+**Goal**: Maintain knowledge continuity across different coding sessions
 
-### 核心组件
+**Implementation**:
+- Session relationship mapping
+- Progressive memory building
+- Context evolution tracking
+- Learning pattern recognition
 
-1. **Memory Hook System**：生命周期 hook、项目上下文检测、动态记忆注入。
-2. **Intelligent Memory Selection**：相关性打分、话题分析、上下文过滤。
-3. **Context Management**：动态更新、格式化工具、连续性追踪。
-4. **Integration Layer**：Claude Code hook 接口、MCP Memory 连接器、项目结构分析器。
+## Technical Architecture
 
-### API 增强
+### Core Components
+
+1. **Memory Hook System**
+   - Session lifecycle hooks
+   - Project context detection
+   - Dynamic memory injection
+
+2. **Intelligent Memory Selection**
+   - Relevance scoring algorithms
+   - Topic analysis and matching
+   - Context-aware filtering
+
+3. **Context Management**
+   - Dynamic context updates
+   - Memory formatting utilities
+   - Conversation continuity tracking
+
+4. **Integration Layer**
+   - Claude Code hooks interface
+   - MCP Memory Service connector
+   - Project structure analysis
+
+### API Enhancements
 
 ```python
+# New memory service endpoints for Claude Code integration
 @app.post("/claude-code/session-context")
 async def get_session_context(project: ProjectContext):
-    """Claude Code 启动时请求记忆上下文"""
-
-@app.post("/claude-code/dynamic-context")
+    """Get relevant memories for Claude Code session initialization."""
+    
+@app.post("/claude-code/dynamic-context")  
 async def get_dynamic_context(topics: List[str], exclude: List[str]):
-    """根据新话题拉取额外上下文"""
-
+    """Get additional context based on evolving conversation topics."""
+    
 @app.post("/claude-code/consolidate-session")
 async def consolidate_session(session_data: SessionData):
-    """存储并组织会话结果"""
+    """Store and organize session outcomes with intelligent tagging."""
 ```
 
-## 成功指标
+## Success Metrics
 
-### 阶段 1
-- ✅ 100% 自动注入会话上下文。
-- ✅ 记忆加载后启动耗时 < 2 秒。
-- ✅ 记忆相关性准确率 ≥ 90%。
+### Phase 1 Targets
+- ✅ 100% automatic session context injection
+- ✅ <2 second session startup time with memory loading
+- ✅ 90%+ relevant memory selection accuracy
 
-### 阶段 2
-- ✅ 话题变化触发实时上下文更新。
-- ✅ 会话连续性 ≥ 95%。
-- ✅ 具备智能话题检测与匹配。
+### Phase 2 Targets  
+- ✅ Real-time context updates based on conversation flow
+- ✅ 95%+ conversation continuity across sessions
+- ✅ Intelligent topic detection and memory matching
 
-### 阶段 3
-- ✅ 记忆管理全流程自动化。
-- ✅ 构建跨会话知识库。
+### Phase 3 Targets
+- ✅ Fully autonomous memory management
+- ✅ Cross-session knowledge building
+- ✅ Adaptive learning from user interactions
+
+## Implementation Priority
+
+**High Priority (Phase 1)**:
+1. Session startup hooks for automatic memory injection
+2. Project-aware memory selection algorithms
+3. Basic context injection utilities
+
+**Medium Priority (Phase 2)**:
+1. Dynamic memory loading based on conversation topics
+2. Cross-session conversation linking
+3. Smart memory filtering enhancements
+
+**Enhancement Priority (Phase 3)**:
+1. Auto-tagging and session outcome consolidation
+2. Advanced memory organization systems
+3. Machine learning-based relevance optimization
+
+## Risk Mitigation
+
+### Technical Risks
+- **Performance Impact**: Implement lazy loading and caching strategies
+- **Context Overload**: Smart filtering and relevance-based selection  
+- **Memory Service Availability**: Graceful degradation without memory service
+
+### User Experience Risks
+- **Information Overload**: Configurable memory injection levels
+- **Privacy Concerns**: Clear memory access controls and user preferences
+- **Learning Curve**: Seamless integration with minimal configuration required
+
+## Conclusion
+
+This enhancement transforms issue #14 from a basic utility into a revolutionary memory-aware Claude Code experience. By leveraging Claude Code's advanced features, we can deliver the original vision of automatic memory context injection while providing intelligent, context-aware assistance that learns and adapts to user patterns.
+
+The phased approach ensures incremental value delivery while building towards a sophisticated memory-aware development environment that fundamentally changes how developers interact with their code and project knowledge.

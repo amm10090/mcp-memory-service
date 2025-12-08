@@ -1,175 +1,175 @@
-# Claude Code 集成指南：命令 vs MCP Server
+# Claude Code Integration: Commands vs MCP Server
 
-本文将帮助你根据实际需求选择最合适的集成方式。
+This guide helps you choose the best integration method for your workflow and needs.
 
-## TL;DR —— 快速决策
+## TL;DR - Quick Decision
 
-### 选择 **命令（Commands）** 的场景：
-✅ **立即可用**（2 分钟内即可运行）  
-✅ **使用简单**（`claude /memory-store "content"`）  
-✅ **无需配置**（零 MCP 服务器设置）  
-✅ **自动感知上下文**（可识别项目环境）  
+### Choose **Commands** if you want:
+✅ **Immediate setup** (2 minutes to working)  
+✅ **Simple usage** (`claude /memory-store "content"`)  
+✅ **No configuration** (zero MCP server setup)  
+✅ **Context awareness** (automatic project detection)  
 
-### 选择 **MCP Server** 的场景：
-✅ **深度集成** Claude Code 的 MCP 体系  
-✅ **多服务器工作流**（可与其他 MCP 服务协同）  
-✅ **最大灵活度**，可自由定制配置  
-✅ **传统 MCP 工具** 交互体验  
-
----
-
-## 详细对比
-
-### 安装与配置
-
-| 维度 | 命令（v2.2.0） | MCP Server |
-|------|----------------|------------|
-| **设置时长** | 约 2 分钟 | 5-15 分钟 |
-| **配置需求** | 无需配置 | 需手动注册 MCP 服务器 |
-| **前置条件** | 仅需 Claude Code CLI | 需 CLAUDE CLI + MCP 基础 |
-| **安装方式** | `python install.py --install-claude-commands` | `claude mcp add memory-service spawn -- ...` |
-| **更新方式** | 安装脚本自动更新 | 手动维护服务器路径 |
-
-### 使用体验
-
-| 维度 | 命令 | MCP Server |
-|------|------|------------|
-| **交互模式** | `claude /memory-store "content"` | 在会话中自然语言调用工具 |
-| **功能探索** | 直接执行命令 | 通过工具调用界面 |
-| **学习成本** | 极低（自带命令帮助） | 中等（需了解 MCP 工作流） |
-| **错误处理** | 内置指引与回退策略 | 标准 MCP 错误返回 |
-| **上下文协助** | 丰富的对话式体验 | 基础工具描述 |
-
-### 功能能力
-
-| 功能 | 命令 | MCP Server |
-|------|------|------------|
-| **记忆存储** | ✅ 支持 | ✅ 支持 |
-| **时间检索** | ✅ 自然语言查询 | ✅ 自然语言查询 |
-| **语义搜索** | ✅ 支持标签与内容搜索 | ✅ 支持标签与内容搜索 |
-| **健康检查** | ✅ 内置全面诊断 | ⚠️ 仅基础连通性 |
-| **上下文识别** | ✅ 自动感知项目/Git | ❌ 需手动指定上下文 |
-| **服务发现** | ✅ 支持 mDNS 自动发现 | ⚠️ 需手动配置端点 |
-| **批量操作** | ✅ 支持会话上下文捕获 | ⚠️ 逐次工具调用 |
-
-### 集成与工作流
-
-| 维度 | 命令 | MCP Server |
-|------|------|------------|
-| **嵌入工作流** | 直接 CLI 命令 | 会话式交互 |
-| **多服务器支持** | ❌ 独立命令 | ✅ 可与其他服务并存 |
-| **协议合规** | ❌ 自定义实现 | ✅ 完整 MCP 协议 |
-| **未来兼容性** | ⚠️ 受命令格式影响 | ✅ 随 MCP 标准演进 |
-| **可扩展性** | ⚠️ 限于预设命令 | ✅ 可扩展完整 MCP 工具生态 |
-
-### 技术考量
-
-| 维度 | 命令 | MCP Server |
-|------|------|------------|
-| **性能** | ⚡ 直接执行 | ⚡ 类似性能 |
-| **资源占用** | 🟢 极低 | 🟢 标准 MCP 开销 |
-| **调试体验** | 🟡 命令日志 | 🟢 标准 MCP 调试手段 |
-| **监控能力** | 🟢 内建健康检查 | 🟡 需外部监控 |
-| **定制能力** | 🟡 限于命令参数 | 🟢 可自定义完整配置 |
+### Choose **MCP Server** if you want:
+✅ **Deep integration** with Claude Code's MCP system  
+✅ **Multi-server workflows** (alongside other MCP servers)  
+✅ **Maximum flexibility** and configuration control  
+✅ **Traditional MCP tool** interactions  
 
 ---
 
-## 推荐使用场景
+## Detailed Comparison
 
-### 命令更合适的情况
+### Installation & Setup
 
-#### **个人开发者**
-- 主要处理个人项目；
-- 需要快速获得记忆能力；
-- 偏好直接命令式接口；
-- 不依赖复杂 MCP 工作流。
+| Aspect | Commands (v2.2.0) | MCP Server |
+|--------|-------------------|------------|
+| **Setup Time** | 2 minutes | 5-15 minutes |
+| **Configuration** | Zero config required | Manual MCP server registration |
+| **Prerequisites** | Claude Code CLI only | Claude Code CLI + MCP knowledge |
+| **Installation** | `python install.py --install-claude-commands` | `claude mcp add memory-service spawn -- ...` |
+| **Updates** | Automatic with installer updates | Manual server path updates |
 
-#### **快速原型/演示**
-- 测试记忆服务能力；
-- 短期项目需求；
-- 功能学习与 Demo 场景；
-- 需要即开即用体验。
+### User Experience
 
-#### **上下文密集工作**
-- 需要自动识别项目上下文；
-- 依赖 Git 仓库信息；
-- 以会话为单位推进开发；
-- 频繁切换项目。
+| Aspect | Commands | MCP Server |
+|--------|----------|------------|
+| **Usage Pattern** | `claude /memory-store "content"` | Natural language in conversations |
+| **Discovery** | Direct command execution | Tool-based interactions |
+| **Learning Curve** | Immediate (command help built-in) | Moderate (need to learn MCP patterns) |
+| **Error Handling** | Built-in guidance and fallbacks | Standard MCP error responses |
+| **Context Help** | Rich conversational interfaces | Basic tool descriptions |
 
-### MCP Server 更合适的情况
+### Features & Capabilities
 
-#### **团队与组织**
-- 多人共享记忆服务；
-- 使用多个 MCP 服务器协同；
-- 与其他 MCP 工具深度集成；
-- 统一化的开发环境。
+| Feature | Commands | MCP Server |
+|---------|----------|------------|
+| **Memory Storage** | ✅ Full support | ✅ Full support |
+| **Time-based Recall** | ✅ Natural language queries | ✅ Natural language queries |
+| **Semantic Search** | ✅ Tag and content search | ✅ Tag and content search |
+| **Health Diagnostics** | ✅ Comprehensive health checks | ⚠️ Basic connectivity |
+| **Context Detection** | ✅ Automatic project/git context | ❌ Manual context specification |
+| **Service Discovery** | ✅ Auto mDNS discovery | ⚠️ Manual endpoint configuration |
+| **Batch Operations** | ✅ Session context capture | ⚠️ Individual tool calls only |
 
-#### **高级用户**
-- 复杂的 MCP 服务器配置；
-- 自定义工具扩展；
-- 精细化的记忆服务运维；
-- 需要最大的灵活度。
+### Integration & Workflow
 
-#### **生产部署**
-- 服务器托管的记忆服务；
-- 多客户端并发访问；
-- 企业级安全需求；
-- 可水平扩展的记忆操作。
+| Aspect | Commands | MCP Server |
+|--------|----------|------------|
+| **Workflow Integration** | Direct CLI commands | Conversational interactions |
+| **Multi-server Support** | ❌ Standalone commands | ✅ Works with other MCP servers |
+| **Protocol Compliance** | ❌ Custom implementation | ✅ Full MCP protocol |
+| **Future Compatibility** | ⚠️ Depends on command format | ✅ Standard MCP evolution |
+| **Extensibility** | ⚠️ Limited to defined commands | ✅ Full MCP tool ecosystem |
+
+### Technical Considerations
+
+| Aspect | Commands | MCP Server |
+|--------|----------|------------|
+| **Performance** | ⚡ Direct execution | ⚡ Similar performance |
+| **Resource Usage** | 🟢 Minimal overhead | 🟢 Standard MCP overhead |
+| **Debugging** | 🟡 Command-specific logs | 🟢 Standard MCP debugging |
+| **Monitoring** | 🟢 Built-in health checks | 🟡 External monitoring needed |
+| **Customization** | 🟡 Limited to command options | 🟢 Full MCP configuration |
 
 ---
 
-## 迁移与兼容
+## Use Case Recommendations
 
-### 可以同时使用吗？
-✅ **可以！** 命令与 MCP Server 可以并存：
-- 命令适合快速操作；
-- MCP Server 负责深度集成；
-- 需要时自由切换；
-- 不会引发冲突或数据问题。
+### Perfect for Commands
 
-### 切换方式
+#### **Individual Developers**
+- Working on personal projects
+- Want immediate memory capabilities
+- Prefer direct command interfaces
+- Don't need complex MCP workflows
 
-#### 从命令切换到 MCP Server
+#### **Quick Prototyping**
+- Testing memory service capabilities
+- Short-term project memory needs
+- Learning the memory service features
+- Demo and presentation scenarios
+
+#### **Context-Heavy Work**
+- Projects requiring automatic context detection
+- Git repository-aware memory operations
+- Session-based development workflows
+- Frequent project switching
+
+### Perfect for MCP Server
+
+#### **Teams & Organizations**
+- Multiple developers sharing memory service
+- Complex multi-server MCP workflows
+- Integration with other MCP tools
+- Standardized development environments
+
+#### **Power Users**
+- Advanced MCP server configurations
+- Custom tool integrations
+- Complex memory service setups
+- Maximum flexibility requirements
+
+#### **Production Deployments**
+- Server-based memory service hosting
+- Multi-client concurrent access
+- Enterprise security requirements
+- Scalable memory operations
+
+---
+
+## Migration & Compatibility
+
+### Can I Use Both?
+✅ **Yes!** Commands and MCP Server can coexist:
+- Commands for quick operations
+- MCP Server for deep integration
+- Switch between methods as needed
+- No conflicts or data issues
+
+### Switching Between Methods
+
+#### From Commands to MCP Server
 ```bash
-# 原有记忆数据保持不变
-# 仅需新增 MCP 注册
+# Your existing memories remain intact
+# Just add MCP server registration
 claude mcp add memory-service spawn -- /path/to/memory/command
 ```
 
-#### 从 MCP Server 切换到命令
+#### From MCP Server to Commands
 ```bash
-# 可在现有配置上安装命令模式
+# Install commands alongside existing setup
 python install.py --install-claude-commands
 ```
 
-### 数据兼容性
-🟢 **完全兼容**：两种方式共用相同的内存服务与数据库。通过命令写入的记忆，可在 MCP Server 中访问，反之亦然。
+### Data Compatibility
+🟢 **Full Compatibility**: Both methods use the same underlying memory service and database. Memories stored via commands are accessible via MCP server and vice versa.
 
 ---
 
-## 实战示例
+## Real-World Examples
 
-### 命令工作流
+### Commands Workflow
 ```bash
-# 开始开发会话
+# Start development session
 claude /memory-context --summary "Starting OAuth integration work"
 
-# 随时记录决策
+# Store decisions as you work
 claude /memory-store --tags "oauth,security" "Using Auth0 for OAuth provider"
 
-# 之后回顾决策
+# Later, recall what you decided
 claude /memory-recall "what did we decide about OAuth last week?"
 
-# 检查服务状态
+# Check everything is working
 claude /memory-health
 ```
 
-### MCP Server 工作流
+### MCP Server Workflow
 ```bash
-# 启动 Claude Code 会话
+# Start Claude Code session
 claude
 
-# 在对话中执行：
+# In conversation with Claude:
 "Please store this OAuth integration decision in memory with tags oauth and security"
 "What did we decide about authentication last week?"
 "Show me all memories related to security decisions"
@@ -177,26 +177,26 @@ claude
 
 ---
 
-## 如何抉择
+## Making Your Choice
 
-### 若满足以下需求，可优先选择命令：
-- 🟢 希望快速体验记忆服务；
-- 🟢 主要处理个人项目；
-- 🟢 偏好命令行交互；
-- 🟢 期待自动识别上下文。
+### Start with Commands if:
+- 🟢 You want to try the memory service quickly
+- 🟢 You're working on individual projects
+- 🟢 You prefer direct command interfaces
+- 🟢 You want automatic context detection
 
-### 若符合以下条件，可选择 MCP Server：
-- 🟢 已经使用其他 MCP 服务器；
-- 🟢 需要最大灵活度与可配置性；
-- 🟢 希望通过对话式交互；
-- 🟢 构建复杂多工具工作流。
+### Choose MCP Server if:
+- 🟢 You're already using other MCP servers
+- 🟢 You need maximum flexibility and control
+- 🟢 You prefer conversational interactions
+- 🟢 You're building complex multi-tool workflows
 
-### 两者结合最灵活：
-- 🚀 使用命令完成即时操作；
-- 🔧 通过 MCP Server 深度嵌入工作流；
-- 📈 依据场景挑选最佳方式；
-- 🎯 兼顾易用与可扩展。
+### Why Not Both?
+- 🚀 Install commands for quick access
+- 🔧 Set up MCP server for deep integration
+- 📈 Use the best tool for each situation
+- 🎯 Maximum flexibility and capability
 
 ---
 
-无论选择命令或 MCP Server，MCP Memory Service 都能为你的 Claude Code 体验提供强大的记忆与检索能力。EOF
+**Remember**: Both methods provide the same powerful memory capabilities - the choice is about interface preference and workflow integration! 🎉

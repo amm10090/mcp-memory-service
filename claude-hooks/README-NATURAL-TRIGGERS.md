@@ -1,10 +1,3 @@
-# README-NATURAL-TRIGGERS.md（中文说明）
-
-自然触发器（Natural Triggers）使用与配置说明。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Natural Memory Triggers for Claude Code
 
 🧠 **Intelligent mid-conversation memory awareness with performance optimization**

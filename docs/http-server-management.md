@@ -1,22 +1,27 @@
-# HTTP 服务器管理指南
+# HTTP Server Management
 
-MCP Memory Service 的 HTTP 服务器是 **Claude Code Hooks（Natural Memory Triggers）正常工作的前提**。本指南说明如何检查、启动与自动化该服务器。
+The MCP Memory Service HTTP server is **required** for Claude Code hooks (Natural Memory Triggers) to work. This guide explains how to check and manage the HTTP server.
 
-## 为什么需要 HTTP 服务器？
+## Why is the HTTP Server Required?
 
-启用 **Natural Memory Triggers** 时：
-- 会话启动 Hook 需通过 HTTP 服务拉取相关记忆。
-- 若 HTTP 未运行，Hook 会静默失败，记忆无法注入。
-- 通过 HTTP 协议可避免与 Claude Code 内置 MCP 服务冲突。
+When using **Natural Memory Triggers** in Claude Code:
+- The session-start hook needs the HTTP server to retrieve relevant memories
+- Without the HTTP server, hooks fail silently and no memories are injected
+- HTTP protocol avoids conflicts with Claude Code's MCP server
 
-## 检查运行状态
+## Checking Server Status
+
+### Quick Check
 
 ```bash
-uv run python scripts/server/check_http_server.py      # 默认：详细输出
-uv run python scripts/server/check_http_server.py -q   # 仅返回码，适合脚本
+# Verbose output (default, recommended for troubleshooting)
+uv run python scripts/server/check_http_server.py
+
+# Quiet mode (only exit code, useful for scripts)
+uv run python scripts/server/check_http_server.py -q
 ```
 
-**运行中示例：**
+**Sample Output (Running):**
 ```
 [OK] HTTP server is running
    Version: 8.3.0
@@ -24,76 +29,155 @@ uv run python scripts/server/check_http_server.py -q   # 仅返回码，适合�
    Status: healthy
 ```
 
-**未运行示例：**
+**Sample Output (Not Running):**
 ```
 [ERROR] HTTP server is NOT running
+
 To start the HTTP server, run:
    uv run python scripts/server/run_http_server.py
+
+   Or for HTTPS:
    MCP_HTTPS_ENABLED=true uv run python scripts/server/run_http_server.py
-Error: [WinError 10061] ...
+
+Error: [WinError 10061] No connection could be made...
 ```
 
-## 启动服务器
+## Starting the Server
+
+### Manual Start
 
 ```bash
-uv run python scripts/server/run_http_server.py                   # HTTP (8001)
-MCP_HTTPS_ENABLED=true uv run python scripts/server/run_http_server.py   # HTTPS (8443)
+# HTTP mode (default, port 8000)
+uv run python scripts/server/run_http_server.py
+
+# HTTPS mode (port 8443)
+MCP_HTTPS_ENABLED=true uv run python scripts/server/run_http_server.py
 ```
 
-### 自动脚本
-- Unix/macOS：`./scripts/server/start_http_server.sh`
-- Windows：`scripts\server\start_http_server.bat`
+### Auto-Start Scripts
 
-特性：
-- 启动前先检测已运行实例。
-- 后台/新窗口执行，并校验成功。
-- 输出日志位置与状态。
+These scripts check if the server is running and start it only if needed:
 
-## 常见问题
-
-### Hook 未注入记忆
-1. `uv run python scripts/server/check_http_server.py`
-2. 若未运行：`uv run python scripts/server/run_http_server.py`
-3. 重启 Claude Code 触发 session-start hook。
-
-### 端口/地址错误
-- 默认 HTTP：`http://localhost:8001`。
-- 若配置端口不一致，需统一 `hooks` 配置或调整 `.env` 中 `MCP_HTTP_PORT`。
-
+**Unix/macOS:**
 ```bash
-# Hooks 配置检查
+./scripts/server/start_http_server.sh
+```
+
+**Windows:**
+```cmd
+scripts\server\start_http_server.bat
+```
+
+**Features:**
+- Checks if server is already running (avoids duplicate instances)
+- Starts server in background/new window
+- Verifies successful startup
+- Shows server status and logs location
+
+## Troubleshooting
+
+### Hook Not Injecting Memories
+
+**Symptom:** Claude Code starts but no memories are shown
+
+**Solution:**
+1. Check if HTTP server is running:
+   ```bash
+   uv run python scripts/server/check_http_server.py
+   ```
+
+2. If not running, start it:
+   ```bash
+   uv run python scripts/server/run_http_server.py
+   ```
+
+3. Restart Claude Code to trigger session-start hook
+
+### Wrong Port or Endpoint
+
+**Symptom:** Hooks fail to connect, "Invalid URL" or connection errors in logs
+
+**Common Issue:** Port mismatch between hooks configuration and actual server
+
+**Check your hooks configuration:**
+```bash
 cat ~/.claude/hooks/config.json | grep -A5 "http"
 ```
 
-### 启动失败
-- 端口占用：`lsof -i :8001` / `netstat -ano | findstr :8001`。
-- 依赖缺失/配置错误：查看日志 `tail -f /tmp/mcp-http-server.log` 或窗口输出。
+Should match your server configuration:
+- Default HTTP: `http://localhost:8000` or `http://127.0.0.1:8000`
+- Default HTTPS: `https://localhost:8443`
 
-## 与 Hooks 的协作
+**Important:** The HTTP server uses port **8000** by default (configured in `.env`). If your hooks are configured for a different port (e.g., 8889), you need to either:
+1. Update hooks config to match port 8000, OR
+2. Change `MCP_HTTP_PORT` in `.env` and restart the server
 
-Claude Code session-start hook 会：
-1. 优先连接 HTTP。
-2. 若失败，回退 MCP。
-3. 若仍失败，仅使用环境上下文。
+**Fix for port mismatch:**
+```bash
+# Option 1: Update hooks config (recommended)
+# Edit ~/.claude/hooks/config.json and change endpoint to:
+# "endpoint": "http://127.0.0.1:8000"
 
-推荐配置（`~/.claude/hooks/config.json`）：
+# Option 2: Change server port (if needed)
+# Edit .env: MCP_HTTP_PORT=8889
+# Then restart: systemctl --user restart mcp-memory-http.service
+```
+
+### Server Startup Issues
+
+**Common causes:**
+- Port already in use
+- Missing dependencies
+- Configuration errors
+
+**Debug steps:**
+1. Check if port is in use:
+   ```bash
+   # Unix/macOS
+   lsof -i :8000
+   ```
+
+   ```cmd
+   # Windows
+   netstat -ano | findstr :8000
+   ```
+
+2. Check server logs (when using auto-start scripts):
+   ```bash
+   # Unix/macOS
+   tail -f /tmp/mcp-http-server.log
+
+   # Windows
+   # Check the server window
+   ```
+
+## Integration with Hooks
+
+The session-start hook automatically:
+1. Attempts to connect to HTTP server (preferred)
+2. Falls back to MCP if HTTP unavailable
+3. Falls back to environment-only if both fail
+
+**Recommended setup for Claude Code** (`~/.claude/hooks/config.json`):
 ```json
 {
   "memoryService": {
     "protocol": "http",
     "preferredProtocol": "http",
     "http": {
-      "endpoint": "http://localhost:8001",
+      "endpoint": "http://localhost:8000",
       "healthCheckTimeout": 3000
     }
   }
 }
 ```
 
-## 自动化
+## Automation
 
-### macOS launchd
-创建 `~/Library/LaunchAgents/com.mcp.memory.http.plist`（路径替换为仓库真实路径）：
+### Start Server on System Boot
+
+**Unix/macOS (launchd):**
+Create `~/Library/LaunchAgents/com.mcp.memory.http.plist` and replace `/path/to/repository` with the absolute path to this repository:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -111,31 +195,54 @@ Claude Code session-start hook 会：
 </plist>
 ```
 
-### Windows 任务计划
-- 触发：登录时。
-- 操作：启动 `scripts\server\start_http_server.bat`。
+**Windows (Task Scheduler):**
+1. Open Task Scheduler
+2. Create Basic Task
+3. Trigger: At log on
+4. Action: Start a program
+5. Program: `C:\path\to\repository\scripts\server\start_http_server.bat` (replace `C:\path\to\repository` with the full path to this repository)
 
-### Shell 快捷命令
+### Pre-Claude Code Script
+
+Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
 ```bash
+# Auto-start MCP Memory HTTP server before Claude Code
+# Replace /path/to/repository with the absolute path to this project
 alias claude-code='/path/to/repository/scripts/server/start_http_server.sh && claude'
 ```
 
-### Linux systemd（推荐）
+**Linux (systemd user service - RECOMMENDED):**
+
+For a persistent, auto-starting service on Linux, use systemd. See [Systemd Service Guide](deployment/systemd-service.md) for detailed setup.
+
+Quick setup:
 ```bash
+# Install service
 bash scripts/service/install_http_service.sh
+
+# Start service
 systemctl --user start mcp-memory-http.service
+
+# Enable auto-start
 systemctl --user enable mcp-memory-http.service
-loginctl enable-linger $USER
+loginctl enable-linger $USER  # Run even when logged out
 ```
 
-常用命令：
+**Quick Commands:**
 ```bash
+# Service control
+systemctl --user start/stop/restart mcp-memory-http.service
 systemctl --user status mcp-memory-http.service
+
+# View logs
 journalctl --user -u mcp-memory-http.service -f
-curl http://127.0.0.1:8001/api/health
+
+# Health check
+curl http://127.0.0.1:8000/api/health
 ```
 
-## 参考
-- [Claude Code Hooks 配置](../CLAUDE.md#claude-code-hooks-configuration-)
+## See Also
+
+- [Claude Code Hooks Configuration](../CLAUDE.md#claude-code-hooks-configuration-)
 - [Natural Memory Triggers](../CLAUDE.md#natural-memory-triggers-v710-latest)
-- [Wiki 故障排查](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING)
+- [Troubleshooting Guide](https://github.com/doobidoo/mcp-memory-service/wiki/07-TROUBLESHOOTING)

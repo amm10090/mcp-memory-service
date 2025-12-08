@@ -1,10 +1,3 @@
-# WINDOWS-SESSIONSTART-BUG.md（中文说明）
-
-Windows 上 SessionStart Hook 问题与解决方法。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Windows SessionStart Hook Bug - Complete Analysis
 
 ## Executive Summary

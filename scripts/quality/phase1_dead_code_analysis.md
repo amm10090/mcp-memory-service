@@ -1,10 +1,3 @@
-# phase1_dead_code_analysis.md（中文说明）
-
-Phase 1 死代码分析指南。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Phase 1: Dead Code Removal Analysis for Issue #240
 
 **Generated:** 2025-11-24

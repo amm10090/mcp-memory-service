@@ -1,94 +1,94 @@
-# ChromaDB 迁移指南
+# ChromaDB Migration Guide
 
-> **ChromaDB 后端已在 v8.0.0 中移除**。本指南将帮助你迁移到现代存储后端。
+> **ChromaDB backend was removed in v8.0.0**. This guide helps you migrate to modern storage backends.
 
-## 快速迁移路径
+## Quick Migration Path
 
-### 方案一：混合后端（推荐）
+### Option 1: Hybrid Backend (Recommended)
 
-最适合大多数场景——兼具本地高速读写与云端同步能力。
+Best choice for most users - combines fast local storage with cloud synchronization.
 
 ```bash
-# 1. 备份 ChromaDB 数据（在 chromadb-legacy 分支上）
+# 1. Backup your ChromaDB data (from chromadb-legacy branch)
 git checkout chromadb-legacy
 python scripts/migration/migrate_chroma_to_sqlite.py --backup ~/chromadb_backup.json
 
-# 2. 切换回主分支并配置混合后端
+# 2. Switch to main branch and configure Hybrid backend
 git checkout main
 export MCP_MEMORY_STORAGE_BACKEND=hybrid
 
-# 3. 配置 Cloudflare 凭据
+# 3. Configure Cloudflare credentials
 export CLOUDFLARE_API_TOKEN="your-token"
 export CLOUDFLARE_ACCOUNT_ID="your-account"
 export CLOUDFLARE_D1_DATABASE_ID="your-d1-id"
 export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 
-# 4. 安装并验证
+# 4. Install and verify
 python install.py --storage-backend hybrid
 python scripts/validation/validate_configuration_complete.py
 ```
 
-### 方案二：SQLite-vec（纯本地）
+### Option 2: SQLite-vec (Local Only)
 
-适用于无需云同步的单设备场景。
+For single-device use without cloud synchronization.
 
 ```bash
-# 1. 备份并迁移
+# 1. Backup and migrate
 git checkout chromadb-legacy
 python scripts/migration/migrate_chroma_to_sqlite.py
 
-# 2. 配置 SQLite-vec 后端
+# 2. Configure SQLite-vec backend
 git checkout main
 export MCP_MEMORY_STORAGE_BACKEND=sqlite_vec
 
-# 3. 安装
+# 3. Install
 python install.py --storage-backend sqlite_vec
 ```
 
-### 方案三：Cloudflare（纯云端）
+### Option 3: Cloudflare (Cloud Only)
 
-面向不需要本地数据库的云端部署需求。
+For pure cloud storage without local database.
 
 ```bash
-# 1. 备份 ChromaDB 数据
+# 1. Backup ChromaDB data
 git checkout chromadb-legacy
 python scripts/migration/migrate_chroma_to_sqlite.py --backup ~/chromadb_backup.json
 
-# 2. 切换到 Cloudflare 后端
+# 2. Switch to Cloudflare backend
 git checkout main
 export MCP_MEMORY_STORAGE_BACKEND=cloudflare
 
-# 3. 配置 Cloudflare 凭据
+# 3. Configure Cloudflare credentials
 export CLOUDFLARE_API_TOKEN="your-token"
 export CLOUDFLARE_ACCOUNT_ID="your-account"
 export CLOUDFLARE_D1_DATABASE_ID="your-d1-id"
 export CLOUDFLARE_VECTORIZE_INDEX="mcp-memory-index"
 
-# 4. 将数据迁移至 Cloudflare
+# 4. Migrate data to Cloudflare
 python scripts/migration/legacy/migrate_chroma_to_sqlite.py
 python scripts/sync/sync_memory_backends.py --source sqlite_vec --target cloudflare
 ```
 
-## 后端对比
+## Backend Comparison
 
-| 功能 | Hybrid ⭐ | SQLite-vec | Cloudflare | ChromaDB（已移除） |
-|------|-----------|------------|------------|--------------------|
-| **性能** | 本地 5ms | 5ms | 受网络影响 | 15ms |
-| **多设备支持** | ✅ 支持 | ❌ 不支持 | ✅ 支持 | ❌ 不支持 |
-| **离线可用** | ✅ 支持 | ✅ 支持 | ❌ 不支持 | ✅ 支持 |
-| **云备份** | ✅ 自动 | ❌ 无 | ✅ 内置 | ❌ 无 |
-| **依赖体量** | 轻量 | 极小 | 无额外 | 庞大（约 2GB） |
-| **配置复杂度** | 中等 | 简单 | 中等 | 简单 |
-| **状态** | **推荐使用** | 受支持 | 受支持 | **已移除** |
+| Feature | Hybrid ⭐ | SQLite-vec | Cloudflare | ChromaDB (Removed) |
+|---------|----------|------------|------------|-------------------|
+| **Performance** | 5ms (local) | 5ms | Network | 15ms |
+| **Multi-device** | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
+| **Offline support** | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes |
+| **Cloud backup** | ✅ Auto | ❌ No | ✅ Native | ❌ No |
+| **Dependencies** | Light | Minimal | None | Heavy (~2GB) |
+| **Setup complexity** | Medium | Easy | Medium | Easy |
+| **Status** | **Recommended** | Supported | Supported | **REMOVED** |
 
-## 迁移脚本详解
+## Migration Script Details
 
-### 使用保留的旧版迁移脚本
+### Using the Legacy Migration Script
 
-迁移脚本保存在 legacy 分支：
+The ChromaDB migration script is preserved in the legacy branch:
 
 ```bash
-# 在 chromadb-legacy 分支
+# From chromadb-legacy branch
 python scripts/migration/migrate_chroma_to_sqlite.py [OPTIONS]
 
 Options:
@@ -99,11 +99,11 @@ Options:
   --dry-run           Show what would be migrated without making changes
 ```
 
-### 手动迁移步骤
+### Manual Migration Steps
 
-若希望完全手动控制：
+If you prefer manual control:
 
-1. **从 ChromaDB 导出**：
+1. **Export from ChromaDB**:
    ```bash
    git checkout chromadb-legacy
    python -c "
@@ -116,7 +116,7 @@ Options:
    "
    ```
 
-2. **导入至新后端**：
+2. **Import to new backend**:
    ```bash
    git checkout main
    python -c "
@@ -131,12 +131,12 @@ Options:
    "
    ```
 
-## 数据校验
+## Data Validation
 
-迁移完成后，务必核对数据：
+After migration, verify your data:
 
 ```bash
-# 检查记忆数量
+# Check memory count
 python -c "
 from mcp_memory_service.storage.factory import create_storage_instance
 storage = await create_storage_instance('./memory.db')
@@ -144,88 +144,88 @@ count = len(await storage.get_all_memories())
 print(f'Migrated {count} memories')
 "
 
-# 与备份对比
+# Compare with backup
 python scripts/validation/validate_migration.py \
     --source ~/chromadb_backup.json \
     --target ./memory.db
 ```
 
-## 故障排查
+## Troubleshooting
 
-### 问题：找不到迁移脚本
+### Issue: Migration script not found
 
-**解决方案**：迁移脚本仅存在于 `chromadb-legacy` 分支。
+**Solution**: The migration script is only available on the `chromadb-legacy` branch:
 ```bash
 git checkout chromadb-legacy
 python scripts/migration/migrate_chroma_to_sqlite.py
 ```
 
-### 问题：导入 ChromaMemoryStorage 时报错
+### Issue: Import errors for ChromaMemoryStorage
 
-**解决方案**：必须切换到 `chromadb-legacy` 分支才能使用 ChromaDB 相关代码。
+**Solution**: You must be on the `chromadb-legacy` branch to access ChromaDB code:
 ```bash
-git checkout chromadb-legacy  # 可访问 ChromaDB 代码
-git checkout main             # v8.0.0+ 已移除 ChromaDB
+git checkout chromadb-legacy  # ChromaDB code available
+git checkout main             # ChromaDB removed (v8.0.0+)
 ```
 
-### 问题：提示 “ChromaDB not installed”
+### Issue: "ChromaDB not installed" error
 
-**解决方案**：在 legacy 分支安装 chromadb 依赖。
+**Solution**: Install chromadb on the legacy branch:
 ```bash
 git checkout chromadb-legacy
 pip install chromadb>=0.5.0 sentence-transformers>=2.2.2
 ```
 
-### 问题：迁移导致时间戳丢失
+### Issue: Memory timestamps lost during migration
 
-**解决方案**：运行脚本时添加 `--preserve-timestamps`。
+**Solution**: Use `--preserve-timestamps` flag:
 ```bash
 python scripts/migration/migrate_chroma_to_sqlite.py --preserve-timestamps
 ```
 
-### 问题：大型 ChromaDB 数据迁移缓慢
+### Issue: Large ChromaDB database migration is slow
 
-**解决方案**：使用批处理模式加速。
+**Solution**: Use batch mode for faster migration:
 ```bash
 python scripts/migration/migrate_chroma_to_sqlite.py --batch-size 100
 ```
 
-## 回滚方案
+## Rollback Plan
 
-若确需回滚到 ChromaDB（不推荐）：
+If you need to rollback to ChromaDB (not recommended):
 
-1. **停留在 v7.x 版本** —— 不要升级到 v8.0.0；
-2. **参考 chromadb-legacy 分支**；
-3. **从备份恢复**：
+1. **Stay on v7.x releases** - Do not upgrade to v8.0.0
+2. **Use chromadb-legacy branch** for reference
+3. **Restore from backup**:
    ```bash
    git checkout chromadb-legacy
    python scripts/migration/restore_from_backup.py ~/chromadb_backup.json
    ```
 
-## 迁移后检查清单
+## Post-Migration Checklist
 
-- [ ] 已完成备份
-- [ ] 迁移脚本运行无报错
-- [ ] 新旧后端的记忆数量一致
-- [ ] 随机抽查查询结果正确
-- [ ] 已更新 `MCP_MEMORY_STORAGE_BACKEND` 配置
-- [ ] Legacy ChromaDB 数据目录妥善备份
-- [ ] 校验脚本通过
-- [ ] 应用/自动化测试通过
-- [ ] Claude Desktop/Claude Code 集成正常
+- [ ] Backup completed successfully
+- [ ] Migration script ran without errors
+- [ ] Memory count matches between old and new backend
+- [ ] Sample queries return expected results
+- [ ] Configuration updated (`MCP_MEMORY_STORAGE_BACKEND`)
+- [ ] Legacy ChromaDB data directory backed up
+- [ ] Validation script passes
+- [ ] Application tests pass
+- [ ] Claude Desktop/Code integration works
 
-## 获取支持
+## Support
 
-- **迁移问题**：参见 [Issue #148](https://github.com/doobidoo/mcp-memory-service/issues/148)
-- **Legacy 分支**： [chromadb-legacy](https://github.com/doobidoo/mcp-memory-service/tree/chromadb-legacy)
-- **后端配置**：参见 [STORAGE_BACKENDS.md](./STORAGE_BACKENDS.md)
+- **Migration issues**: See [Issue #148](https://github.com/doobidoo/mcp-memory-service/issues/148)
+- **Legacy branch**: [chromadb-legacy](https://github.com/doobidoo/mcp-memory-service/tree/chromadb-legacy)
+- **Backend setup**: See [STORAGE_BACKENDS.md](./STORAGE_BACKENDS.md)
 
-## 为什么移除 ChromaDB？
+## Why Was ChromaDB Removed?
 
-- **性能问题**：相较 SQLite-vec 慢约 3 倍（15ms vs 5ms）；
-- **依赖体量**：需要下载约 2GB 的 PyTorch 依赖；
-- **复杂度**：一次移除 2,841 行代码，降低维护成本；
-- **更佳替代方案**：混合后端提供更高性能并支持云同步；
-- **维护负担**：减少长期技术债务与升级压力。
+- **Performance**: 3x slower than SQLite-vec (15ms vs 5ms)
+- **Dependencies**: Required ~2GB PyTorch download
+- **Complexity**: 2,841 lines of code removed
+- **Better alternatives**: Hybrid backend provides better performance with cloud sync
+- **Maintenance**: Reduced long-term maintenance burden
 
-移除 ChromaDB 使项目更易维护，同时通过现代后端获得更佳性能体验。
+The removal improves the project's maintainability while offering better performance through modern alternatives.
