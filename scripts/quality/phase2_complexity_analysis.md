@@ -1,3 +1,9 @@
+# phase2_complexity_analysis.md（中文说明）
+
+Phase 2 复杂度分析指南。
+
+---
+
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Issue #240 Phase 2: Low-Hanging Complexity Reductions
 
