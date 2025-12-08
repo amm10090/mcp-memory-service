@@ -1,4 +1,6 @@
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
+> 中文摘要：本文档保留英文原文，概述「Litestream Synchronization Setup Guide」的背景与要点，供历史记录与快速阅览。
+
 # Litestream Synchronization Setup Guide
 
 This guide will help you set up real-time database synchronization between your local macOS machine and your remote server at `your-remote-server:8443`.

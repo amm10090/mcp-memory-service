@@ -1,4 +1,6 @@
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
+> 中文摘要：本文档保留英文原文，概述「Windows Setup Guide」的背景与要点，供历史记录与快速阅览。
+
 # Windows Setup Guide
 
 This guide provides comprehensive instructions for setting up and running the MCP Memory Service on Windows systems, including handling common Windows-specific issues.

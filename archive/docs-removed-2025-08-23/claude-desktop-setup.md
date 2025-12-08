@@ -1,4 +1,6 @@
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
+> 中文摘要：本文档保留英文原文，概述「Claude Desktop Setup Guide - Windows」的背景与要点，供历史记录与快速阅览。
+
 # Claude Desktop Setup Guide - Windows
 
 This guide helps you configure the MCP Memory Service to work with Claude Desktop on Windows without repeated PyTorch downloads.
