@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Multi-Client Architecture Documentation
 
 This document provides technical details about the multi-client architecture implementation in the MCP Memory Service, specifically focusing on the integrated setup functionality added to `install.py`.

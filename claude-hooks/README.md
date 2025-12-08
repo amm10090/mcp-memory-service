@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Claude Code Memory Awareness Hooks
 
 Automatic memory awareness and intelligent context injection for Claude Code using the MCP Memory Service.

@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Claude Code Commands for MCP Memory Service
 
 This directory contains conversational Claude Code commands that integrate memory functionality into your Claude Code workflow. These commands follow the CCPlugins pattern of markdown-based conversational instructions.

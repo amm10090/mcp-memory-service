@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # macOS Intel Setup Guide
 
 This guide addresses the specific challenges of running MCP Memory Service on Intel-based Mac systems, including both legacy (2013-2017) and modern (2018+) Intel Macs.

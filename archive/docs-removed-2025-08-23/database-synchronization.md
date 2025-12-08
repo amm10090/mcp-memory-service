@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Database Synchronization Guide
 
 This guide covers setting up database synchronization for MCP Memory Service across multiple machines using JSON export/import and Litestream replication.

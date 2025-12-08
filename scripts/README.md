@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP Memory Service Scripts
 
 This directory contains organized utility scripts for maintaining, managing, and operating the MCP Memory Service. Scripts are categorized by function for easy navigation and maintenance.

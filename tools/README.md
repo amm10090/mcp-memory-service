@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Development Tools and Utilities
 
 This directory contains development tools, build utilities, and deployment configurations for MCP Memory Service.

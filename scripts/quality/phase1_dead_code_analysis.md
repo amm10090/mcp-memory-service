@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Phase 1: Dead Code Removal Analysis for Issue #240
 
 **Generated:** 2025-11-24

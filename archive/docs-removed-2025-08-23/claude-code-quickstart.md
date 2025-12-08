@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Claude Code Commands - Quick Start Guide
 
 Get up and running with MCP Memory Service Claude Code commands in just 2 minutes!

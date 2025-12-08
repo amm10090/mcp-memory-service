@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP Memory Service Examples
 
 This directory contains example configurations, scripts, and setup utilities for deploying MCP Memory Service in various scenarios.

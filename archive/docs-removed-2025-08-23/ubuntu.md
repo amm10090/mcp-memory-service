@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Ubuntu Setup Guide
 
 This guide provides comprehensive instructions for setting up MCP Memory Service on Ubuntu systems, covering both desktop and server environments.

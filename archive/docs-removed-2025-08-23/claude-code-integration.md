@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Using MCP Memory Service with Claude Code
 
 This guide explains how to integrate the MCP Memory Service with Claude Code, providing two powerful approaches for using persistent memory capabilities in the Claude CLI environment.

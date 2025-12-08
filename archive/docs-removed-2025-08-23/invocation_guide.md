@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP Memory Service Invocation Guide
 
 This document outlines the specific keywords and phrases that trigger the MCP memory service in Claude Desktop conversations, along with examples of how to use them effectively.

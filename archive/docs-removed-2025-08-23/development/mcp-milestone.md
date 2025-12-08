@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP Memory Service v4.0.0-beta.1 - Major Milestone Achievement
 
 **Date**: August 4, 2025  

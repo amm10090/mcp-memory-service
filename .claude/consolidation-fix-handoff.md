@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Consolidation Fix - Session Handoff
 
 **Session Date**: 2025-12-06

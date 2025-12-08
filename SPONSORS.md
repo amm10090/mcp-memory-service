@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Support MCP Memory Service Development
 
 Thank you for considering sponsoring MCP Memory Service! Your support helps maintain and enhance this production-ready knowledge management system.

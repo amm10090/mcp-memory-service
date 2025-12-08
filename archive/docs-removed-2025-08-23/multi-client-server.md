@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Multi-Client Deployment Guide
 
 This guide explains how to deploy MCP Memory Service for multiple clients accessing a shared memory database. The service supports two primary deployment patterns: **Centralized Server Deployment** and **Shared File Access**.

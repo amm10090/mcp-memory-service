@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Cross-Platform Service Installation Guide
 
 This guide provides instructions for installing MCP Memory Service as a native service on Windows, macOS, and Linux systems. The service will automatically start when your system boots or when you log in.

@@ -1,3 +1,4 @@
+<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP-MEMORY-SERVICE Cleanup and Organization
 
 This branch contains cleanup and reorganization changes for the MCP-MEMORY-SERVICE project.
