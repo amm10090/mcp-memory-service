@@ -1,3 +1,13 @@
+# 赞助与致谢（中文概述）
+
+感谢社区和赞助者对 MCP Memory Service 的支持。若您愿意赞助：
+- 可通过 GitHub Sponsors 或与维护者联系。
+- 赞助将用于基础设施、CI、测试与文档。
+
+下文保留英文原文。
+
+---
+
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Support MCP Memory Service Development
 

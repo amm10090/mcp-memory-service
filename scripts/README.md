@@ -1,3 +1,14 @@
+# scripts 目录说明（中文）
+
+- `maintenance/`：维护与诊断脚本（类型清理、去重、修复等）。
+- `sync/`：同步脚本（含 litestream）。
+- `quality/`：质量管线、静态分析与复杂度/死代码报告。
+- `migration/`：迁移与时间戳修复脚本。
+- `pr/`、`validation/`：PR 质量门、环境校验。
+- 运行前阅读对应子目录 README。
+
+---
+
 # README.md（中文说明）
 
 脚本目录总览及分类说明。

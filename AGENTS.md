@@ -1,3 +1,14 @@
+# AGENTS 配置指南（中文概述）
+
+- 介绍 Codex Agents 的全局配置、行为原则与 MCP 集成规范。
+- 强调使用中文、清晰推理链、最小权限、记忆集成（my-local-mcp）、代码索引、GitHub、Replicate、Shadcn、Exa 等服务。
+- 工作流：先检索记忆与代码索引，再执行，再存储关键结论。
+- 小步修改、阶段性进度报告、文档化输出。
+
+下文保留英文原文。
+
+---
+
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # MCP Memory Service - Agent Guidelines
 

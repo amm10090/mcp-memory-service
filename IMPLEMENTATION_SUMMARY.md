@@ -1,3 +1,13 @@
+# 实施摘要（中文概述）
+
+- 概述 MCP Memory Service 的架构、核心模块、质量系统、存储后端、Web 界面和钩子。
+- 列出关键特性、性能目标和已知风险。
+- 便于快速了解项目实现，不替代详细文档。
+
+下文保留英文原文。
+
+---
+
 <!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
 # Phase 1 Implementation Summary: Memento-Inspired Quality System
 

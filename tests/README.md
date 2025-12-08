@@ -1,3 +1,12 @@
+# 测试说明（中文）
+
+- 测试类型：unit、integration、contracts、performance。
+- 常用命令：`pytest tests/`；单测 `pytest tests/unit -q`；集成 `pytest tests/integration -q`。
+- 运行前确保依赖已安装，必要时设置后端配置（hybrid/cloudflare/sqlite-vec）。
+- 详情见下方英文原文。
+
+---
+
 # README.md（中文说明）
 
 测试运行与结构说明。
