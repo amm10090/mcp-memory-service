@@ -1683,203 +1683,154 @@
 ## [8.45.2] - 2025-12-06
 
 ### Fixed
-- **Dashboard Dark Mode Consistency** - Fixed dark mode regression where form controls, select elements, and view buttons had white/light backgrounds in dark mode
-- **Global Dark Mode CSS** - Added comprehensive `.form-control` and `.form-select` dark mode overrides ensuring consistency across all 7 dashboard tabs (Dashboard, Search, Browse, Documents, Manage, Analytics, Quality)
-- **Quality Tab Chart Contrast** - Improved chart readability in dark mode with proper `var(--neutral-400)` backgrounds and visible grid lines
-- **Chart.js Dark Mode Support** - Added dynamic Chart.js color configuration in `applyTheme()` function with light text (#f9fafb) and proper legend colors
-- **Quality Distribution Chart** - Updated `renderQualityDistributionChart()` with dynamic text/grid colors for dark mode
-- **Quality Provider Chart** - Updated `renderQualityProviderChart()` with dark mode-aware legend colors
+- **仪表盘暗黑模式一致性** —— 修复表单控件/选择框/视图按钮在暗黑模式下背景发白的问题。
+- **全局暗黑 CSS** —— 为 `.form-control`、`.form-select` 添加全覆盖暗黑样式，覆盖仪表盘 7 个标签页（Dashboard/Search/Browse/Documents/Manage/Analytics/Quality）。
+- **质量页图表对比度** —— 为暗黑模式设置合适背景与网格线（`var(--neutral-400)`）。
+- **Chart.js 暗黑支持** —— `applyTheme()` 动态配置图表颜色（浅色文字 #f9fafb、正确图例色）。
+- **质量分布图** —— `renderQualityDistributionChart()` 动态调节文字/网格颜色适配暗黑。
+- **质量提供方图表** —— `renderQualityProviderChart()` 图例颜色兼容暗黑。
 
 ### Changed
-- Enhanced `.view-btn` dark mode styles with proper hover states for better user interaction
+- `.view-btn` 暗黑模式样式优化，悬停态更清晰。
 
 ## [8.45.1] - 2025-12-05
 
 ### Fixed
-- **Quality System HTTP API** - Fixed router configuration causing 404 errors on all `/api/quality/*` endpoints (missing `/api/quality` prefix in app.py router inclusion)
-- **Quality Distribution MCP Tool** - Corrected storage method call from non-existent `search_all_memories()` to `get_all_memories()` in server.py quality distribution handler
-- **HTTP API Tests** - Replaced synchronous `TestClient` with async `httpx.AsyncClient` to fix SQLite thread safety issues in quality system tests
-- **Distribution Endpoint** - Fixed storage retrieval logic in quality.py and removed unnecessary dict-to-Memory conversions
+- **质量系统 HTTP API** —— 修复路由缺少 `/api/quality` 前缀导致所有 `/api/quality/*` 返回 404。
+- **质量分布 MCP 工具** —— 将不存在的 `search_all_memories()` 改为 `get_all_memories()`。
+- **HTTP API 测试** —— 用异步 `httpx.AsyncClient` 替换同步 `TestClient`，解决 SQLite 线程安全问题。
+- **分布接口** —— 修正 quality.py 的存储读取逻辑，移除多余的字典→Memory 转换。
 
 ### Added
-- **Dependencies** - Added `pytest-benchmark` for performance testing support
-- **Dependencies** - Added `onnxruntime` as optional dependency for ONNX model support
+- **依赖** —— 增加 `pytest-benchmark`（性能测试）；新增可选 `onnxruntime`（支持 ONNX 模型）。
 
 ### Testing
-- All 27 functional tests passing
-- ONNX tests properly skip when model unavailable (expected behavior)
-- Zero errors in test suite
+- 27 个功能测试全部通过；ONNX 测试在缺模型时正确跳过；测试套件 0 错误。
 
 ## [8.45.0] - 2025-12-05
 
 ### Added
-- **Memory Quality System** - AI-driven automatic quality scoring (Issue #260, Memento-inspired design)
-  - Local SLM via ONNX (ms-marco-MiniLM-L-6-v2, 23MB) as Tier 1 (primary, default)
-  - Multi-tier fallback chain: Local SLM → Groq API → Gemini API → Implicit signals
-  - Zero cost, full privacy, offline-capable with local SLM
-  - 50-100ms latency (CPU), 10-20ms (GPU with CUDA/MPS/DirectML)
-  - Cross-platform: Windows (CUDA/DirectML), macOS (MPS), Linux (CUDA/ROCm)
+- **记忆质量系统** —— AI 驱动的自动质量评分（Issue #260，灵感来自 Memento）。
+  - 本地 SLM（ONNX：ms-marco-MiniLM-L-6-v2，23MB）为第 1 层（默认）。
+  - 多层回退：本地 SLM → Groq API → Gemini API → 隐式信号。
+  - 零成本、隐私友好、可离线运行。
+  - 延迟：CPU 50-100ms，GPU 10-20ms（CUDA/MPS/DirectML）。
+  - 跨平台：Windows（CUDA/DirectML）、macOS（MPS）、Linux（CUDA/ROCm）。
 
-- **Quality-Based Memory Management**
-  - Quality-based forgetting: High (≥0.7) preserved 365 days, Medium (0.5-0.7) 180 days, Low (<0.5) 30-90 days
-  - Quality-weighted decay: High-quality memories decay 3x slower than low-quality
-  - Quality-boosted search: 0.7×semantic + 0.3×quality reranking (opt-in via `MCP_QUALITY_BOOST_ENABLED`)
-  - Adaptive retention based on access patterns and user feedback
+- **基于质量的记忆管理**
+  - 遗忘策略：高分(≥0.7)保留 365 天，中分(0.5-0.7) 180 天，低分(<0.5) 30-90 天。
+  - 质量加权衰减：高分记忆衰减速度比低分慢 3 倍。
+  - 质量增强检索：0.7×语义 + 0.3×质量重排（`MCP_QUALITY_BOOST_ENABLED`）。
+  - 基于访问与反馈的自适应保留。
 
-- **MCP Tools** (4 new tools for quality management)
-  - `rate_memory` - Manual quality rating with thumbs up/down/neutral (-1/0/1)
-  - `get_memory_quality` - Retrieve quality metrics (score, provider, confidence, access stats)
-  - `analyze_quality_distribution` - System-wide analytics (distribution, provider breakdown, trends)
-  - `retrieve_with_quality_boost` - Quality-boosted semantic search with reranking
+- **MCP 工具（质量管理 4 个新工具）**
+  - `rate_memory`：人工评分 (-1/0/1)。
+  - `get_memory_quality`：查看质量指标（分数/提供方/置信度/访问统计）。
+  - `analyze_quality_distribution`：全局分布分析（分布、提供方拆分、趋势）。
+  - `retrieve_with_quality_boost`：质量增强的语义检索 + 重排。
 
-- **HTTP API Endpoints** (4 new REST endpoints)
-  - POST `/api/quality/memories/{hash}/rate` - Rate memory quality manually
-  - GET `/api/quality/memories/{hash}` - Get quality metrics for specific memory
-  - GET `/api/quality/distribution` - Distribution statistics (high/medium/low counts)
-  - GET `/api/quality/trends` - Time series quality analysis (weekly/monthly trends)
+- **HTTP API**（4 个新端点）
+  - POST `/api/quality/memories/{hash}/rate`：手动评分。
+  - GET `/api/quality/memories/{hash}`：查看单条记忆质量指标。
+  - GET `/api/quality/distribution`：高/中/低分布统计。
+  - GET `/api/quality/trends`：质量时间序列趋势。
 
-- **Dashboard UI Enhancements**
-  - Quality badges on all memory cards (color-coded by tier: green/yellow/red/gray)
-  - Analytics view with distribution charts (bar chart for counts, pie chart for providers)
-  - Provider breakdown visualization (local/groq/gemini/implicit usage statistics)
-  - Top/bottom performers lists (highest and lowest quality memories)
-  - Settings panel for quality configuration (enable/disable, provider selection, boost weight)
-  - i18n support for quality UI elements (English + Chinese translations)
+- **仪表盘 UI 增强**
+  - 记忆卡片质量徽章（绿/黄/红/灰）。
+  - 分布与提供方图表；Top/Bottom 列表。
+  - 质量配置面板（开关、提供方、加权）。
+  - 质量相关 UI 的中英文 i18n。
 
-- **Configuration** (10 new environment variables)
-  - `MCP_QUALITY_SYSTEM_ENABLED` - Master toggle (default: true)
-  - `MCP_QUALITY_AI_PROVIDER` - Provider selection (local/groq/gemini/auto/none, default: local)
-  - `MCP_QUALITY_LOCAL_MODEL` - ONNX model name (default: ms-marco-MiniLM-L-6-v2)
-  - `MCP_QUALITY_LOCAL_DEVICE` - Device selection (auto/cpu/cuda/mps/directml, default: auto)
-  - `MCP_QUALITY_BOOST_ENABLED` - Enable quality-boosted search (default: false, opt-in)
-  - `MCP_QUALITY_BOOST_WEIGHT` - Quality weight 0.0-1.0 (default: 0.3)
-  - `MCP_QUALITY_RETENTION_HIGH` - High-quality retention days (default: 365)
-  - `MCP_QUALITY_RETENTION_MEDIUM` - Medium-quality retention days (default: 180)
-  - `MCP_QUALITY_RETENTION_LOW_MIN` - Low-quality minimum retention (default: 30)
-  - `MCP_QUALITY_RETENTION_LOW_MAX` - Low-quality maximum retention (default: 90)
+- **配置**（10 个环境变量）
+  - `MCP_QUALITY_SYSTEM_ENABLED`（默认 true）
+  - `MCP_QUALITY_AI_PROVIDER`（local/groq/gemini/auto/none，默认 local）
+  - `MCP_QUALITY_LOCAL_MODEL`（默认 ms-marco-MiniLM-L-6-v2）
+  - `MCP_QUALITY_LOCAL_DEVICE`（auto/cpu/cuda/mps/directml，默认 auto）
+  - `MCP_QUALITY_BOOST_ENABLED`（默认 false，可选）
+  - `MCP_QUALITY_BOOST_WEIGHT`（0.0-1.0，默认 0.3）
+  - `MCP_QUALITY_RETENTION_HIGH`（默认 365 天）
+  - `MCP_QUALITY_RETENTION_MEDIUM`（默认 180 天）
+  - `MCP_QUALITY_RETENTION_LOW_MIN`（默认 30 天）
+  - `MCP_QUALITY_RETENTION_LOW_MAX`（默认 90 天）
 
 ### Changed
-- **Memory Model** - Extended with quality properties (backward compatible)
-  - Added `quality_score`, `quality_provider`, `quality_confidence`, `quality_calculated_at`
-  - Added `access_count` and `last_accessed_at` for usage tracking
-  - Existing memories work without modification (quality calculated on first access)
+- **记忆模型** —— 增加质量属性（向后兼容）：`quality_score`、`quality_provider`、`quality_confidence`、`quality_calculated_at`，以及访问计数/最近访问时间。
+  - 旧记忆无需改动，首次访问时计算质量。
 
-- **Storage Backends** - Enhanced with access pattern tracking
-  - SQLite-Vec: Tracks access_count and last_accessed_at on retrieval
-  - Cloudflare: Tracks access_count and last_accessed_at on retrieval
-  - Both backends support quality-boosted search (opt-in)
+- **存储后端** —— 加入访问模式追踪；SQLite-Vec / Cloudflare 检索时记录 access_count/last_accessed_at；两者均可选质量增强检索。
 
-- **Consolidation System** - Integrated quality scores for intelligent retention
-  - Forgetting module uses quality scores for retention decisions
-  - Decay module applies quality-weighted decay (high-quality decays slower)
-  - Association discovery prioritizes high-quality memories
+- **整合系统** —— 使用质量分做保留决策；衰减模块按质量加权（高分衰减更慢）；关联发现优先高质量记忆。
 
-- **Search System** - Optional quality-based reranking
-  - Default: Pure semantic search (0% quality influence)
-  - Opt-in: Quality-boosted search (70% semantic + 30% quality)
-  - Configurable boost weight via `MCP_QUALITY_BOOST_WEIGHT`
+- **搜索系统** —— 可选质量重排：默认纯语义；可选 70% 语义 + 30% 质量；权重由 `MCP_QUALITY_BOOST_WEIGHT` 配置。
 
 ### Documentation
-- Comprehensive user guide: `/Users/hkr/Documents/GitHub/mcp-memory-service/docs/guides/memory-quality-guide.md`
-  - Setup and configuration (local SLM, cloud APIs, hybrid mode)
-  - Usage examples (MCP tools, HTTP API, Dashboard UI)
-  - Performance benchmarks (latency, accuracy, cost analysis)
-  - Troubleshooting guide (common issues, diagnostics)
-- CLAUDE.md updated with quality system section
-- Configuration examples for all deployment scenarios
-- Migration notes for existing users (zero breaking changes)
+- 完整用户指南：`docs/guides/memory-quality-guide.md`（包含本地 SLM、云 API、混合模式配置；MCP 工具/HTTP API/仪表盘示例；性能基准；故障排查）。
+- `CLAUDE.md` 已更新质量系统章节；提供各部署场景的配置示例与零破坏迁移说明。
 
 ### Performance
-- **Quality Calculation Overhead**: <10ms per memory (non-blocking async)
-- **Search Latency with Boost**: <100ms total (semantic search + quality reranking)
-- **Local SLM Inference**: 50-100ms CPU, 10-20ms GPU (CUDA/MPS/DirectML)
-- **Async Background Scoring**: Non-blocking, queued processing for new memories
-- **Model Size**: 23MB ONNX (ms-marco-MiniLM-L-6-v2)
+- **质量计算开销**：<10ms/条（异步非阻塞）。
+- **加权搜索时延**：<100ms（语义 + 质量重排）。
+- **本地 SLM 推理**：CPU 50-100ms，GPU 10-20ms。
+- **异步后台评分**：非阻塞，排队处理新记忆。
+- **模型大小**：23MB ONNX。
 
 ### Testing
-- 25 unit tests for quality scoring (`tests/test_quality_system.py`)
-- 6 integration tests for consolidation (`tests/test_quality_integration.py`)
-- Test pass rate: 67% (22/33 tests passing)
-- Known issues: 4 HTTP API tests (non-critical, fix scheduled for v8.45.1)
+- 质量评分单测 25 个（`tests/test_quality_system.py`）；整合相关集成测试 6 个（`tests/test_quality_integration.py`）。
+- 通过率 67%（22/33），已知 4 个 HTTP API 测试失败（非关键，计划 v8.45.1 修复）。
 
 ### Known Issues
-- 4 HTTP API tests failing (non-critical, development environment only):
-  - `test_analyze_quality_distribution_mcp_tool` - Storage retrieval edge case
-  - `test_rate_memory_http_endpoint` - HTTP 404 (routing configuration)
-  - `test_get_quality_http_endpoint` - HTTP 404 (routing configuration)
-  - `test_distribution_http_endpoint` - HTTP 500 (async handling)
-- Fix scheduled for v8.45.1 patch release
-- Production functionality unaffected (manual testing validates all features work correctly)
+- 4 个 HTTP API 测试失败（开发环境，非关键）：
+  - `test_analyze_quality_distribution_mcp_tool`：存储读取边界。
+  - `test_rate_memory_http_endpoint`：HTTP 404（路由配置）。
+  - `test_get_quality_http_endpoint`：HTTP 404（路由配置）。
+  - `test_distribution_http_endpoint`：HTTP 500（异步处理）。
+  - 计划在 v8.45.1 修复；生产功能不受影响（手测正常）。
 
 ### Migration Notes
-- **No breaking changes** - Quality system is opt-in and backward compatible
-- **Existing users**: System works as before, quality scoring happens automatically in background
-- **To enable quality-boosted search**: Set `MCP_QUALITY_BOOST_ENABLED=true` in configuration
-- **To use cloud APIs**: Set API keys (GROQ_API_KEY/GEMINI_API_KEY) and `MCP_QUALITY_AI_PROVIDER=auto`
-- **To disable quality system**: Set `MCP_QUALITY_SYSTEM_ENABLED=false` (not recommended)
+- **无破坏性变更**：质量系统可选且向后兼容。
+- 现有用户无需改动，质量评分后台自动进行。
+- 启用质量增强检索：配置 `MCP_QUALITY_BOOST_ENABLED=true`。
+- 使用云提供方：设置 GROQ_API_KEY / GEMINI_API_KEY，并设 `MCP_QUALITY_AI_PROVIDER=auto`。
+- 关闭质量系统（不推荐）：`MCP_QUALITY_SYSTEM_ENABLED=false`。
 
 ### Success Metrics (Phase 1 Targets)
-- Target: >40% improvement in retrieval precision (to be measured with usage data)
-- Target: >95% local SLM usage (Tier 1, zero cost)
-- Target: <100ms search latency with quality boost
-- Target: $0 monthly cost (local SLM default, no external API calls)
+- 目标（一期）：
+  - 检索精度提升 >40%（以使用数据衡量）。
+  - 本地 SLM 使用率 >95%（零成本）。
+  - 质量增强检索延迟 <100ms。
+  - 月成本 $0（默认本地 SLM，不调用外部 API）。
 
 ## [8.44.0] - 2025-11-30
 
 ### Added
-- **Multi-Language Expansion** - Added 5 new languages to dashboard i18n system (commit a7d0ba7)
-  - 🇯🇵 **Japanese (日本語)** - 359 translation keys, complete UI coverage
-  - 🇰🇷 **Korean (한국어)** - 359 translation keys, complete UI coverage
-  - 🇩🇪 **German (Deutsch)** - 359 translation keys, complete UI coverage
-  - 🇫🇷 **French (Français)** - 359 translation keys, complete UI coverage
-  - 🇪🇸 **Spanish (Español)** - 359 translation keys, complete UI coverage
-  - All translations professionally validated (key parity, interpolation syntax, JSON structure)
-- **Complete i18n Coverage** - Extended translation support to all UI elements (+57 keys: 304 → 359)
-  - Search results view: headers, view buttons, empty states
-  - Browse by Tags view: title, subtitle, filter controls
-  - Memory Details Modal: all buttons and labels
-  - Add Memory Modal: complete form field coverage
-  - Settings Modal: preferences, system info, backup sections
-  - Loading states and connection status indicators
-  - Memory Viewer Modal: all interactive elements
-  - ~80 data-i18n attributes added to index.html for automatic translation
+- **多语言扩展** —— 仪表盘 i18n 新增 5 种语言（a7d0ba7）：日/韩/德/法/西，各 359 个翻译键，完整 UI 覆盖；全部经专业校验（键对齐、插值、JSON 结构）。
+- **i18n 全量覆盖** —— UI 翻译键从 304 → 359，覆盖搜索结果、标签浏览、记忆详情/新增表单、设置、加载态与连接状态、Memory Viewer 等；index.html 新增约 80 个 data-i18n 属性。
 
 ### Fixed
-- **Dark Mode Language Dropdown** - Fixed styling inconsistencies in dark mode (commit a7d0ba7)
-  - Added proper background colors for dropdown items
-  - Fixed hover state styling (translucent white overlay)
-  - Fixed active language highlighting
-  - Improved contrast and readability in dark theme
+- **暗黑模式语言下拉** —— 修复暗黑样式不一致（a7d0ba7）：统一背景、悬停态半透明白遮罩、激活态高亮，提升对比度可读性。
 
 ### Changed
-- **Translation Key Structure** - Expanded from 304 to 359 keys per language
-  - Maintains backward compatibility with existing translations
-  - English (en.json) and Chinese (zh.json) updated to match new structure
-  - Consistent key naming conventions across all languages
+- **翻译键结构** —— 每种语言键数 304 → 359，保持向后兼容；en.json / zh.json 已对齐；键命名一致化。
 
 ## [8.43.0] - 2025-11-30
 
 ### Added
-- **Frontend Internationalization** - Complete i18n support for dashboard with English and Chinese translations (PR #256, thanks @amm10090!)
-  - Language toggle switcher in header with 🌐 icon
-  - 300+ translation keys in `en.json` and `zh.json`
-  - Automatic language detection (localStorage > browser language > English)
-  - Dynamic translation of all UI elements, placeholders, tooltips
-  - English fallback for missing keys
-- **Enhanced Claude Branch Automation** - Integrated quality checks before PR creation
-  - New file-level quality validation utility (`scripts/pr/run_quality_checks_on_files.sh`, 286 lines)
-  - Groq API primary (fast, 200-300ms), Gemini CLI fallback
-  - Code complexity analysis (blocks >8, warns 7-8)
-  - Security vulnerability scan (SQL injection, XSS, command injection, path traversal, secrets)
-  - Conditional PR creation (blocks if security issues detected)
-  - GitHub Actions annotations for inline feedback
-  - Machine-parseable output format for CI/CD integration
+- **前端国际化** —— 仪表盘完成中英双语 i18n（PR #256，@amm10090）。
+  - 头部语言切换（🌐 图标）；`en.json`/`zh.json` 各 300+ 键。
+  - 自动语言检测：localStorage > 浏览器语言 > English。
+  - 动态翻译所有 UI/占位符/提示；缺失键回退英文。
+
+- **Claude 分支自动化增强** —— PR 前置质量检查。
+  - 新增文件级质量校验脚本 `scripts/pr/run_quality_checks_on_files.sh`（286 行）。
+  - Groq API 主通道（200-300ms），Gemini CLI 作为回退。
+  - 复杂度分析（>8 阻断，7-8 警告）；安全扫描（SQLi/XSS/命令注入/路径遍历/Secrets）。
+  - 结果决定是否允许建 PR；GitHub Actions 输出行内注解；提供机器可解析格式以便 CI 集成。
 
 ### Changed
-- **i18n Performance Optimization** - Reduced DOM traversal overhead (4 separate calls → single unified traversal)
+- **i18n 性能优化** —— DOM 遍历由 4 次合并为 1 次，降低开销。
 
 ### Fixed
-- **Translation Accuracy** - Removed incorrect translation wrapping for backend error messages
+- **翻译准确性** —— 移除对后端错误消息的错误包裹，避免误译。
 - **Translation Completeness** - Added missing `{reason}` placeholder to error translations
 
 ## [8.42.1] - 2025-11-29
