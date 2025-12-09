@@ -1,5 +1,7 @@
 # Dual Service Deployment - FastMCP + HTTP Dashboard
 
+[English](dual-service.md) | [简体中文](dual-service_zh-cn.md)
+
 ## Overview
 
 This deployment provides both **FastMCP Protocol** and **HTTP Dashboard** services running simultaneously, eliminating Node.js SSL issues while maintaining full functionality.

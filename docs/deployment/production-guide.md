@@ -1,5 +1,7 @@
 # MCP Memory Service - Production Setup
 
+[English](production-guide.md) | [简体中文](production-guide_zh-cn.md)
+
 ## 🚀 Quick Start
 
 This MCP Memory Service is configured with **consolidation system**, **mDNS auto-discovery**, **HTTPS**, and **automatic startup**.

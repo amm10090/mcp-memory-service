@@ -1,5 +1,7 @@
 # MCP Memory Service Troubleshooting Guide
 
+[English](general.md) | [简体中文](general_zh-cn.md)
+
 This guide covers common issues and their solutions when working with the MCP Memory Service.
 
 ## First-Time Setup Warnings (Normal Behavior)

@@ -51358,128 +51358,280 @@
     "chinese": "docs/deployment/dual-service_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
         "line": 1,
         "token": "HTTP",
-        "context": "# 双服务部署（FastMCP + HTTP Dashboard）"
+        "context": "# 双服务部署 - FastMCP + HTTP 仪表盘"
       },
       {
-        "line": 4,
-        "token": "over",
-        "context": "1. **FastMCP 服务**（端口 8001）：面向 Claude 等 MCP 客户端，JSON-RPC over SSE；"
-      },
-      {
-        "line": 5,
+        "line": 7,
         "token": "HTTP",
-        "context": "2. **HTTP Dashboard**（端口 8080）：Web 控制台与 REST API。"
+        "context": "本部署同时提供 **FastMCP 协议** 与 **HTTP 仪表盘**，绕开 Node.js SSL 问题并保持完整功能。"
       },
       {
-        "line": 11,
-        "token": "systemd",
-        "context": "或手动：复制 systemd 单元 → `systemctl enable/start mcp-memory mcp-http-dashboard`。"
+        "line": 12,
+        "token": "protocol",
+        "context": "- **Purpose**: Native MCP protocol for Claude Code clients"
+      },
+      {
+        "line": 13,
+        "token": "over",
+        "context": "- **Protocol**: JSON-RPC 2.0 over Server-Sent Events"
       },
       {
         "line": 14,
         "token": "http",
-        "context": "- MCP：`http://SERVER_IP:8001/mcp`"
+        "context": "- **Access**: `http://[IP]:8000/mcp`"
       },
       {
-        "line": 15,
+        "line": 17,
+        "token": "HTTP",
+        "context": "### Service 2: HTTP 仪表盘 (Port 8080)"
+      },
+      {
+        "line": 18,
+        "token": "dashboard",
+        "context": "- **Purpose**: Web dashboard and HTTP API"
+      },
+      {
+        "line": 19,
+        "token": "HTTP/REST",
+        "context": "- **Protocol**: Standard HTTP/REST"
+      },
+      {
+        "line": 20,
         "token": "http",
-        "context": "- Dashboard：`http://SERVER_IP:8080/`"
+        "context": "- **Access**: `http://[IP]:8080/`"
       },
       {
-        "line": 33,
-        "token": "mcp",
-        "context": "`mcp`、`fastapi`、`uvicorn`、`zeroconf`、`aiohttp`、`sqlite-vec`、`sentence-transformers`。"
+        "line": 21,
+        "token": "http",
+        "context": "- **API**: `http://[IP]:8080/api/*`"
       },
       {
-        "line": 37,
-        "token": "true",
-        "context": "- `MCP_MDNS_ENABLED=true`"
-      },
-      {
-        "line": 38,
-        "token": "true",
-        "context": "- `MCP_HTTP_ENABLED=true`"
-      },
-      {
-        "line": 44,
-        "token": "IP/",
-        "context": "- 无法访问：检查服务状态、端口监听、IP/防火墙；"
-      },
-      {
-        "line": 45,
-        "token": "zeroconf",
-        "context": "- mDNS 失效：确认 `avahi-daemon` 与 `zeroconf` 依赖；"
-      },
-      {
-        "line": 46,
-        "token": "mcp",
-        "context": "- FastMCP 异常：确保访问 `/mcp`，客户端支持 SSE/JSON-RPC。"
+        "line": 47,
+        "token": "your",
+        "context": "Replace `[IP]` with your actual server IP address (e.g., `10.0.1.30`):"
       },
       {
         "line": 49,
         "token": "http",
-        "context": "- Claude：配置 MCP URL 为 `http://SERVER_IP:8001/mcp`；"
+        "context": "- **FastMCP Protocol**: `http://[IP]:8000/mcp` (for Claude Code)"
       },
       {
         "line": 50,
-        "token": "curl",
-        "context": "- curl 示例：`curl http://SERVER_IP:8080/api/health`、POST `/api/memories`、`/api/search`。"
+        "token": "http",
+        "context": "- **Web Dashboard**: `http://[IP]:8080/` (for monitoring)"
+      },
+      {
+        "line": 51,
+        "token": "http",
+        "context": "- **Health API**: `http://[IP]:8080/api/health`"
       },
       {
         "line": 52,
+        "token": "http",
+        "context": "- **Memory API**: `http://[IP]:8080/api/memories`"
+      },
+      {
+        "line": 53,
+        "token": "http",
+        "context": "- **Search API**: `http://[IP]:8080/api/search`"
+      },
+      {
+        "line": 83,
+        "token": "services",
+        "context": "Both services advertise via mDNS for network discovery:"
+      },
+      {
+        "line": 97,
+        "token": "port",
+        "context": "- `MCP Memory Dashboard._http._tcp.local.` (port 8080)"
+      },
+      {
+        "line": 98,
+        "token": "port",
+        "context": "- `MCP Memory FastMCP._mcp._tcp.local.` (port 8000)"
+      },
+      {
+        "line": 102,
+        "token": "packages",
+        "context": "Ensure these packages are installed in the virtual environment:"
+      },
+      {
+        "line": 103,
+        "token": "mcp",
+        "context": "- `mcp` - MCP Protocol support"
+      },
+      {
+        "line": 104,
+        "token": "fastapi",
+        "context": "- `fastapi` - Web framework"
+      },
+      {
+        "line": 105,
+        "token": "uvicorn",
+        "context": "- `uvicorn` - ASGI server"
+      },
+      {
+        "line": 106,
+        "token": "zeroconf",
+        "context": "- `zeroconf` - mDNS advertising"
+      },
+      {
+        "line": 107,
+        "token": "aiohttp",
+        "context": "- `aiohttp` - HTTP client/server"
+      },
+      {
+        "line": 108,
+        "token": "database",
+        "context": "- `sqlite-vec` - Vector database"
+      },
+      {
+        "line": 115,
+        "token": "true",
+        "context": "- `MCP_MDNS_ENABLED=true`"
+      },
+      {
+        "line": 116,
+        "token": "true",
+        "context": "- `MCP_HTTP_ENABLED=true`"
+      },
+      {
+        "line": 122,
+        "token": "services",
+        "context": "Both services share the same SQLite-vec database:"
+      },
+      {
+        "line": 130,
+        "token": "services",
+        "context": "1. Check if services are running: `systemctl status [service]`"
+      },
+      {
+        "line": 131,
+        "token": "ports",
+        "context": "2. Verify ports are listening: `ss -tlnp | grep -E \":800[08]\"`"
+      },
+      {
+        "line": 132,
+        "token": "direct",
+        "context": "3. Test direct IP access instead of hostname"
+      },
+      {
+        "line": 133,
+        "token": "firewall",
+        "context": "4. Check firewall rules if accessing remotely"
+      },
+      {
+        "line": 136,
+        "token": "running",
+        "context": "1. Ensure avahi-daemon is running: `systemctl status avahi-daemon`"
+      },
+      {
+        "line": 137,
+        "token": "missing",
+        "context": "2. Install missing dependencies: `pip install zeroconf aiohttp`"
+      },
+      {
+        "line": 138,
+        "token": "services",
+        "context": "3. Restart services after installing dependencies"
+      },
+      {
+        "line": 141,
+        "token": "client",
+        "context": "1. Ensure client accepts `text/event-stream` headers"
+      },
+      {
+        "line": 142,
+        "token": "format",
+        "context": "2. Use JSON-RPC 2.0 format for requests"
+      },
+      {
+        "line": 143,
+        "token": "mcp",
+        "context": "3. Access `/mcp` endpoint, not root `/`"
+      },
+      {
+        "line": 148,
+        "token": "client",
+        "context": "Configure MCP client to use:"
+      },
+      {
+        "line": 153,
+        "token": "curl",
+        "context": "### curl Examples"
+      },
+      {
+        "line": 171,
+        "token": "implementation",
+        "context": "✅ **No Node.js SSL Issues** - Pure Python implementation"
+      },
+      {
+        "line": 172,
         "token": "HTTP",
-        "context": "✅ 纯 Python 实现，规避 Node SSL；✅ MCP + HTTP 双协议；✅ systemd/ mDNS 生产可用。EOF"
+        "context": "✅ **Dual Protocol Support** - Both MCP and HTTP available"
+      },
+      {
+        "line": 173,
+        "token": "advertising",
+        "context": "✅ **Network Discovery** - mDNS advertising for easy access"
+      },
+      {
+        "line": 174,
+        "token": "systemd",
+        "context": "✅ **Production Ready** - systemd managed services"
+      },
+      {
+        "line": 175,
+        "token": "HTTP",
+        "context": "✅ **Backward Compatible** - HTTP API preserved for existing tools"
+      },
+      {
+        "line": 176,
+        "token": "protocol",
+        "context": "✅ **Claude Code Ready** - Native MCP protocol support"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        38,
-        10
-      ],
-      "codeblock": [
-        16,
-        6
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/deployment/production-guide.md",
     "chinese": "docs/deployment/production-guide_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 4,
+        "line": 7,
         "token": "HTTPS",
-        "context": "默认启用记忆归并、mDNS 自动发现、HTTPS 与自启动。"
+        "context": "默认配置包含 **整合系统**、**mDNS 自动发现**、**HTTPS**、**自启动**。"
       },
       {
-        "line": 21,
+        "line": 36,
         "token": "HTTPS",
-        "context": "- HTTPS 地址：`https://localhost:8001`"
+        "context": "- **HTTPS Address**: https://localhost:8000"
       },
       {
-        "line": 34,
-        "token": "systemd",
-        "context": "- systemd 与脚本：`mcp-memory.service`、`archive/setup-development/`"
+        "line": 55,
+        "token": "management",
+        "context": "- **Service Files**: `mcp-memory.service`, management scripts"
+      },
+      {
+        "line": 56,
+        "token": "development",
+        "context": "- **Archive**: `archive/setup-development/` (development files)"
+      },
+      {
+        "line": 58,
+        "token": "production",
+        "context": "**✅ Ready for production use!**"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        13,
-        5
-      ],
-      "tables": [
-        0,
-        1
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/deployment/systemd-service.md",
@@ -56782,114 +56934,230 @@
     "chinese": "docs/troubleshooting/general_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
         "line": 11,
+        "token": "following",
+        "context": "The following warnings are **completely normal** during first-time setup:"
+      },
+      {
+        "line": 13,
         "token": "snapshots",
-        "context": "#### “No snapshots directory” 警告"
+        "context": "#### \"No snapshots directory\" Warning"
+      },
+      {
+        "line": 17,
+        "token": "checking",
+        "context": "- **Status:** ✅ Normal - Service is checking for cached models"
+      },
+      {
+        "line": 18,
+        "token": "required",
+        "context": "- **Action:** None required - Model will download automatically"
       },
       {
         "line": 19,
+        "token": "only",
+        "context": "- **Duration:** Appears only on first run"
+      },
+      {
+        "line": 21,
         "token": "deprecated",
-        "context": "#### “TRANSFORMERS_CACHE deprecated” 警告"
+        "context": "#### \"TRANSFORMERS_CACHE deprecated\" Warning"
+      },
+      {
+        "line": 25,
+        "token": "warning",
+        "context": "- **Status:** ✅ Normal - Informational warning from Hugging Face"
+      },
+      {
+        "line": 26,
+        "token": "required",
+        "context": "- **Action:** None required - Doesn't affect functionality"
+      },
+      {
+        "line": 27,
+        "token": "appear",
+        "context": "- **Duration:** May appear on each run (can be ignored)"
+      },
+      {
+        "line": 33,
+        "token": "model",
+        "context": "- **Status:** ✅ Normal - One-time model download (~25MB)"
+      },
+      {
+        "line": 34,
+        "token": "minutes",
+        "context": "- **Action:** Wait 1-2 minutes for download to complete"
       },
       {
         "line": 35,
-        "token": "first-time-setup.md",
-        "context": "更多信息见 [首次运行指南](../first-time-setup.md)。"
+        "token": "run",
+        "context": "- **Duration:** First run only"
       },
       {
-        "line": 39,
+        "line": 37,
+        "token": "detailed",
+        "context": "For detailed information, see the [First-Time Setup Guide](../first-time-setup.md)."
+      },
+      {
+        "line": 42,
         "token": "install",
-        "context": "**报错示例**：`Failed to install SQLite-vec: Command ... returned non-zero exit status 1`"
+        "context": "**Error:** `Failed to install SQLite-vec: Command ... returned non-zero exit status 1`"
       },
       {
-        "line": 41,
-        "token": "wheel",
-        "context": "**原因**：sqlite-vec 尚未提供 Python 3.13 的 wheel，且 PyPI 上暂时没有源码包。"
+        "line": 44,
+        "token": "doesn",
+        "context": "**Cause:** sqlite-vec doesn't have pre-built wheels for Python 3.13 yet, and no source distribution is available on PyPI."
       },
       {
-        "line": 45,
-        "token": "pip",
-        "context": "1. **自动回退（v6.13.2+）**：安装脚本会尝试 uv pip、pip、源码构建、GitHub 安装；若全部失败，会提示切换 ChromaDB。"
+        "line": 49,
+        "token": "installer",
+        "context": "- The installer now automatically tries multiple installation methods"
       },
       {
-        "line": 47,
-        "token": "python",
-        "context": "3. **切换后端**：`python install.py --storage-backend chromadb`。"
+        "line": 50,
+        "token": "will",
+        "context": "- It will attempt: uv pip, standard pip, source build, and GitHub installation"
       },
       {
-        "line": 54,
-        "token": "https",
-        "context": "5. **反馈问题**：关注 https://github.com/asg017/sqlite-vec/issues 获取最新进展。"
+        "line": 51,
+        "token": "all",
+        "context": "- If all fail, you'll be prompted to switch to ChromaDB"
       },
       {
-        "line": 56,
-        "token": "sqlite",
-        "context": "## macOS 无法启用 sqlite 扩展"
+        "line": 80,
+        "token": "updates",
+        "context": "- Check for updates: https://github.com/asg017/sqlite-vec/issues"
       },
       {
-        "line": 58,
+        "line": 81,
+        "token": "may",
+        "context": "- sqlite-vec may add Python 3.13 support in future releases"
+      },
+      {
+        "line": 85,
         "token": "object",
-        "context": "**报错**：`AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`"
+        "context": "### Problem: `AttributeError: 'sqlite3.Connection' object has no attribute 'enable_load_extension'`"
       },
       {
-        "line": 64,
-        "token": "brew",
-        "context": "1. **Homebrew Python（推荐）**：`brew install python`，并使用该版本重装服务；"
+        "line": 86,
+        "token": "other",
+        "context": "**Error:** Python 3.12 (and other versions) on macOS failing with sqlite-vec backend"
       },
       {
-        "line": 65,
+        "line": 88,
+        "token": "not",
+        "context": "**Cause:** Python on macOS is not compiled with `--enable-loadable-sqlite-extensions` by default. The system SQLite library doesn't support extensions."
+      },
+      {
+        "line": 90,
+        "token": "all",
+        "context": "**Platform:** Affects macOS (all versions), particularly with system Python"
+      },
+      {
+        "line": 105,
         "token": "pyenv",
-        "context": "2. **pyenv + 扩展支持**：使用 `PYTHON_CONFIGURE_OPTS='--enable-loadable-sqlite-extensions'` 安装；"
+        "context": "2. **Use pyenv with Extension Support**"
       },
       {
-        "line": 66,
-        "token": "sqlite",
-        "context": "3. **切换 ChromaDB 后端**：不需要 sqlite 扩展；"
+        "line": 143,
+        "token": "happens",
+        "context": "**Why this happens:**"
       },
       {
-        "line": 67,
-        "token": "python",
-        "context": "4. **检测命令**：参考指南中提供的 `python -c` 测试脚本判断扩展是否启用。"
+        "line": 144,
+        "token": "loading",
+        "context": "- Security: Extension loading disabled by default"
       },
       {
-        "line": 75,
+        "line": 145,
         "token": "not",
-        "context": "### “Method not found” 错误"
+        "context": "- Compilation: System Python not built with extension support"
       },
       {
-        "line": 77,
+        "line": 146,
+        "token": "bundled",
+        "context": "- Library: macOS bundled SQLite lacks extension loading capability"
+      },
+      {
+        "line": 148,
+        "token": "installer",
+        "context": "**Detection:** The installer now automatically detects this issue and provides guidance."
+      },
+      {
+        "line": 152,
+        "token": "installation.md",
+        "context": "[Content from installation.md's troubleshooting section - already well documented]"
+      },
+      {
+        "line": 158,
+        "token": "you",
+        "context": "If you're seeing \"Method not found\" errors or JSON error popups in Claude Desktop:"
+      },
+      {
+        "line": 161,
         "token": "not",
-        "context": "- **症状**：Claude Desktop 日志出现 “Method not found” 或 JSON 错误弹窗；"
+        "context": "- \"Method not found\" errors in logs"
       },
       {
-        "line": 83,
+        "line": 162,
         "token": "JSON",
-        "context": "- **JSON 编码/解码异常**、**路径权限问题** 等，请参见 `WINDOWS_JSON_FIX.md` 及相关章节。"
+        "context": "- JSON error popups in Claude Desktop"
       },
       {
-        "line": 91,
-        "token": "python",
-        "context": "- 推荐使用 `python scripts/validation/diagnose_backend_config.py` 获取环境诊断；"
+        "line": 163,
+        "token": "issues",
+        "context": "- Connection issues between Claude Desktop and the memory service"
       },
       {
-        "line": 96,
-        "token": "python",
-        "context": "- 运行检测脚本：`python scripts/validation/diagnose_backend_config.py`；"
+        "line": 166,
+        "token": "you",
+        "context": "1. Ensure you have the latest version of the MCP Memory Service"
+      },
+      {
+        "line": 167,
+        "token": "your",
+        "context": "2. Verify your server implements all required MCP protocol methods:"
+      },
+      {
+        "line": 171,
+        "token": "your",
+        "context": "3. Update your Claude Desktop configuration using the provided template"
+      },
+      {
+        "line": 173,
+        "token": "content",
+        "context": "[Additional content from MCP_PROTOCOL_FIX.md]"
+      },
+      {
+        "line": 177,
+        "token": "sections",
+        "context": "[Content from WINDOWS_JSON_FIX.md and windows-specific sections]"
+      },
+      {
+        "line": 182,
+        "token": "installation.md",
+        "context": "[Content from installation.md's performance section]"
+      },
+      {
+        "line": 185,
+        "token": "installation.md",
+        "context": "[Content from installation.md's acceleration section]"
+      },
+      {
+        "line": 189,
+        "token": "installation.md",
+        "context": "[Content from installation.md's debugging section]"
+      },
+      {
+        "line": 193,
+        "token": "installation.md",
+        "context": "[Content from installation.md's help section]"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        30,
-        15
-      ],
-      "codeblock": [
-        20,
-        8
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/troubleshooting/hooks-quick-reference.md",
