@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+[简体中文](CLAUDE_zh-cn.md) | [English](CLAUDE.md)
+
 本文档为 Claude Code（claude.ai/code）在 MCP Memory Service 仓库中工作时提供操作指南与项目约定。
 
 > **📝 个性化配置**：欢迎创建被 `.gitignore` 忽略的 `CLAUDE.local.md`，用于记录个人习惯、定制流程或特定环境说明。本主文件仅存放团队共享的规范。

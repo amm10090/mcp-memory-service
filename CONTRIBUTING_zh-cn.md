@@ -1,5 +1,7 @@
 # MCP Memory Service 贡献指南
 
+[简体中文](CONTRIBUTING_zh-cn.md) | [English](CONTRIBUTING.md)
+
 感谢你关注 MCP Memory Service！🎉
 
 本项目通过模型上下文协议（Model Context Protocol, MCP）为 AI 助手提供语义记忆与持久化存储。我们欢迎各种形式的贡献——无论是缺陷修复、功能增强、文档完善还是测试补充。

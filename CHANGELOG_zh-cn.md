@@ -1,5 +1,7 @@
 # 更新日志（Changelog）
 
+[简体中文](CHANGELOG_zh-cn.md) | [English](CHANGELOG.md)
+
 > 说明：本文件以时间倒序记录 v8.24.0 及以上版本的主要变更。保留英文关键词便于对照提交与 Issue。
 
 **Recent releases for MCP Memory Service (v8.0.0 and later)**

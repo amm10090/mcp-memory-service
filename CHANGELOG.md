@@ -1,5 +1,7 @@
 # Changelog
 
+[English](CHANGELOG.md) | [简体中文](CHANGELOG_zh-cn.md)
+
 **Recent releases for MCP Memory Service (v8.0.0 and later)**
 
 All notable changes to the MCP Memory Service project will be documented in this file.
@@ -1522,4 +1524,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `670fb74` - Phase 1: Automated detection (check_dev_setup.py, pre-commit hook, CLAUDE.md)
 - `9537259` - Phase 2: Runtime warnings (server.py) + developer documentation
 - `a17bcc7` - Phase 3: Interactive onboarding (install.py) + CI/CD validation
-

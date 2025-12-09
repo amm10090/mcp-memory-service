@@ -1,5 +1,7 @@
 # Security Policy
 
+[English](SECURITY.md) | [简体中文](SECURITY_zh-cn.md)
+
 ## Supported Versions
 
 We actively maintain and provide security updates for the following versions of MCP Memory Service:

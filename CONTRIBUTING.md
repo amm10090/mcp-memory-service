@@ -1,5 +1,7 @@
 # Contributing to MCP Memory Service
 
+[English](CONTRIBUTING.md) | [简体中文](CONTRIBUTING_zh-cn.md)
+
 Thank you for your interest in contributing to MCP Memory Service! 🎉
 
 This project provides semantic memory and persistent storage for AI assistants through the Model Context Protocol. We welcome contributions of all kinds - from bug fixes and features to documentation and testing.

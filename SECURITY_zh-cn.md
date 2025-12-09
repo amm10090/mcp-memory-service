@@ -1,202 +1,77 @@
-# 安全策略（中文概述）
+# 安全策略
 
-- 报告安全漏洞：发送邮件至仓库维护者或使用 GitHub Security 功能，优先私下披露。
-- 请附复现步骤、影响范围、环境信息。
-- 我们会尽快确认并提供修复进度，发布安全补丁后再公开细节。
-- 默认不提供漏洞赏金，但会在发布说明致谢。
+[简体中文](SECURITY_zh-cn.md) | [English](SECURITY.md)
 
-下文保留英文原文。
+## 支持的版本
 
----
+我们为以下 MCP Memory Service 版本持续提供维护和安全更新：
 
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
-# Security Policy
+| 版本 | 支持状态 | 说明 |
+| --- | --- | --- |
+| 8.x.x | ✅ 全面支持 | 当前稳定版，享受完整支持 |
+| 7.x.x | ✅ 安全修复 | 上一稳定版，仅提供安全修复 |
+| < 7.0 | ❌ 不再支持 | 停止维护 |
 
-## Supported Versions
+## 漏洞报告
 
-We actively maintain and provide security updates for the following versions of MCP Memory Service:
+我们高度重视安全。如果你发现安全漏洞，请遵循负责任的披露流程。
 
-| Version | Supported          | Notes |
-| ------- | ------------------ | ----- |
-| 8.x.x   | :white_check_mark: | Current stable release - full support |
-| 7.x.x   | :white_check_mark: | Previous stable - security fixes only |
-| < 7.0   | :x:                | No longer supported |
+### 报告方式
 
-## Reporting a Vulnerability
+**敏感安全问题（优先）**：
+1. **GitHub Security Advisory（推荐）**
+   - 访问 [Security Advisories](https://github.com/doobidoo/mcp-memory-service/security/advisories)
+   - 点击 “Report a vulnerability” 提交详情
+2. **直接联系**
+   - 发起带有 `[SECURITY]` 前缀的 GitHub Discussion，建立私密沟通渠道
 
-We take the security of MCP Memory Service seriously. If you discover a security vulnerability, please report it responsibly.
+**非敏感安全疑虑**：可以直接创建普通 GitHub Issue。
 
-### How to Report
+### 报告需包含的内容
+1. **漏洞描述**：清晰描述问题现象与位置
+2. **影响范围**：潜在影响及受影响版本
+3. **复现步骤**：可重现的操作流程
+4. **环境信息**：
+   - Python 版本
+   - 操作系统
+   - 存储后端（SQLite-vec / Cloudflare / Hybrid）
+   - 安装方式（pip、Docker、源码）
+5. **PoC**：可选，演示漏洞的代码或命令
+6. **修复建议**：如有，可提供思路
 
-**For sensitive security issues**, please use one of these private reporting methods:
+### 响应时间线
+- **确认**：48 小时内回复
+- **初步评估**：5 个工作日内完成
+- **状态更新**：修复前每周更新进度
+- **修复开发**：高危问题 7–14 天内完成
+- **补丁发布**：修复验证后立即发布
+- **公开披露**：补丁发布后，与报告者协调披露
 
-1. **GitHub Security Advisory** (Preferred):
-   - Navigate to the [Security Advisories](https://github.com/doobidoo/mcp-memory-service/security/advisories) page
-   - Click "Report a vulnerability"
-   - Provide detailed information about the vulnerability
+### 严重性分级
 
-2. **Direct Contact**:
-   - Open a GitHub Discussion with `[SECURITY]` prefix for initial contact
-   - We'll provide a secure communication channel for details
+**Critical / 严重** 🔴
+- 远程代码执行
+- 身份验证绕过
+- 窃取其他用户记忆数据
+- 系统全面被攻陷
 
-**For non-sensitive security concerns**, you may open a regular GitHub issue.
+**High / 高** 🟠
+- 权限提升
+- SQL 注入
+- 控制台 XSS
+- 影响所有用户的拒绝服务
 
-### What to Include
+**Medium / 中** 🟡
+- 信息泄露（有限范围）
+- CSRF
+- 本地文件访问漏洞
+- 单用户资源耗尽
 
-When reporting a vulnerability, please include:
+**Low / 低** 🟢
+- 轻微漏洞或仅在极端场景影响有限用户
 
-1. **Description**: Clear description of the vulnerability
-2. **Impact**: Potential security impact and affected versions
-3. **Reproduction**: Step-by-step instructions to reproduce the issue
-4. **Environment**:
-   - Python version
-   - Operating system
-   - Storage backend (SQLite-vec, Cloudflare, Hybrid)
-   - Installation method (pip, Docker, source)
-5. **Proof of Concept**: Code or commands demonstrating the vulnerability (if applicable)
-6. **Suggested Fix**: Any ideas for fixing the issue (optional)
+### 披露政策
 
-### Response Timeline
+我们遵循“先修复、后披露”的原则。补丁发布后，会与报告者协商披露时间，确保用户有足够时间更新。除非经双方同意或法律要求，不会提前公开细节。
 
-We aim to respond to security reports according to the following timeline:
-
-- **Acknowledgment**: Within 48 hours of report
-- **Initial Assessment**: Within 5 business days
-- **Status Updates**: Weekly until resolved
-- **Fix Development**: 7-14 days for high-severity issues
-- **Patch Release**: As soon as fix is validated and tested
-- **Public Disclosure**: After patch is released (coordinated with reporter)
-
-### Severity Classification
-
-We use the following severity levels to prioritize security issues:
-
-**Critical** 🔴
-- Remote code execution
-- Authentication bypass
-- Data exfiltration from other users' memories
-- Complete system compromise
-
-**High** 🟠
-- Privilege escalation
-- SQL injection
-- Cross-site scripting (XSS) in dashboard
-- Denial of service affecting all users
-
-**Medium** 🟡
-- Information disclosure (limited scope)
-- Cross-site request forgery (CSRF)
-- Local file access vulnerabilities
-- Resource exhaustion (single user)
-
-**Low** 🟢
-- Timing attacks
-- Security configuration issues
-- Low-impact information leaks
-
-## Security Best Practices
-
-### For Users
-
-1. **Keep Updated**: Always use the latest stable version
-2. **Secure Configuration**:
-   - Use strong API keys (`openssl rand -base64 32`)
-   - Enable HTTPS for HTTP server mode
-   - Restrict network access to localhost unless needed
-3. **Credential Management**:
-   - Never commit `.env` files with credentials
-   - Use environment variables for sensitive data
-   - Rotate Cloudflare API tokens regularly
-4. **Authentication**: Enable OAuth 2.1 for multi-user deployments
-5. **Monitoring**: Review logs for suspicious activity
-6. **Backups**: Regularly backup your memory database
-
-### For Contributors
-
-1. **Dependency Security**:
-   - Review dependency updates for known vulnerabilities
-   - Use `pip-audit` to scan for security issues
-   - Keep dependencies up to date
-2. **Input Validation**:
-   - Sanitize all user input
-   - Use parameterized queries (no string concatenation)
-   - Validate file uploads and document ingestion
-3. **Authentication & Authorization**:
-   - Use secure session management
-   - Implement proper access controls
-   - Follow OAuth 2.1 security best practices
-4. **Sensitive Data**:
-   - Never log API keys, tokens, or passwords
-   - Encrypt sensitive data at rest (user responsibility)
-   - Use secure random number generation
-5. **Code Review**: All PRs must pass security review before merge
-
-## Known Security Considerations
-
-### SQLite-vec Backend
-- **Local File Access**: Database file should have appropriate permissions (600)
-- **Concurrent Access**: Use proper locking to prevent corruption
-- **Backup Encryption**: User responsibility to encrypt backups
-
-### Cloudflare Backend
-- **API Token Security**: Tokens have full account access - guard carefully
-- **Rate Limiting**: Cloudflare enforces rate limits (10k requests/min)
-- **Data Residency**: Data stored in Cloudflare's network per your account settings
-
-### Hybrid Backend
-- **Synchronization**: Ensure secure sync between local and cloud storage
-- **Credential Exposure**: Both SQLite and Cloudflare credentials needed
-
-### Web Dashboard
-- **HTTPS Recommended**: Use HTTPS in production environments
-- **XSS Protection**: All user input is escaped before rendering
-- **CSRF Protection**: Implement for state-changing operations
-- **Session Security**: Enable secure cookies in production
-
-### MCP Protocol
-- **Local Access Only**: MCP server typically runs locally via stdin/stdout
-- **Process Isolation**: Each client gets isolated server process
-- **No Network Exposure**: By default, MCP mode has no network attack surface
-
-## Security Updates
-
-Security patches are released as:
-- **Patch versions** (8.x.Y) for low/medium severity
-- **Minor versions** (8.X.0) for high severity requiring API changes
-- **Out-of-band releases** for critical vulnerabilities
-
-Security advisories are published at:
-- [GitHub Security Advisories](https://github.com/doobidoo/mcp-memory-service/security/advisories)
-- [CHANGELOG.md](CHANGELOG.md) with `[SECURITY]` tag
-- Release notes for affected versions
-
-## Disclosure Policy
-
-We follow **coordinated disclosure**:
-
-1. Vulnerability reported privately
-2. We confirm and develop a fix
-3. Security advisory drafted (private)
-4. Patch released with security note
-5. Public disclosure 7 days after patch release
-6. Reporter credited (if desired)
-
-We appreciate security researchers following responsible disclosure practices and will acknowledge contributors in our security advisories.
-
-## Security Hall of Fame
-
-We recognize security researchers who help make MCP Memory Service more secure:
-
-<!-- Security contributors will be listed here -->
-*No security vulnerabilities have been publicly disclosed to date.*
-
-## Contact
-
-For security concerns that don't fit the above categories:
-- **General Security Questions**: [GitHub Discussions](https://github.com/doobidoo/mcp-memory-service/discussions)
-- **Project Security**: See reporting instructions above
-
----
-
-**Last Updated**: November 2025
-**Policy Version**: 1.0
+感谢你帮助提升 MCP Memory Service 的安全性！

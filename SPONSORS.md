@@ -1,5 +1,7 @@
 # Support MCP Memory Service Development
 
+[English](SPONSORS.md) | [简体中文](SPONSORS_zh-cn.md)
+
 Thank you for considering sponsoring MCP Memory Service! Your support helps maintain and enhance this production-ready knowledge management system.
 
 ## 🌟 Why Your Sponsorship Matters

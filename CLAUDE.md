@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+[English](CLAUDE.md) | [简体中文](CLAUDE_zh-cn.md)
+
 This file provides guidance to Claude Code (claude.ai/code) when working with this MCP Memory Service repository.
 
 > **📝 Personal Customizations**: You can create `CLAUDE.local.md` (gitignored) for personal notes, custom workflows, or environment-specific instructions. This file contains shared project conventions.
