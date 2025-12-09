@@ -1382,27 +1382,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.48.1] - 2025-12-08
 
 ### Fixed
-- **CRITICAL: Service Startup Failure** - Fixed fatal `UnboundLocalError` that prevented v8.48.0 from starting
-  - **Root Cause**: Redundant local `import calendar` statement at line 84 in `src/mcp_memory_service/models/memory.py`
-  - **Python Scoping Issue**: Local import declaration made `calendar` a local variable within `iso_to_float()` function
-  - **Error Location**: Exception handler at line 168 referenced `calendar` before the local import statement was executed
-  - **Impact**: Service entered infinite loop during Cloudflare sync initialization, repeating error every ~100ms
-  - **Symptoms**: Health endpoint unresponsive, dashboard inaccessible, all MCP Memory Service functionality unavailable
-  - **Resolution**: Removed redundant local import (module already imported globally at line 21)
-  - **Severity**: CRITICAL - All v8.48.0 users affected, immediate upgrade required
-  - **Migration**: Drop-in replacement, no configuration changes needed
-  - Location: `src/mcp_memory_service/models/memory.py:84` (removed)
+- **严重：服务无法启动** —— 修复 v8.48.0 的致命 `UnboundLocalError`。
+  - **根因**：`models/memory.py` 第 84 行多余的局部 `import calendar`，使 `iso_to_float()` 中 `calendar` 变为局部变量。
+  - **错误位置**：异常处理（168 行）在局部 import 执行前引用 `calendar`。
+  - **影响**：Cloudflare 同步初始化时 ~100ms 循环报错，健康检查与控制台不可用，服务无法启动。
+  - **修复**：移除冗余局部 import，统一使用模块级导入（全局 21 行已导入）。
+  - **严重性**：CRITICAL——所有 v8.48.0 用户需立即升级。
+  - **迁移**：直接替换，无需改配置。
+  - **位置**：`src/mcp_memory_service/models/memory.py:84`（已移除）。
 
 ### Technical Details
-- **Error Message**: `UnboundLocalError: cannot access local variable 'calendar' where it is not associated with a value`
-- **Frequency**: Repeating continuously (~100ms intervals) during Cloudflare hybrid backend initialization
-- **Testing**: Service now starts successfully, health endpoint responds correctly, Cloudflare sync completes without errors
-- **Verification**: No timestamp parsing errors in logs, dashboard accessible at https://localhost:8000
+- **错误信息**：`UnboundLocalError: cannot access local variable 'calendar' where it is not associated with a value`
+- **触发频率**：Cloudflare 混合后端初始化期间持续 ~100ms 重复。
+- **测试结果**：修复后服务可正常启动，健康检查响应正常，Cloudflare 同步无报错。
+- **验证**：日志无时间戳解析错误，控制台可访问 `https://localhost:8000`。
 
 ## [8.48.0] - 2025-12-07
 
 ### Added
-- **CSV-Based Metadata Compression** - Intelligent metadata compression system for Cloudflare sync operations
+- **基于 CSV 的元数据压缩** —— Cloudflare 同步的智能压缩体系
   - Implemented CSV encoding/decoding for quality and consolidation metadata
   - Achieved 78% size reduction (732B → 159B typical case)
   - Provider code mapping (onnx_local → ox, groq_llama3_70b → gp, etc.) for 70% reduction in provider field
@@ -1414,7 +1412,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Cloudflare-specific field suppression (metadata_source, last_quality_check)
   - Location: `src/mcp_memory_service/quality/metadata_codec.py`
 
-- **Verification Script** - Shell script to verify compression effectiveness
+- **验证脚本** —— Shell 脚本验证压缩效果
   - Tests CSV encoding/decoding round-trip accuracy
   - Measures compression ratios
   - Validates metadata size under Cloudflare limits
@@ -1441,20 +1439,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.47.1] - 2025-12-07
 
 ### Fixed
-- **ONNX Self-Match Bug** - ONNX bulk evaluation was using memory content as its own query, producing artificially inflated scores (~1.0 for all memories)
+- **ONNX 自匹配缺陷** —— 批量评估将记忆内容当作查询，导致质量分接近 1.0。
   - Root cause: Cross-encoder design requires meaningful query-memory pairs for relevance ranking
   - Fixed by generating queries from tags/metadata (what memory is *about*) instead of memory content
   - Result: Realistic quality distribution (avg 0.468 vs 1.000, breakdown: 42.9% high / 3.2% medium / 53.9% low)
   - Location: `scripts/quality/bulk_evaluate_onnx.py`
 
-- **Association Pollution** - System-generated associations and compressed clusters were being evaluated for quality
+- **关联污染** —— 系统生成的 association/压缩聚类被误评质量。
   - These memories are structural (not content) and shouldn't receive quality scores
   - Fixed by filtering memories with type='association' or type='compressed_cluster'
   - Added belt-and-suspenders check for 'source_memory_hashes' metadata field
   - Impact: 948 system-generated memories excluded from evaluation
   - Location: `scripts/quality/bulk_evaluate_onnx.py`
 
-- **Sync Queue Overflow** - Queue capacity of 1,000 was overwhelmed by 4,478 updates during bulk ONNX evaluation
+- **同步队列溢出** —— 队列 1000 容量在批量 ONNX 评估的 4478 次更新中被撑满。
   - Resulted in 278 Cloudflare sync failures (27.8% failure rate)
   - Fixed by increasing queue size to 2,000 (env: `MCP_HYBRID_QUEUE_SIZE`)
   - Fixed by increasing batch size to 100 (env: `MCP_HYBRID_BATCH_SIZE`)
@@ -1463,21 +1461,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Result: 0% sync failure rate during bulk operations
   - Location: `src/mcp_memory_service/storage/hybrid.py`, `src/mcp_memory_service/config.py`
 
-- **Consolidation Hang** - Batch update optimization was missing for relevance score updates
+- **整合卡顿** —— 相关性得分缺少批量更新优化。
   - Sequential update_memory() calls caused slowdown during consolidation
   - Fixed by collecting updates and using single `update_memories_batch()` transaction
   - Impact: 50-100x speedup for relevance score updates during consolidation
   - Location: `src/mcp_memory_service/consolidation/consolidator.py`
 
 ### Added
-- **Reset ONNX Scores Script** (`scripts/quality/reset_onnx_scores.py`)
+- **重置 ONNX 评分脚本** (`scripts/quality/reset_onnx_scores.py`)
   - Resets all ONNX quality scores to implicit defaults (0.5)
   - Pauses hybrid backend sync during reset, resumes after completion
   - Preserves timestamps (doesn't change created_at/updated_at)
   - Progress reporting every 500 memories
   - Use case: Recover from bad ONNX evaluation (self-match bug)
 
-- **Enhanced Bulk Evaluate Script** (`scripts/quality/bulk_evaluate_onnx.py`)
+- **增强版批量评估脚本** (`scripts/quality/bulk_evaluate_onnx.py`)
   - Added association filtering (skip system-generated memories)
   - Added sync monitoring with queue size reporting
   - Added wait_for_sync_completion() call to prevent premature exit
@@ -1485,18 +1483,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Proper pause/resume for hybrid backend sync
 
 ### Changed
-- **ONNX Configuration Defaults** - Updated for better bulk operation support
+- **ONNX 默认配置** —— 调优以支持大批量操作
   - `HYBRID_QUEUE_SIZE`: 1,000 → 2,000 (default, configurable via env)
   - `HYBRID_BATCH_SIZE`: 50 → 100 (default, configurable via env)
   - Backward compatible: `HYBRID_MAX_QUEUE_SIZE` still supported (legacy)
 
-- **Hybrid Backend Sync** - Enhanced pause/resume state tracking
+- **混合后端同步** —— 加强暂停/恢复状态管理
   - Added `_sync_paused` flag to prevent enqueuing during pause (v8.47.1)
   - Fixed race condition where operations were enqueued while sync was paused
   - Ensures operations are not lost during consolidation or bulk updates
 
 ### Documentation
-- **ONNX Limitations** - Added critical warning to CLAUDE.md
+- **ONNX 限制** —— 在 CLAUDE.md 中新增重要警告说明
   - Documented that ONNX ranker (ms-marco-MiniLM-L-6-v2) is a cross-encoder
   - Clarified it scores query-memory relevance, not absolute quality
   - Explained why self-matching queries produce artificially high scores
