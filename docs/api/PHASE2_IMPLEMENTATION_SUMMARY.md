@@ -1,5 +1,7 @@
 # Phase 2 Implementation Summary: Session Hook Migration
 
+[English](PHASE2_IMPLEMENTATION_SUMMARY.md) | [简体中文](PHASE2_IMPLEMENTATION_SUMMARY_zh-cn.md)
+
 **Issue**: [#206 - Implement Code Execution Interface for Token Efficiency](https://github.com/doobidoo/mcp-memory-service/issues/206)
 **Branch**: `feature/code-execution-api`
 **Status**: ✅ **Complete** - Ready for PR

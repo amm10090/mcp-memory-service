@@ -1,5 +1,7 @@
 # Memory Metadata Enhancement API
 
+[English](memory-metadata-api.md) | [简体中文](memory-metadata-api_zh-cn.md)
+
 ## Overview
 
 The Memory Metadata Enhancement API provides efficient memory metadata updates without requiring complete memory recreation. This addresses the core limitation identified in Issue #10 where updating memory metadata required deleting and recreating entire memory entries.

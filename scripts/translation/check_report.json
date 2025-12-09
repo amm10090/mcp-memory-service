@@ -50269,103 +50269,675 @@
     "chinese": "docs/api/PHASE2_IMPLEMENTATION_SUMMARY_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 3,
+        "line": 5,
         "token": "https",
-        "context": "- **Issue**：[ #206 - 实现 Code Execution 接口以提升 Token 效率](https://github.com/doobidoo/mcp-memory-service/issues/206)"
+        "context": "**Issue**: [#206 - Implement Code Execution Interface for Token Efficiency](https://github.com/doobidoo/mcp-memory-service/issues/206)"
       },
       {
         "line": 13,
-        "token": "tokens",
-        "context": "- ✅ **Token 再降 75%**（每次会话 3,600 → 900 tokens）；"
+        "token": "successfully",
+        "context": "Phase 2 successfully migrates session hooks from MCP tool calls to direct Python code execution, achieving:"
+      },
+      {
+        "line": 15,
+        "token": "token",
+        "context": "- ✅ **75% token reduction** (3,600 → 900 tokens per session)"
+      },
+      {
+        "line": 16,
+        "token": "backward",
+        "context": "- ✅ **100% backward compatibility** (zero breaking changes)"
+      },
+      {
+        "line": 17,
+        "token": "tests",
+        "context": "- ✅ **10/10 tests passing** (comprehensive validation)"
       },
       {
         "line": 18,
-        "token": "tokens/",
-        "context": "> **年度影响**：保守估算 10 用户部署可节省 4,927.5 万 tokens/年（≈ $7.39 / 年）。"
+        "token": "degradation",
+        "context": "- ✅ **Graceful degradation** (automatic MCP fallback)"
+      },
+      {
+        "line": 20,
+        "token": "tokens",
+        "context": "**Annual Impact**: 49.3M tokens saved (~$7.39/year per 10-user deployment)"
+      },
+      {
+        "line": 30,
+        "token": "memories",
+        "context": "| Session Start (8 memories) | 3,600 | 900 | 2,700 | **75.0%** |"
+      },
+      {
+        "line": 31,
+        "token": "memories",
+        "context": "| Git Context (3 memories) | 1,650 | 395 | 1,255 | **76.1%** |"
+      },
+      {
+        "line": 32,
+        "token": "memories",
+        "context": "| Recent Search (5 memories) | 2,625 | 385 | 2,240 | **85.3%** |"
       },
       {
         "line": 33,
-        "token": "tokens",
-        "context": "- 每日节省：135,000 tokens"
-      },
-      {
-        "line": 34,
-        "token": "tokens",
-        "context": "- 年度节省：49,275,000 tokens"
+        "token": "memories",
+        "context": "| Important Tagged (5 memories) | 2,625 | 385 | 2,240 | **85.3%** |"
       },
       {
         "line": 35,
-        "token": "tokens",
-        "context": "- 成本节省：≈ $7.39 / 年（按 $0.15 / 百万 tokens）"
+        "token": "exceeds",
+        "context": "**Average Reduction**: **75.25%** (exceeds 75% target)"
+      },
+      {
+        "line": 39,
+        "token": "users",
+        "context": "**Conservative Estimate** (10 users, 5 sessions/day, 365 days):"
+      },
+      {
+        "line": 40,
+        "token": "savings",
+        "context": "- Daily savings: 135,000 tokens"
+      },
+      {
+        "line": 41,
+        "token": "savings",
+        "context": "- Annual savings: **49,275,000 tokens**"
+      },
+      {
+        "line": 42,
+        "token": "savings",
+        "context": "- Cost savings: **$7.39/year** at $0.15/1M tokens"
       },
       {
         "line": 44,
-        "token": "import",
-        "context": "- 新增 `queryMemoryServiceViaCode()`：通过 `python3 -c \"from mcp_memory_service.api import search\"` 查询；"
+        "token": "users",
+        "context": "**Scaling** (100 users):"
       },
       {
         "line": 45,
+        "token": "savings",
+        "context": "- Annual savings: **492,750,000 tokens**"
+      },
+      {
+        "line": 46,
+        "token": "savings",
+        "context": "- Cost savings: **$73.91/year**"
+      },
+      {
+        "line": 74,
+        "token": "code",
+        "context": "- Automatic code execution → MCP fallback"
+      },
+      {
+        "line": 75,
+        "token": "savings",
+        "context": "- Token savings calculation and reporting"
+      },
+      {
+        "line": 76,
+        "token": "path",
+        "context": "- Configurable Python path and timeout"
+      },
+      {
+        "line": 77,
+        "token": "error",
+        "context": "- Comprehensive error handling"
+      },
+      {
+        "line": 78,
+        "token": "monitoring",
+        "context": "- Performance monitoring"
+      },
+      {
+        "line": 95,
+        "token": "code",
+        "context": "- Disable code execution: `enabled: false` (MCP-only mode)"
+      },
+      {
+        "line": 96,
         "token": "fallback",
-        "context": "- `queryMemoryService()` 统一调度 Code → MCP fallback；"
+        "context": "- Disable fallback: `fallbackToMCP: false` (code-only mode)"
       },
       {
         "line": 98,
-        "token": "path",
-        "context": "> Warm path (<100ms) 将在 Phase 3（常驻 Python 进程）实现。"
-      },
-      {
-        "line": 105,
-        "token": "null",
-        "context": "| 模块导入失败 | Python 异常 | 返回 null | MCP |"
+        "token": "timeout",
+        "context": "- Adjust timeout: `timeout: 10000` (for slow systems)"
       },
       {
         "line": 106,
-        "token": "timeout",
-        "context": "| 执行超时 | `execSync` timeout | 返回 null | MCP |"
+        "token": "execution",
+        "context": "1. ✅ **Code execution succeeds** - Validates API calls work"
       },
       {
         "line": 107,
+        "token": "fallback",
+        "context": "2. ✅ **MCP fallback on failure** - Ensures graceful degradation"
+      },
+      {
+        "line": 108,
+        "token": "reduction",
+        "context": "3. ✅ **Token reduction validation** - Confirms 75%+ savings"
+      },
+      {
+        "line": 109,
+        "token": "loading",
+        "context": "4. ✅ **Configuration loading** - Verifies config schema"
+      },
+      {
+        "line": 110,
+        "token": "handling",
+        "context": "5. ✅ **Error handling** - Tests failure scenarios"
+      },
+      {
+        "line": 111,
+        "token": "validation",
+        "context": "6. ✅ **Performance validation** - Checks cold start <10s"
+      },
+      {
+        "line": 112,
+        "token": "calculation",
+        "context": "7. ✅ **Metrics calculation** - Validates token math"
+      },
+      {
+        "line": 113,
+        "token": "compatibility",
+        "context": "8. ✅ **Backward compatibility** - Ensures no breaking changes"
+      },
+      {
+        "line": 114,
+        "token": "path",
+        "context": "9. ✅ **Python path detection** - Verifies Python availability"
+      },
+      {
+        "line": 115,
+        "token": "escaping",
+        "context": "10. ✅ **String escaping** - Prevents injection attacks"
+      },
+      {
+        "line": 137,
+        "token": "query",
+        "context": "- First query: **Success** - Code execution (75% reduction)"
+      },
+      {
+        "line": 138,
+        "token": "query",
+        "context": "- Second query: **Timeout** - Graceful fallback to MCP"
+      },
+      {
+        "line": 139,
+        "token": "errors",
+        "context": "- Zero errors, full functionality maintained"
+      },
+      {
+        "line": 152,
+        "token": "loading",
+        "context": "- Model loading: 3-4s (cold start, acceptable for hooks)"
+      },
+      {
+        "line": 153,
+        "token": "init",
+        "context": "- Storage init: 50-100ms"
+      },
+      {
+        "line": 154,
+        "token": "execution",
+        "context": "- Query execution: 5-10ms"
+      },
+      {
+        "line": 155,
+        "token": "well",
+        "context": "- **Total**: ~3.4s (well under 5s target)"
+      },
+      {
+        "line": 161,
+        "token": "not",
+        "context": "| Python not found | execSync throws | Log warning | MCP tools |"
+      },
+      {
+        "line": 162,
+        "token": "import",
+        "context": "| Module import error | Python exception | Return null | MCP tools |"
+      },
+      {
+        "line": 163,
+        "token": "timeout",
+        "context": "| Execution timeout | execSync timeout | Return null | MCP tools |"
+      },
+      {
+        "line": 164,
         "token": "JSON",
-        "context": "| JSON 解析失败 | `JSON.parse` 异常 | 返回 null | MCP |"
+        "context": "| Invalid JSON output | JSON.parse throws | Return null | MCP tools |"
       },
       {
-        "line": 149,
-        "token": "docs/hooks/phase2-code-execution-migration.md",
-        "context": "- `docs/hooks/phase2-code-execution-migration.md`：迁移指南 + 指标；"
+        "line": 165,
+        "token": "unavailable",
+        "context": "| Storage unavailable | Python exception | Return error JSON | MCP tools |"
       },
       {
-        "line": 182,
+        "line": 167,
+        "token": "break",
+        "context": "**Key Principle**: **Never break the hook** - always fallback to MCP on failure."
+      },
+      {
+        "line": 177,
+        "token": "new",
+        "context": "| Default (new) | ✅ Enabled | ✅ Enabled | Code → MCP fallback |"
+      },
+      {
+        "line": 178,
+        "token": "old",
+        "context": "| Legacy (old) | ❌ Disabled | N/A | MCP only (works) |"
+      },
+      {
+        "line": 180,
+        "token": "config",
+        "context": "| No config | ✅ Enabled | ✅ Enabled | Default behavior |"
+      },
+      {
+        "line": 185,
+        "token": "changes",
+        "context": "1. No changes required - continue using MCP"
+      },
+      {
+        "line": 186,
+        "token": "config",
+        "context": "2. Update config to enable code execution"
+      },
+      {
+        "line": 187,
+        "token": "rollout",
+        "context": "3. Gradual rollout possible"
+      },
+      {
+        "line": 190,
+        "token": "execution",
+        "context": "1. Code execution enabled by default"
+      },
+      {
+        "line": 191,
+        "token": "fallback",
+        "context": "2. Automatic MCP fallback on errors"
+      },
+      {
+        "line": 192,
+        "token": "user",
+        "context": "3. Zero user configuration needed"
+      },
+      {
+        "line": 246,
+        "token": "code",
+        "context": "- Python code is statically defined"
+      },
+      {
+        "line": 247,
+        "token": "dynamic",
+        "context": "- No dynamic code generation"
+      },
+      {
+        "line": 248,
+        "token": "input",
+        "context": "- User input only used as query strings"
+      },
+      {
+        "line": 251,
+        "token": "seconds",
+        "context": "- Default: 8 seconds"
+      },
+      {
+        "line": 252,
+        "token": "per",
+        "context": "- Configurable per environment"
+      },
+      {
+        "line": 253,
+        "token": "hanging",
+        "context": "- Prevents hanging on slow systems"
+      },
+      {
+        "line": 261,
+        "token": "seconds",
+        "context": "1. **Cold Start Latency** (3-4 seconds)"
+      },
+      {
+        "line": 262,
+        "token": "model",
+        "context": "- **Cause**: Embedding model loading on first execution"
+      },
+      {
+        "line": 263,
+        "token": "session",
+        "context": "- **Impact**: Acceptable for session start hooks"
+      },
+      {
+        "line": 264,
+        "token": "persistent",
+        "context": "- **Mitigation**: Deferred to Phase 3 (persistent daemon)"
+      },
+      {
+        "line": 267,
+        "token": "query",
+        "context": "- **Cause**: Second query may timeout during cold start"
+      },
+      {
+        "line": 268,
+        "token": "fallback",
+        "context": "- **Impact**: Graceful fallback to MCP (no data loss)"
+      },
+      {
+        "line": 269,
+        "token": "timeout",
+        "context": "- **Mitigation**: Increased timeout to 8s (from 5s)"
+      },
+      {
+        "line": 272,
+        "token": "returned",
+        "context": "- **Cause**: Results returned in single batch"
+      },
+      {
+        "line": 273,
+        "token": "memories",
+        "context": "- **Impact**: Limited to 8 memories per query"
+      },
+      {
+        "line": 274,
+        "token": "session",
+        "context": "- **Mitigation**: Sufficient for session hooks"
+      },
+      {
+        "line": 278,
         "token": "warm",
-        "context": "1. **常驻 Python 守护进程**：目标 warm <100ms；"
+        "context": "- [ ] **Persistent Python Daemon** - <100ms warm execution"
       },
       {
-        "line": 183,
+        "line": 279,
+        "token": "storage",
+        "context": "- [ ] **Connection Pooling** - Reuse storage connections"
+      },
+      {
+        "line": 280,
+        "token": "additional",
+        "context": "- [ ] **Batch Operations** - 90% additional reduction"
+      },
+      {
+        "line": 281,
+        "token": "results",
+        "context": "- [ ] **Streaming Support** - Incremental results"
+      },
+      {
+        "line": 282,
+        "token": "stack",
+        "context": "- [ ] **Advanced Error Reporting** - Python stack traces"
+      },
+      {
+        "line": 290,
+        "token": "docs/hooks/phase2-code-execution-migration.md",
+        "context": "1. **Phase 2 Migration Guide** - `/docs/hooks/phase2-code-execution-migration.md`"
+      },
+      {
+        "line": 291,
+        "token": "efficiency",
+        "context": "- Token efficiency analysis"
+      },
+      {
+        "line": 292,
+        "token": "metrics",
+        "context": "- Performance metrics"
+      },
+      {
+        "line": 293,
+        "token": "checklist",
+        "context": "- Deployment checklist"
+      },
+      {
+        "line": 297,
+        "token": "comprehensive",
+        "context": "- 10 comprehensive tests"
+      },
+      {
+        "line": 298,
+        "token": "pass",
+        "context": "- 100% pass rate"
+      },
+      {
+        "line": 299,
+        "token": "usage",
+        "context": "- Example usage patterns"
+      },
+      {
+        "line": 302,
+        "token": "section",
+        "context": "- `codeExecution` section added"
+      },
+      {
+        "line": 303,
+        "token": "comments",
+        "context": "- Inline comments"
+      },
+      {
+        "line": 304,
+        "token": "values",
+        "context": "- Default values documented"
+      },
+      {
+        "line": 310,
+        "token": "execution",
+        "context": "- [x] Code execution wrapper implemented"
+      },
+      {
+        "line": 311,
+        "token": "schema",
+        "context": "- [x] Configuration schema added"
+      },
+      {
+        "line": 312,
+        "token": "fallback",
+        "context": "- [x] MCP fallback mechanism complete"
+      },
+      {
+        "line": 313,
+        "token": "handling",
+        "context": "- [x] Error handling comprehensive"
+      },
+      {
+        "line": 314,
+        "token": "suite",
+        "context": "- [x] Test suite passing (10/10)"
+      },
+      {
+        "line": 315,
+        "token": "complete",
+        "context": "- [x] Documentation complete"
+      },
+      {
+        "line": 316,
+        "token": "reduction",
+        "context": "- [x] Token reduction validated (75.25%)"
+      },
+      {
+        "line": 317,
+        "token": "compatibility",
+        "context": "- [x] Backward compatibility verified"
+      },
+      {
+        "line": 318,
+        "token": "reviewed",
+        "context": "- [x] Security reviewed (string escaping)"
+      },
+      {
+        "line": 319,
+        "token": "testing",
+        "context": "- [x] Integration testing complete"
+      },
+      {
+        "line": 320,
+        "token": "optimization",
+        "context": "- [ ] Performance optimization (deferred to Phase 3)"
+      },
+      {
+        "line": 328,
+        "token": "review",
+        "context": "1. **Create PR for review**"
+      },
+      {
+        "line": 329,
+        "token": "implementation",
+        "context": "- Include Phase 2 implementation"
+      },
+      {
+        "line": 331,
+        "token": "token",
+        "context": "- Highlight 75% token reduction"
+      },
+      {
+        "line": 333,
+        "token": "users",
+        "context": "2. **Announce to users**"
+      },
+      {
+        "line": 334,
+        "token": "post",
+        "context": "- Blog post about token efficiency"
+      },
+      {
+        "line": 335,
+        "token": "guide",
+        "context": "- Migration guide for existing users"
+      },
+      {
+        "line": 336,
+        "token": "zero",
+        "context": "- Emphasize zero breaking changes"
+      },
+      {
+        "line": 341,
+        "token": "warm",
+        "context": "- Target: <100ms warm execution"
+      },
+      {
+        "line": 342,
+        "token": "reduction",
+        "context": "- 95% reduction vs cold start"
+      },
+      {
+        "line": 343,
+        "token": "user",
+        "context": "- Better user experience"
+      },
+      {
+        "line": 346,
+        "token": "support",
+        "context": "- `search_by_tag()` support"
+      },
+      {
+        "line": 347,
         "token": "recall",
-        "context": "2. **扩展 API**：`search_by_tag`、`recall`、`update/delete`；"
+        "context": "- `recall()` time-based queries"
       },
       {
-        "line": 197,
+        "line": 351,
+        "token": "multiple",
+        "context": "- Combine multiple queries"
+      },
+      {
+        "line": 352,
+        "token": "invocation",
+        "context": "- Single Python invocation"
+      },
+      {
+        "line": 353,
+        "token": "additional",
+        "context": "- 90% additional reduction"
+      },
+      {
+        "line": 362,
+        "token": "warm",
+        "context": "| Execution Time | <500ms warm | 3.4s cold* | ⚠️ Acceptable |"
+      },
+      {
+        "line": 369,
+        "token": "execution",
+        "context": "*Warm execution optimization deferred to Phase 3"
+      },
+      {
+        "line": 375,
+        "token": "successfully",
+        "context": "Phase 2 **successfully achieves all objectives**:"
+      },
+      {
+        "line": 377,
+        "token": "token",
+        "context": "✅ **75% token reduction** - Exceeds target at 75.25%"
+      },
+      {
+        "line": 378,
+        "token": "backward",
+        "context": "✅ **100% backward compatibility** - Zero breaking changes"
+      },
+      {
+        "line": 379,
+        "token": "error",
+        "context": "✅ **Production-ready** - Comprehensive error handling, fallback, monitoring"
+      },
+      {
+        "line": 380,
+        "token": "tests",
+        "context": "✅ **Well-tested** - 10/10 tests passing"
+      },
+      {
+        "line": 381,
+        "token": "documented",
+        "context": "✅ **Fully documented** - Migration guide, API docs, configuration"
+      },
+      {
+        "line": 383,
+        "token": "review",
+        "context": "**Status**: **Ready for PR review and merge**"
+      },
+      {
+        "line": 386,
         "token": "main",
-        "context": "> **状态**：已准备好合并进 `main`，下一阶段聚焦 warm 性能与高级 API。"
+        "context": "1. Create PR for `feature/code-execution-api` → `main`"
+      },
+      {
+        "line": 387,
+        "token": "achievements",
+        "context": "2. Update CHANGELOG.md with Phase 2 achievements"
+      },
+      {
+        "line": 388,
+        "token": "implementation",
+        "context": "3. Plan Phase 3 implementation (persistent daemon)"
+      },
+      {
+        "line": 394,
+        "token": "https",
+        "context": "- [Issue #206 - Code Execution Interface](https://github.com/doobidoo/mcp-memory-service/issues/206)"
+      },
+      {
+        "line": 396,
+        "token": "docs/hooks/phase2-code-execution-migration.md",
+        "context": "- [Phase 2 Migration Guide](/docs/hooks/phase2-code-execution-migration.md)"
+      },
+      {
+        "line": 397,
+        "token": "docs/api/code-execution-interface.md",
+        "context": "- [Code Execution Interface Spec](/docs/api/code-execution-interface.md)"
+      },
+      {
+        "line": 405,
+        "token": "https",
+        "context": "**Repository**: [doobidoo/mcp-memory-service](https://github.com/doobidoo/mcp-memory-service)"
+      },
+      {
+        "line": 406,
+        "token": "https",
+        "context": "**Issue Tracker**: [GitHub Issues](https://github.com/doobidoo/mcp-memory-service/issues)"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        39,
-        18
-      ],
-      "codeblock": [
-        14,
-        4
-      ],
-      "tables": [
-        35,
-        27
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/api/PHASE2_REPORT.md",
@@ -50579,115 +51151,565 @@
     "chinese": "docs/api/memory-metadata-api_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 24,
+        "line": 13,
+        "token": "memory",
+        "context": "Updates memory metadata while preserving the original memory content, embeddings, and optionally timestamps."
+      },
+      {
+        "line": 25,
+        "token": "string",
+        "context": "- `content_hash` (string, required): The content hash of the memory to update"
+      },
+      {
+        "line": 26,
         "token": "updates",
-        "context": "- `updates`（必填）：包含要修改字段的字典；"
+        "context": "- `updates` (object, required): Dictionary of metadata fields to update"
       },
       {
-        "line": 28,
+        "line": 27,
+        "token": "boolean",
+        "context": "- `preserve_timestamps` (boolean, optional): Whether to preserve original created_at timestamp (default: true)"
+      },
+      {
+        "line": 30,
         "token": "success",
-        "context": "- `success`：布尔值，指示是否成功；"
+        "context": "- `success` (boolean): Whether the update was successful"
       },
       {
-        "line": 29,
+        "line": 31,
         "token": "message",
-        "context": "- `message`：更新摘要或错误信息。"
-      },
-      {
-        "line": 35,
-        "token": "tags",
-        "context": "1. **tags**（字符串数组）"
+        "context": "- `message` (string): Summary of updated fields or error message"
       },
       {
         "line": 37,
         "token": "tags",
-        "context": "- 示例：`\"tags\": [\"important\", \"reference\", \"new-tag\"]`。"
+        "context": "1. **tags** (array of strings)"
       },
       {
-        "line": 40,
-        "token": "reminder",
-        "context": "- 更新记忆类型，示例：`\"memory_type\": \"reminder\"`。"
+        "line": 38,
+        "token": "existing",
+        "context": "- Replaces existing tags completely"
+      },
+      {
+        "line": 39,
+        "token": "tags",
+        "context": "- Example: `\"tags\": [\"important\", \"reference\", \"new-tag\"]`"
+      },
+      {
+        "line": 41,
+        "token": "string",
+        "context": "2. **memory_type** (string)"
       },
       {
         "line": 42,
-        "token": "metadata",
-        "context": "3. **metadata**（对象）"
+        "token": "memory",
+        "context": "- Updates the memory type classification"
       },
       {
-        "line": 44,
-        "token": "metadata",
-        "context": "- 示例：`\"metadata\": {\"priority\": \"high\", \"due_date\": \"2024-01-15\"}`。"
+        "line": 43,
+        "token": "reminder",
+        "context": "- Example: `\"memory_type\": \"reminder\"`"
       },
       {
-        "line": 49,
+        "line": 45,
+        "token": "metadata",
+        "context": "3. **metadata** (object)"
+      },
+      {
+        "line": 46,
+        "token": "existing",
+        "context": "- Merges with existing custom metadata"
+      },
+      {
+        "line": 47,
+        "token": "metadata",
+        "context": "- Example: `\"metadata\": {\"priority\": \"high\", \"due_date\": \"2024-01-15\"}`"
+      },
+      {
+        "line": 51,
+        "token": "other",
+        "context": "Any other fields not in the protected list can be updated directly:"
+      },
+      {
+        "line": 52,
         "token": "priority",
         "context": "- `\"priority\": \"urgent\"`"
       },
       {
-        "line": 50,
+        "line": 53,
         "token": "status",
         "context": "- `\"status\": \"active\"`"
       },
       {
-        "line": 51,
+        "line": 54,
         "token": "category",
         "context": "- `\"category\": \"work\"`"
       },
       {
-        "line": 57,
-        "token": "content",
-        "context": "- `content`"
+        "line": 55,
+        "token": "fields",
+        "context": "- Custom application-specific fields"
       },
       {
         "line": 59,
-        "token": "embedding",
-        "context": "- `embedding`"
+        "token": "fields",
+        "context": "These fields cannot be modified through this API:"
       },
       {
         "line": 60,
-        "token": "false",
-        "context": "- `created_at` / `created_at_iso`（除非 `preserve_timestamps=false`）"
+        "token": "content",
+        "context": "- `content` - Memory content is immutable"
       },
       {
         "line": 61,
+        "token": "hash",
+        "context": "- `content_hash` - Content hash is immutable"
+      },
+      {
+        "line": 62,
+        "token": "embedding",
+        "context": "- `embedding` - Embeddings are preserved automatically"
+      },
+      {
+        "line": 63,
+        "token": "unless",
+        "context": "- `created_at` / `created_at_iso` - Preserved unless `preserve_timestamps=false`"
+      },
+      {
+        "line": 64,
         "token": "timestamp",
-        "context": "- 内部时间戳（`timestamp`、`timestamp_float`、`timestamp_str`）"
+        "context": "- Internal timestamp fields (`timestamp`, `timestamp_float`, `timestamp_str`)"
       },
       {
-        "line": 116,
+        "line": 123,
         "token": "true",
-        "context": "### 默认（`preserve_timestamps=true`）"
+        "context": "### Default Behavior (preserve_timestamps=true)"
       },
       {
-        "line": 121,
-        "token": "false",
-        "context": "### 重置（`preserve_timestamps=false`）"
+        "line": 125,
+        "token": "preserved",
+        "context": "- `created_at` and `created_at_iso` are preserved from original memory"
+      },
+      {
+        "line": 126,
+        "token": "set",
+        "context": "- `updated_at` and `updated_at_iso` are set to current time"
+      },
+      {
+        "line": 127,
+        "token": "timestamp",
+        "context": "- Legacy timestamp fields are updated for backward compatibility"
       },
       {
         "line": 129,
-        "token": "upsert",
-        "context": "2. **ChromaDB**（`storage/chroma.py`）：通过高效 upsert 保留嵌入，并校验/合并元数据；"
+        "token": "false",
+        "context": "### Reset Behavior (preserve_timestamps=false)"
       },
       {
-        "line": 154,
-        "token": "hash",
-        "context": "1. **记忆不存在**：`Memory with hash ... not found`；"
+        "line": 131,
+        "token": "timestamp",
+        "context": "- All timestamp fields are set to current time"
+      },
+      {
+        "line": 132,
+        "token": "marking",
+        "context": "- Useful for marking memories as \"refreshed\" or \"re-activated\""
+      },
+      {
+        "line": 138,
+        "token": "implemented",
+        "context": "The API is implemented in the storage abstraction layer:"
+      },
+      {
+        "line": 141,
+        "token": "method",
+        "context": "- Abstract method definition"
+      },
+      {
+        "line": 142,
+        "token": "interface",
+        "context": "- Consistent interface across storage backends"
+      },
+      {
+        "line": 145,
+        "token": "upsert",
+        "context": "- Efficient upsert operation preserving embeddings"
+      },
+      {
+        "line": 146,
+        "token": "merging",
+        "context": "- Metadata merging with validation"
+      },
+      {
+        "line": 147,
+        "token": "synchronization",
+        "context": "- Timestamp synchronization"
+      },
+      {
+        "line": 150,
+        "token": "implementation",
+        "context": "- sqlite-vec implementation will follow same interface"
+      },
+      {
+        "line": 151,
+        "token": "storage",
+        "context": "- Other storage backends can implement consistently"
       },
       {
         "line": 155,
-        "token": "updates",
-        "context": "2. **updates 不是字典**；"
+        "token": "exposed",
+        "context": "The API is exposed via the MCP protocol:"
+      },
+      {
+        "line": 157,
+        "token": "tool",
+        "context": "1. **Tool Registration** - Available as `update_memory_metadata` tool"
+      },
+      {
+        "line": 158,
+        "token": "parameter",
+        "context": "2. **Input Validation** - Comprehensive parameter validation"
+      },
+      {
+        "line": 159,
+        "token": "error",
+        "context": "3. **Error Handling** - Clear error messages for debugging"
+      },
+      {
+        "line": 160,
+        "token": "operation",
+        "context": "4. **Logging** - Detailed operation logging for monitoring"
+      },
+      {
+        "line": 167,
+        "token": "content",
+        "context": "- Original content remains unchanged"
+      },
+      {
+        "line": 168,
+        "token": "need",
+        "context": "- No need to regenerate embeddings"
+      },
+      {
+        "line": 169,
+        "token": "vector",
+        "context": "- Preserves vector database relationships"
+      },
+      {
+        "line": 172,
+        "token": "metadata",
+        "context": "- Only metadata changes are transmitted"
+      },
+      {
+        "line": 173,
+        "token": "bandwidth",
+        "context": "- Reduced bandwidth usage"
+      },
+      {
+        "line": 174,
+        "token": "operation",
+        "context": "- Faster operation completion"
+      },
+      {
+        "line": 177,
+        "token": "update",
+        "context": "- Single update operation vs delete+insert"
+      },
+      {
+        "line": 178,
+        "token": "database",
+        "context": "- Maintains database indices and relationships"
+      },
+      {
+        "line": 179,
+        "token": "transaction",
+        "context": "- Reduces transaction overhead"
+      },
+      {
+        "line": 183,
+        "token": "need",
+        "context": "- **Memory Usage**: No need to load full memory content"
+      },
+      {
+        "line": 184,
+        "token": "embedding",
+        "context": "- **CPU Usage**: No embedding regeneration required"
+      },
+      {
+        "line": 185,
+        "token": "database",
+        "context": "- **Storage I/O**: Minimal database operations"
+      },
+      {
+        "line": 186,
+        "token": "data",
+        "context": "- **Network**: Reduced data transfer"
+      },
+      {
+        "line": 214,
+        "token": "error",
+        "context": "- Detailed error messages for debugging"
+      },
+      {
+        "line": 215,
+        "token": "rollback",
+        "context": "- Transaction rollback on failures"
+      },
+      {
+        "line": 216,
+        "token": "memory",
+        "context": "- Original memory remains unchanged on errors"
+      },
+      {
+        "line": 217,
+        "token": "troubleshooting",
+        "context": "- Logging for troubleshooting"
+      },
+      {
+        "line": 223,
+        "token": "memories",
+        "context": "- Existing memories work without modification"
+      },
+      {
+        "line": 224,
+        "token": "timestamp",
+        "context": "- Legacy timestamp fields are maintained"
+      },
+      {
+        "line": 225,
+        "token": "breaking",
+        "context": "- No breaking changes to existing APIs"
+      },
+      {
+        "line": 229,
+        "token": "available",
+        "context": "1. **Immediate Availability** - API available immediately after deployment"
+      },
+      {
+        "line": 230,
+        "token": "adopted",
+        "context": "2. **Gradual Adoption** - Can be adopted incrementally"
+      },
+      {
+        "line": 231,
+        "token": "pattern",
+        "context": "3. **Fallback Support** - Original store/delete pattern still works"
+      },
+      {
+        "line": 232,
+        "token": "testing",
+        "context": "4. **Validation** - Comprehensive testing before production use"
+      },
+      {
+        "line": 239,
+        "token": "organizational",
+        "context": "- Add organizational tags over time"
+      },
+      {
+        "line": 240,
+        "token": "memories",
+        "context": "- Categorize memories as understanding improves"
+      },
+      {
+        "line": 241,
+        "token": "bulk",
+        "context": "- Apply bulk tagging for organization"
+      },
+      {
+        "line": 244,
+        "token": "memories",
+        "context": "- Mark memories as high/low priority"
+      },
+      {
+        "line": 245,
+        "token": "urgency",
+        "context": "- Update urgency as contexts change"
+      },
+      {
+        "line": 246,
+        "token": "memory",
+        "context": "- Implement memory lifecycle management"
+      },
+      {
+        "line": 249,
+        "token": "memory",
+        "context": "- Track memory processing status"
+      },
+      {
+        "line": 250,
+        "token": "memories",
+        "context": "- Mark memories as reviewed/processed"
+      },
+      {
+        "line": 251,
+        "token": "workflow",
+        "context": "- Implement workflow states"
+      },
+      {
+        "line": 256,
+        "token": "relationship",
+        "context": "- Add relationship metadata"
+      },
+      {
+        "line": 257,
+        "token": "memory",
+        "context": "- Create memory hierarchies"
+      },
+      {
+        "line": 258,
+        "token": "reference",
+        "context": "- Implement reference systems"
+      },
+      {
+        "line": 261,
+        "token": "expiration",
+        "context": "- Add expiration metadata"
+      },
+      {
+        "line": 262,
+        "token": "memory",
+        "context": "- Implement memory aging"
+      },
+      {
+        "line": 263,
+        "token": "automatic",
+        "context": "- Schedule automatic cleanup"
+      },
+      {
+        "line": 266,
+        "token": "ownership",
+        "context": "- Add ownership metadata"
+      },
+      {
+        "line": 267,
+        "token": "sharing",
+        "context": "- Implement sharing controls"
+      },
+      {
+        "line": 268,
+        "token": "access",
+        "context": "- Track access permissions"
+      },
+      {
+        "line": 274,
+        "token": "test",
+        "context": "- Comprehensive test coverage for all update scenarios"
+      },
+      {
+        "line": 275,
+        "token": "condition",
+        "context": "- Error condition testing"
+      },
+      {
+        "line": 276,
+        "token": "behavior",
+        "context": "- Timestamp behavior validation"
+      },
+      {
+        "line": 277,
+        "token": "merging",
+        "context": "- Metadata merging verification"
+      },
+      {
+        "line": 281,
+        "token": "protocol",
+        "context": "- End-to-end MCP protocol testing"
+      },
+      {
+        "line": 282,
+        "token": "backend",
+        "context": "- Storage backend compatibility testing"
+      },
+      {
+        "line": 283,
+        "token": "benchmarking",
+        "context": "- Performance benchmarking"
+      },
+      {
+        "line": 284,
+        "token": "validation",
+        "context": "- Cross-platform validation"
+      },
+      {
+        "line": 288,
+        "token": "dataset",
+        "context": "- Large dataset updates"
+      },
+      {
+        "line": 289,
+        "token": "update",
+        "context": "- Concurrent update operations"
+      },
+      {
+        "line": 290,
+        "token": "usage",
+        "context": "- Memory usage monitoring"
+      },
+      {
+        "line": 291,
+        "token": "time",
+        "context": "- Response time measurement"
+      },
+      {
+        "line": 297,
+        "token": "multiple",
+        "context": "1. **Batch Updates** - Update multiple memories in single operation"
+      },
+      {
+        "line": 298,
+        "token": "only",
+        "context": "2. **Conditional Updates** - Update only if conditions are met"
+      },
+      {
+        "line": 299,
+        "token": "validation",
+        "context": "3. **Metadata Validation** - Schema validation for metadata fields"
+      },
+      {
+        "line": 300,
+        "token": "metadata",
+        "context": "4. **Update History** - Track metadata change history"
+      },
+      {
+        "line": 301,
+        "token": "only",
+        "context": "5. **Selective Updates** - Update only specific metadata fields"
+      },
+      {
+        "line": 305,
+        "token": "implementation",
+        "context": "- sqlite-vec implementation (Issue #40)"
+      },
+      {
+        "line": 306,
+        "token": "vector",
+        "context": "- Other vector database backends"
+      },
+      {
+        "line": 307,
+        "token": "across",
+        "context": "- Consistent API across all backends"
+      },
+      {
+        "line": 308,
+        "token": "optimization",
+        "context": "- Performance optimization per backend"
+      },
+      {
+        "line": 312,
+        "token": "provides",
+        "context": "The Memory Metadata Enhancement API provides a robust, efficient solution for memory metadata management. It enables sophisticated memory organization features "
+      },
+      {
+        "line": 314,
+        "token": "implementation",
+        "context": "This implementation forms the foundation for advanced memory management features like re-tagging systems (Issue #45) and memory consolidation (Issue #11)."
       }
     ],
-    "structure_diff": {
-      "codeblock": [
-        18,
-        10
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/api/tag-standardization.md",
