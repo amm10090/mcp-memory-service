@@ -29107,692 +29107,287 @@
         "context": "- **Testing**: Both fixes validated in PR test runs - drift detection now works, tests pass consistently"
       },
       {
-        "line": 2310,
-        "token": "metadata",
-        "context": "- **Hybrid Backend Drift Detection** - Automatic metadata synchronization using `updated_at` timestamps (issue #202)"
-      },
-      {
-        "line": 2311,
-        "token": "awareness",
-        "context": "- **Bidirectional awareness**: Detects metadata changes on either backend (SQLite-vec ↔ Cloudflare)"
-      },
-      {
-        "line": 2312,
-        "token": "drift",
-        "context": "- **Periodic drift checks**: Configurable interval via `MCP_HYBRID_DRIFT_CHECK_INTERVAL` (default: 1 hour)"
-      },
-      {
-        "line": 2313,
-        "token": "timestamp",
-        "context": "- **\"Newer timestamp wins\" conflict resolution**: Prevents data loss during metadata updates"
-      },
-      {
         "line": 2314,
-        "token": "support",
-        "context": "- **Dry-run support**: Preview changes via `python scripts/sync/check_drift.py`"
-      },
-      {
-        "line": 2315,
-        "token": "configuration",
-        "context": "- **New configuration variables**:"
-      },
-      {
-        "line": 2316,
-        "token": "metadata",
-        "context": "- `MCP_HYBRID_SYNC_UPDATES` - Enable metadata sync (default: true)"
-      },
-      {
-        "line": 2317,
-        "token": "between",
-        "context": "- `MCP_HYBRID_DRIFT_CHECK_INTERVAL` - Seconds between drift checks (default: 3600)"
+        "token": "docs/deployment/systemd-service.md",
+        "context": "- **文档**：在 `docs/deployment/systemd-service.md` 增漂移检测章节，`README.md` 补充概览与时间戳恢复排错步骤。"
       },
       {
         "line": 2318,
-        "token": "check",
-        "context": "- `MCP_HYBRID_DRIFT_BATCH_SIZE` - Memories to check per scan (default: 100)"
-      },
-      {
-        "line": 2319,
-        "token": "methods",
-        "context": "- **New methods**:"
-      },
-      {
-        "line": 2320,
-        "token": "drift",
-        "context": "- `BackgroundSyncService._detect_and_sync_drift()` - Core drift detection logic with dry-run mode"
-      },
-      {
-        "line": 2321,
-        "token": "memories",
-        "context": "- `CloudflareStorage.get_memories_updated_since()` - Query memories by update timestamp"
-      },
-      {
-        "line": 2322,
-        "token": "initial",
-        "context": "- **Enhanced initial sync**: Now detects and syncs metadata drift for existing memories"
-      },
-      {
-        "line": 2325,
-        "token": "backend",
-        "context": "- **Issue #202** - Hybrid backend now syncs metadata updates (tags, types, custom fields)"
-      },
-      {
-        "line": 2326,
-        "token": "behavior",
-        "context": "- Previous behavior only detected missing memories, ignoring metadata changes"
-      },
-      {
-        "line": 2327,
-        "token": "silent",
-        "context": "- Prevented silent data loss when memories updated on one backend but not synced"
-      },
-      {
-        "line": 2328,
-        "token": "fixes",
-        "context": "- Tag fixes in Cloudflare now properly propagate to local SQLite"
-      },
-      {
-        "line": 2329,
-        "token": "updates",
-        "context": "- Metadata updates no longer diverge between backends"
-      },
-      {
-        "line": 2332,
-        "token": "sync",
-        "context": "- Initial sync (`_perform_initial_sync`) now compares timestamps for existing memories"
-      },
-      {
-        "line": 2333,
-        "token": "sync",
-        "context": "- Periodic sync includes drift detection checks at configurable intervals"
-      },
-      {
-        "line": 2334,
-        "token": "statistics",
-        "context": "- Sync statistics tracking expanded with drift detection metrics"
-      },
-      {
-        "line": 2338,
-        "token": "configuration",
-        "context": "- `src/mcp_memory_service/config.py` - Added 3 configuration variables"
-      },
-      {
-        "line": 2339,
-        "token": "detection",
-        "context": "- `src/mcp_memory_service/storage/hybrid.py` - Drift detection implementation (~150 lines)"
-      },
-      {
-        "line": 2340,
-        "token": "method",
-        "context": "- `src/mcp_memory_service/storage/cloudflare.py` - Added `get_memories_updated_since()` method"
-      },
-      {
-        "line": 2341,
-        "token": "validation",
-        "context": "- `scripts/sync/check_drift.py` - New dry-run validation script"
-      },
-      {
-        "line": 2342,
-        "token": "drift",
-        "context": "- **Architecture**: Timestamp-based drift detection with 1-second clock skew tolerance"
-      },
-      {
-        "line": 2343,
-        "token": "async",
-        "context": "- **Performance**: Non-blocking async operations, configurable batch sizes"
-      },
-      {
-        "line": 2344,
-        "token": "feature",
-        "context": "- **Safety**: Opt-in feature, dry-run mode, comprehensive audit logging"
-      },
-      {
-        "line": 2349,
-        "token": "review",
-        "context": "- **Code Quality Improvements** - Applied Gemini Code Assist review suggestions (issue #180)"
-      },
-      {
-        "line": 2350,
-        "token": "chained",
-        "context": "- **documents.py:87** - Replaced chained `.replace()` calls with `re.sub()` for path separator sanitization"
-      },
-      {
-        "line": 2351,
-        "token": "elements",
-        "context": "- **app.js:751-762** - Cached DOM elements in setProcessingMode to reduce query overhead"
-      },
-      {
-        "line": 2352,
-        "token": "upload",
-        "context": "- **app.js:551-553, 778-780** - Cached upload option elements to optimize handleDocumentUpload"
-      },
-      {
-        "line": 2353,
-        "token": "indentation",
-        "context": "- **index.html:357, 570** - Fixed indentation consistency for closing `</div>` tags"
-      },
-      {
-        "line": 2354,
-        "token": "impact",
-        "context": "- Performance impact: Minor - reduced DOM query overhead"
-      },
-      {
-        "line": 2355,
-        "token": "changes",
-        "context": "- Breaking changes: None"
-      },
-      {
-        "line": 2359,
-        "token": "sanitization",
-        "context": "- **Code Quality**: Regex-based sanitization more scalable, DOM element caching reduces redundant queries"
-      },
-      {
-        "line": 2360,
-        "token": "refactor",
-        "context": "- **Commit**: ffc6246 - refactor: code quality improvements from Gemini review (issue #180)"
-      },
-      {
-        "line": 2365,
-        "token": "systematic",
-        "context": "- **GitHub Release Manager Agent** - Resolved systematic version history omission in README.md (commit ccf959a)"
-      },
-      {
-        "line": 2366,
-        "token": "agent",
-        "context": "- Fixed agent behavior that was omitting previous versions from \"Previous Releases\" section"
-      },
-      {
-        "line": 2367,
-        "token": "list",
-        "context": "- Added v8.24.1 to Previous Releases list (was missing despite being valid release)"
-      },
-      {
-        "line": 2368,
-        "token": "agent",
-        "context": "- Enhanced agent instructions with CRITICAL section for maintaining version history integrity"
-      },
-      {
-        "line": 2369,
-        "token": "quality",
-        "context": "- Added quality assurance checklist item to prevent future omissions"
-      },
-      {
-        "line": 2370,
-        "token": "cause",
-        "context": "- Root cause: Agent was replacing entire Previous Releases section instead of prepending new version"
-      },
-      {
-        "line": 2373,
-        "token": "test",
-        "context": "- **Test Coverage for Tag+Time Filtering** - Comprehensive test suite for issue #216 (commit ebff282)"
-      },
-      {
-        "line": 2374,
-        "token": "unit",
-        "context": "- 10 unit tests passing across SQLite-vec, Cloudflare, and Hybrid backends"
-      },
-      {
-        "line": 2375,
-        "token": "functionality",
-        "context": "- Validates PR #215 functionality (tag+time filtering to fix semantic over-filtering bug #214)"
-      },
-      {
-        "line": 2376,
-        "token": "verify",
-        "context": "- Tests verify memories can be retrieved using both tag criteria AND time range filters"
-      },
-      {
-        "line": 2377,
-        "token": "integration",
-        "context": "- API integration tests created (with known threading issues documented for future fix)"
-      },
-      {
-        "line": 2378,
-        "token": "regression",
-        "context": "- Ensures regression prevention for semantic search over-filtering bug"
-      },
-      {
-        "line": 2381,
-        "token": "release",
-        "context": "- GitHub release workflow now more reliable with enhanced agent guardrails"
-      },
-      {
-        "line": 2382,
-        "token": "suite",
-        "context": "- Test suite provides better coverage for multi-filter memory retrieval scenarios"
-      },
-      {
-        "line": 2386,
-        "token": "claude/agents/github-release-manager.md",
-        "context": "- `.claude/agents/github-release-manager.md` - Added CRITICAL section for Previous Releases maintenance"
-      },
-      {
-        "line": 2387,
-        "token": "new",
-        "context": "- `tests/test_time_filtering.py` - 10 new unit tests for tag+time filtering"
-      },
-      {
-        "line": 2388,
-        "token": "integration",
-        "context": "- `tests/integration/test_api_time_search.py` - API integration tests (threading issues documented)"
-      },
-      {
-        "line": 2389,
-        "token": "unit",
-        "context": "- **Test Execution**: All 10 unit tests passing, API tests have known threading limitations"
-      },
-      {
-        "line": 2390,
-        "token": "version",
-        "context": "- **Impact**: Prevents version history loss in future releases, ensures tag+time filtering remains functional"
-      },
-      {
-        "line": 2395,
-        "token": "workflow",
-        "context": "- **CI/CD Workflow Infrastructure** - Development Setup Validation workflow fixes (issue #217 related)"
-      },
-      {
-        "line": 2396,
-        "token": "bash",
-        "context": "- Fixed bash errexit handling in workflow tests - prevents premature exit on intentional test failures"
-      },
-      {
-        "line": 2397,
-        "token": "exit",
-        "context": "- Corrected exit code capture using EXIT_CODE=0 and || EXIT_CODE=$? pattern"
-      },
-      {
-        "line": 2398,
-        "token": "workflow",
-        "context": "- All 5 workflow tests now passing: version consistency, pre-commit hooks, server warnings, developer prompts, docs accuracy"
-      },
-      {
-        "line": 2399,
-        "token": "cause",
-        "context": "- Root cause: bash runs with -e flag (errexit), which exits immediately when commands return non-zero exit codes"
-      },
-      {
-        "line": 2400,
-        "token": "intentionally",
-        "context": "- Tests intentionally run check_dev_setup.py expecting exit code 1, but bash was exiting before capture"
-      },
-      {
-        "line": 2404,
-        "token": "tests",
-        "context": "- Workflow tests can now properly validate that the development setup validator correctly detects problems"
-      },
-      {
-        "line": 2405,
-        "token": "code",
-        "context": "- Exit code capture no longer uses \"|| true\" pattern (was making all commands return 0)"
-      },
-      {
-        "line": 2410,
-        "token": "python",
-        "context": "- Before: `python script.py || true` (always returns 0, breaks exit code testing)"
-      },
-      {
-        "line": 2411,
-        "token": "python",
-        "context": "- After: `EXIT_CODE=0; python script.py || EXIT_CODE=$?` (captures actual exit code, prevents bash exit)"
-      },
-      {
-        "line": 2412,
-        "token": "jobs",
-        "context": "- **Test Jobs**: All 5 jobs in dev-setup-validation workflow now pass consistently"
-      },
-      {
-        "line": 2413,
-        "token": "test",
-        "context": "- **Context**: Part of test infrastructure improvement efforts (issue #217)"
-      },
-      {
-        "line": 2418,
-        "token": "test",
-        "context": "- **Test Infrastructure Failures** - Resolved 27 pre-existing test failures (issue #217)"
-      },
-      {
-        "line": 2419,
-        "token": "async",
-        "context": "- Fixed async fixture incompatibility in 6 test files (19+ failures)"
-      },
-      {
-        "line": 2420,
-        "token": "missing",
-        "context": "- Corrected missing imports (MCPMemoryServer → MemoryServer, removed MemoryMetadata)"
-      },
-      {
-        "line": 2421,
-        "token": "missing",
-        "context": "- Added missing content_hash parameter to Memory() instantiations"
-      },
-      {
-        "line": 2422,
-        "token": "hardcoded",
-        "context": "- Updated hardcoded version strings (6.3.0 → 8.24.0)"
-      },
-      {
-        "line": 2423,
-        "token": "test",
-        "context": "- Improved test pass rate from 63% to 71% (412/584 tests passing)"
-      },
-      {
-        "line": 2424,
-        "token": "via",
-        "context": "- Execution: Automated via amp-bridge agent"
-      },
-      {
-        "line": 2427,
-        "token": "suite",
-        "context": "- Test suite now has cleaner baseline for detecting new regressions"
-      },
-      {
-        "line": 2428,
-        "token": "async",
-        "context": "- All async test fixtures now use @pytest_asyncio.fixture decorator"
-      },
-      {
-        "line": 2431,
-        "token": "agent",
-        "context": "- **Automated Fix**: Used amp-bridge agent for pattern-based refactoring"
-      },
-      {
-        "line": 2432,
-        "token": "minutes",
-        "context": "- **Execution Time**: ~15 minutes (vs 1-2 hours manual)"
-      },
-      {
-        "line": 2433,
-        "token": "test",
-        "context": "- **Files Modified**: 11 test files across tests/ and tests/integration/"
-      },
-      {
-        "line": 2434,
-        "token": "infrastructure",
-        "context": "- **Root Causes**: Test infrastructure issues, not code bugs"
-      },
-      {
-        "line": 2435,
-        "token": "failures",
-        "context": "- **Remaining Failures**: 172 failures remain (backend config, performance, actual bugs)"
-      },
-      {
-        "line": 2440,
         "token": "now",
         "context": "- **PyPI Publishing Automation** - Package now available via `pip install mcp-memory-service`"
       },
       {
-        "line": 2441,
+        "line": 2319,
         "token": "workflow",
         "context": "- **Workflow Automation**: Configured GitHub Actions workflow to automatically publish to PyPI on tag pushes"
       },
       {
-        "line": 2442,
+        "line": 2320,
         "token": "can",
         "context": "- **Installation Simplification**: Users can now install directly via `pip install mcp-memory-service` or `uv pip install mcp-memory-service`"
       },
       {
-        "line": 2443,
+        "line": 2321,
         "token": "installation",
         "context": "- **Accessibility**: Resolves installation barriers for users without git access or familiarity"
       },
       {
-        "line": 2444,
+        "line": 2322,
         "token": "secret",
         "context": "- **Token Configuration**: Secured with `PYPI_TOKEN` GitHub secret for automated publishing"
       },
       {
-        "line": 2445,
+        "line": 2323,
         "token": "only",
         "context": "- **Quality Gates**: Publishes only after successful test suite execution"
       },
       {
-        "line": 2448,
+        "line": 2326,
         "token": "primary",
         "context": "- **Distribution Method**: Added PyPI as primary distribution channel alongside GitHub releases"
       },
       {
-        "line": 2449,
+        "line": 2327,
         "token": "guides",
         "context": "- **Installation Documentation**: Updated guides to include pip-based installation as recommended method"
       },
       {
-        "line": 2453,
+        "line": 2331,
         "token": "workflow",
         "context": "- `.github/workflows/publish.yml` - NEW workflow for automated PyPI publishing"
       },
       {
-        "line": 2454,
+        "line": 2332,
         "token": "repository",
         "context": "- GitHub repository secrets - Added `PYPI_TOKEN` for authentication"
       },
       {
-        "line": 2455,
+        "line": 2333,
         "token": "runs",
         "context": "- **Trigger**: Workflow runs automatically on git tag creation (pattern: `v*.*.*`)"
       },
       {
-        "line": 2456,
+        "line": 2334,
         "token": "build",
         "context": "- **Build System**: Uses Hatchling build backend with `python-semantic-release`"
       },
       {
-        "line": 2459,
+        "line": 2337,
         "token": "installation",
         "context": "- **For New Users**: Preferred installation is now `pip install mcp-memory-service`"
       },
       {
-        "line": 2460,
+        "line": 2338,
         "token": "action",
         "context": "- **For Existing Users**: No action required - git-based installation continues to work"
       },
       {
-        "line": 2461,
+        "line": 2339,
         "token": "creation",
         "context": "- **For Contributors**: Tag creation now triggers PyPI publishing automatically"
       },
       {
-        "line": 2466,
+        "line": 2344,
         "token": "layer",
         "context": "- **Stale Virtual Environment Prevention System** - Comprehensive 6-layer strategy to prevent \"stale venv vs source code\" version mismatches"
       },
       {
-        "line": 2467,
+        "line": 2345,
         "token": "servers",
         "context": "- **Root Cause**: MCP servers load from site-packages, not source files. System restart doesn't help - it relaunches with same stale package"
       },
       {
-        "line": 2468,
+        "line": 2346,
         "token": "issue",
         "context": "- **Impact**: Prevented issue that caused v8.23.0 tag validation bug to persist despite v8.22.2 fix (source showed v8.23.0 while venv had v8.5.3)"
       },
       {
-        "line": 2472,
+        "line": 2350,
         "token": "version",
         "context": "- New `scripts/validation/check_dev_setup.py` - Validates source/venv version consistency, detects editable installs"
       },
       {
-        "line": 2473,
+        "line": 2351,
         "token": "commits",
         "context": "- Enhanced `scripts/hooks/pre-commit` - Blocks commits when venv is stale, provides actionable error messages"
       },
       {
-        "line": 2474,
+        "line": 2352,
         "token": "development",
         "context": "- Added CLAUDE.md development setup section with explicit `pip install -e .` guidance"
       },
       {
-        "line": 2477,
+        "line": 2355,
         "token": "function",
         "context": "- Added `check_version_consistency()` function in `src/mcp_memory_service/server.py`"
       },
       {
-        "line": 2478,
+        "line": 2356,
         "token": "startup",
         "context": "- Server startup warnings when version mismatch detected (source vs package)"
       },
       {
-        "line": 2479,
+        "line": 2357,
         "token": "developer",
         "context": "- Updated README.md developer section with editable install instructions"
       },
       {
-        "line": 2480,
+        "line": 2358,
         "token": "docs/development/ai-agent-instructions.md",
         "context": "- Enhanced `docs/development/ai-agent-instructions.md` with proper setup commands"
       },
       {
-        "line": 2483,
+        "line": 2361,
         "token": "developer",
         "context": "- Enhanced `scripts/installation/install.py` with developer detection (checks for git repo)"
       },
       {
-        "line": 2484,
+        "line": 2362,
         "token": "prompt",
         "context": "- Interactive prompt guides developers to use `pip install -e .` for editable installs"
       },
       {
-        "line": 2485,
+        "line": 2363,
         "token": "workflow",
         "context": "- New CI/CD workflow `.github/workflows/dev-setup-validation.yml` with 5 comprehensive test jobs:"
       },
       {
-        "line": 2486,
+        "line": 2364,
         "token": "consistency",
         "context": "1. Version consistency validation"
       },
       {
-        "line": 2487,
+        "line": 2365,
         "token": "hook",
         "context": "2. Pre-commit hook functionality"
       },
       {
-        "line": 2488,
+        "line": 2366,
         "token": "startup",
         "context": "3. Server startup warnings"
       },
       {
-        "line": 2489,
+        "line": 2367,
         "token": "developer",
         "context": "4. Interactive developer prompts"
       },
       {
-        "line": 2490,
+        "line": 2368,
         "token": "accuracy",
         "context": "5. Documentation accuracy checks"
       },
       {
-        "line": 2493,
+        "line": 2371,
         "token": "now",
         "context": "- **Developer Workflow**: Developers now automatically guided to use `pip install -e .` for proper setup"
       },
       {
-        "line": 2494,
+        "line": 2372,
         "token": "validates",
         "context": "- **Pre-commit Hook**: Now validates venv consistency before allowing commits"
       },
       {
-        "line": 2495,
+        "line": 2373,
         "token": "developer",
         "context": "- **Installation Process**: Detects developer mode and provides targeted guidance"
       },
       {
-        "line": 2499,
+        "line": 2377,
         "token": "hook",
         "context": "1. **Development**: Pre-commit hook blocks bad commits, detection script validates setup"
       },
       {
-        "line": 2500,
+        "line": 2378,
         "token": "startup",
         "context": "2. **Runtime**: Server startup warnings catch edge cases"
       },
       {
-        "line": 2501,
+        "line": 2379,
         "token": "ai-agent-instructions.md",
         "context": "3. **Documentation**: CLAUDE.md, README.md, ai-agent-instructions.md all updated"
       },
       {
-        "line": 2502,
+        "line": 2380,
         "token": "hook",
         "context": "4. **Automation**: check_dev_setup.py, pre-commit hook, CI/CD workflow"
       },
       {
-        "line": 2503,
+        "line": 2381,
         "token": "prompts",
         "context": "5. **Interactive**: install.py prompts developers for editable install"
       },
       {
-        "line": 2504,
+        "line": 2382,
         "token": "workflow",
         "context": "6. **Testing**: CI/CD workflow with 5 comprehensive test jobs"
       },
       {
-        "line": 2507,
+        "line": 2385,
         "token": "automated",
         "context": "- `scripts/validation/check_dev_setup.py` - NEW automated detection script"
       },
       {
-        "line": 2508,
+        "line": 2386,
         "token": "venv",
         "context": "- `scripts/hooks/pre-commit` - Enhanced with venv validation"
       },
       {
-        "line": 2509,
+        "line": 2387,
         "token": "development",
         "context": "- `CLAUDE.md` - Added development setup guidance"
       },
       {
-        "line": 2510,
+        "line": 2388,
         "token": "runtime",
         "context": "- `src/mcp_memory_service/server.py` - Added runtime version check"
       },
       {
-        "line": 2511,
+        "line": 2389,
         "token": "developer",
         "context": "- `README.md` - Updated developer section"
       },
       {
-        "line": 2512,
+        "line": 2390,
         "token": "docs/development/ai-agent-instructions.md",
         "context": "- `docs/development/ai-agent-instructions.md` - Updated setup commands"
       },
       {
-        "line": 2513,
+        "line": 2391,
         "token": "developer",
         "context": "- `scripts/installation/install.py` - Added developer detection"
       },
       {
-        "line": 2514,
+        "line": 2392,
         "token": "validation",
         "context": "- `.github/workflows/dev-setup-validation.yml` - NEW CI/CD validation"
       },
       {
-        "line": 2517,
+        "line": 2395,
         "token": "pip",
         "context": "- **For Developers**: Run `pip install -e .` to install in editable mode (will be prompted by install.py)"
       },
       {
-        "line": 2518,
+        "line": 2396,
         "token": "action",
         "context": "- **For Users**: No action required - prevention system is transparent for production use"
       },
       {
-        "line": 2519,
+        "line": 2397,
         "token": "installed",
         "context": "- **Pre-commit Hook**: Automatically installed during `install.py`, validates on every commit"
       },
       {
-        "line": 2522,
+        "line": 2400,
         "token": "fb74",
         "context": "- `670fb74` - Phase 1: Automated detection (check_dev_setup.py, pre-commit hook, CLAUDE.md)"
       },
       {
-        "line": 2523,
+        "line": 2401,
         "token": "warnings",
         "context": "- `9537259` - Phase 2: Runtime warnings (server.py) + developer documentation"
       },
       {
-        "line": 2524,
+        "line": 2402,
         "token": "onboarding",
         "context": "- `a17bcc7` - Phase 3: Interactive onboarding (install.py) + CI/CD validation"
       }
@@ -29800,7 +29395,7 @@
     "structure_diff": {
       "heading": [
         189,
-        315
+        296
       ],
       "codeblock": [
         6,
@@ -29808,7 +29403,7 @@
       ],
       "tables": [
         6,
-        7
+        3
       ]
     }
   },
