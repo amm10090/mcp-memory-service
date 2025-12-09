@@ -105,13 +105,13 @@ claude /memory-ingest document.pdf --tags documentation
 claude /memory-ingest-dir ./docs --tags knowledge-base
 ```
 
-See [docs/document-ingestion.md](docs/document-ingestion.md) for full configuration and usage.
+更多配置与用法详见 [docs/document-ingestion.md](docs/document-ingestion.md)。
 
-## Interactive Dashboard
+## 交互式控制面板（快速概览）
 
-Web interface at `http://127.0.0.1:8000/` with CRUD operations, semantic/tag/time search, real-time updates (SSE), mobile responsive. Performance: 25ms page load, <100ms search.
+Web 控制台默认地址 `http://127.0.0.1:8000/`，提供 CRUD、语义/标签/时间检索、SSE 实时更新与移动端适配；实测页面 25ms 级加载、检索 <100ms。
 
-**API Endpoints:** `/api/search`, `/api/search/by-tag`, `/api/search/by-time`, `/api/events`, `/api/quality/*` (v8.45.0+)
+常用 API 端点：`/api/search`、`/api/search/by-tag`、`/api/search/by-time`、`/api/events`、`/api/quality/*`（v8.45.0+）。
 
 ## Memory Quality System 🆕 (v8.45.0+)
 
@@ -160,103 +160,84 @@ export MCP_QUALITY_RETENTION_LOW_MIN=30         # <0.5 最少 30 天
 - ⚠️ 平均分 0.469，**自匹配偏置 ~25%**，质量增强提升 0-3%  
 - 下一步：混合评分、用户反馈、LLM 评审（Issue #268）
 
-### Hooks Integration (v8.45.3+)
+### 钩子集成 (v8.45.3+)
 
-Quality scoring is now integrated with memory awareness hooks:
+质量评分已与记忆感知钩子集成：
 
-**Phase 1: Backend Quality in Hooks**
-- `memory-scorer.js` reads `quality_score` from memory metadata
-- Weight: 20% of hook scoring (reduces contentQuality/contentRelevance)
-- Graceful fallback to 0.5 if quality_score not available
+- **Phase 1：后端质量信号** —— `memory-scorer.js` 读取 `quality_score`，占钩子评分权重 20%，无评分时回退 0.5。
+- **Phase 2：异步质量评估** —— 会话结束触发 `/api/quality/memories/{hash}/evaluate`，10s 超时非阻塞，ONNX 评估 ~355ms。
+- **Phase 3：质量增强检索** —— 查询时可开启 `quality_boost`，示例：
+  ```bash
+  curl -X POST http://127.0.0.1:8000/api/search \
+    -H "Content-Type: application/json" \
+    -d '{"query": "...", "quality_boost": true, "quality_weight": 0.3}'
+  ```
 
-**Phase 2: Async Quality Evaluation**
-- Session-end hook triggers `/api/quality/memories/{hash}/evaluate`
-- Non-blocking: 10s timeout, doesn't delay session end
-- ONNX ranker provides ~355ms evaluation time
-
-**Phase 3: Quality-Boosted Retrieval**
-```bash
-# Search with quality boost
-curl -X POST http://127.0.0.1:8000/api/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "...", "quality_boost": true, "quality_weight": 0.3}'
+**完整流程：**
+```
+Session End → Store Memory → /evaluate（异步）
+                        ↓
+                  ONNX 评分 (~355ms)
+                        ↓
+           更新 metadata.quality_score
+                        ↓
+Next Session → Hook Retrieval（质量权重 20%）
 ```
 
-**Complete Flow:**
-```
-Session End → Store Memory → Trigger /evaluate (async)
-                                    ↓
-                            ONNX Ranker (355ms)
-                                    ↓
-                            Update metadata.quality_score
-                                    ↓
-Next Session → Hook Retrieval → backendQuality = 20% weight
-```
+更多细节见 [docs/guides/memory-quality-guide.md](docs/guides/memory-quality-guide.md)：使用指南、配置示例、故障排查与性能基准。
 
-### Documentation
+## 记忆整合系统 🆕 (v8.23.0+)
 
-**Updated for v8.48.3** - See [docs/guides/memory-quality-guide.md](docs/guides/memory-quality-guide.md) for:
-- Comprehensive user guide
-- Configuration examples
-- Troubleshooting
-- Best practices
-- Performance benchmarks
+“梦境式”自动记忆整合，带计划调度与 Code Execution API。
 
-## Memory Consolidation System 🆕
+### 架构
 
-**Dream-inspired memory consolidation** with automatic scheduling and Code Execution API (v8.23.0+).
+- **调度位置**：HTTP 服务器侧（独立于 MCP/Claude Desktop），24×7 常驻，APScheduler 定时，可通过 HTTP API 与 MCP 工具访问。
+- **优势**：持久可靠，不依赖 Claude Desktop 是否开启。
 
-### Architecture
-
-**Consolidation Scheduler Location**: HTTP Server (v8.23.0+)
-- Runs 24/7 with HTTP server (independent of MCP server/Claude Desktop)
-- Uses APScheduler for automatic scheduling
-- Accessible via both HTTP API and MCP tools
-- **Benefits**: Persistent, reliable, no dependency on Claude Desktop being open
-
-**Code Execution API** (token-efficient operations):
+**Code Execution API（低 Token 调用）示例：**
 ```python
 from mcp_memory_service.api import consolidate, scheduler_status
 
-# Trigger consolidation (15 tokens vs 150 MCP tool - 90% reduction)
+# 触发整合（约 15 tokens，较 MCP 工具节省 ~90%）
 result = consolidate('weekly')
 
-# Check scheduler (10 tokens vs 125 - 92% reduction)
+# 查看调度器状态（约 10 tokens）
 status = scheduler_status()
 ```
 
-### HTTP API Endpoints
+### HTTP API 端点
 
-| Endpoint | Method | Description | Response Time |
-|----------|--------|-------------|---------------|
-| `/api/consolidation/trigger` | POST | Trigger consolidation | ~10-30s |
-| `/api/consolidation/status` | GET | Scheduler status | <5ms |
-| `/api/consolidation/recommendations/{horizon}` | GET | Get recommendations | ~50ms |
+| 端点 | 方法 | 说明 | 响应时间 |
+| --- | --- | --- | --- |
+| `/api/consolidation/trigger` | POST | 触发整合 | ~10-30s |
+| `/api/consolidation/status` | GET | 查看调度状态 | <5ms |
+| `/api/consolidation/recommendations/{horizon}` | GET | 获取整合建议 | ~50ms |
 
-**Example Usage:**
+**调用示例：**
 ```bash
-# Trigger weekly consolidation
+# 触发周度整合
 curl -X POST http://127.0.0.1:8000/api/consolidation/trigger \
   -H "Content-Type: application/json" \
   -d '{"time_horizon": "weekly"}'
 
-# Check scheduler status
+# 查询调度状态
 curl http://127.0.0.1:8000/api/consolidation/status
 
-# Get recommendations
+# 获取整合建议
 curl http://127.0.0.1:8000/api/consolidation/recommendations/weekly
 ```
 
 ### 配置
 
 ```bash
-# Enable consolidation (default: true)
+# 启用整合（默认 true）
 export MCP_CONSOLIDATION_ENABLED=true
 
-# Association-based quality boost (v8.47.0+)
-export MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED=true   # Enable boost (default: true)
-export MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST=5  # Min connections (default: 5)
-export MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR=1.2     # Boost multiplier (default: 1.2 = 20%)
+# 关联度加权（v8.47.0+）
+export MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED=true
+export MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST=5
+export MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR=1.2
 
 ### 使用示例
 
