@@ -130,7 +130,7 @@
   - **Platform**: Works on Windows, macOS, Linux
   - **Use Case**: Primary workaround for Windows SessionStart hook bug (#160)
   - **Location**: `claude_commands/session-start.md`
-  - **Benefits**:
+  - **收益**：
     - ✅ Safe manual alternative to automatic hooks
     - ✅ No configuration changes needed
     - ✅ Full memory awareness functionality
@@ -255,7 +255,7 @@
     - Search operations: `SearchByTagSuccess`, `SearchByTagError`
     - Delete operations: `DeleteMemorySuccess`, `DeleteMemoryFailure`
     - Health operations: `HealthCheckSuccess`, `HealthCheckFailure`
-  - **Benefits**:
+  - **收益**：
     - ✅ IDE autocomplete for all return values (type `result["` to see available keys)
     - ✅ Compile-time type checking catches typos (e.g., `result["succes"]` → type error)
     - ✅ Self-documenting API - clear contracts for all methods
@@ -309,7 +309,7 @@
   - **Files Modified**:
     - `src/mcp_memory_service/services/memory_service.py`: Added normalize_tags(), updated store_memory() and search_by_tag()
     - `src/mcp_memory_service/mcp_server.py`: Updated docstring to reflect all formats supported
-  - **Benefits**:
+  - **收益**：
     - ✅ Single source of truth for tag normalization (DRY)
     - ✅ All tag formats work everywhere (top-level, metadata, any protocol)
     - ✅ No more validation errors for comma-separated strings
@@ -686,7 +686,7 @@
     - SQLite pragmas for concurrent access (`MCP_MEMORY_SQLITE_PRAGMAS`)
     - Cloudflare credentials for background sync
     - Proper environment variable propagation
-  - **Benefits**:
+  - **收益**：
     - 5ms local reads (SQLite-vec)
     - Zero user-facing latency (background Cloudflare sync)
     - Multi-device synchronization
@@ -795,7 +795,7 @@
     - Refactored `mcp_server.py` to thin adapter (-338 lines, now ~50 lines per method)
     - Refactored `server.py` to use MemoryService (169 lines modified)
     - Both servers now delegate to shared business logic
-  - **Benefits**:
+  - **收益**：
     - **Single source of truth**: All memory operations (store, retrieve, search, delete) in one place
     - **Consistent behavior**: Both protocols guaranteed identical business logic
     - **Easier maintenance**: Bug fixes automatically apply to both servers
@@ -1895,62 +1895,62 @@
 ## [8.41.0] - 2025-11-27
 
 ### Fixed
-- **Session Start Hook Reliability** - Improved session start hook reliability and memory filtering (commit 924962a)
-  - **Error Suppression**: Suppressed Code Execution ModuleNotFoundError spam
-    - Added `suppressErrors: true` to Code Execution call configuration
+- **Session Start 钩子可靠性** —— 提升启动钩子可靠性与记忆过滤（924962a）
+  - **抑制错误**：屏蔽 Code Execution 的 ModuleNotFoundError 噪声。
+    - 在 Code Execution 配置中加入 `suppressErrors: true`。
     - Eliminates console noise from module import errors during session start
-  - **Clean Output**: Removed duplicate "Injected Memory Context" output
-    - Removed duplicate stdout console.log that caused double messages
+  - **输出清理**：移除重复的 “Injected Memory Context” 输出。
+    - 删除导致双重输出的 stdout console.log。
     - Session start output now cleaner and easier to read
-  - **Memory Filtering**: Added project affinity scoring to prevent cross-project memory pollution
-    - New `calculateProjectAffinity()` function in `memory-scorer.js`
-    - Hard filters out memories without project tag when in a project context
-    - Soft scoring penalty (0.3x) for memories from different projects
+  - **记忆过滤**：引入项目亲和度评分，防止跨项目记忆污染。
+    - 新增 `calculateProjectAffinity()`（memory-scorer.js）。
+    - 在项目上下文中硬过滤无项目标签的记忆。
+    - 对跨项目记忆施加 0.3x 软惩罚。
     - Prevents Azure/Terraform memories from appearing in mcp-memory-service context
-  - **Classification Fix**: Session summaries no longer misclassified as "Current Problems"
-    - Excludes `session`, `session-summary`, and `session-end` memory types from problem classification
+  - **分类修正**：Session 摘要不再被误判为 “Current Problems”。
+    - 将 `session`/`session-summary`/`session-end` 类型排除在问题分类之外。
     - Prevents confusion between historical session notes and actual current issues
-  - **Path Display**: "Unknown location" now shows actual path via `process.cwd()` fallback
+  - **路径显示**：无法检测 git 时用 `process.cwd()` 替代 “Unknown location”。
     - When git repository detection fails, uses `process.cwd()` instead of "Unknown location"
     - Provides better context awareness even in non-git directories
 
 ## [8.40.0] - 2025-11-27
 
 ### Added
-- **Session Start Version Display** - Automatic version information display during session startup (commit f2f7d2b, fixes #250)
-  - **Version Checker Utility**: New `version-checker.js` utility in `claude-hooks/utilities/`
+- **Session Start 版本显示** —— 启动自动展示版本信息（f2f7d2b，修复 #250）。
+  - **版本检查工具**：新增 `version-checker.js`（位于 `claude-hooks/utilities/`）。
     - Reads local version from `src/mcp_memory_service/__init__.py`
     - Fetches latest published version from PyPI API
     - Compares versions and displays status labels (published/development/outdated)
     - Configurable timeout for PyPI API requests
-  - **Session Start Integration**: Version information now appears automatically during session initialization
+  - 会话初始化时自动展示版本信息。
     - Displays format: `📦 Version → X.Y.Z (local) • PyPI: X.Y.Z`
     - Shows after storage backend information
     - Provides immediate visibility into version status
-  - **Testing**: Includes `test_version_checker.js` for utility validation
-  - **Benefits**:
-    - Quick version verification without manual checks
-    - Early detection of outdated installations
-    - Improved development workflow transparency
-    - Helps users stay current with latest features and fixes
+  - 含 `test_version_checker.js` 用于校验。
+  - **收益**：
+    - 快速核对版本，无需手查。
+    - 及早发现安装过期。
+    - 提升开发流程透明度。
+    - 帮助用户保持最新特性与修复。
 
 ## [8.39.1] - 2025-11-27
 
 ### Fixed
-- **Dashboard Analytics Bugs** - Fixed three critical bugs in the analytics section (commit c898a72, fixes #253)
-  - **Top Tags filtering**: Now correctly filters tags by selected timeframe (7d/30d/90d)
-    - Implemented time-based filtering using `get_memories_by_time_range()`
-    - Counts tags only from memories within the selected period
+- **仪表盘分析页缺陷** —— 修复分析页三项关键问题（c898a72，修复 #253）。
+  - **热门标签过滤**：按选定时间范围（7/30/90 天）正确过滤。
+    - 使用 `get_memories_by_time_range()` 做时间过滤。`
+    - 仅统计所选时间段内的标签。
     - Maintains backward compatibility with all storage backends
-  - **Recent Activity display**: Bars now show percentage distribution
-    - Enhanced display to show both count and percentage of total
-    - Tooltip includes both absolute count and percentage
-    - Activity count label shows percentage (e.g., '42 (23.5%)')
-  - **Storage Report field mismatches**: Fixed "undefined chars" display
-    - Fixed field name: `size_kb` instead of `size`
-    - Fixed field name: `preview` instead of `content_preview`
-    - Fixed date parsing: `created_at` is ISO string, not timestamp
-    - Added null safety and proper size display (KB with bytes fallback)
+  - **最近活动显示**：柱状图显示百分比分布。
+    - 同时显示数量与占比。
+    - 提示包含绝对值与百分比。
+    - 活动计数标签展示百分比（例：42 (23.5%)）。
+  - **存储报告字段不匹配**：修复 “undefined chars” 显示。
+    - 字段改为 `size_kb`。
+    - 字段改为 `preview`。
+    - 修正日期解析：`created_at` 为 ISO 字符串。
+    - 增加空值保护，正确显示大小（KB，回退 bytes）。
 
 ## [8.39.0] - 2025-11-26
 
@@ -1963,7 +1963,7 @@
     - Response time (SQLite-vec): ~500ms → ~50ms (10x improvement)
     - Response time (Cloudflare): ~2-3s → ~200ms (10-15x improvement)
   - **Scalability**: Now handles databases with >10,000 memories efficiently
-  - **Benefits**: Pushes filtering to database WHERE clauses, leverages indexes on `created_at`
+  - **收益**： Pushes filtering to database WHERE clauses, leverages indexes on `created_at`
 
 ## [8.38.1] - 2025-11-26
 
