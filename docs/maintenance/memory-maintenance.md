@@ -1,5 +1,7 @@
 # Memory Maintenance Guide
 
+[English](memory-maintenance.md) | [简体中文](memory-maintenance_zh-cn.md)
+
 A comprehensive guide for maintaining and organizing your MCP Memory Service knowledge base through systematic review, analysis, and re-categorization processes.
 
 ## 🎯 Overview

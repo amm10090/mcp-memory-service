@@ -1,5 +1,7 @@
 # Code Quality Workflow Documentation
 
+[English](code-quality-workflow.md) | [简体中文](code-quality-workflow_zh-cn.md)
+
 > **Version**: 1.0.0
 > **Last Updated**: November 2025
 > **Status**: Active

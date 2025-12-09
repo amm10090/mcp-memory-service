@@ -53076,88 +53076,700 @@
     "chinese": "docs/development/code-quality-workflow_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 3,
-        "token": "pyscn",
-        "context": "> 面向贡献者的统一质量管线：静态分析（pyscn）、测试、质量门、回归检查。适用于 v8.45.0+。"
-      },
-      {
         "line": 11,
-        "token": "lint",
-        "context": "1) 本地预检：格式、lint、单测。"
+        "token": "document",
+        "context": "This document describes the comprehensive code quality workflow for the MCP Memory Service project, integrating LLM-based analysis (Groq/Gemini) with static ana"
       },
       {
-        "line": 12,
+        "line": 19,
         "token": "pyscn",
-        "context": "2) 质量分析（可选）：`pyscn analyze .` + ONNX 质量评估（如启用）。"
+        "context": "- [pyscn Integration](#pyscn-integration)"
       },
       {
-        "line": 13,
-        "token": "lint",
-        "context": "3) PR 质量门：GitHub Actions 运行 lint + tests + 关键集成测试。"
+        "line": 21,
+        "token": "troubleshooting",
+        "context": "- [Troubleshooting](#troubleshooting)"
       },
       {
-        "line": 33,
-        "token": "false/true",
-        "context": "- **死代码**：未引用函数、恒 false/true 分支。"
+        "line": 22,
+        "token": "appendix",
+        "context": "- [Appendix](#appendix)"
       },
       {
-        "line": 38,
-        "token": "unit/integration",
-        "context": "- [ ] 单测通过（至少变更相关的 unit/integration）。"
+        "line": 28,
+        "token": "workflow",
+        "context": "The workflow uses three complementary layers to ensure code quality:"
+      },
+      {
+        "line": 40,
+        "token": "complexity",
+        "context": "| **Groq API** | LLM complexity checks | <5s | Yes (>8) | Pre-commit |"
+      },
+      {
+        "line": 41,
+        "token": "fallback",
+        "context": "| **Gemini CLI** | LLM fallback | ~3s | Yes (>8) | Pre-commit |"
+      },
+      {
+        "line": 42,
+        "token": "pyscn",
+        "context": "| **pyscn** | Static analysis | 30-60s | Yes (<50) | PR + weekly |"
       },
       {
         "line": 43,
-        "token": "pyscn",
-        "context": "## pyscn 使用"
+        "token": "review",
+        "context": "| **code-quality-guard** | Manual review | Variable | No | On-demand |"
       },
       {
-        "line": 45,
-        "token": "HTML",
-        "context": "- 输出：HTML 报告位于 `.pyscn/reports/`，CI 可作为 Artifact。"
+        "line": 49,
+        "token": "quality",
+        "context": "Catch quality issues before they enter the codebase."
       },
       {
-        "line": 57,
-        "token": "pyscn",
-        "context": "4) （可选）pyscn 报告"
+        "line": 54,
+        "token": "editable",
+        "context": "- Verify editable install (`pip install -e .`)"
       },
       {
-        "line": 62,
-        "token": "web/api/",
-        "context": "- 关注高风险目录：`storage/`, `web/api/`, `consolidation/`, `quality/`。"
+        "line": 55,
+        "token": "version",
+        "context": "- Check version consistency (source vs installed)"
+      },
+      {
+        "line": 56,
+        "token": "stale",
+        "context": "- Prevent stale package issues"
+      },
+      {
+        "line": 59,
+        "token": "functions",
+        "context": "- Rate functions 1-10"
+      },
+      {
+        "line": 60,
+        "token": "any",
+        "context": "- Block if any function >8"
+      },
+      {
+        "line": 61,
+        "token": "any",
+        "context": "- Warn if any function =7"
+      },
+      {
+        "line": 64,
+        "token": "injection",
+        "context": "- SQL injection (raw SQL queries)"
       },
       {
         "line": 65,
-        "token": "pytest",
-        "context": "- **CI 很慢**：优先运行变更相关测试；使用 `pytest -k <pattern>`。"
+        "token": "unescaped",
+        "context": "- XSS (unescaped HTML)"
+      },
+      {
+        "line": 66,
+        "token": "injection",
+        "context": "- Command injection (shell=True)"
       },
       {
         "line": 67,
-        "token": "pyscn",
-        "context": "- **pyscn 报告为空**：检查 `.pyscn` 目录权限或日志输出。"
+        "token": "secrets",
+        "context": "- Hardcoded secrets"
       },
       {
-        "line": 72,
-        "token": "scripts/quality/phase1_dead_code_analysis.md",
-        "context": "- `scripts/quality/phase1_dead_code_analysis.md`"
+        "line": 115,
+        "token": "any",
+        "context": "- **Block**: Complexity >8, any security issues"
+      },
+      {
+        "line": 117,
+        "token": "security",
+        "context": "- **Pass**: Complexity <7, no security issues"
+      },
+      {
+        "line": 123,
+        "token": "checks",
+        "context": "Comprehensive checks before code review and merge."
+      },
+      {
+        "line": 127,
+        "token": "automatically",
+        "context": "Run automatically on PR creation:"
+      },
+      {
+        "line": 134,
+        "token": "complexity",
+        "context": "1. Code complexity (Gemini CLI)"
+      },
+      {
+        "line": 135,
+        "token": "vulnerabilities",
+        "context": "2. Security vulnerabilities"
+      },
+      {
+        "line": 136,
+        "token": "coverage",
+        "context": "3. Test coverage (code files vs test files)"
+      },
+      {
+        "line": 137,
+        "token": "changes",
+        "context": "4. Breaking changes detection"
+      },
+      {
+        "line": 139,
+        "token": "seconds",
+        "context": "**Duration:** ~10-30 seconds"
+      },
+      {
+        "line": 141,
+        "token": "pyscn",
+        "context": "### Comprehensive Checks (with pyscn)"
+      },
+      {
+        "line": 143,
+        "token": "deep",
+        "context": "Optional deep analysis:"
+      },
+      {
+        "line": 150,
+        "token": "complexity",
+        "context": "- Cyclomatic complexity scoring"
+      },
+      {
+        "line": 151,
+        "token": "code",
+        "context": "- Dead code detection"
+      },
+      {
+        "line": 152,
+        "token": "duplication",
+        "context": "- Code duplication analysis"
+      },
+      {
+        "line": 153,
+        "token": "metrics",
+        "context": "- Coupling metrics (CBO)"
+      },
+      {
+        "line": 154,
+        "token": "violations",
+        "context": "- Architecture violations"
+      },
+      {
+        "line": 156,
+        "token": "seconds",
+        "context": "**Duration:** ~30-60 seconds"
+      },
+      {
+        "line": 197,
+        "token": "pyscn",
+        "context": "**Comprehensive Checks (with pyscn):**"
+      },
+      {
+        "line": 216,
+        "token": "issues",
+        "context": "- **Block PR**: Security issues, health score <50"
+      },
+      {
+        "line": 217,
+        "token": "health",
+        "context": "- **Warn**: Complexity >7, health score 50-69"
+      },
+      {
+        "line": 218,
+        "token": "security",
+        "context": "- **Pass**: No security issues, health score ≥70"
+      },
+      {
+        "line": 224,
+        "token": "quality",
+        "context": "Track quality trends, detect regressions, plan refactoring."
+      },
+      {
+        "line": 228,
+        "token": "manually",
+        "context": "**Run manually or via cron:**"
+      },
+      {
+        "line": 233,
+        "token": "after",
+        "context": "**Frequency:** Weekly or after major changes"
+      },
+      {
+        "line": 236,
+        "token": "score",
+        "context": "- Health score over time"
+      },
+      {
+        "line": 237,
+        "token": "metrics",
+        "context": "- Complexity metrics (avg, max)"
+      },
+      {
+        "line": 238,
+        "token": "percentage",
+        "context": "- Duplication percentage"
+      },
+      {
+        "line": 239,
+        "token": "code",
+        "context": "- Dead code issues"
+      },
+      {
+        "line": 240,
+        "token": "violations",
+        "context": "- Architecture violations"
+      },
+      {
+        "line": 243,
+        "token": "CSV",
+        "context": "- CSV file: `.pyscn/history/metrics.csv`"
+      },
+      {
+        "line": 244,
+        "token": "HTML",
+        "context": "- HTML report: `.pyscn/reports/analyze_*.html`"
+      },
+      {
+        "line": 280,
+        "token": "manually",
+        "context": "**Run manually or via cron:**"
+      },
+      {
+        "line": 286,
+        "token": "current",
+        "context": "- Compare current vs last week's metrics"
+      },
+      {
+        "line": 287,
+        "token": "markdown",
+        "context": "- Generate markdown trend report"
+      },
+      {
+        "line": 288,
+        "token": "regressions",
+        "context": "- Identify regressions (>5% health score drop)"
+      },
+      {
+        "line": 289,
+        "token": "create",
+        "context": "- Optionally create GitHub issue for significant regressions"
+      },
+      {
+        "line": 322,
+        "token": "pyscn",
+        "context": "## pyscn Integration"
+      },
+      {
+        "line": 330,
+        "token": "https",
+        "context": "**Repository:** https://github.com/ludo-technologies/pyscn"
+      },
+      {
+        "line": 335,
+        "token": "scoring",
+        "context": "- Function-level scoring (1-100)"
+      },
+      {
+        "line": 336,
+        "token": "maximum",
+        "context": "- Average, maximum, high-risk functions"
+      },
+      {
+        "line": 337,
+        "token": "complexity",
+        "context": "- Detailed complexity breakdown"
+      },
+      {
+        "line": 340,
+        "token": "code",
+        "context": "- Unreachable code after returns"
+      },
+      {
+        "line": 341,
+        "token": "imports",
+        "context": "- Unused imports"
+      },
+      {
+        "line": 345,
+        "token": "duplicates",
+        "context": "- Exact duplicates"
+      },
+      {
+        "line": 346,
+        "token": "duplicates",
+        "context": "- Near-exact duplicates (>90% similarity)"
+      },
+      {
+        "line": 347,
+        "token": "groups",
+        "context": "- Clone groups and fragments"
+      },
+      {
+        "line": 351,
+        "token": "classes",
+        "context": "- High-coupling classes"
+      },
+      {
+        "line": 352,
+        "token": "coupling",
+        "context": "- Average coupling score"
+      },
+      {
+        "line": 355,
+        "token": "dependencies",
+        "context": "- Module dependencies"
+      },
+      {
+        "line": 356,
+        "token": "dependency",
+        "context": "- Circular dependency detection"
+      },
+      {
+        "line": 357,
+        "token": "depth",
+        "context": "- Dependency depth"
+      },
+      {
+        "line": 360,
+        "token": "architecture",
+        "context": "- Layered architecture compliance"
+      },
+      {
+        "line": 361,
+        "token": "violation",
+        "context": "- Layer violation detection"
+      },
+      {
+        "line": 362,
+        "token": "dependencies",
+        "context": "- Cross-layer dependencies"
+      },
+      {
+        "line": 376,
+        "token": "JSON",
+        "context": "**JSON Output:**"
+      },
+      {
+        "line": 387,
+        "token": "functions",
+        "context": "| **Complexity** | 40/100 | Poor | 28 high-risk functions (>7), avg 9.5 |"
+      },
+      {
+        "line": 388,
+        "token": "issues",
+        "context": "| **Dead Code** | 70/100 | Fair | 27 issues, 2 critical |"
+      },
+      {
+        "line": 389,
+        "token": "duplication",
+        "context": "| **Duplication** | 30/100 | Poor | 6.0% duplication, 18 clone groups |"
+      },
+      {
+        "line": 391,
+        "token": "cycles",
+        "context": "| **Dependencies** | 85/100 | Good | 0 cycles, depth 7 |"
+      },
+      {
+        "line": 392,
+        "token": "violations",
+        "context": "| **Architecture** | 75/100 | Good | 58 violations, 75.5% compliance |"
+      },
+      {
+        "line": 405,
+        "token": "functions",
+        "context": "**Action:** Refactor functions with complexity >10 using:"
+      },
+      {
+        "line": 406,
+        "token": "method",
+        "context": "- Extract method refactoring"
+      },
+      {
+        "line": 407,
+        "token": "pattern",
+        "context": "- Strategy pattern for conditionals"
+      },
+      {
+        "line": 408,
+        "token": "functions",
+        "context": "- Helper functions for complex operations"
+      },
+      {
+        "line": 414,
+        "token": "merge",
+        "context": "**Status:** 🔴 **Cannot merge or release**"
+      },
+      {
+        "line": 417,
+        "token": "full",
+        "context": "1. Review full pyscn report"
+      },
+      {
+        "line": 418,
+        "token": "top",
+        "context": "2. Identify top 5 complexity hotspots"
+      },
+      {
+        "line": 419,
+        "token": "refactoring",
+        "context": "3. Create refactoring tasks"
+      },
+      {
+        "line": 420,
+        "token": "immediate",
+        "context": "4. Schedule immediate refactoring sprint"
+      },
+      {
+        "line": 421,
+        "token": "progress",
+        "context": "5. Track progress in issue #240"
+      },
+      {
+        "line": 423,
+        "token": "resolve",
+        "context": "**Timeline:** Must resolve before any merges"
+      },
+      {
+        "line": 427,
+        "token": "refactoring",
+        "context": "**Status:** 🟡 **Plan refactoring within 2 weeks**"
+      },
+      {
+        "line": 430,
+        "token": "complexity",
+        "context": "1. Analyze complexity trends"
+      },
+      {
+        "line": 431,
+        "token": "project",
+        "context": "2. Create project board for tracking"
+      },
+      {
+        "line": 432,
+        "token": "sprint",
+        "context": "3. Allocate 20% sprint capacity to quality"
+      },
+      {
+        "line": 433,
+        "token": "duplication",
+        "context": "4. Review duplication for consolidation"
+      },
+      {
+        "line": 434,
+        "token": "dead",
+        "context": "5. Remove dead code"
+      },
+      {
+        "line": 436,
+        "token": "week",
+        "context": "**Timeline:** 2-week improvement plan"
+      },
+      {
+        "line": 440,
+        "token": "trends",
+        "context": "**Status:** ✅ **Monitor trends, continue development**"
+      },
+      {
+        "line": 443,
+        "token": "quality",
+        "context": "- Monthly quality reviews"
+      },
+      {
+        "line": 444,
+        "token": "complexity",
+        "context": "- Track complexity trends"
+      },
+      {
+        "line": 445,
+        "token": "health",
+        "context": "- Keep health score above 70"
+      },
+      {
+        "line": 446,
+        "token": "new",
+        "context": "- Address new issues proactively"
+      },
+      {
+        "line": 450,
+        "token": "current",
+        "context": "**Status:** 🎯 **Maintain current standards**"
+      },
+      {
+        "line": 453,
+        "token": "quality",
+        "context": "- Document quality patterns"
+      },
+      {
+        "line": 454,
+        "token": "refactoring",
+        "context": "- Share refactoring techniques"
+      },
+      {
+        "line": 455,
+        "token": "team",
+        "context": "- Mentor team members"
+      },
+      {
+        "line": 456,
+        "token": "wins",
+        "context": "- Celebrate wins"
+      },
+      {
+        "line": 462,
+        "token": "pyscn",
+        "context": "**Issue:** pyscn not found"
+      },
+      {
+        "line": 468,
+        "token": "hook",
+        "context": "**Issue:** Pre-commit hook not running"
+      },
+      {
+        "line": 475,
+        "token": "errors",
+        "context": "**Issue:** Groq API errors"
+      },
+      {
+        "line": 488,
+        "token": "pyscn",
+        "context": "**Issue:** pyscn analysis too slow"
+      },
+      {
+        "line": 495,
+        "token": "positive",
+        "context": "**Issue:** False positive security warnings"
+      },
+      {
+        "line": 507,
+        "token": "only",
+        "context": "- Analyze only staged files"
+      },
+      {
+        "line": 508,
+        "token": "checks",
+        "context": "- Skip checks if no Python files"
+      },
+      {
+        "line": 511,
+        "token": "standard",
+        "context": "- Run standard checks first (fast)"
+      },
+      {
+        "line": 512,
+        "token": "comprehensive",
+        "context": "- Use `--with-pyscn` for comprehensive analysis"
+      },
+      {
+        "line": 513,
+        "token": "pyscn",
+        "context": "- Cache pyscn reports for repeated checks"
+      },
+      {
+        "line": 516,
+        "token": "during",
+        "context": "- Schedule during off-hours (cron)"
+      },
+      {
+        "line": 517,
+        "token": "JSON",
+        "context": "- Use JSON output for scripting"
+      },
+      {
+        "line": 518,
+        "token": "old",
+        "context": "- Archive old reports (keep last 30 days)"
+      },
+      {
+        "line": 526,
+        "token": "quality",
+        "context": "| `scripts/hooks/pre-commit` | Pre-commit quality checks | Auto-runs on `git commit` |"
+      },
+      {
+        "line": 527,
+        "token": "quality",
+        "context": "| `scripts/pr/quality_gate.sh` | PR quality gates | `bash scripts/pr/quality_gate.sh <PR>` |"
+      },
+      {
+        "line": 528,
+        "token": "pyscn",
+        "context": "| `scripts/pr/run_pyscn_analysis.sh` | pyscn PR analysis | `bash scripts/pr/run_pyscn_analysis.sh --pr <PR>` |"
+      },
+      {
+        "line": 529,
+        "token": "tracking",
+        "context": "| `scripts/quality/track_pyscn_metrics.sh` | Metrics tracking | `bash scripts/quality/track_pyscn_metrics.sh` |"
+      },
+      {
+        "line": 530,
+        "token": "review",
+        "context": "| `scripts/quality/weekly_quality_review.sh` | Weekly review | `bash scripts/quality/weekly_quality_review.sh` |"
+      },
+      {
+        "line": 536,
+        "token": "pyscn",
+        "context": "| `.pyscn/.gitignore` | Ignore pyscn reports and history |"
+      },
+      {
+        "line": 537,
+        "token": "quality",
+        "context": "| `.pyscn/history/metrics.csv` | Historical quality metrics |"
+      },
+      {
+        "line": 538,
+        "token": "html",
+        "context": "| `.pyscn/reports/*.html` | pyscn HTML reports |"
+      },
+      {
+        "line": 539,
+        "token": "claude/agents/code-quality-guard.md",
+        "context": "| `.claude/agents/code-quality-guard.md` | Code quality agent specification |"
+      },
+      {
+        "line": 543,
+        "token": "conventions",
+        "context": "- [CLAUDE.md](../../CLAUDE.md) - Project conventions and workflows"
+      },
+      {
+        "line": 544,
+        "token": "claude/agents/code-quality-guard.md",
+        "context": "- [`.claude/agents/code-quality-guard.md`](../../.claude/agents/code-quality-guard.md) - Agent workflows"
+      },
+      {
+        "line": 545,
+        "token": "documentation",
+        "context": "- [scripts/README.md](../../scripts/README.md) - Script documentation"
+      },
+      {
+        "line": 546,
+        "token": "https",
+        "context": "- [Issue #240](https://github.com/doobidoo/mcp-memory-service/issues/240) - Quality improvements tracking"
+      },
+      {
+        "line": 550,
+        "token": "pyscn",
+        "context": "- [pyscn GitHub](https://github.com/ludo-technologies/pyscn) - pyscn documentation"
+      },
+      {
+        "line": 551,
+        "token": "https",
+        "context": "- [Groq API Docs](https://console.groq.com/docs) - Groq API reference"
+      },
+      {
+        "line": 552,
+        "token": "https",
+        "context": "- [Gemini CLI](https://www.npmjs.com/package/@google/generative-ai-cli) - Gemini CLI docs"
+      },
+      {
+        "line": 558,
+        "token": "comprehensive",
+        "context": "- v1.0.0 (2025-11-24): Initial comprehensive documentation with pyscn integration"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        56,
-        14
-      ],
-      "codeblock": [
-        44,
-        2
-      ],
-      "tables": [
-        32,
-        0
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/development/dashboard-workflow.md",
@@ -56245,24 +56857,710 @@
     "chinese": "docs/maintenance/memory-maintenance_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 11,
-        "token": "query",
-        "context": "1. 搜索未打标签记忆：`retrieve_memory({\"query\": \"untagged memories\", \"n_results\": 20})`"
+        "line": 5,
+        "token": "comprehensive",
+        "context": "A comprehensive guide for maintaining and organizing your MCP Memory Service knowledge base through systematic review, analysis, and re-categorization processes"
+      },
+      {
+        "line": 9,
+        "token": "maintenance",
+        "context": "Memory maintenance is essential for keeping your knowledge base organized, searchable, and valuable over time. This guide provides practical workflows for ident"
+      },
+      {
+        "line": 15,
+        "token": "untagged",
+        "context": "1. **Identify untagged memories**: `retrieve_memory({\"query\": \"untagged memories\", \"n_results\": 20})`"
+      },
+      {
+        "line": 16,
+        "token": "content",
+        "context": "2. **Analyze content themes**: Look for projects, technologies, activities, status indicators"
+      },
+      {
+        "line": 17,
+        "token": "standardized",
+        "context": "3. **Apply standardized tags**: Use consistent categorization schema"
+      },
+      {
+        "line": 18,
+        "token": "old",
+        "context": "4. **Replace old memories**: Create new tagged version, delete old untagged version"
+      },
+      {
+        "line": 19,
+        "token": "results",
+        "context": "5. **Document results**: Store summary of maintenance session"
+      },
+      {
+        "line": 23,
+        "token": "memories",
+        "context": "- **Weekly**: Review memories from past 7 days"
+      },
+      {
+        "line": 24,
+        "token": "review",
+        "context": "- **Monthly**: Comprehensive review of recent memories + spot check older ones"
+      },
+      {
+        "line": 25,
+        "token": "database",
+        "context": "- **Quarterly**: Full database health check and optimization"
+      },
+      {
+        "line": 38,
+        "token": "look",
+        "context": "**What to look for:**"
+      },
+      {
+        "line": 39,
+        "token": "memory",
+        "context": "- Total memory count"
+      },
+      {
+        "line": 40,
+        "token": "health",
+        "context": "- Database health status"
+      },
+      {
+        "line": 41,
+        "token": "activity",
+        "context": "- Recent activity patterns"
+      },
+      {
+        "line": 42,
+        "token": "indicators",
+        "context": "- Error indicators"
+      },
+      {
+        "line": 60,
+        "token": "tags",
+        "context": "- Memories with no tags"
+      },
+      {
+        "line": 61,
+        "token": "only",
+        "context": "- Memories with only generic tags (`test`, `memory`, `note`)"
+      },
+      {
+        "line": 62,
+        "token": "inconsistent",
+        "context": "- Memories with inconsistent tag formats"
+      },
+      {
+        "line": 63,
+        "token": "memories",
+        "context": "- Old memories that predate tag standardization"
+      },
+      {
+        "line": 68,
+        "token": "accessed",
+        "context": "- Frequently accessed memories"
+      },
+      {
+        "line": 69,
+        "token": "project",
+        "context": "- Critical project information"
+      },
+      {
+        "line": 70,
+        "token": "important",
+        "context": "- Recent important developments"
+      },
+      {
+        "line": 73,
+        "token": "documentation",
+        "context": "- Historical documentation"
+      },
+      {
+        "line": 74,
+        "token": "materials",
+        "context": "- Reference materials"
+      },
+      {
+        "line": 75,
+        "token": "content",
+        "context": "- Tutorial content"
+      },
+      {
+        "line": 78,
+        "token": "memories",
+        "context": "- Test memories (evaluate for deletion)"
+      },
+      {
+        "line": 79,
+        "token": "information",
+        "context": "- Outdated information"
+      },
+      {
+        "line": 80,
+        "token": "content",
+        "context": "- Duplicate content"
+      },
+      {
+        "line": 86,
+        "token": "each",
+        "context": "For each identified memory, analyze:"
+      },
+      {
+        "line": 89,
+        "token": "project",
+        "context": "- Which project does this relate to?"
+      },
+      {
+        "line": 90,
+        "token": "part",
+        "context": "- Is it part of a larger initiative?"
+      },
+      {
+        "line": 91,
+        "token": "project",
+        "context": "- What's the project phase/status?"
+      },
+      {
+        "line": 94,
+        "token": "languages",
+        "context": "- Programming languages mentioned"
+      },
+      {
+        "line": 95,
+        "token": "libraries",
+        "context": "- Frameworks and libraries"
+      },
+      {
+        "line": 96,
+        "token": "platforms",
+        "context": "- Tools and platforms"
+      },
+      {
+        "line": 97,
+        "token": "services",
+        "context": "- Databases and services"
+      },
+      {
+        "line": 100,
+        "token": "work",
+        "context": "- Development work"
+      },
+      {
+        "line": 101,
+        "token": "debugging",
+        "context": "- Testing and debugging"
+      },
+      {
+        "line": 103,
+        "token": "planning",
+        "context": "- Research and planning"
+      },
+      {
+        "line": 104,
+        "token": "resolution",
+        "context": "- Issue resolution"
+      },
+      {
+        "line": 107,
+        "token": "idea",
+        "context": "- Concept or idea"
+      },
+      {
+        "line": 108,
+        "token": "guide",
+        "context": "- Tutorial or guide"
+      },
+      {
+        "line": 109,
+        "token": "material",
+        "context": "- Reference material"
+      },
+      {
+        "line": 110,
+        "token": "solution",
+        "context": "- Troubleshooting solution"
+      },
+      {
+        "line": 111,
+        "token": "practice",
+        "context": "- Best practice"
+      },
+      {
+        "line": 116,
+        "token": "tags",
+        "context": "Apply tags from multiple categories for comprehensive organization:"
+      },
+      {
+        "line": 134,
+        "token": "main",
+        "context": "1. **Start with Project/Context**: What's the main project or domain?"
+      },
+      {
+        "line": 135,
+        "token": "tools",
+        "context": "2. **Add Technology Tags**: What tools, languages, or frameworks?"
+      },
+      {
+        "line": 136,
+        "token": "was",
+        "context": "3. **Include Activity Tags**: What was being done?"
+      },
+      {
+        "line": 137,
+        "token": "current",
+        "context": "4. **Specify Status**: What's the current state?"
+      },
+      {
+        "line": 138,
+        "token": "kind",
+        "context": "5. **Add Content Type**: What kind of information is this?"
+      },
+      {
+        "line": 144,
+        "token": "each",
+        "context": "**For each memory to be re-tagged:**"
+      },
+      {
+        "line": 146,
+        "token": "exact",
+        "context": "1. **Copy Content**: Preserve exact content"
+      },
+      {
+        "line": 147,
+        "token": "improved",
+        "context": "2. **Create New Memory**: With improved tags"
+      },
+      {
+        "line": 148,
+        "token": "new",
+        "context": "3. **Verify Storage**: Confirm new memory exists"
+      },
+      {
+        "line": 149,
+        "token": "untagged",
+        "context": "4. **Delete Old Memory**: Remove untagged version"
+      },
+      {
+        "line": 150,
+        "token": "maintenance",
+        "context": "5. **Document Change**: Record in maintenance log"
+      },
+      {
+        "line": 172,
+        "token": "similar",
+        "context": "- Group similar memories for consistent tagging"
+      },
+      {
+        "line": 173,
+        "token": "template",
+        "context": "- Use template patterns for common memory types"
+      },
+      {
+        "line": 174,
+        "token": "one",
+        "context": "- Process one category at a time (e.g., all test memories)"
+      },
+      {
+        "line": 175,
+        "token": "breaks",
+        "context": "- Take breaks between batches to maintain quality"
+      },
+      {
+        "line": 178,
+        "token": "tag",
+        "context": "- Double-check tag spelling and format"
+      },
+      {
+        "line": 179,
+        "token": "content",
+        "context": "- Verify content hasn't been modified"
+      },
+      {
+        "line": 180,
+        "token": "old",
+        "context": "- Confirm old memory deletion"
+      },
+      {
+        "line": 181,
+        "token": "search",
+        "context": "- Test search functionality with new tags"
+      },
+      {
+        "line": 187,
+        "token": "each",
+        "context": "**After each memory:**"
+      },
+      {
+        "line": 188,
+        "token": "memory",
+        "context": "- [ ] New memory stored successfully"
+      },
+      {
+        "line": 189,
+        "token": "applied",
+        "context": "- [ ] Tags applied correctly"
+      },
+      {
+        "line": 190,
+        "token": "memory",
+        "context": "- [ ] Old memory deleted"
+      },
+      {
+        "line": 191,
+        "token": "returns",
+        "context": "- [ ] Search returns new memory"
+      },
+      {
+        "line": 193,
+        "token": "maintenance",
+        "context": "**After maintenance session:**"
+      },
+      {
+        "line": 194,
+        "token": "targeted",
+        "context": "- [ ] All targeted memories processed"
+      },
+      {
+        "line": 195,
+        "token": "health",
+        "context": "- [ ] Database health check passed"
+      },
+      {
+        "line": 196,
+        "token": "orphaned",
+        "context": "- [ ] No orphaned or broken memories"
+      },
+      {
+        "line": 197,
+        "token": "functionality",
+        "context": "- [ ] Search functionality improved"
+      },
+      {
+        "line": 201,
+        "token": "maintenance",
+        "context": "**Create maintenance summary memory:**"
+      },
+      {
+        "line": 212,
+        "token": "summary",
+        "context": "**Include in summary:**"
+      },
+      {
+        "line": 213,
+        "token": "memories",
+        "context": "- Number of memories processed"
+      },
+      {
+        "line": 214,
+        "token": "addressed",
+        "context": "- Categories addressed"
+      },
+      {
+        "line": 215,
+        "token": "patterns",
+        "context": "- Tag patterns applied"
+      },
+      {
+        "line": 216,
+        "token": "investment",
+        "context": "- Time investment"
+      },
+      {
+        "line": 217,
+        "token": "improvements",
+        "context": "- Quality improvements"
+      },
+      {
+        "line": 218,
+        "token": "steps",
+        "context": "- Next steps identified"
+      },
+      {
+        "line": 224,
+        "token": "test",
+        "context": "**Situation**: Numerous test memories from development work"
+      },
+      {
+        "line": 227,
+        "token": "all",
+        "context": "1. Identify all test-related memories"
+      },
+      {
+        "line": 228,
+        "token": "each",
+        "context": "2. Evaluate each for permanent value"
+      },
+      {
+        "line": 229,
+        "token": "valuable",
+        "context": "3. Re-tag valuable tests with specific context"
+      },
+      {
+        "line": 230,
+        "token": "obsolete",
+        "context": "4. Delete obsolete or redundant tests"
+      },
+      {
+        "line": 232,
+        "token": "tags",
+        "context": "**Example tags for valuable tests:**"
+      },
+      {
+        "line": 239,
+        "token": "memories",
+        "context": "**Situation**: Project memories scattered without clear organization"
+      },
+      {
+        "line": 242,
+        "token": "project",
+        "context": "1. Group by project phase (planning, development, deployment)"
+      },
+      {
+        "line": 243,
+        "token": "temporal",
+        "context": "2. Add temporal context (month/quarter)"
+      },
+      {
+        "line": 244,
+        "token": "status",
+        "context": "3. Include status information"
+      },
+      {
+        "line": 245,
+        "token": "related",
+        "context": "4. Link related memories with consistent tags"
+      },
+      {
+        "line": 247,
+        "token": "patterns",
+        "context": "**Tag patterns:**"
+      },
+      {
+        "line": 255,
+        "token": "solutions",
+        "context": "**Situation**: Troubleshooting solutions need better organization"
+      },
+      {
+        "line": 259,
+        "token": "problem",
+        "context": "2. Add problem domain tags"
+      },
+      {
+        "line": 260,
+        "token": "resolution",
+        "context": "3. Include resolution status"
+      },
+      {
+        "line": 263,
+        "token": "organization",
+        "context": "**Example organization:**"
+      },
+      {
+        "line": 272,
+        "token": "potentially",
+        "context": "**Find potentially untagged memories:**"
+      },
+      {
+        "line": 280,
+        "token": "pattern",
+        "context": "**Content pattern analysis:**"
+      },
+      {
+        "line": 289,
+        "token": "test",
+        "context": "**Standard test memory re-tagging:**"
+      },
+      {
+        "line": 297,
+        "token": "memory",
+        "context": "**Documentation memory pattern:**"
+      },
+      {
+        "line": 310,
+        "token": "tagged",
+        "context": "- Percentage of tagged memories"
+      },
+      {
+        "line": 311,
+        "token": "result",
+        "context": "- Search result relevance improvement"
+      },
+      {
+        "line": 312,
+        "token": "find",
+        "context": "- Time to find specific information"
+      },
+      {
+        "line": 313,
+        "token": "retrieval",
+        "context": "- Memory retrieval accuracy"
+      },
+      {
+        "line": 316,
+        "token": "knowledge",
+        "context": "- Ease of knowledge discovery"
+      },
+      {
+        "line": 317,
+        "token": "organization",
+        "context": "- Consistency of organization"
+      },
+      {
+        "line": 318,
+        "token": "search",
+        "context": "- Usefulness of search results"
+      },
+      {
+        "line": 319,
+        "token": "system",
+        "context": "- Overall system usability"
+      },
+      {
+        "line": 324,
+        "token": "processed",
+        "context": "- Memories processed per hour"
+      },
+      {
+        "line": 325,
+        "token": "organized",
+        "context": "- Categories organized"
+      },
+      {
+        "line": 326,
+        "token": "patterns",
+        "context": "- Tag patterns established"
+      },
+      {
+        "line": 327,
+        "token": "improvements",
+        "context": "- Quality improvements achieved"
+      },
+      {
+        "line": 330,
+        "token": "maintenance",
+        "context": "- Monthly maintenance time investment"
+      },
+      {
+        "line": 331,
+        "token": "organization",
+        "context": "- Database organization score"
+      },
+      {
+        "line": 332,
+        "token": "retrieval",
+        "context": "- Knowledge retrieval efficiency"
+      },
+      {
+        "line": 333,
+        "token": "satisfaction",
+        "context": "- User satisfaction with search"
+      },
+      {
+        "line": 337,
+        "token": "minutes",
+        "context": "### Weekly Maintenance (15-30 minutes)"
+      },
+      {
+        "line": 348,
+        "token": "hours",
+        "context": "### Monthly Maintenance (1-2 hours)"
+      },
+      {
+        "line": 360,
+        "token": "hours",
+        "context": "### Quarterly Maintenance (2-4 hours)"
+      },
+      {
+        "line": 376,
+        "token": "regularly",
+        "context": "✅ **Process regularly**: Small, frequent sessions beat large overhauls"
+      },
+      {
+        "line": 377,
+        "token": "consistent",
+        "context": "✅ **Use consistent patterns**: Develop standard approaches for common scenarios"
+      },
+      {
+        "line": 378,
+        "token": "decisions",
+        "context": "✅ **Document decisions**: Record maintenance choices for future reference"
+      },
+      {
+        "line": 379,
+        "token": "thoroughly",
+        "context": "✅ **Verify thoroughly**: Always confirm changes worked as expected"
+      },
+      {
+        "line": 380,
+        "token": "value",
+        "context": "✅ **Focus on value**: Prioritize high-impact memories first"
+      },
+      {
+        "line": 384,
+        "token": "process",
+        "context": "❌ **Rush the process**: Quality categorization takes time"
+      },
+      {
+        "line": 385,
+        "token": "content",
+        "context": "❌ **Change content**: Only modify tags and metadata, preserve original content"
+      },
+      {
+        "line": 386,
+        "token": "without",
+        "context": "❌ **Delete without backup**: Ensure new memory is stored before deleting old"
+      },
+      {
+        "line": 387,
+        "token": "verification",
+        "context": "❌ **Ignore verification**: Always test that maintenance improved functionality"
+      },
+      {
+        "line": 388,
+        "token": "when",
+        "context": "❌ **Work when tired**: Categorization quality suffers with fatigue"
+      },
+      {
+        "line": 394,
+        "token": "semantic",
+        "context": "**Use semantic search for tag suggestions:**"
+      },
+      {
+        "line": 400,
+        "token": "recognition",
+        "context": "**Pattern recognition:**"
+      },
+      {
+        "line": 408,
+        "token": "external",
+        "context": "**Connect with external tools:**"
+      },
+      {
+        "line": 409,
+        "token": "tagged",
+        "context": "- Export tagged memories for documentation systems"
+      },
+      {
+        "line": 410,
+        "token": "project",
+        "context": "- Sync with project management tools"
+      },
+      {
+        "line": 411,
+        "token": "reports",
+        "context": "- Generate reports for team sharing"
+      },
+      {
+        "line": 412,
+        "token": "knowledge",
+        "context": "- Create knowledge graphs from tag relationships"
+      },
+      {
+        "line": 416,
+        "token": "guide",
+        "context": "*This guide provides the foundation for maintaining a professional-grade knowledge management system. Regular maintenance ensures your MCP Memory Service contin"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        39,
-        14
-      ],
-      "codeblock": [
-        34,
-        2
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/mastery/api-reference.md",
