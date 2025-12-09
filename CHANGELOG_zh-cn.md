@@ -2016,302 +2016,171 @@
 ## [8.36.1] - 2025-11-24
 
 ### Fixed
-- **CRITICAL**: HTTP server crash on v8.36.0 startup - forward reference error in analytics.py (issue #247)
-  - Added `from __future__ import annotations` to enable forward references in type hints
-  - Added `Tuple` to typing imports for Python 3.9 compatibility
-  - Impact: Unblocks all v8.36.0 users experiencing startup failures
-  - Root cause: PR #244 refactoring introduced forward references without future annotations import
-  - Fix verified: HTTP server starts successfully, all 10 analytics routes registered
+- **严重**：修复 v8.36.0 启动时 analytics.py 前向引用导致 HTTP 服务器崩溃（#247）。
+  - 增加 `from __future__ import annotations`；typing 引入 `Tuple` 兼容 Py3.9。
+  - 解除所有 v8.36.0 启动失败；10 个分析路由注册成功。
+  - 根因：PR #244 重构引入前向引用但缺少 future 导入。
 
 ## [8.36.0] - 2025-11-24
 
 ### Improved
-- **Code Quality: Phase 2 COMPLETE - 100% of Target Achieved** - Refactored final 7 functions, -19 complexity points (issue #240 PR #244)
-  - **consolidator.py (-8 points)**:
-    - `consolidate()`: 12 → 8 - Introduced SyncPauseContext for cleaner sync state management + extracted `check_horizon_requirements()` helper
-    - `_get_memories_for_horizon()`: 10 → 8 - Replaced conditional logic with data-driven HORIZON_CONFIGS dict lookup
-  - **analytics.py (-8 points)**:
-    - `get_tag_usage_analytics()`: 10 → 6 - Extracted `fetch_storage_stats()` and `calculate_tag_statistics()` helpers (40+ lines)
-    - `get_activity_breakdown()`: 9 → 7 - Extracted `calculate_activity_time_ranges()` helper (70+ lines)
-    - `get_memory_type_distribution()`: 9 → 7 - Extracted `aggregate_type_statistics()` helper
-  - **install.py (-2 points)**:
-    - `detect_gpu()`: 10 → 8 - Data-driven GPU_PLATFORM_CHECKS dict + extracted `test_gpu_platform()` helper
-  - **cloudflare.py (-1 point)**:
-    - `get_memory_timestamps()`: 9 → 8 - Extracted `_fetch_d1_timestamps()` method for D1 query logic
-  - **Gemini Review Improvements (5 iterations)**:
-    - **Critical Fixes**:
-      - Fixed timezone bug: `datetime.now()` → `datetime.now(timezone.utc)` in consolidator
-      - Fixed analytics double-counting: proper use of `count_all_memories()`
-      - CUDA/ROCm robustness: try all detection paths before failing
-    - **Quality Improvements**:
-      - Modernized deprecated APIs: `pkg_resources` → `importlib.metadata`, `universal_newlines` → `text=True`
-      - Enhanced error logging with `exc_info=True` for better debugging
-      - Improved code consistency and structure across all refactored functions
+- **代码质量：Phase 2 完成（目标 100%）** —— 最后 7 个函数重构，复杂度 -19（#240 / PR #244）。
+  - consolidator.py（-8）：`consolidate()` 12→8，加入 SyncPauseContext 与 `check_horizon_requirements()`；`_get_memories_for_horizon()` 10→8，改为 HORIZON_CONFIGS 数据驱动。
+  - analytics.py（-8）：`get_tag_usage_analytics()` 10→6，抽取 `fetch_storage_stats()` 与 `calculate_tag_statistics()`；`get_activity_breakdown()` 9→7 抽取时间范围计算；`get_memory_type_distribution()` 9→7 抽取聚合助手。
+  - install.py（-2）：`detect_gpu()` 10→8，数据驱动 GPU_PLATFORM_CHECKS + `test_gpu_platform()`。
+  - cloudflare.py（-1）：`get_memory_timestamps()` 9→8，抽取 `_fetch_d1_timestamps()`。
+  - Gemini 审核改进（5 轮）：
+    - 关键修复：时区 `datetime.now(timezone.utc)`；analytics 计数改用 `count_all_memories()`；CUDA/ROCm 尝试所有路径。
+    - 质量提升：`pkg_resources`→`importlib.metadata`，`universal_newlines`→`text=True`；`exc_info=True` 日志；结构一致性提升。
 
 ### Code Quality
-- **Phase 2 Complete**: 10 of 10 functions refactored (100%)
-- **Complexity Reduction**: -39 of -39 points achieved (100% of target)
-- **Total Batches**:
-  - v8.34.0 (PR #242): `analytics.py::get_memory_growth()` (-5 points)
-  - v8.35.0 (PR #243): `install.py::configure_paths()`, `cloudflare.py::_search_by_tags_internal()` (-15 points)
-  - v8.36.0 (PR #244): Remaining 7 functions (-19 points)
-- **Expected Impact**:
-  - Complexity Score: 40 → 51+ (+11 points, exceeded +10 target)
-  - Overall Health Score: 63 → 68-72 (Grade B achieved!)
-- **Related**: Issue #240 Phase 2 (100% COMPLETE), Phase 1: v8.33.0 (dead code removal, +5-9 health points)
+- **Phase 2 完成**：10/10 函数已重构，复杂度目标 -39 全部达成。
+  - 批次：v8.34.0 (-5)；v8.35.0 (-15)；v8.36.0 (-19)。
+  - 预期：复杂度分 40→51+（超额）；健康分 63→68-72（达 B 等级）。
+  - 关联：Issue #240 Phase 2 完成；Phase 1（v8.33.0）为死代码清理。
 
 ## [8.35.0] - 2025-11-24
 
 ### Improved
-- **Code Quality: Phase 2 Batch 1 Complete** - Refactored 2 high-priority functions (issue #240 PR #243)
-  - **install.py::configure_paths()**: Complexity reduced from 15 → 5 (-10 points)
-    - Extracted 4 helper functions for better separation of concerns
-    - Main function reduced from 80 → ~30 lines
-    - Improved testability and maintainability
-  - **cloudflare.py::_search_by_tags_internal()**: Complexity reduced from 13 → 8 (-5 points)
-    - Extracted 3 helper functions for tag normalization and query building
-    - Method reduced from 75 → ~45 lines
-    - Better code organization
-  - **Gemini Review Improvements**:
-    - Dynamic PROJECT_ROOT detection in scripts
-    - Specific exception handling (OSError, IOError, PermissionError)
-    - Portable documentation paths
+- **代码质量：Phase 2 Batch 1** —— 重构 2 个高优先函数（#240 / PR #243）。
+  - `install.py::configure_paths()`：复杂度 15→5，抽取 4 个 helper，主函数缩至 ~30 行，可测试性提升。
+  - `cloudflare.py::_search_by_tags_internal()`：复杂度 13→8，抽取 3 个 helper（标签归一/查询构建），更清晰。
+  - Gemini 审核改进：动态 PROJECT_ROOT 检测；精确异常处理（OSError/IOError/PermissionError）；文档路径可移植。
 
 ### Code Quality
-- **Phase 2 Progress**: 3 of 10 functions refactored (30% complete)
-- **Complexity Reduction**: -20 points achieved of -39 point target (51% of target)
-- **Remaining Work**: 7 functions with implementation plans ready
-- **Overall Health**: On track for 75+ target score
+- 进度：3/10 函数已重构（30%）；复杂度已降 20/39（51%）。
+- 剩余 7 个函数计划已就绪；整体健康分仍朝 75+ 目标推进。
 
 ## [8.34.0] - 2025-11-24
 
 ### Improved
-- **Code Quality: Phase 2 Complexity Reduction** - Refactored `analytics.py::get_memory_growth()` function (issue #240 Phase 2)
-  - Complexity reduced from 11 → 6-7 (-4 to -5 points, exceeding -3 point target)
-  - Introduced PeriodType Enum for type-safe period validation
-  - Data-driven period configuration with PERIOD_CONFIGS dict
-  - Data-driven label formatting with PERIOD_LABEL_FORMATTERS dict
-  - Improved maintainability and extensibility for analytics endpoints
+- **代码质量：Phase 2 降复杂度** —— 重构 `analytics.py::get_memory_growth()`（#240）。
+  - 复杂度 11→6-7（超额完成 -3 目标）。
+  - 引入 PeriodType 枚举、PERIOD_CONFIGS/ PERIOD_LABEL_FORMATTERS 数据驱动配置与标签格式；提升分析端点可维护性与扩展性。
 
 ### Code Quality
-- Phase 2 Progress: 1 of 10 functions refactored
-- Complexity Score: Estimated +1 point improvement (partial Phase 2)
-- Overall Health: On track for 70+ target
+- Phase 2 进度：1/10 函数完成；复杂度预估 +1；整体健康分仍朝 70+ 目标推进。
 
 ## [8.33.0] - 2025-11-24
 
 ### Fixed
-- **Critical Installation Bug**: Fixed early return in `install.py` that prevented Claude Desktop MCP configuration from executing (issue #240 Phase 1)
-  - 77 lines of Claude Desktop setup code now properly runs during installation
-  - Users will now get automatic MCP server configuration when running `install.py`
-  - Bug was at line 1358 - early `return False` in exception handler made lines 1360-1436 unreachable
-  - Resolves all 27 pyscn dead code violations identified in issue #240 Phase 1
+- **严重安装问题**：修复 `install.py` 提前 return 导致 Claude Desktop MCP 配置未执行（#240 Phase 1）。
+  - 77 行 Claude Desktop 设置代码现会正确运行，`install.py` 将自动配置 MCP 服务器。
+  - 根因：1358 行异常处理提前 `return False`，使 1360-1436 行不可达。
+  - 解决了 pyscn 识别的 27 处死代码。
 
 ### Improved
-- Modernized `install.py` with pathlib throughout (via Gemini Code Assist automated review)
-- Specific exception handling (OSError, PermissionError, JSONDecodeError) instead of bare `except`
-- Fixed Windows `memory_wrapper.py` path resolution bug (now uses `resolve()` for absolute paths)
-- Added config structure validation to prevent TypeError on malformed JSON
-- Import optimization and better error messages
-- Code structure improvements from 10+ Gemini Code Assist review iterations
+- `install.py` 全面改用 pathlib；精确异常处理（OSError/PermissionError/JSONDecodeError）；修复 Windows `memory_wrapper.py` 路径解析（`resolve()`）。
+- 增加配置结构校验、防止 JSON 异常；优化导入与错误信息；多轮 Gemini Code Assist 审核后的结构改进。
 
 ### Code Quality
-- **Dead Code Score**: 70 → 85-90 (projected +15-20 points from removing 27 violations)
-- **Overall Health Score**: 63 → 68-72 (projected +5-9 points)
-- All improvements applied via automated Gemini PR review workflow
+- **死代码分**：70 → 85-90（移除 27 处违例，预计 +15-20 分）。
+- **健康分**：63 → 68-72（预计 +5-9 分）。
+- 以上改进由 Gemini PR 自动审查工作流完成。
 
 ## [8.32.0] - 2025-11-24
 
 ### Added
-- **pyscn Static Analysis Integration**: Multi-layer quality workflow with comprehensive static analysis
-  - New `scripts/pr/run_pyscn_analysis.sh` for PR-time analysis with health score thresholds (blocks <50)
-  - New `scripts/quality/track_pyscn_metrics.sh` for historical metrics tracking (CSV storage)
-  - New `scripts/quality/weekly_quality_review.sh` for automated weekly reviews with regression detection
-  - Enhanced `scripts/pr/quality_gate.sh` with `--with-pyscn` flag for comprehensive checks
-  - Three-layer quality strategy: Pre-commit (Groq/Gemini LLM) → PR Gate (standard + pyscn) → Periodic (weekly)
-  - 6 comprehensive metrics: cyclomatic complexity, dead code, duplication, coupling, dependencies, architecture
-  - Health score thresholds: <50 (blocker), 50-69 (action required), 70-84 (good), 85+ (excellent)
-  - Complete documentation in `docs/development/code-quality-workflow.md` (651 lines)
-  - Integration guide in `.claude/agents/code-quality-guard.md`
-  - Updated `CLAUDE.md` with "Code Quality Monitoring" section
+- **pyscn 静态分析集成** —— 多层质量工作流。
+  - 新增 `scripts/pr/run_pyscn_analysis.sh`（PR 阶段，健康分阈值 <50 阻断）。
+  - 新增 `scripts/quality/track_pyscn_metrics.sh`（历史指标 CSV 追踪）。
+  - 新增 `scripts/quality/weekly_quality_review.sh`（每周自动回归检测）。
+  - `scripts/pr/quality_gate.sh` 增 `--with-pyscn` 全量检查。
+  - 三层策略：预提交（Groq/Gemini LLM）→ PR Gate（标准+pyscn）→ 周期性（周报）。
+  - 覆盖 6 指标：圈复杂度、死代码、重复、耦合、依赖、架构；健康分阈值：<50 阻断、50-69 需行动、70-84 良好、85+ 优秀。
+  - 文档：`docs/development/code-quality-workflow.md`；集成指南 `.claude/agents/code-quality-guard.md`；`CLAUDE.md` 补充“Code Quality Monitoring”。
 
 ## [8.31.0] - 2025-11-23
 
 ### Added
-- **Revolutionary Batch Update Performance** - Memory consolidation now 21,428x faster with new batch update API (#241)
-  - **Performance Improvement**: 300 seconds → 0.014 seconds for 500 memory batch updates (21,428x speedup)
-  - **Consolidation Workflow**: Complete consolidation time reduced from 5+ minutes to <1 second for 500 memories
-  - **New API Method**: `update_memories_batch()` in storage backends for atomic batch operations
-  - **Implementation**:
-    - **SQLite Backend**: Single transaction with executemany for 21,428x speedup
-    - **Cloudflare Backend**: Parallel batch updates with proper vectorize sync
-    - **Hybrid Backend**: Optimized dual-backend batch sync with queue processing
-  - **Backward Compatible**: Existing single-update code paths continue working
-  - **Real-world Impact**: Memory consolidation that previously took 5+ minutes now completes in <1 second
-  - **Files Modified**:
-    - `src/mcp_memory_service/storage/sqlite_vec.py` (lines 542-571): Batch update implementation
-    - `src/mcp_memory_service/storage/cloudflare.py` (lines 673-728): Cloudflare batch updates
-    - `src/mcp_memory_service/storage/hybrid.py` (lines 772-822): Hybrid backend batch sync
-    - `src/mcp_memory_service/consolidation/service.py` (line 472): Using batch update in consolidation
+- **批量更新性能革命** —— 新批量更新 API 让整合提速 21,428×（#241）。
+  - 性能：500 条批量更新 300s → 0.014s；整合流程 5+ 分钟 → <1s。
+  - 新增 `update_memories_batch()`，存储后端原子批量操作。
+  - 实现：SQLite 单事务 executemany；Cloudflare 并行批更新并同步 vectorize；Hybrid 双后端队列优化。
+  - 兼容：单条更新路径仍可用；真实场景 5 分钟级操作降至 <1 秒。
+  - 变更文件：`storage/sqlite_vec.py`、`storage/cloudflare.py`、`storage/hybrid.py`、`consolidation/service.py` 等。
 
 ### Performance
-- **Memory Consolidation**: 21,428x faster batch metadata updates (300s → 0.014s for 500 memories)
-- **Consolidation Workflow**: Complete workflow time reduced from 5+ minutes to <1 second for 500 memories
-- **Database Efficiency**: Single transaction instead of 500 individual updates with commit overhead
+- **记忆整合**：批量元数据更新 21,428× 提速；整合全流程 <1 秒（500 条）。
+- **数据库效率**：单事务取代 500 次提交，消除开销。
 
 ## [8.30.0] - 2025-11-23
 
 ### Added
-- **Adaptive Chart Granularity** - Analytics charts now use semantically appropriate time intervals for better trend visualization
-  - **Last Month view**: Changed from 3-day intervals to weekly aggregation for clearer monthly trends
-  - **Last Year view**: Uses monthly aggregation for annual overview
-  - **Human-readable labels**: Charts display clear interval formatting:
-    - Daily view: "Nov 15" format
-    - Weekly aggregation: "Week of Nov 15" format
-    - Monthly aggregation: "November 2024" format
-  - **Improved UX**: Better semantic alignment between time period and chart granularity
-  - **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 307-345), `src/mcp_memory_service/web/static/app.js` (line 3661)
+- **自适应图表粒度** —— 分析图表按语义时间间隔聚合：
+  - 上月视图：3 天粒度 → 周聚合；上年视图：月聚合。
+  - 友好标签：日视图 “Nov 15”；周 “Week of Nov 15”；月 “November 2024”。
+  - 更契合时间区间与图表粒度；改动文件 `analytics.py`、`web/static/app.js`。
 
 ### Fixed
-- **CRITICAL: Interval Aggregation Bug** - Multi-day intervals (weekly, monthly) now correctly aggregate across entire period
-  - **Problem**: Intervals were only counting memories from the first day of the interval, not the entire period
-  - **Impact**: Analytics showed wildly inaccurate data (e.g., 0 memories instead of 427 for Oct 24-30 week)
-  - **Root Cause**: `strftime` format in date grouping only used the first timestamp, not the interval's date range
-  - **Solution**: Updated aggregation logic to properly filter and count all memories within each interval
-  - **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 242-267)
+- **严重：区间聚合错误** —— 多日区间（周/月）现按完整区间聚合。
+  - 问题：仅统计区间首日数据，导致周数据严重偏低。
+  - 修复：调整聚合逻辑，按区间过滤计数；修改 `analytics.py` 相关段。
 
-- **CRITICAL: Data Sampling Bug** - Analytics now fetch complete historical data with proper date range filtering
-  - **Problem**: API only fetched 1,000 most recent memories, missing historical data for longer time periods
-  - **Impact**: Charts showed incomplete or missing data for older time ranges
-  - **Solution**: Increased fetch limit to 10,000 memories with proper `created_at >= start_date` filtering
-  - **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 56-62)
-  - **Performance**: Maintains fast response times (<200ms) even with larger dataset
+- **严重：数据采样缺失** —— API 仅拉取最近 1000 条，导致历史数据缺失。
+  - 修复：拉取上限增至 10,000，并按 `created_at >= start_date` 过滤；保持 <200ms 响应。
 
 ### Changed
-- **Analytics API**: Improved data fetching with larger limits and proper date filtering for accurate historical analysis
+- **Analytics API**：扩大拉取上限并正确过滤日期，保证历史分析准确。
 
 ## [8.29.0] - 2025-11-23
 
 ### Added
-- **Dashboard Quick Actions: Sync Controls Widget** - Compact, real-time sync management for hybrid backend users (#234, fixes #233)
-  - **Real-time sync status indicator**: Visual states for synced/syncing/pending/error/paused with color-coded icons
-  - **Pause/Resume controls**: Safely pause background sync for database maintenance or offline work
-  - **Force sync button**: Manual trigger for immediate synchronization
-  - **Sync metrics**: Display last sync time and pending operations count
-  - **Clean layout**: Removed redundant sync status bar between header and body, moved to sidebar widget
-  - **Backend-aware**: Widget automatically hides for sqlite-vec only users (hybrid-specific feature)
-  - **API endpoints**:
-    - `POST /api/sync/pause` - Pause background sync
-    - `POST /api/sync/resume` - Resume background sync
-  - **Hybrid backend methods**: Added `pause_sync()` and `resume_sync()` for sync control
+- **仪表盘快速操作：同步控件小部件** —— 为混合后端提供紧凑实时同步管理（#234，修复 #233）。
+  - 实时状态：同步/同步中/挂起/错误/暂停，彩色图标显示。
+  - 暂停/恢复：便于维护或离线；强制同步按钮；展示上次同步时间与待处理数。
+  - 清爽布局：移除头部与主体间冗余条，移至侧边栏；sqlite-vec-only 用户自动隐藏。
+  - API：`POST /api/sync/pause`、`POST /api/sync/resume`；后端新增 `pause_sync()`/`resume_sync()`。
 
-- **Automatic Scheduled Backup System** - Enterprise-grade backup with retention policies and scheduling (#234, fixes #233)
-  - **New backup module**: `src/mcp_memory_service/backup/` with `BackupService` and `BackupScheduler`
-  - **SQLite native backup API**: Uses safe `sqlite3.backup()` to prevent corruption (no file copying)
-  - **Async I/O**: Non-blocking backup operations with `asyncio.to_thread`
-  - **Flexible scheduling**: Hourly, daily, or weekly automatic backups
-  - **Retention policies**: Configurable by days and max backup count
-  - **Dashboard widget**: Backup status, last backup time, manual trigger, backup count, next scheduled time
-  - **Configuration via environment variables**:
-    - `MCP_BACKUP_ENABLED=true` (default: true)
-    - `MCP_BACKUP_INTERVAL=daily` (hourly/daily/weekly, default: daily)
-    - `MCP_BACKUP_RETENTION=7` (days, default: 7)
-    - `MCP_BACKUP_MAX_COUNT=10` (max backups, default: 10)
-  - **API endpoints**:
-    - `GET /api/backup/status` - Get backup status and scheduler info
-    - `POST /api/backup/now` - Trigger manual backup
-    - `GET /api/backup/list` - List available backups with metadata
-  - **Security**: OAuth protection on backup endpoints, no file path exposure in responses
-  - **Safari compatibility**: Improved event listener handling with lazy initialization
+- **自动计划备份系统** —— 企业级备份，含保留策略与调度（#234，修复 #233）。
+  - 新模块 `backup/`：`BackupService` + `BackupScheduler`；使用 SQLite 原生 `sqlite3.backup()` 安全备份；异步 I/O；支持小时/日/周计划；保留天数与最大数可配。
+  - 仪表盘小部件：状态、上次备份、手动触发、数量、下次时间。
+  - 配置：`MCP_BACKUP_ENABLED`、`MCP_BACKUP_INTERVAL`、`MCP_BACKUP_RETENTION`、`MCP_BACKUP_MAX_COUNT`。
+  - API：`GET /api/backup/status`、`POST /api/backup/now`、`GET /api/backup/list`；OAuth 保护，响应不暴露路径；Safari 懒加载监听器兼容。
 
 ### Changed
-- **Quick Actions Layout**: Moved sync controls from top status bar to sidebar widget for cleaner, more accessible UI
-- **Sync State Persistence**: Pause state is now preserved during force sync operations
-- **Dashboard Feedback**: Added toast notifications for sync and backup operations
+- **布局**：同步控件移至侧边栏；强制同步保留暂停状态；同步/备份操作新增 toast 通知。
 
 ### Fixed
-- **Sync Button Click Events**: Resolved DOM timing issues with lazy event listeners for reliable button interactions
-- **Spinner Animation**: Fixed syncing state visual feedback with proper CSS animations
-- **Security**: Removed file path exposure from backup API responses (used backup IDs instead)
+- 修复同步按钮懒监听的 DOM 时序问题；同步动画 CSS 修正；备份 API 响应不再暴露路径（改用备份 ID）。
 
 ## [8.28.1] - 2025-11-22
 
 ### Fixed
-- **CRITICAL: HTTP MCP Transport JSON-RPC 2.0 Compliance** - Fixed protocol violation causing Claude Code rejection (#236)
-  - **Problem**: HTTP MCP server returned `"error": null` in successful responses, violating JSON-RPC 2.0 spec which requires successful responses to OMIT the error field entirely (not include it as null)
-  - **Impact**: Claude Code's strict schema validation rejected all HTTP MCP responses with "Unrecognized key(s) in object: 'error'" errors, making HTTP transport completely unusable
-  - **Root Cause**: MCPResponse Pydantic model included both `result` and `error` fields in all responses, serializing null values
-  - **Solution**:
-    - Added `ConfigDict(exclude_none=True)` to MCPResponse model to exclude null fields from serialization
-    - Updated docstring to document JSON-RPC 2.0 compliance requirements
-    - Replaced deprecated `.dict()` with `.model_dump()` for Pydantic V2 compatibility
-    - Moved json import to top of file per PEP 8 style guidelines
-  - **Files Modified**:
-    - `src/mcp_memory_service/web/api/mcp.py` - Added ConfigDict, updated serialization
-  - **Affected Users**: All users attempting to use HTTP MCP transport with Claude Code or other strict JSON-RPC 2.0 clients
-  - **Testing**: Verified successful responses exclude `error` field and error responses exclude `result` field
-  - **Credits**: Thanks to @timkjr for identifying the issue and providing the fix
+- **严重：HTTP MCP 传输 JSON-RPC 2.0 合规** —— 修复协议违规导致 Claude Code 拒绝（#236）。
+  - 问题：成功响应含 `"error": null`，违反规范（成功应无 error 字段）；Claude Code 抛 “Unrecognized key 'error'”。
+  - 根因：MCPResponse 同时含 result/error，序列化出 null。
+  - 方案：`ConfigDict(exclude_none=True)`；docstring 说明；`.dict()` 改 `.model_dump()`；调整 import 顺序。
+  - 修改文件：`web/api/mcp.py`；测试确认成功响应仅含 jsonrpc/id/result，错误仅含 jsonrpc/id/error；致谢 @timkjr。
 
 ## [8.28.0] - 2025-11-21
 
 ### Added
-- **Cloudflare Tag Filtering** - AND/OR operations for tag searches with unified API contracts (#228)
-  - Added `search_by_tags(tags, operation, time_start, time_end)` to the storage base class and implemented it across SQLite, Cloudflare, Hybrid, and HTTP client backends
-  - Normalized Cloudflare SQL to use `GROUP BY` + `HAVING COUNT(DISTINCT ...)` for AND semantics while supporting optional time ranges
-  - Introduced `get_all_tags_with_counts()` for Cloudflare to power analytics dashboards without extra queries
+- **Cloudflare 标签过滤** —— 标签搜索支持 AND/OR，统一 API（#228）。
+  - 基类新增 `search_by_tags(tags, operation, time_start, time_end)`，SQLite/Cloudflare/Hybrid/HTTP 客户端均实现。
+  - Cloudflare SQL 统一用 `GROUP BY` + `HAVING COUNT(DISTINCT ...)` 实现 AND，可选时间范围。
+  - 新增 `get_all_tags_with_counts()` 供分析面板使用。
 
 ### Changed
-- **Tag Filtering Behavior** - `get_all_memories(tags=...)` now performs exact tag comparisons with AND logic instead of substring OR matching, and hybrid storage exposes the same `operation` parameter for parity across backends.
+- **标签过滤行为** —— `get_all_memories(tags=...)` 改为精确匹配 + AND 逻辑（不再子串 OR），Hybrid 也暴露 `operation` 参数保持一致。
 
 ## [8.27.2] - 2025-11-18
 
 ### Fixed
-- **Memory Type Loss During Cloudflare-to-SQLite Sync** - Fixed `memory_type` not being preserved in sync script
-  - **Problem**: `scripts/sync/sync_memory_backends.py` did not extract or pass `memory_type` when syncing from Cloudflare to SQLite-vec
-  - **Impact**: All memories synced via `--direction cf-to-sqlite` showed as "untyped" (100%) in dashboard analytics
-  - **Root Cause**: Missing `memory_type` field in both memory dict extraction and Memory object creation
-  - **Solution**:
-    - Added `memory_type` to memory dictionary extraction from source
-    - Added `memory_type` and `updated_at` parameters when creating Memory objects for target storage
-  - **Files Modified**:
-    - `scripts/sync/sync_memory_backends.py` - Added memory_type and updated_at handling
-  - **Affected Users**: Users who ran `python scripts/sync/sync_memory_backends.py --direction cf-to-sqlite`
-  - **Recovery**: Re-run sync from Cloudflare to restore memory types (Cloudflare preserves original types)
+- **Cloudflare→SQLite 同步丢失 memory_type** —— 修复同步脚本未保留 `memory_type`。
+  - 问题：`sync_memory_backends.py` 未提取/传递 `memory_type`，`--direction cf-to-sqlite` 后仪表盘显示 100% 未类型化。
+  - 方案：提取源的 `memory_type`，创建目标 Memory 时传递 `memory_type`、`updated_at`。
+  - 修改：`scripts/sync/sync_memory_backends.py`。受影响用户可重新执行同步恢复类型。
 
 ## [8.27.1] - 2025-11-18
 
 ### Fixed
-- **CRITICAL: Timestamp Regression Bug** - Fixed `created_at` timestamps being reset during metadata sync
-  - **Problem**: Bidirectional sync and drift detection (v8.25.0-v8.27.0) incorrectly reset `created_at` timestamps to current time during metadata updates
-  - **Impact**: All memories synced from Cloudflare → SQLite-vec appeared "just created", destroying historical timestamp data
-  - **Root Cause**: `preserve_timestamps=False` parameter reset **both** `created_at` and `updated_at`, when it should only update `updated_at`
-  - **Solution**:
-    - Modified `update_memory_metadata()` to preserve `created_at` from source memory during sync
-    - Hybrid storage now passes all 4 timestamp fields (`created_at`, `created_at_iso`, `updated_at`, `updated_at_iso`) during drift detection
-    - Cloudflare storage updated to handle timestamps consistently with SQLite-vec
-  - **Files Modified**:
-    - `src/mcp_memory_service/storage/sqlite_vec.py:1389-1406` - Fixed timestamp handling logic
-    - `src/mcp_memory_service/storage/hybrid.py:625-637, 935-947` - Pass source timestamps during sync
-    - `src/mcp_memory_service/storage/cloudflare.py:833-864` - Consistent timestamp handling
-  - **Tests Added**: `tests/test_timestamp_preservation.py` - Comprehensive test suite with 7 tests covering:
-    - Timestamp preservation with `preserve_timestamps=True`
-    - Regression test for `created_at` preservation without source timestamps
-    - Drift detection scenario
-    - Multiple sync operations
-    - Initial memory storage
-  - **Recovery Tools**:
-    - `scripts/validation/validate_timestamp_integrity.py` - Detect timestamp anomalies
-    - `scripts/maintenance/recover_timestamps_from_cloudflare.py` - Restore corrupted timestamps from Cloudflare
-  - **Affected Versions**: v8.25.0 (drift detection), v8.27.0 (bidirectional sync)
-  - **Affected Users**: Hybrid backend users who experienced automatic drift detection or initial sync
-  - **Data Recovery**: If using hybrid backend and Cloudflare has correct timestamps, run recovery script:
-    ```bash
-    # Preview recovery
-    python scripts/maintenance/recover_timestamps_from_cloudflare.py --dry-run
-
-    # Apply recovery
-    python scripts/maintenance/recover_timestamps_from_cloudflare.py --apply
-    ```
+- **严重：时间戳回归缺陷** —— 修复 `created_at` 在元数据同步中被重置。
+  - 问题：双向同步/漂移检测（v8.25.0-8.27.0）把 `created_at` 重置为当前时间，历史时间戳丢失。
+  - 根因：`preserve_timestamps=False` 错误地重置了 `created_at` 与 `updated_at`。
+  - 方案：`update_memory_metadata()` 保留源 `created_at`；Hybrid 传递四个时间字段；Cloudflare 与 SQLite-vec 时间处理一致。
+  - 修改：`storage/sqlite_vec.py`、`storage/hybrid.py`、`storage/cloudflare.py`；新增测试 `tests/test_timestamp_preservation.py`。
+  - 恢复工具：`scripts/validation/validate_timestamp_integrity.py`、`scripts/maintenance/recover_timestamps_from_cloudflare.py`；受影响版本 v8.25.0 / v8.27.0，Hybrid 用户可按脚本恢复时间戳。
 
 ### Changed
 - **Timestamp Handling Semantics** - Clarified `preserve_timestamps` parameter behavior:
@@ -2332,21 +2201,11 @@
 ## [8.27.0] - 2025-11-17
 
 ### Added
-- **Hybrid Storage Sync Performance Optimization** - Dramatic initial sync speed improvement (3-5x faster)
-  - **Performance Metrics**:
-    - **Before**: ~5.5 memories/second (8 minutes for 2,619 memories)
-    - **After**: ~15-30 memories/second (1.5-3 minutes for 2,619 memories)
-    - **3-5x faster** initial sync from Cloudflare to local SQLite
-  - **Optimizations**:
-    - **Bulk Existence Check**: `get_all_content_hashes()` method eliminates 2,619 individual DB queries
-    - **Parallel Processing**: `asyncio.gather()` with Semaphore(15) for concurrent memory processing
-    - **Larger Batch Sizes**: Increased from 100 to 500 memories per Cloudflare API call (5x fewer requests)
-  - **Files Modified**:
-    - `src/mcp_memory_service/storage/sqlite_vec.py` - Added `get_all_content_hashes()` method (lines 1208-1227)
-    - `src/mcp_memory_service/storage/hybrid.py` - Parallel sync implementation (lines 859-921)
-    - `scripts/benchmarks/benchmark_hybrid_sync.py` - Performance validation script
-  - **Backward Compatibility**: Zero breaking changes, transparent optimization for all sync operations
-  - **Use Case**: Users with large memory databases (1000+ memories) will see significantly faster initial sync times
+- **混合存储同步性能优化** —— 初始同步提速 3-5 倍。
+  - 绩效：~5.5 条/秒 → ~15-30 条/秒（2619 条从 8 分钟降至 1.5-3 分钟）。
+  - 优化：批量存在检查 `get_all_content_hashes()`；`asyncio.gather()` + Semaphore(15) 并发；Cloudflare 批量 100→500（请求 1/5）。
+  - 修改：`storage/sqlite_vec.py`、`storage/hybrid.py`、`scripts/benchmarks/benchmark_hybrid_sync.py`。
+  - 兼容：零破坏，适用于大规模初始同步。
 
 ### Changed
 - **Hybrid Initial Sync Architecture** - Refactored sync loop for better performance
@@ -2356,25 +2215,10 @@
   - Maintains full drift detection and metadata synchronization capabilities
 
 ### Fixed
-- **Duplicate Sync Queue Architecture** - Resolved inefficient dual-sync issue
-  - **Problem**: MCP server and HTTP server each created separate HybridStorage instances with independent sync queues
-  - **Impact**: Duplicate sync work, potential race conditions, memory not immediately visible across servers
-  - **Solution**: New `MCP_HYBRID_SYNC_OWNER` configuration to control which process handles Cloudflare sync
-  - **Configuration Options**:
-    - `"http"` - HTTP server only handles sync (recommended - avoids duplicate work)
-    - `"mcp"` - MCP server only handles sync
-    - `"both"` - Both servers sync independently (default for backward compatibility)
-  - **Files Modified**:
-    - `src/mcp_memory_service/config.py` - Added `HYBRID_SYNC_OWNER` configuration (lines 424-427)
-    - `src/mcp_memory_service/storage/factory.py` - Server-type aware storage creation (lines 76-110)
-    - `src/mcp_memory_service/mcp_server.py` - Pass server_type="mcp" (line 143)
-    - `src/mcp_memory_service/web/dependencies.py` - Pass server_type="http" (line 65)
-  - **Migration Guide**:
-    ```bash
-    # Recommended: Set HTTP server as sync owner to eliminate duplicate sync
-    export MCP_HYBRID_SYNC_OWNER=http
-    ```
-  - **Backward Compatibility**: Defaults to "both" (existing behavior), no breaking changes
+- **重复同步队列** —— 新增 `MCP_HYBRID_SYNC_OWNER` 解决双队列低效/竞态。
+  - 选项：`http`（推荐，仅 HTTP 同步）、`mcp`、`both`（默认兼容）。
+  - 修改：`config.py`、`storage/factory.py`、`mcp_server.py`、`web/dependencies.py`。
+  - 迁移：`export MCP_HYBRID_SYNC_OWNER=http` 可避免重复同步；保持向后兼容。
 
 ### Performance
 - **Benchmark Results** (`python scripts/benchmarks/benchmark_hybrid_sync.py`):
@@ -2386,27 +2230,12 @@
 ## [8.26.0] - 2025-11-16
 
 ### Added
-- **Global MCP Server Caching** - Revolutionary performance improvement for MCP tools (PR #227)
-  - **Performance Metrics**:
-    - **534,628x faster** on cache hits (1,810ms → 0.01ms per MCP tool call)
-    - **99.9996% latency reduction** for cached operations
-    - **90%+ cache hit rate** in normal usage patterns
-    - **MCP tools now 41x faster** than HTTP API after warm-up
-  - **New MCP Tool**: `get_cache_stats` - Real-time cache performance monitoring
-    - Track hits/misses, hit rate percentage
-    - Monitor storage and service cache sizes
-    - View initialization time statistics (avg/min/max)
-  - **Infrastructure**:
-    - Global cache structures: `_STORAGE_CACHE`, `_MEMORY_SERVICE_CACHE`, `_CACHE_STATS`
-    - Thread-safe concurrent access via `asyncio.Lock`
-    - Automatic cleanup on server shutdown (no memory leaks)
-  - **Files Modified**:
-    - `src/mcp_memory_service/server.py` - Production MCP server caching
-    - `src/mcp_memory_service/mcp_server.py` - FastMCP server caching
-    - `src/mcp_memory_service/utils/cache_manager.py` - New cache management utilities
-    - `scripts/benchmarks/benchmark_server_caching.py` - Cache effectiveness validation
-  - **Backward Compatibility**: Zero breaking changes, transparent caching for all MCP clients
-  - **Use Case**: MCP tools in Claude Desktop and Claude Code are now the fastest method for memory operations
+- **全局 MCP 服务器缓存** —— MCP 工具性能大幅提升（PR #227）。
+  - 性能：缓存命中快 534,628×（1,810ms→0.01ms）；延迟降 99.9996%；命中率 90%+；预热后 MCP 工具较 HTTP 快 41×。
+  - 新工具 `get_cache_stats`：实时查看命中/未命中、缓存大小、初始化耗时。
+  - 基础设施：`_STORAGE_CACHE`、`_MEMORY_SERVICE_CACHE`、`_CACHE_STATS`；`asyncio.Lock` 保障并发；关闭时自动清理。
+  - 修改：`server.py`、`mcp_server.py`、`utils/cache_manager.py`、`benchmark_server_caching.py`。
+  - 兼容：零破坏，对所有 MCP 客户端透明；Claude Desktop/Code 现为最快路径。
 
 ### Changed
 - **Code Quality Improvements** - Gemini Code Assist review implementation (PR #227)

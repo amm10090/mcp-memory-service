@@ -28629,2215 +28629,1170 @@
       {
         "line": 2019,
         "token": "HTTP",
-        "context": "- **CRITICAL**: HTTP server crash on v8.36.0 startup - forward reference error in analytics.py (issue #247)"
+        "context": "- **严重**：修复 v8.36.0 启动时 analytics.py 前向引用导致 HTTP 服务器崩溃（#247）。"
       },
       {
         "line": 2020,
         "token": "import",
-        "context": "- Added `from __future__ import annotations` to enable forward references in type hints"
-      },
-      {
-        "line": 2021,
-        "token": "typing",
-        "context": "- Added `Tuple` to typing imports for Python 3.9 compatibility"
+        "context": "- 增加 `from __future__ import annotations`；typing 引入 `Tuple` 兼容 Py3.9。"
       },
       {
         "line": 2022,
-        "token": "all",
-        "context": "- Impact: Unblocks all v8.36.0 users experiencing startup failures"
+        "token": "future",
+        "context": "- 根因：PR #244 重构引入前向引用但缺少 future 导入。"
       },
       {
-        "line": 2023,
-        "token": "cause",
-        "context": "- Root cause: PR #244 refactoring introduced forward references without future annotations import"
-      },
-      {
-        "line": 2024,
-        "token": "verified",
-        "context": "- Fix verified: HTTP server starts successfully, all 10 analytics routes registered"
-      },
-      {
-        "line": 2029,
-        "token": "final",
-        "context": "- **Code Quality: Phase 2 COMPLETE - 100% of Target Achieved** - Refactored final 7 functions, -19 complexity points (issue #240 PR #244)"
-      },
-      {
-        "line": 2030,
-        "token": "points",
-        "context": "- **consolidator.py (-8 points)**:"
-      },
-      {
-        "line": 2031,
+        "line": 2028,
         "token": "consolidate",
-        "context": "- `consolidate()`: 12 → 8 - Introduced SyncPauseContext for cleaner sync state management + extracted `check_horizon_requirements()` helper"
-      },
-      {
-        "line": 2032,
-        "token": "conditional",
-        "context": "- `_get_memories_for_horizon()`: 10 → 8 - Replaced conditional logic with data-driven HORIZON_CONFIGS dict lookup"
+        "context": "- consolidator.py（-8）：`consolidate()` 12→8，加入 SyncPauseContext 与 `check_horizon_requirements()`；`_get_memories_for_horizon()` 10→8，改为 HORIZON_CONFIGS 数据驱动。"
       },
       {
         "line": 2033,
-        "token": "points",
-        "context": "- **analytics.py (-8 points)**:"
+        "token": "analytics",
+        "context": "- 关键修复：时区 `datetime.now(timezone.utc)`；analytics 计数改用 `count_all_memories()`；CUDA/ROCm 尝试所有路径。"
       },
       {
         "line": 2034,
-        "token": "helpers",
-        "context": "- `get_tag_usage_analytics()`: 10 → 6 - Extracted `fetch_storage_stats()` and `calculate_tag_statistics()` helpers (40+ lines)"
+        "token": "text",
+        "context": "- 质量提升：`pkg_resources`→`importlib.metadata`，`universal_newlines`→`text=True`；`exc_info=True` 日志；结构一致性提升。"
       },
       {
-        "line": 2035,
+        "line": 2046,
         "token": "helper",
-        "context": "- `get_activity_breakdown()`: 9 → 7 - Extracted `calculate_activity_time_ranges()` helper (70+ lines)"
-      },
-      {
-        "line": 2036,
-        "token": "helper",
-        "context": "- `get_memory_type_distribution()`: 9 → 7 - Extracted `aggregate_type_statistics()` helper"
-      },
-      {
-        "line": 2037,
-        "token": "points",
-        "context": "- **install.py (-2 points)**:"
-      },
-      {
-        "line": 2038,
-        "token": "dict",
-        "context": "- `detect_gpu()`: 10 → 8 - Data-driven GPU_PLATFORM_CHECKS dict + extracted `test_gpu_platform()` helper"
-      },
-      {
-        "line": 2039,
-        "token": "point",
-        "context": "- **cloudflare.py (-1 point)**:"
-      },
-      {
-        "line": 2040,
-        "token": "method",
-        "context": "- `get_memory_timestamps()`: 9 → 8 - Extracted `_fetch_d1_timestamps()` method for D1 query logic"
-      },
-      {
-        "line": 2041,
-        "token": "iterations",
-        "context": "- **Gemini Review Improvements (5 iterations)**:"
-      },
-      {
-        "line": 2043,
-        "token": "timezone",
-        "context": "- Fixed timezone bug: `datetime.now()` → `datetime.now(timezone.utc)` in consolidator"
-      },
-      {
-        "line": 2044,
-        "token": "analytics",
-        "context": "- Fixed analytics double-counting: proper use of `count_all_memories()`"
-      },
-      {
-        "line": 2045,
-        "token": "robustness",
-        "context": "- CUDA/ROCm robustness: try all detection paths before failing"
+        "context": "- `install.py::configure_paths()`：复杂度 15→5，抽取 4 个 helper，主函数缩至 ~30 行，可测试性提升。"
       },
       {
         "line": 2047,
-        "token": "deprecated",
-        "context": "- Modernized deprecated APIs: `pkg_resources` → `importlib.metadata`, `universal_newlines` → `text=True`"
-      },
-      {
-        "line": 2048,
-        "token": "error",
-        "context": "- Enhanced error logging with `exc_info=True` for better debugging"
-      },
-      {
-        "line": 2049,
-        "token": "code",
-        "context": "- Improved code consistency and structure across all refactored functions"
-      },
-      {
-        "line": 2052,
-        "token": "functions",
-        "context": "- **Phase 2 Complete**: 10 of 10 functions refactored (100%)"
-      },
-      {
-        "line": 2053,
-        "token": "points",
-        "context": "- **Complexity Reduction**: -39 of -39 points achieved (100% of target)"
-      },
-      {
-        "line": 2055,
-        "token": "points",
-        "context": "- v8.34.0 (PR #242): `analytics.py::get_memory_growth()` (-5 points)"
-      },
-      {
-        "line": 2056,
-        "token": "points",
-        "context": "- v8.35.0 (PR #243): `install.py::configure_paths()`, `cloudflare.py::_search_by_tags_internal()` (-15 points)"
-      },
-      {
-        "line": 2057,
-        "token": "functions",
-        "context": "- v8.36.0 (PR #244): Remaining 7 functions (-19 points)"
+        "token": "helper",
+        "context": "- `cloudflare.py::_search_by_tags_internal()`：复杂度 13→8，抽取 3 个 helper（标签归一/查询构建），更清晰。"
       },
       {
         "line": 2059,
-        "token": "points",
-        "context": "- Complexity Score: 40 → 51+ (+11 points, exceeded +10 target)"
-      },
-      {
-        "line": 2060,
-        "token": "achieved",
-        "context": "- Overall Health Score: 63 → 68-72 (Grade B achieved!)"
-      },
-      {
-        "line": 2061,
-        "token": "dead",
-        "context": "- **Related**: Issue #240 Phase 2 (100% COMPLETE), Phase 1: v8.33.0 (dead code removal, +5-9 health points)"
-      },
-      {
-        "line": 2066,
-        "token": "functions",
-        "context": "- **Code Quality: Phase 2 Batch 1 Complete** - Refactored 2 high-priority functions (issue #240 PR #243)"
+        "token": "PERIOD_CONFIGS/",
+        "context": "- 引入 PeriodType 枚举、PERIOD_CONFIGS/ PERIOD_LABEL_FORMATTERS 数据驱动配置与标签格式；提升分析端点可维护性与扩展性。"
       },
       {
         "line": 2067,
-        "token": "reduced",
-        "context": "- **install.py::configure_paths()**: Complexity reduced from 15 → 5 (-10 points)"
-      },
-      {
-        "line": 2068,
-        "token": "helper",
-        "context": "- Extracted 4 helper functions for better separation of concerns"
+        "token": "return",
+        "context": "- **严重安装问题**：修复 `install.py` 提前 return 导致 Claude Desktop MCP 配置未执行（#240 Phase 1）。"
       },
       {
         "line": 2069,
-        "token": "function",
-        "context": "- Main function reduced from 80 → ~30 lines"
+        "token": "return",
+        "context": "- 根因：1358 行异常处理提前 `return False`，使 1360-1436 行不可达。"
       },
       {
         "line": 2070,
-        "token": "testability",
-        "context": "- Improved testability and maintainability"
-      },
-      {
-        "line": 2071,
-        "token": "reduced",
-        "context": "- **cloudflare.py::_search_by_tags_internal()**: Complexity reduced from 13 → 8 (-5 points)"
-      },
-      {
-        "line": 2072,
-        "token": "helper",
-        "context": "- Extracted 3 helper functions for tag normalization and query building"
+        "token": "pyscn",
+        "context": "- 解决了 pyscn 识别的 27 处死代码。"
       },
       {
         "line": 2073,
-        "token": "reduced",
-        "context": "- Method reduced from 75 → ~45 lines"
+        "token": "pathlib",
+        "context": "- `install.py` 全面改用 pathlib；精确异常处理（OSError/PermissionError/JSONDecodeError）；修复 Windows `memory_wrapper.py` 路径解析（`resolve()`）。"
       },
       {
         "line": 2074,
-        "token": "code",
-        "context": "- Better code organization"
-      },
-      {
-        "line": 2076,
-        "token": "detection",
-        "context": "- Dynamic PROJECT_ROOT detection in scripts"
-      },
-      {
-        "line": 2077,
-        "token": "exception",
-        "context": "- Specific exception handling (OSError, IOError, PermissionError)"
-      },
-      {
-        "line": 2078,
-        "token": "documentation",
-        "context": "- Portable documentation paths"
-      },
-      {
-        "line": 2081,
-        "token": "functions",
-        "context": "- **Phase 2 Progress**: 3 of 10 functions refactored (30% complete)"
-      },
-      {
-        "line": 2082,
-        "token": "points",
-        "context": "- **Complexity Reduction**: -20 points achieved of -39 point target (51% of target)"
-      },
-      {
-        "line": 2083,
-        "token": "functions",
-        "context": "- **Remaining Work**: 7 functions with implementation plans ready"
+        "token": "JSON",
+        "context": "- 增加配置结构校验、防止 JSON 异常；优化导入与错误信息；多轮 Gemini Code Assist 审核后的结构改进。"
       },
       {
         "line": 2084,
-        "token": "track",
-        "context": "- **Overall Health**: On track for 75+ target score"
+        "token": "pyscn",
+        "context": "- **pyscn 静态分析集成** —— 多层质量工作流。"
+      },
+      {
+        "line": 2086,
+        "token": "CSV",
+        "context": "- 新增 `scripts/quality/track_pyscn_metrics.sh`（历史指标 CSV 追踪）。"
       },
       {
         "line": 2089,
-        "token": "function",
-        "context": "- **Code Quality: Phase 2 Complexity Reduction** - Refactored `analytics.py::get_memory_growth()` function (issue #240 Phase 2)"
-      },
-      {
-        "line": 2090,
-        "token": "reduced",
-        "context": "- Complexity reduced from 11 → 6-7 (-4 to -5 points, exceeding -3 point target)"
+        "token": "pyscn",
+        "context": "- 三层策略：预提交（Groq/Gemini LLM）→ PR Gate（标准+pyscn）→ 周期性（周报）。"
       },
       {
         "line": 2091,
-        "token": "period",
-        "context": "- Introduced PeriodType Enum for type-safe period validation"
-      },
-      {
-        "line": 2092,
-        "token": "period",
-        "context": "- Data-driven period configuration with PERIOD_CONFIGS dict"
-      },
-      {
-        "line": 2093,
-        "token": "label",
-        "context": "- Data-driven label formatting with PERIOD_LABEL_FORMATTERS dict"
-      },
-      {
-        "line": 2094,
-        "token": "maintainability",
-        "context": "- Improved maintainability and extensibility for analytics endpoints"
-      },
-      {
-        "line": 2097,
-        "token": "functions",
-        "context": "- Phase 2 Progress: 1 of 10 functions refactored"
-      },
-      {
-        "line": 2098,
-        "token": "point",
-        "context": "- Complexity Score: Estimated +1 point improvement (partial Phase 2)"
+        "token": "docs/development/code-quality-workflow.md",
+        "context": "- 文档：`docs/development/code-quality-workflow.md`；集成指南 `.claude/agents/code-quality-guard.md`；`CLAUDE.md` 补充“Code Quality Monitoring”。"
       },
       {
         "line": 2099,
-        "token": "track",
-        "context": "- Overall Health: On track for 70+ target"
+        "token": "executemany",
+        "context": "- 实现：SQLite 单事务 executemany；Cloudflare 并行批更新并同步 vectorize；Hybrid 双后端队列优化。"
       },
       {
-        "line": 2104,
-        "token": "early",
-        "context": "- **Critical Installation Bug**: Fixed early return in `install.py` that prevented Claude Desktop MCP configuration from executing (issue #240 Phase 1)"
-      },
-      {
-        "line": 2105,
-        "token": "lines",
-        "context": "- 77 lines of Claude Desktop setup code now properly runs during installation"
-      },
-      {
-        "line": 2106,
-        "token": "will",
-        "context": "- Users will now get automatic MCP server configuration when running `install.py`"
-      },
-      {
-        "line": 2107,
-        "token": "was",
-        "context": "- Bug was at line 1358 - early `return False` in exception handler made lines 1360-1436 unreachable"
-      },
-      {
-        "line": 2108,
-        "token": "all",
-        "context": "- Resolves all 27 pyscn dead code violations identified in issue #240 Phase 1"
-      },
-      {
-        "line": 2111,
-        "token": "pathlib",
-        "context": "- Modernized `install.py` with pathlib throughout (via Gemini Code Assist automated review)"
-      },
-      {
-        "line": 2112,
-        "token": "exception",
-        "context": "- Specific exception handling (OSError, PermissionError, JSONDecodeError) instead of bare `except`"
-      },
-      {
-        "line": 2113,
-        "token": "path",
-        "context": "- Fixed Windows `memory_wrapper.py` path resolution bug (now uses `resolve()` for absolute paths)"
-      },
-      {
-        "line": 2114,
-        "token": "config",
-        "context": "- Added config structure validation to prevent TypeError on malformed JSON"
-      },
-      {
-        "line": 2115,
-        "token": "optimization",
-        "context": "- Import optimization and better error messages"
-      },
-      {
-        "line": 2116,
-        "token": "structure",
-        "context": "- Code structure improvements from 10+ Gemini Code Assist review iterations"
-      },
-      {
-        "line": 2119,
-        "token": "projected",
-        "context": "- **Dead Code Score**: 70 → 85-90 (projected +15-20 points from removing 27 violations)"
-      },
-      {
-        "line": 2120,
-        "token": "projected",
-        "context": "- **Overall Health Score**: 63 → 68-72 (projected +5-9 points)"
-      },
-      {
-        "line": 2121,
-        "token": "improvements",
-        "context": "- All improvements applied via automated Gemini PR review workflow"
-      },
-      {
-        "line": 2126,
-        "token": "pyscn",
-        "context": "- **pyscn Static Analysis Integration**: Multi-layer quality workflow with comprehensive static analysis"
-      },
-      {
-        "line": 2127,
-        "token": "analysis",
-        "context": "- New `scripts/pr/run_pyscn_analysis.sh` for PR-time analysis with health score thresholds (blocks <50)"
-      },
-      {
-        "line": 2128,
-        "token": "historical",
-        "context": "- New `scripts/quality/track_pyscn_metrics.sh` for historical metrics tracking (CSV storage)"
-      },
-      {
-        "line": 2129,
-        "token": "automated",
-        "context": "- New `scripts/quality/weekly_quality_review.sh` for automated weekly reviews with regression detection"
-      },
-      {
-        "line": 2130,
-        "token": "flag",
-        "context": "- Enhanced `scripts/pr/quality_gate.sh` with `--with-pyscn` flag for comprehensive checks"
-      },
-      {
-        "line": 2131,
-        "token": "quality",
-        "context": "- Three-layer quality strategy: Pre-commit (Groq/Gemini LLM) → PR Gate (standard + pyscn) → Periodic (weekly)"
+        "line": 2101,
+        "token": "consolidation/service.py",
+        "context": "- 变更文件：`storage/sqlite_vec.py`、`storage/cloudflare.py`、`storage/hybrid.py`、`consolidation/service.py` 等。"
       },
       {
         "line": 2132,
-        "token": "comprehensive",
-        "context": "- 6 comprehensive metrics: cyclomatic complexity, dead code, duplication, coupling, dependencies, architecture"
-      },
-      {
-        "line": 2133,
-        "token": "score",
-        "context": "- Health score thresholds: <50 (blocker), 50-69 (action required), 70-84 (good), 85+ (excellent)"
-      },
-      {
-        "line": 2134,
-        "token": "documentation",
-        "context": "- Complete documentation in `docs/development/code-quality-workflow.md` (651 lines)"
-      },
-      {
-        "line": 2135,
-        "token": "guide",
-        "context": "- Integration guide in `.claude/agents/code-quality-guard.md`"
-      },
-      {
-        "line": 2136,
-        "token": "section",
-        "context": "- Updated `CLAUDE.md` with \"Code Quality Monitoring\" section"
-      },
-      {
-        "line": 2141,
-        "token": "consolidation",
-        "context": "- **Revolutionary Batch Update Performance** - Memory consolidation now 21,428x faster with new batch update API (#241)"
+        "token": "sqlite-vec-only",
+        "context": "- 清爽布局：移除头部与主体间冗余条，移至侧边栏；sqlite-vec-only 用户自动隐藏。"
       },
       {
         "line": 2142,
-        "token": "seconds",
-        "context": "- **Performance Improvement**: 300 seconds → 0.014 seconds for 500 memory batch updates (21,428x speedup)"
-      },
-      {
-        "line": 2143,
-        "token": "consolidation",
-        "context": "- **Consolidation Workflow**: Complete consolidation time reduced from 5+ minutes to <1 second for 500 memories"
-      },
-      {
-        "line": 2144,
-        "token": "storage",
-        "context": "- **New API Method**: `update_memories_batch()` in storage backends for atomic batch operations"
-      },
-      {
-        "line": 2146,
-        "token": "transaction",
-        "context": "- **SQLite Backend**: Single transaction with executemany for 21,428x speedup"
-      },
-      {
-        "line": 2147,
-        "token": "batch",
-        "context": "- **Cloudflare Backend**: Parallel batch updates with proper vectorize sync"
-      },
-      {
-        "line": 2148,
-        "token": "batch",
-        "context": "- **Hybrid Backend**: Optimized dual-backend batch sync with queue processing"
-      },
-      {
-        "line": 2149,
-        "token": "code",
-        "context": "- **Backward Compatible**: Existing single-update code paths continue working"
+        "token": "toast",
+        "context": "- **布局**：同步控件移至侧边栏；强制同步保留暂停状态；同步/备份操作新增 toast 通知。"
       },
       {
         "line": 2150,
-        "token": "consolidation",
-        "context": "- **Real-world Impact**: Memory consolidation that previously took 5+ minutes now completes in <1 second"
+        "token": "HTTP",
+        "context": "- **严重：HTTP MCP 传输 JSON-RPC 2.0 合规** —— 修复协议违规导致 Claude Code 拒绝（#236）。"
+      },
+      {
+        "line": 2151,
+        "token": "error",
+        "context": "- 问题：成功响应含 `\"error\": null`，违反规范（成功应无 error 字段）；Claude Code 抛 “Unrecognized key 'error'”。"
       },
       {
         "line": 2152,
-        "token": "lines",
-        "context": "- `src/mcp_memory_service/storage/sqlite_vec.py` (lines 542-571): Batch update implementation"
+        "token": "result/error",
+        "context": "- 根因：MCPResponse 同时含 result/error，序列化出 null。"
       },
       {
         "line": 2153,
-        "token": "lines",
-        "context": "- `src/mcp_memory_service/storage/cloudflare.py` (lines 673-728): Cloudflare batch updates"
+        "token": "docstring",
+        "context": "- 方案：`ConfigDict(exclude_none=True)`；docstring 说明；`.dict()` 改 `.model_dump()`；调整 import 顺序。"
       },
       {
         "line": 2154,
-        "token": "lines",
-        "context": "- `src/mcp_memory_service/storage/hybrid.py` (lines 772-822): Hybrid backend batch sync"
-      },
-      {
-        "line": 2155,
-        "token": "line",
-        "context": "- `src/mcp_memory_service/consolidation/service.py` (line 472): Using batch update in consolidation"
-      },
-      {
-        "line": 2158,
-        "token": "faster",
-        "context": "- **Memory Consolidation**: 21,428x faster batch metadata updates (300s → 0.014s for 500 memories)"
-      },
-      {
-        "line": 2159,
-        "token": "workflow",
-        "context": "- **Consolidation Workflow**: Complete workflow time reduced from 5+ minutes to <1 second for 500 memories"
+        "token": "jsonrpc/id/result",
+        "context": "- 修改文件：`web/api/mcp.py`；测试确认成功响应仅含 jsonrpc/id/result，错误仅含 jsonrpc/id/error；致谢 @timkjr。"
       },
       {
         "line": 2160,
-        "token": "transaction",
-        "context": "- **Database Efficiency**: Single transaction instead of 500 individual updates with commit overhead"
+        "token": "tags",
+        "context": "- 基类新增 `search_by_tags(tags, operation, time_start, time_end)`，SQLite/Cloudflare/Hybrid/HTTP 客户端均实现。"
       },
       {
         "line": 2165,
-        "token": "charts",
-        "context": "- **Adaptive Chart Granularity** - Analytics charts now use semantically appropriate time intervals for better trend visualization"
-      },
-      {
-        "line": 2166,
-        "token": "view",
-        "context": "- **Last Month view**: Changed from 3-day intervals to weekly aggregation for clearer monthly trends"
-      },
-      {
-        "line": 2167,
-        "token": "view",
-        "context": "- **Last Year view**: Uses monthly aggregation for annual overview"
-      },
-      {
-        "line": 2168,
-        "token": "labels",
-        "context": "- **Human-readable labels**: Charts display clear interval formatting:"
-      },
-      {
-        "line": 2169,
-        "token": "view",
-        "context": "- Daily view: \"Nov 15\" format"
-      },
-      {
-        "line": 2170,
-        "token": "aggregation",
-        "context": "- Weekly aggregation: \"Week of Nov 15\" format"
+        "token": "tags",
+        "context": "- **标签过滤行为** —— `get_all_memories(tags=...)` 改为精确匹配 + AND 逻辑（不再子串 OR），Hybrid 也暴露 `operation` 参数保持一致。"
       },
       {
         "line": 2171,
-        "token": "aggregation",
-        "context": "- Monthly aggregation: \"November 2024\" format"
-      },
-      {
-        "line": 2172,
-        "token": "semantic",
-        "context": "- **Improved UX**: Better semantic alignment between time period and chart granularity"
-      },
-      {
-        "line": 2173,
-        "token": "lines",
-        "context": "- **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 307-345), `src/mcp_memory_service/web/static/app.js` (line 3661)"
-      },
-      {
-        "line": 2176,
-        "token": "intervals",
-        "context": "- **CRITICAL: Interval Aggregation Bug** - Multi-day intervals (weekly, monthly) now correctly aggregate across entire period"
-      },
-      {
-        "line": 2177,
-        "token": "were",
-        "context": "- **Problem**: Intervals were only counting memories from the first day of the interval, not the entire period"
-      },
-      {
-        "line": 2178,
-        "token": "showed",
-        "context": "- **Impact**: Analytics showed wildly inaccurate data (e.g., 0 memories instead of 427 for Oct 24-30 week)"
+        "token": "direction",
+        "context": "- 问题：`sync_memory_backends.py` 未提取/传递 `memory_type`，`--direction cf-to-sqlite` 后仪表盘显示 100% 未类型化。"
       },
       {
         "line": 2179,
-        "token": "strftime",
-        "context": "- **Root Cause**: `strftime` format in date grouping only used the first timestamp, not the interval's date range"
-      },
-      {
-        "line": 2180,
-        "token": "aggregation",
-        "context": "- **Solution**: Updated aggregation logic to properly filter and count all memories within each interval"
-      },
-      {
-        "line": 2181,
-        "token": "lines",
-        "context": "- **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 242-267)"
-      },
-      {
-        "line": 2183,
-        "token": "now",
-        "context": "- **CRITICAL: Data Sampling Bug** - Analytics now fetch complete historical data with proper date range filtering"
-      },
-      {
-        "line": 2184,
-        "token": "only",
-        "context": "- **Problem**: API only fetched 1,000 most recent memories, missing historical data for longer time periods"
-      },
-      {
-        "line": 2185,
-        "token": "showed",
-        "context": "- **Impact**: Charts showed incomplete or missing data for older time ranges"
+        "token": "v8.25.0-8.27.0",
+        "context": "- 问题：双向同步/漂移检测（v8.25.0-8.27.0）把 `created_at` 重置为当前时间，历史时间戳丢失。"
       },
       {
         "line": 2186,
-        "token": "fetch",
-        "context": "- **Solution**: Increased fetch limit to 10,000 memories with proper `created_at >= start_date` filtering"
-      },
-      {
-        "line": 2187,
-        "token": "lines",
-        "context": "- **Files Modified**: `src/mcp_memory_service/web/api/analytics.py` (lines 56-62)"
-      },
-      {
-        "line": 2188,
-        "token": "fast",
-        "context": "- **Performance**: Maintains fast response times (<200ms) even with larger dataset"
-      },
-      {
-        "line": 2191,
-        "token": "data",
-        "context": "- **Analytics API**: Improved data fetching with larger limits and proper date filtering for accurate historical analysis"
-      },
-      {
-        "line": 2196,
-        "token": "sync",
-        "context": "- **Dashboard Quick Actions: Sync Controls Widget** - Compact, real-time sync management for hybrid backend users (#234, fixes #233)"
-      },
-      {
-        "line": 2197,
-        "token": "sync",
-        "context": "- **Real-time sync status indicator**: Visual states for synced/syncing/pending/error/paused with color-coded icons"
-      },
-      {
-        "line": 2198,
-        "token": "controls",
-        "context": "- **Pause/Resume controls**: Safely pause background sync for database maintenance or offline work"
-      },
-      {
-        "line": 2199,
-        "token": "sync",
-        "context": "- **Force sync button**: Manual trigger for immediate synchronization"
-      },
-      {
-        "line": 2200,
-        "token": "metrics",
-        "context": "- **Sync metrics**: Display last sync time and pending operations count"
-      },
-      {
-        "line": 2201,
-        "token": "layout",
-        "context": "- **Clean layout**: Removed redundant sync status bar between header and body, moved to sidebar widget"
-      },
-      {
-        "line": 2202,
-        "token": "automatically",
-        "context": "- **Backend-aware**: Widget automatically hides for sqlite-vec only users (hybrid-specific feature)"
-      },
-      {
-        "line": 2203,
-        "token": "endpoints",
-        "context": "- **API endpoints**:"
-      },
-      {
-        "line": 2204,
-        "token": "background",
-        "context": "- `POST /api/sync/pause` - Pause background sync"
-      },
-      {
-        "line": 2205,
-        "token": "background",
-        "context": "- `POST /api/sync/resume` - Resume background sync"
-      },
-      {
-        "line": 2206,
-        "token": "backend",
-        "context": "- **Hybrid backend methods**: Added `pause_sync()` and `resume_sync()` for sync control"
-      },
-      {
-        "line": 2208,
-        "token": "backup",
-        "context": "- **Automatic Scheduled Backup System** - Enterprise-grade backup with retention policies and scheduling (#234, fixes #233)"
-      },
-      {
-        "line": 2209,
-        "token": "backup",
-        "context": "- **New backup module**: `src/mcp_memory_service/backup/` with `BackupService` and `BackupScheduler`"
-      },
-      {
-        "line": 2210,
-        "token": "native",
-        "context": "- **SQLite native backup API**: Uses safe `sqlite3.backup()` to prevent corruption (no file copying)"
-      },
-      {
-        "line": 2211,
-        "token": "backup",
-        "context": "- **Async I/O**: Non-blocking backup operations with `asyncio.to_thread`"
-      },
-      {
-        "line": 2212,
-        "token": "scheduling",
-        "context": "- **Flexible scheduling**: Hourly, daily, or weekly automatic backups"
-      },
-      {
-        "line": 2213,
-        "token": "policies",
-        "context": "- **Retention policies**: Configurable by days and max backup count"
-      },
-      {
-        "line": 2214,
-        "token": "widget",
-        "context": "- **Dashboard widget**: Backup status, last backup time, manual trigger, backup count, next scheduled time"
-      },
-      {
-        "line": 2215,
-        "token": "via",
-        "context": "- **Configuration via environment variables**:"
-      },
-      {
-        "line": 2216,
-        "token": "true",
-        "context": "- `MCP_BACKUP_ENABLED=true` (default: true)"
-      },
-      {
-        "line": 2217,
-        "token": "daily",
-        "context": "- `MCP_BACKUP_INTERVAL=daily` (hourly/daily/weekly, default: daily)"
-      },
-      {
-        "line": 2218,
-        "token": "days",
-        "context": "- `MCP_BACKUP_RETENTION=7` (days, default: 7)"
-      },
-      {
-        "line": 2219,
-        "token": "max",
-        "context": "- `MCP_BACKUP_MAX_COUNT=10` (max backups, default: 10)"
-      },
-      {
-        "line": 2220,
-        "token": "endpoints",
-        "context": "- **API endpoints**:"
-      },
-      {
-        "line": 2221,
-        "token": "backup",
-        "context": "- `GET /api/backup/status` - Get backup status and scheduler info"
-      },
-      {
-        "line": 2222,
-        "token": "manual",
-        "context": "- `POST /api/backup/now` - Trigger manual backup"
-      },
-      {
-        "line": 2223,
-        "token": "available",
-        "context": "- `GET /api/backup/list` - List available backups with metadata"
-      },
-      {
-        "line": 2224,
-        "token": "protection",
-        "context": "- **Security**: OAuth protection on backup endpoints, no file path exposure in responses"
-      },
-      {
-        "line": 2225,
-        "token": "compatibility",
-        "context": "- **Safari compatibility**: Improved event listener handling with lazy initialization"
-      },
-      {
-        "line": 2228,
-        "token": "sync",
-        "context": "- **Quick Actions Layout**: Moved sync controls from top status bar to sidebar widget for cleaner, more accessible UI"
-      },
-      {
-        "line": 2229,
-        "token": "state",
-        "context": "- **Sync State Persistence**: Pause state is now preserved during force sync operations"
-      },
-      {
-        "line": 2230,
-        "token": "toast",
-        "context": "- **Dashboard Feedback**: Added toast notifications for sync and backup operations"
-      },
-      {
-        "line": 2233,
-        "token": "timing",
-        "context": "- **Sync Button Click Events**: Resolved DOM timing issues with lazy event listeners for reliable button interactions"
-      },
-      {
-        "line": 2234,
-        "token": "syncing",
-        "context": "- **Spinner Animation**: Fixed syncing state visual feedback with proper CSS animations"
-      },
-      {
-        "line": 2235,
-        "token": "file",
-        "context": "- **Security**: Removed file path exposure from backup API responses (used backup IDs instead)"
-      },
-      {
-        "line": 2240,
-        "token": "HTTP",
-        "context": "- **CRITICAL: HTTP MCP Transport JSON-RPC 2.0 Compliance** - Fixed protocol violation causing Claude Code rejection (#236)"
-      },
-      {
-        "line": 2241,
-        "token": "HTTP",
-        "context": "- **Problem**: HTTP MCP server returned `\"error\": null` in successful responses, violating JSON-RPC 2.0 spec which requires successful responses to OMIT the err"
-      },
-      {
-        "line": 2242,
-        "token": "strict",
-        "context": "- **Impact**: Claude Code's strict schema validation rejected all HTTP MCP responses with \"Unrecognized key(s) in object: 'error'\" errors, making HTTP transport"
-      },
-      {
-        "line": 2243,
-        "token": "model",
-        "context": "- **Root Cause**: MCPResponse Pydantic model included both `result` and `error` fields in all responses, serializing null values"
-      },
-      {
-        "line": 2245,
-        "token": "model",
-        "context": "- Added `ConfigDict(exclude_none=True)` to MCPResponse model to exclude null fields from serialization"
-      },
-      {
-        "line": 2246,
-        "token": "docstring",
-        "context": "- Updated docstring to document JSON-RPC 2.0 compliance requirements"
-      },
-      {
-        "line": 2247,
-        "token": "deprecated",
-        "context": "- Replaced deprecated `.dict()` with `.model_dump()` for Pydantic V2 compatibility"
-      },
-      {
-        "line": 2248,
-        "token": "json",
-        "context": "- Moved json import to top of file per PEP 8 style guidelines"
-      },
-      {
-        "line": 2250,
-        "token": "updated",
-        "context": "- `src/mcp_memory_service/web/api/mcp.py` - Added ConfigDict, updated serialization"
-      },
-      {
-        "line": 2251,
-        "token": "users",
-        "context": "- **Affected Users**: All users attempting to use HTTP MCP transport with Claude Code or other strict JSON-RPC 2.0 clients"
-      },
-      {
-        "line": 2252,
-        "token": "successful",
-        "context": "- **Testing**: Verified successful responses exclude `error` field and error responses exclude `result` field"
-      },
-      {
-        "line": 2253,
-        "token": "timkjr",
-        "context": "- **Credits**: Thanks to @timkjr for identifying the issue and providing the fix"
-      },
-      {
-        "line": 2258,
-        "token": "operations",
-        "context": "- **Cloudflare Tag Filtering** - AND/OR operations for tag searches with unified API contracts (#228)"
-      },
-      {
-        "line": 2259,
-        "token": "tags",
-        "context": "- Added `search_by_tags(tags, operation, time_start, time_end)` to the storage base class and implemented it across SQLite, Cloudflare, Hybrid, and HTTP client "
-      },
-      {
-        "line": 2260,
-        "token": "use",
-        "context": "- Normalized Cloudflare SQL to use `GROUP BY` + `HAVING COUNT(DISTINCT ...)` for AND semantics while supporting optional time ranges"
-      },
-      {
-        "line": 2261,
-        "token": "power",
-        "context": "- Introduced `get_all_tags_with_counts()` for Cloudflare to power analytics dashboards without extra queries"
-      },
-      {
-        "line": 2264,
-        "token": "tags",
-        "context": "- **Tag Filtering Behavior** - `get_all_memories(tags=...)` now performs exact tag comparisons with AND logic instead of substring OR matching, and hybrid stora"
-      },
-      {
-        "line": 2269,
-        "token": "not",
-        "context": "- **Memory Type Loss During Cloudflare-to-SQLite Sync** - Fixed `memory_type` not being preserved in sync script"
-      },
-      {
-        "line": 2270,
-        "token": "did",
-        "context": "- **Problem**: `scripts/sync/sync_memory_backends.py` did not extract or pass `memory_type` when syncing from Cloudflare to SQLite-vec"
-      },
-      {
-        "line": 2271,
-        "token": "memories",
-        "context": "- **Impact**: All memories synced via `--direction cf-to-sqlite` showed as \"untyped\" (100%) in dashboard analytics"
-      },
-      {
-        "line": 2272,
-        "token": "field",
-        "context": "- **Root Cause**: Missing `memory_type` field in both memory dict extraction and Memory object creation"
-      },
-      {
-        "line": 2274,
-        "token": "memory",
-        "context": "- Added `memory_type` to memory dictionary extraction from source"
-      },
-      {
-        "line": 2275,
-        "token": "parameters",
-        "context": "- Added `memory_type` and `updated_at` parameters when creating Memory objects for target storage"
-      },
-      {
-        "line": 2277,
-        "token": "handling",
-        "context": "- `scripts/sync/sync_memory_backends.py` - Added memory_type and updated_at handling"
-      },
-      {
-        "line": 2278,
-        "token": "who",
-        "context": "- **Affected Users**: Users who ran `python scripts/sync/sync_memory_backends.py --direction cf-to-sqlite`"
-      },
-      {
-        "line": 2279,
-        "token": "sync",
-        "context": "- **Recovery**: Re-run sync from Cloudflare to restore memory types (Cloudflare preserves original types)"
-      },
-      {
-        "line": 2284,
-        "token": "timestamps",
-        "context": "- **CRITICAL: Timestamp Regression Bug** - Fixed `created_at` timestamps being reset during metadata sync"
-      },
-      {
-        "line": 2285,
-        "token": "sync",
-        "context": "- **Problem**: Bidirectional sync and drift detection (v8.25.0-v8.27.0) incorrectly reset `created_at` timestamps to current time during metadata updates"
-      },
-      {
-        "line": 2286,
-        "token": "memories",
-        "context": "- **Impact**: All memories synced from Cloudflare → SQLite-vec appeared \"just created\", destroying historical timestamp data"
-      },
-      {
-        "line": 2287,
-        "token": "parameter",
-        "context": "- **Root Cause**: `preserve_timestamps=False` parameter reset **both** `created_at` and `updated_at`, when it should only update `updated_at`"
-      },
-      {
-        "line": 2289,
-        "token": "preserve",
-        "context": "- Modified `update_memory_metadata()` to preserve `created_at` from source memory during sync"
-      },
-      {
-        "line": 2290,
-        "token": "storage",
-        "context": "- Hybrid storage now passes all 4 timestamp fields (`created_at`, `created_at_iso`, `updated_at`, `updated_at_iso`) during drift detection"
-      },
-      {
-        "line": 2291,
-        "token": "storage",
-        "context": "- Cloudflare storage updated to handle timestamps consistently with SQLite-vec"
-      },
-      {
-        "line": 2293,
-        "token": "timestamp",
-        "context": "- `src/mcp_memory_service/storage/sqlite_vec.py:1389-1406` - Fixed timestamp handling logic"
-      },
-      {
-        "line": 2294,
-        "token": "source",
-        "context": "- `src/mcp_memory_service/storage/hybrid.py:625-637, 935-947` - Pass source timestamps during sync"
-      },
-      {
-        "line": 2295,
-        "token": "timestamp",
-        "context": "- `src/mcp_memory_service/storage/cloudflare.py:833-864` - Consistent timestamp handling"
-      },
-      {
-        "line": 2296,
-        "token": "test",
-        "context": "- **Tests Added**: `tests/test_timestamp_preservation.py` - Comprehensive test suite with 7 tests covering:"
-      },
-      {
-        "line": 2297,
-        "token": "preservation",
-        "context": "- Timestamp preservation with `preserve_timestamps=True`"
-      },
-      {
-        "line": 2298,
-        "token": "test",
-        "context": "- Regression test for `created_at` preservation without source timestamps"
-      },
-      {
-        "line": 2299,
-        "token": "detection",
-        "context": "- Drift detection scenario"
-      },
-      {
-        "line": 2300,
-        "token": "sync",
-        "context": "- Multiple sync operations"
-      },
-      {
-        "line": 2301,
-        "token": "memory",
-        "context": "- Initial memory storage"
-      },
-      {
-        "line": 2303,
-        "token": "timestamp",
-        "context": "- `scripts/validation/validate_timestamp_integrity.py` - Detect timestamp anomalies"
-      },
-      {
-        "line": 2304,
-        "token": "corrupted",
-        "context": "- `scripts/maintenance/recover_timestamps_from_cloudflare.py` - Restore corrupted timestamps from Cloudflare"
-      },
-      {
-        "line": 2305,
-        "token": "drift",
-        "context": "- **Affected Versions**: v8.25.0 (drift detection), v8.27.0 (bidirectional sync)"
-      },
-      {
-        "line": 2306,
-        "token": "backend",
-        "context": "- **Affected Users**: Hybrid backend users who experienced automatic drift detection or initial sync"
-      },
-      {
-        "line": 2307,
-        "token": "using",
-        "context": "- **Data Recovery**: If using hybrid backend and Cloudflare has correct timestamps, run recovery script:"
-      },
-      {
-        "line": 2317,
         "token": "parameter",
         "context": "- **Timestamp Handling Semantics** - Clarified `preserve_timestamps` parameter behavior:"
       },
       {
-        "line": 2318,
+        "line": 2187,
         "token": "default",
         "context": "- `preserve_timestamps=True` (default): Only updates `updated_at` to current time, preserves `created_at`"
       },
       {
-        "line": 2319,
+        "line": 2188,
         "token": "timestamps",
         "context": "- `preserve_timestamps=False`: Uses timestamps from `updates` dict if provided, otherwise preserves existing `created_at`"
       },
       {
-        "line": 2320,
+        "line": 2189,
         "token": "resets",
         "context": "- **Never** resets `created_at` to current time (this was the bug)"
       },
       {
-        "line": 2323,
+        "line": 2192,
         "token": "script",
         "context": "- **Timestamp Integrity Validation** - New script to detect timestamp anomalies:"
       },
       {
-        "line": 2327,
+        "line": 2196,
         "token": "impossible",
         "context": "- Checks for impossible timestamps (`created_at > updated_at`)"
       },
       {
-        "line": 2328,
+        "line": 2197,
         "token": "suspicious",
         "context": "- Detects suspicious timestamp clusters (bulk reset indicators)"
       },
       {
-        "line": 2329,
+        "line": 2198,
         "token": "timestamp",
         "context": "- Analyzes timestamp distribution for anomalies"
       },
       {
-        "line": 2330,
+        "line": 2199,
         "token": "detailed",
         "context": "- Provides detailed statistics and warnings"
       },
       {
-        "line": 2335,
-        "token": "initial",
-        "context": "- **Hybrid Storage Sync Performance Optimization** - Dramatic initial sync speed improvement (3-5x faster)"
-      },
-      {
-        "line": 2337,
-        "token": "minutes",
-        "context": "- **Before**: ~5.5 memories/second (8 minutes for 2,619 memories)"
-      },
-      {
-        "line": 2338,
-        "token": "minutes",
-        "context": "- **After**: ~15-30 memories/second (1.5-3 minutes for 2,619 memories)"
-      },
-      {
-        "line": 2339,
-        "token": "faster",
-        "context": "- **3-5x faster** initial sync from Cloudflare to local SQLite"
-      },
-      {
-        "line": 2341,
-        "token": "method",
-        "context": "- **Bulk Existence Check**: `get_all_content_hashes()` method eliminates 2,619 individual DB queries"
-      },
-      {
-        "line": 2342,
-        "token": "concurrent",
-        "context": "- **Parallel Processing**: `asyncio.gather()` with Semaphore(15) for concurrent memory processing"
-      },
-      {
-        "line": 2343,
-        "token": "memories",
-        "context": "- **Larger Batch Sizes**: Increased from 100 to 500 memories per Cloudflare API call (5x fewer requests)"
-      },
-      {
-        "line": 2345,
-        "token": "method",
-        "context": "- `src/mcp_memory_service/storage/sqlite_vec.py` - Added `get_all_content_hashes()` method (lines 1208-1227)"
-      },
-      {
-        "line": 2346,
-        "token": "sync",
-        "context": "- `src/mcp_memory_service/storage/hybrid.py` - Parallel sync implementation (lines 859-921)"
-      },
-      {
-        "line": 2347,
-        "token": "validation",
-        "context": "- `scripts/benchmarks/benchmark_hybrid_sync.py` - Performance validation script"
-      },
-      {
-        "line": 2348,
-        "token": "breaking",
-        "context": "- **Backward Compatibility**: Zero breaking changes, transparent optimization for all sync operations"
-      },
-      {
-        "line": 2349,
-        "token": "large",
-        "context": "- **Use Case**: Users with large memory databases (1000+ memories) will see significantly faster initial sync times"
-      },
-      {
-        "line": 2352,
+        "line": 2211,
         "token": "sync",
         "context": "- **Hybrid Initial Sync Architecture** - Refactored sync loop for better performance"
       },
       {
-        "line": 2353,
+        "line": 2212,
         "token": "hash",
         "context": "- O(1) hash lookups instead of O(n) individual queries"
       },
       {
-        "line": 2354,
+        "line": 2213,
         "token": "processing",
         "context": "- Concurrent processing with controlled parallelism (15 simultaneous operations)"
       },
       {
-        "line": 2355,
+        "line": 2214,
         "token": "overhead",
         "context": "- Reduced Cloudflare API overhead with larger batches (6 API calls vs 27)"
       },
       {
-        "line": 2356,
+        "line": 2215,
         "token": "full",
         "context": "- Maintains full drift detection and metadata synchronization capabilities"
       },
       {
-        "line": 2359,
-        "token": "inefficient",
-        "context": "- **Duplicate Sync Queue Architecture** - Resolved inefficient dual-sync issue"
-      },
-      {
-        "line": 2360,
-        "token": "server",
-        "context": "- **Problem**: MCP server and HTTP server each created separate HybridStorage instances with independent sync queues"
-      },
-      {
-        "line": 2361,
-        "token": "sync",
-        "context": "- **Impact**: Duplicate sync work, potential race conditions, memory not immediately visible across servers"
-      },
-      {
-        "line": 2362,
-        "token": "configuration",
-        "context": "- **Solution**: New `MCP_HYBRID_SYNC_OWNER` configuration to control which process handles Cloudflare sync"
-      },
-      {
-        "line": 2364,
+        "line": 2219,
         "token": "http",
-        "context": "- `\"http\"` - HTTP server only handles sync (recommended - avoids duplicate work)"
+        "context": "- 选项：`http`（推荐，仅 HTTP 同步）、`mcp`、`both`（默认兼容）。"
       },
       {
-        "line": 2365,
-        "token": "mcp",
-        "context": "- `\"mcp\"` - MCP server only handles sync"
+        "line": 2220,
+        "token": "web/dependencies.py",
+        "context": "- 修改：`config.py`、`storage/factory.py`、`mcp_server.py`、`web/dependencies.py`。"
       },
       {
-        "line": 2366,
-        "token": "both",
-        "context": "- `\"both\"` - Both servers sync independently (default for backward compatibility)"
+        "line": 2221,
+        "token": "export",
+        "context": "- 迁移：`export MCP_HYBRID_SYNC_OWNER=http` 可避免重复同步；保持向后兼容。"
       },
       {
-        "line": 2368,
-        "token": "configuration",
-        "context": "- `src/mcp_memory_service/config.py` - Added `HYBRID_SYNC_OWNER` configuration (lines 424-427)"
-      },
-      {
-        "line": 2369,
-        "token": "aware",
-        "context": "- `src/mcp_memory_service/storage/factory.py` - Server-type aware storage creation (lines 76-110)"
-      },
-      {
-        "line": 2370,
-        "token": "mcp",
-        "context": "- `src/mcp_memory_service/mcp_server.py` - Pass server_type=\"mcp\" (line 143)"
-      },
-      {
-        "line": 2371,
-        "token": "http",
-        "context": "- `src/mcp_memory_service/web/dependencies.py` - Pass server_type=\"http\" (line 65)"
-      },
-      {
-        "line": 2377,
-        "token": "both",
-        "context": "- **Backward Compatibility**: Defaults to \"both\" (existing behavior), no breaking changes"
-      },
-      {
-        "line": 2380,
+        "line": 2224,
         "token": "python",
         "context": "- **Benchmark Results** (`python scripts/benchmarks/benchmark_hybrid_sync.py`):"
       },
       {
-        "line": 2381,
+        "line": 2225,
         "token": "hash",
         "context": "- Bulk hash loading: 2,619 hashes loaded in ~100ms (vs ~13,000ms for individual queries)"
       },
       {
-        "line": 2382,
+        "line": 2226,
         "token": "processing",
         "context": "- Parallel processing: 15x concurrency reduces CPU idle time"
       },
       {
-        "line": 2383,
+        "line": 2227,
         "token": "size",
         "context": "- Batch size optimization: 78% reduction in API calls (27 → 6 for 2,619 memories)"
       },
       {
-        "line": 2384,
+        "line": 2228,
         "token": "speedup",
         "context": "- Combined speedup: 3-5x faster initial sync"
       },
       {
-        "line": 2389,
-        "token": "performance",
-        "context": "- **Global MCP Server Caching** - Revolutionary performance improvement for MCP tools (PR #227)"
+        "line": 2234,
+        "token": "HTTP",
+        "context": "- 性能：缓存命中快 534,628×（1,810ms→0.01ms）；延迟降 99.9996%；命中率 90%+；预热后 MCP 工具较 HTTP 快 41×。"
       },
       {
-        "line": 2391,
-        "token": "faster",
-        "context": "- **534,628x faster** on cache hits (1,810ms → 0.01ms per MCP tool call)"
+        "line": 2237,
+        "token": "utils/cache_manager.py",
+        "context": "- 修改：`server.py`、`mcp_server.py`、`utils/cache_manager.py`、`benchmark_server_caching.py`。"
       },
       {
-        "line": 2392,
-        "token": "latency",
-        "context": "- **99.9996% latency reduction** for cached operations"
-      },
-      {
-        "line": 2393,
-        "token": "cache",
-        "context": "- **90%+ cache hit rate** in normal usage patterns"
-      },
-      {
-        "line": 2394,
-        "token": "tools",
-        "context": "- **MCP tools now 41x faster** than HTTP API after warm-up"
-      },
-      {
-        "line": 2395,
-        "token": "cache",
-        "context": "- **New MCP Tool**: `get_cache_stats` - Real-time cache performance monitoring"
-      },
-      {
-        "line": 2396,
-        "token": "hit",
-        "context": "- Track hits/misses, hit rate percentage"
-      },
-      {
-        "line": 2397,
-        "token": "storage",
-        "context": "- Monitor storage and service cache sizes"
-      },
-      {
-        "line": 2398,
-        "token": "initialization",
-        "context": "- View initialization time statistics (avg/min/max)"
-      },
-      {
-        "line": 2400,
-        "token": "cache",
-        "context": "- Global cache structures: `_STORAGE_CACHE`, `_MEMORY_SERVICE_CACHE`, `_CACHE_STATS`"
-      },
-      {
-        "line": 2401,
-        "token": "concurrent",
-        "context": "- Thread-safe concurrent access via `asyncio.Lock`"
-      },
-      {
-        "line": 2402,
-        "token": "cleanup",
-        "context": "- Automatic cleanup on server shutdown (no memory leaks)"
-      },
-      {
-        "line": 2404,
-        "token": "server",
-        "context": "- `src/mcp_memory_service/server.py` - Production MCP server caching"
-      },
-      {
-        "line": 2405,
-        "token": "server",
-        "context": "- `src/mcp_memory_service/mcp_server.py` - FastMCP server caching"
-      },
-      {
-        "line": 2406,
-        "token": "cache",
-        "context": "- `src/mcp_memory_service/utils/cache_manager.py` - New cache management utilities"
-      },
-      {
-        "line": 2407,
-        "token": "effectiveness",
-        "context": "- `scripts/benchmarks/benchmark_server_caching.py` - Cache effectiveness validation"
-      },
-      {
-        "line": 2408,
-        "token": "breaking",
-        "context": "- **Backward Compatibility**: Zero breaking changes, transparent caching for all MCP clients"
-      },
-      {
-        "line": 2409,
-        "token": "tools",
-        "context": "- **Use Case**: MCP tools in Claude Desktop and Claude Code are now the fastest method for memory operations"
-      },
-      {
-        "line": 2412,
+        "line": 2241,
         "token": "review",
         "context": "- **Code Quality Improvements** - Gemini Code Assist review implementation (PR #227)"
       },
       {
-        "line": 2413,
+        "line": 2242,
         "token": "code",
         "context": "- Eliminated code duplication across `server.py` and `mcp_server.py`"
       },
       {
-        "line": 2414,
+        "line": 2243,
         "token": "shared",
         "context": "- Created shared `CacheManager.calculate_stats()` utility for statistics"
       },
       {
-        "line": 2415,
+        "line": 2244,
         "token": "compliance",
         "context": "- Enhanced PEP 8 compliance with proper naming conventions"
       },
       {
-        "line": 2416,
+        "line": 2245,
         "token": "comprehensive",
         "context": "- Added comprehensive inline documentation for cache implementation"
       },
       {
-        "line": 2419,
+        "line": 2248,
         "token": "unsafe",
         "context": "- **Security Vulnerability** - Removed unsafe `eval()` usage in benchmark script (PR #227)"
       },
       {
-        "line": 2420,
+        "line": 2249,
         "token": "eval",
         "context": "- Replaced `eval(stats_str)` with safe `json.loads()` for parsing cache statistics"
       },
       {
-        "line": 2421,
+        "line": 2250,
         "token": "arbitrary",
         "context": "- Eliminated arbitrary code execution risk in development tools"
       },
       {
-        "line": 2422,
+        "line": 2251,
         "token": "benchmark",
         "context": "- Improved benchmark script robustness"
       },
       {
-        "line": 2425,
+        "line": 2254,
         "token": "consecutive",
         "context": "- **Benchmark Results** (10 consecutive MCP tool calls):"
       },
       {
-        "line": 2430,
+        "line": 2259,
         "token": "tools",
         "context": "- **Impact**: MCP tools are now the recommended method for Claude Desktop and Claude Code users"
       },
       {
-        "line": 2432,
+        "line": 2261,
         "token": "persist",
         "context": "- Caches persist across stateless HTTP calls"
       },
       {
-        "line": 2433,
+        "line": 2262,
         "token": "instances",
         "context": "- Storage instances keyed by \"{backend}:{path}\""
       },
       {
-        "line": 2434,
+        "line": 2263,
         "token": "instances",
         "context": "- MemoryService instances keyed by storage ID"
       },
       {
-        "line": 2435,
+        "line": 2264,
         "token": "initialization",
         "context": "- Lazy initialization preserved to prevent startup hangs"
       },
       {
-        "line": 2438,
+        "line": 2267,
         "token": "cache",
         "context": "- Updated Wiki: 05-Performance-Optimization.md with cache architecture"
       },
       {
-        "line": 2439,
+        "line": 2268,
         "token": "cache",
         "context": "- Added cache monitoring guide using `get_cache_stats` tool"
       },
       {
-        "line": 2440,
+        "line": 2269,
         "token": "comparison",
         "context": "- Performance comparison tables now show MCP as fastest method"
       },
       {
-        "line": 2445,
+        "line": 2274,
         "token": "code",
         "context": "- **Drift Detection Script Refactoring** - Improved code maintainability in `check_drift.py` (PR #226)"
       },
       {
-        "line": 2446,
+        "line": 2275,
         "token": "config",
         "context": "- **Refactored**: Cloudflare config dictionary construction to use dictionary comprehension"
       },
       {
-        "line": 2447,
+        "line": 2276,
         "token": "configuration",
         "context": "- **Improvement**: Separated configuration keys list from transformation logic"
       },
       {
-        "line": 2448,
+        "line": 2277,
         "token": "maintain",
         "context": "- **Benefit**: Easier to maintain and modify configuration keys"
       },
       {
-        "line": 2449,
+        "line": 2278,
         "token": "cleaner",
         "context": "- **Code Quality**: More Pythonic, cleaner, and more readable"
       },
       {
-        "line": 2450,
+        "line": 2279,
         "token": "functional",
         "context": "- **Impact**: No functional changes, pure code quality improvement"
       },
       {
-        "line": 2452,
+        "line": 2281,
         "token": "code",
         "context": "- **Credit**: Implements Gemini code review suggestions from PR #224"
       },
       {
-        "line": 2457,
+        "line": 2286,
         "token": "critical",
         "context": "- **Drift Detection Script Initialization** - Corrected critical bugs in `check_drift.py` (PR #224)"
       },
       {
-        "line": 2458,
+        "line": 2287,
         "token": "incorrect",
         "context": "- **Bug 1**: Fixed incorrect config attribute `SQLITE_DB_PATH` → `SQLITE_VEC_PATH` in AppConfig"
       },
       {
-        "line": 2459,
+        "line": 2288,
         "token": "missing",
         "context": "- **Bug 2**: Added missing `cloudflare_config` parameter to HybridMemoryStorage initialization"
       },
       {
-        "line": 2460,
+        "line": 2289,
         "token": "was",
         "context": "- **Impact**: Script was completely broken for Cloudflare/Hybrid backends - now initializes successfully"
       },
       {
-        "line": 2461,
+        "line": 2290,
         "token": "prevented",
         "context": "- **Error prevented**: `AttributeError: 'AppConfig' object has no attribute 'SQLITE_DB_PATH'`"
       },
       {
-        "line": 2463,
+        "line": 2292,
         "token": "was",
         "context": "- **Severity**: High - Script was non-functional for users with hybrid or cloudflare backends"
       },
       {
-        "line": 2464,
+        "line": 2293,
         "token": "model",
         "context": "- **CI Test Infrastructure** - Added HuggingFace model caching to prevent network-related test failures (PR #225)"
       },
       {
-        "line": 2465,
+        "line": 2294,
         "token": "runners",
         "context": "- **Root Cause**: GitHub Actions runners cannot access huggingface.co during test runs"
       },
       {
-        "line": 2466,
+        "line": 2295,
         "token": "directory",
         "context": "- **Solution**: Implemented `actions/cache@v3` for `~/.cache/huggingface` directory"
       },
       {
-        "line": 2467,
+        "line": 2296,
         "token": "step",
         "context": "- **Pre-download step**: Downloads `all-MiniLM-L6-v2` model after dependency installation"
       },
       {
-        "line": 2468,
+        "line": 2297,
         "token": "all",
         "context": "- **Impact**: Fixes all future PR test failures caused by model download restrictions"
       },
       {
-        "line": 2469,
+        "line": 2298,
         "token": "includes",
         "context": "- **Cache Strategy**: Key includes `pyproject.toml` hash for dependency tracking"
       },
       {
-        "line": 2470,
+        "line": 2299,
         "token": "run",
         "context": "- **Performance**: First run downloads model, subsequent runs use cache"
       },
       {
-        "line": 2474,
+        "line": 2303,
         "token": "detection",
         "context": "- **PR #224**: Drift detection script now properly initializes Cloudflare backend with all required parameters (api_token, account_id, d1_database_id, vectorize"
       },
       {
-        "line": 2475,
+        "line": 2304,
         "token": "environment",
         "context": "- **PR #225**: CI environment now caches embedding models, eliminating network dependency during test execution"
       },
       {
-        "line": 2476,
+        "line": 2305,
         "token": "fixes",
         "context": "- **Testing**: Both fixes validated in PR test runs - drift detection now works, tests pass consistently"
       },
       {
-        "line": 2481,
+        "line": 2310,
         "token": "metadata",
         "context": "- **Hybrid Backend Drift Detection** - Automatic metadata synchronization using `updated_at` timestamps (issue #202)"
       },
       {
-        "line": 2482,
+        "line": 2311,
         "token": "awareness",
         "context": "- **Bidirectional awareness**: Detects metadata changes on either backend (SQLite-vec ↔ Cloudflare)"
       },
       {
-        "line": 2483,
+        "line": 2312,
         "token": "drift",
         "context": "- **Periodic drift checks**: Configurable interval via `MCP_HYBRID_DRIFT_CHECK_INTERVAL` (default: 1 hour)"
       },
       {
-        "line": 2484,
+        "line": 2313,
         "token": "timestamp",
         "context": "- **\"Newer timestamp wins\" conflict resolution**: Prevents data loss during metadata updates"
       },
       {
-        "line": 2485,
+        "line": 2314,
         "token": "support",
         "context": "- **Dry-run support**: Preview changes via `python scripts/sync/check_drift.py`"
       },
       {
-        "line": 2486,
+        "line": 2315,
         "token": "configuration",
         "context": "- **New configuration variables**:"
       },
       {
-        "line": 2487,
+        "line": 2316,
         "token": "metadata",
         "context": "- `MCP_HYBRID_SYNC_UPDATES` - Enable metadata sync (default: true)"
       },
       {
-        "line": 2488,
+        "line": 2317,
         "token": "between",
         "context": "- `MCP_HYBRID_DRIFT_CHECK_INTERVAL` - Seconds between drift checks (default: 3600)"
       },
       {
-        "line": 2489,
+        "line": 2318,
         "token": "check",
         "context": "- `MCP_HYBRID_DRIFT_BATCH_SIZE` - Memories to check per scan (default: 100)"
       },
       {
-        "line": 2490,
+        "line": 2319,
         "token": "methods",
         "context": "- **New methods**:"
       },
       {
-        "line": 2491,
+        "line": 2320,
         "token": "drift",
         "context": "- `BackgroundSyncService._detect_and_sync_drift()` - Core drift detection logic with dry-run mode"
       },
       {
-        "line": 2492,
+        "line": 2321,
         "token": "memories",
         "context": "- `CloudflareStorage.get_memories_updated_since()` - Query memories by update timestamp"
       },
       {
-        "line": 2493,
+        "line": 2322,
         "token": "initial",
         "context": "- **Enhanced initial sync**: Now detects and syncs metadata drift for existing memories"
       },
       {
-        "line": 2496,
+        "line": 2325,
         "token": "backend",
         "context": "- **Issue #202** - Hybrid backend now syncs metadata updates (tags, types, custom fields)"
       },
       {
-        "line": 2497,
+        "line": 2326,
         "token": "behavior",
         "context": "- Previous behavior only detected missing memories, ignoring metadata changes"
       },
       {
-        "line": 2498,
+        "line": 2327,
         "token": "silent",
         "context": "- Prevented silent data loss when memories updated on one backend but not synced"
       },
       {
-        "line": 2499,
+        "line": 2328,
         "token": "fixes",
         "context": "- Tag fixes in Cloudflare now properly propagate to local SQLite"
       },
       {
-        "line": 2500,
+        "line": 2329,
         "token": "updates",
         "context": "- Metadata updates no longer diverge between backends"
       },
       {
-        "line": 2503,
+        "line": 2332,
         "token": "sync",
         "context": "- Initial sync (`_perform_initial_sync`) now compares timestamps for existing memories"
       },
       {
-        "line": 2504,
+        "line": 2333,
         "token": "sync",
         "context": "- Periodic sync includes drift detection checks at configurable intervals"
       },
       {
-        "line": 2505,
+        "line": 2334,
         "token": "statistics",
         "context": "- Sync statistics tracking expanded with drift detection metrics"
       },
       {
-        "line": 2509,
+        "line": 2338,
         "token": "configuration",
         "context": "- `src/mcp_memory_service/config.py` - Added 3 configuration variables"
       },
       {
-        "line": 2510,
+        "line": 2339,
         "token": "detection",
         "context": "- `src/mcp_memory_service/storage/hybrid.py` - Drift detection implementation (~150 lines)"
       },
       {
-        "line": 2511,
+        "line": 2340,
         "token": "method",
         "context": "- `src/mcp_memory_service/storage/cloudflare.py` - Added `get_memories_updated_since()` method"
       },
       {
-        "line": 2512,
+        "line": 2341,
         "token": "validation",
         "context": "- `scripts/sync/check_drift.py` - New dry-run validation script"
       },
       {
-        "line": 2513,
+        "line": 2342,
         "token": "drift",
         "context": "- **Architecture**: Timestamp-based drift detection with 1-second clock skew tolerance"
       },
       {
-        "line": 2514,
+        "line": 2343,
         "token": "async",
         "context": "- **Performance**: Non-blocking async operations, configurable batch sizes"
       },
       {
-        "line": 2515,
+        "line": 2344,
         "token": "feature",
         "context": "- **Safety**: Opt-in feature, dry-run mode, comprehensive audit logging"
       },
       {
-        "line": 2520,
+        "line": 2349,
         "token": "review",
         "context": "- **Code Quality Improvements** - Applied Gemini Code Assist review suggestions (issue #180)"
       },
       {
-        "line": 2521,
+        "line": 2350,
         "token": "chained",
         "context": "- **documents.py:87** - Replaced chained `.replace()` calls with `re.sub()` for path separator sanitization"
       },
       {
-        "line": 2522,
+        "line": 2351,
         "token": "elements",
         "context": "- **app.js:751-762** - Cached DOM elements in setProcessingMode to reduce query overhead"
       },
       {
-        "line": 2523,
+        "line": 2352,
         "token": "upload",
         "context": "- **app.js:551-553, 778-780** - Cached upload option elements to optimize handleDocumentUpload"
       },
       {
-        "line": 2524,
+        "line": 2353,
         "token": "indentation",
         "context": "- **index.html:357, 570** - Fixed indentation consistency for closing `</div>` tags"
       },
       {
-        "line": 2525,
+        "line": 2354,
         "token": "impact",
         "context": "- Performance impact: Minor - reduced DOM query overhead"
       },
       {
-        "line": 2526,
+        "line": 2355,
         "token": "changes",
         "context": "- Breaking changes: None"
       },
       {
-        "line": 2530,
+        "line": 2359,
         "token": "sanitization",
         "context": "- **Code Quality**: Regex-based sanitization more scalable, DOM element caching reduces redundant queries"
       },
       {
-        "line": 2531,
+        "line": 2360,
         "token": "refactor",
         "context": "- **Commit**: ffc6246 - refactor: code quality improvements from Gemini review (issue #180)"
       },
       {
-        "line": 2536,
+        "line": 2365,
         "token": "systematic",
         "context": "- **GitHub Release Manager Agent** - Resolved systematic version history omission in README.md (commit ccf959a)"
       },
       {
-        "line": 2537,
+        "line": 2366,
         "token": "agent",
         "context": "- Fixed agent behavior that was omitting previous versions from \"Previous Releases\" section"
       },
       {
-        "line": 2538,
+        "line": 2367,
         "token": "list",
         "context": "- Added v8.24.1 to Previous Releases list (was missing despite being valid release)"
       },
       {
-        "line": 2539,
+        "line": 2368,
         "token": "agent",
         "context": "- Enhanced agent instructions with CRITICAL section for maintaining version history integrity"
       },
       {
-        "line": 2540,
+        "line": 2369,
         "token": "quality",
         "context": "- Added quality assurance checklist item to prevent future omissions"
       },
       {
-        "line": 2541,
+        "line": 2370,
         "token": "cause",
         "context": "- Root cause: Agent was replacing entire Previous Releases section instead of prepending new version"
       },
       {
-        "line": 2544,
+        "line": 2373,
         "token": "test",
         "context": "- **Test Coverage for Tag+Time Filtering** - Comprehensive test suite for issue #216 (commit ebff282)"
       },
       {
-        "line": 2545,
+        "line": 2374,
         "token": "unit",
         "context": "- 10 unit tests passing across SQLite-vec, Cloudflare, and Hybrid backends"
       },
       {
-        "line": 2546,
+        "line": 2375,
         "token": "functionality",
         "context": "- Validates PR #215 functionality (tag+time filtering to fix semantic over-filtering bug #214)"
       },
       {
-        "line": 2547,
+        "line": 2376,
         "token": "verify",
         "context": "- Tests verify memories can be retrieved using both tag criteria AND time range filters"
       },
       {
-        "line": 2548,
+        "line": 2377,
         "token": "integration",
         "context": "- API integration tests created (with known threading issues documented for future fix)"
       },
       {
-        "line": 2549,
+        "line": 2378,
         "token": "regression",
         "context": "- Ensures regression prevention for semantic search over-filtering bug"
       },
       {
-        "line": 2552,
+        "line": 2381,
         "token": "release",
         "context": "- GitHub release workflow now more reliable with enhanced agent guardrails"
       },
       {
-        "line": 2553,
+        "line": 2382,
         "token": "suite",
         "context": "- Test suite provides better coverage for multi-filter memory retrieval scenarios"
       },
       {
-        "line": 2557,
+        "line": 2386,
         "token": "claude/agents/github-release-manager.md",
         "context": "- `.claude/agents/github-release-manager.md` - Added CRITICAL section for Previous Releases maintenance"
       },
       {
-        "line": 2558,
+        "line": 2387,
         "token": "new",
         "context": "- `tests/test_time_filtering.py` - 10 new unit tests for tag+time filtering"
       },
       {
-        "line": 2559,
+        "line": 2388,
         "token": "integration",
         "context": "- `tests/integration/test_api_time_search.py` - API integration tests (threading issues documented)"
       },
       {
-        "line": 2560,
+        "line": 2389,
         "token": "unit",
         "context": "- **Test Execution**: All 10 unit tests passing, API tests have known threading limitations"
       },
       {
-        "line": 2561,
+        "line": 2390,
         "token": "version",
         "context": "- **Impact**: Prevents version history loss in future releases, ensures tag+time filtering remains functional"
       },
       {
-        "line": 2566,
+        "line": 2395,
         "token": "workflow",
         "context": "- **CI/CD Workflow Infrastructure** - Development Setup Validation workflow fixes (issue #217 related)"
       },
       {
-        "line": 2567,
+        "line": 2396,
         "token": "bash",
         "context": "- Fixed bash errexit handling in workflow tests - prevents premature exit on intentional test failures"
       },
       {
-        "line": 2568,
+        "line": 2397,
         "token": "exit",
         "context": "- Corrected exit code capture using EXIT_CODE=0 and || EXIT_CODE=$? pattern"
       },
       {
-        "line": 2569,
+        "line": 2398,
         "token": "workflow",
         "context": "- All 5 workflow tests now passing: version consistency, pre-commit hooks, server warnings, developer prompts, docs accuracy"
       },
       {
-        "line": 2570,
+        "line": 2399,
         "token": "cause",
         "context": "- Root cause: bash runs with -e flag (errexit), which exits immediately when commands return non-zero exit codes"
       },
       {
-        "line": 2571,
+        "line": 2400,
         "token": "intentionally",
         "context": "- Tests intentionally run check_dev_setup.py expecting exit code 1, but bash was exiting before capture"
       },
       {
-        "line": 2575,
+        "line": 2404,
         "token": "tests",
         "context": "- Workflow tests can now properly validate that the development setup validator correctly detects problems"
       },
       {
-        "line": 2576,
+        "line": 2405,
         "token": "code",
         "context": "- Exit code capture no longer uses \"|| true\" pattern (was making all commands return 0)"
       },
       {
-        "line": 2581,
+        "line": 2410,
         "token": "python",
         "context": "- Before: `python script.py || true` (always returns 0, breaks exit code testing)"
       },
       {
-        "line": 2582,
+        "line": 2411,
         "token": "python",
         "context": "- After: `EXIT_CODE=0; python script.py || EXIT_CODE=$?` (captures actual exit code, prevents bash exit)"
       },
       {
-        "line": 2583,
+        "line": 2412,
         "token": "jobs",
         "context": "- **Test Jobs**: All 5 jobs in dev-setup-validation workflow now pass consistently"
       },
       {
-        "line": 2584,
+        "line": 2413,
         "token": "test",
         "context": "- **Context**: Part of test infrastructure improvement efforts (issue #217)"
       },
       {
-        "line": 2589,
+        "line": 2418,
         "token": "test",
         "context": "- **Test Infrastructure Failures** - Resolved 27 pre-existing test failures (issue #217)"
       },
       {
-        "line": 2590,
+        "line": 2419,
         "token": "async",
         "context": "- Fixed async fixture incompatibility in 6 test files (19+ failures)"
       },
       {
-        "line": 2591,
+        "line": 2420,
         "token": "missing",
         "context": "- Corrected missing imports (MCPMemoryServer → MemoryServer, removed MemoryMetadata)"
       },
       {
-        "line": 2592,
+        "line": 2421,
         "token": "missing",
         "context": "- Added missing content_hash parameter to Memory() instantiations"
       },
       {
-        "line": 2593,
+        "line": 2422,
         "token": "hardcoded",
         "context": "- Updated hardcoded version strings (6.3.0 → 8.24.0)"
       },
       {
-        "line": 2594,
+        "line": 2423,
         "token": "test",
         "context": "- Improved test pass rate from 63% to 71% (412/584 tests passing)"
       },
       {
-        "line": 2595,
+        "line": 2424,
         "token": "via",
         "context": "- Execution: Automated via amp-bridge agent"
       },
       {
-        "line": 2598,
+        "line": 2427,
         "token": "suite",
         "context": "- Test suite now has cleaner baseline for detecting new regressions"
       },
       {
-        "line": 2599,
+        "line": 2428,
         "token": "async",
         "context": "- All async test fixtures now use @pytest_asyncio.fixture decorator"
       },
       {
-        "line": 2602,
+        "line": 2431,
         "token": "agent",
         "context": "- **Automated Fix**: Used amp-bridge agent for pattern-based refactoring"
       },
       {
-        "line": 2603,
+        "line": 2432,
         "token": "minutes",
         "context": "- **Execution Time**: ~15 minutes (vs 1-2 hours manual)"
       },
       {
-        "line": 2604,
+        "line": 2433,
         "token": "test",
         "context": "- **Files Modified**: 11 test files across tests/ and tests/integration/"
       },
       {
-        "line": 2605,
+        "line": 2434,
         "token": "infrastructure",
         "context": "- **Root Causes**: Test infrastructure issues, not code bugs"
       },
       {
-        "line": 2606,
+        "line": 2435,
         "token": "failures",
         "context": "- **Remaining Failures**: 172 failures remain (backend config, performance, actual bugs)"
       },
       {
-        "line": 2611,
+        "line": 2440,
         "token": "now",
         "context": "- **PyPI Publishing Automation** - Package now available via `pip install mcp-memory-service`"
       },
       {
-        "line": 2612,
+        "line": 2441,
         "token": "workflow",
         "context": "- **Workflow Automation**: Configured GitHub Actions workflow to automatically publish to PyPI on tag pushes"
       },
       {
-        "line": 2613,
+        "line": 2442,
         "token": "can",
         "context": "- **Installation Simplification**: Users can now install directly via `pip install mcp-memory-service` or `uv pip install mcp-memory-service`"
       },
       {
-        "line": 2614,
+        "line": 2443,
         "token": "installation",
         "context": "- **Accessibility**: Resolves installation barriers for users without git access or familiarity"
       },
       {
-        "line": 2615,
+        "line": 2444,
         "token": "secret",
         "context": "- **Token Configuration**: Secured with `PYPI_TOKEN` GitHub secret for automated publishing"
       },
       {
-        "line": 2616,
+        "line": 2445,
         "token": "only",
         "context": "- **Quality Gates**: Publishes only after successful test suite execution"
       },
       {
-        "line": 2619,
+        "line": 2448,
         "token": "primary",
         "context": "- **Distribution Method**: Added PyPI as primary distribution channel alongside GitHub releases"
       },
       {
-        "line": 2620,
+        "line": 2449,
         "token": "guides",
         "context": "- **Installation Documentation**: Updated guides to include pip-based installation as recommended method"
       },
       {
-        "line": 2624,
+        "line": 2453,
         "token": "workflow",
         "context": "- `.github/workflows/publish.yml` - NEW workflow for automated PyPI publishing"
       },
       {
-        "line": 2625,
+        "line": 2454,
         "token": "repository",
         "context": "- GitHub repository secrets - Added `PYPI_TOKEN` for authentication"
       },
       {
-        "line": 2626,
+        "line": 2455,
         "token": "runs",
         "context": "- **Trigger**: Workflow runs automatically on git tag creation (pattern: `v*.*.*`)"
       },
       {
-        "line": 2627,
+        "line": 2456,
         "token": "build",
         "context": "- **Build System**: Uses Hatchling build backend with `python-semantic-release`"
       },
       {
-        "line": 2630,
+        "line": 2459,
         "token": "installation",
         "context": "- **For New Users**: Preferred installation is now `pip install mcp-memory-service`"
       },
       {
-        "line": 2631,
+        "line": 2460,
         "token": "action",
         "context": "- **For Existing Users**: No action required - git-based installation continues to work"
       },
       {
-        "line": 2632,
+        "line": 2461,
         "token": "creation",
         "context": "- **For Contributors**: Tag creation now triggers PyPI publishing automatically"
       },
       {
-        "line": 2637,
+        "line": 2466,
         "token": "layer",
         "context": "- **Stale Virtual Environment Prevention System** - Comprehensive 6-layer strategy to prevent \"stale venv vs source code\" version mismatches"
       },
       {
-        "line": 2638,
+        "line": 2467,
         "token": "servers",
         "context": "- **Root Cause**: MCP servers load from site-packages, not source files. System restart doesn't help - it relaunches with same stale package"
       },
       {
-        "line": 2639,
+        "line": 2468,
         "token": "issue",
         "context": "- **Impact**: Prevented issue that caused v8.23.0 tag validation bug to persist despite v8.22.2 fix (source showed v8.23.0 while venv had v8.5.3)"
       },
       {
-        "line": 2643,
+        "line": 2472,
         "token": "version",
         "context": "- New `scripts/validation/check_dev_setup.py` - Validates source/venv version consistency, detects editable installs"
       },
       {
-        "line": 2644,
+        "line": 2473,
         "token": "commits",
         "context": "- Enhanced `scripts/hooks/pre-commit` - Blocks commits when venv is stale, provides actionable error messages"
       },
       {
-        "line": 2645,
+        "line": 2474,
         "token": "development",
         "context": "- Added CLAUDE.md development setup section with explicit `pip install -e .` guidance"
       },
       {
-        "line": 2648,
+        "line": 2477,
         "token": "function",
         "context": "- Added `check_version_consistency()` function in `src/mcp_memory_service/server.py`"
       },
       {
-        "line": 2649,
+        "line": 2478,
         "token": "startup",
         "context": "- Server startup warnings when version mismatch detected (source vs package)"
       },
       {
-        "line": 2650,
+        "line": 2479,
         "token": "developer",
         "context": "- Updated README.md developer section with editable install instructions"
       },
       {
-        "line": 2651,
+        "line": 2480,
         "token": "docs/development/ai-agent-instructions.md",
         "context": "- Enhanced `docs/development/ai-agent-instructions.md` with proper setup commands"
       },
       {
-        "line": 2654,
+        "line": 2483,
         "token": "developer",
         "context": "- Enhanced `scripts/installation/install.py` with developer detection (checks for git repo)"
       },
       {
-        "line": 2655,
+        "line": 2484,
         "token": "prompt",
         "context": "- Interactive prompt guides developers to use `pip install -e .` for editable installs"
       },
       {
-        "line": 2656,
+        "line": 2485,
         "token": "workflow",
         "context": "- New CI/CD workflow `.github/workflows/dev-setup-validation.yml` with 5 comprehensive test jobs:"
       },
       {
-        "line": 2657,
+        "line": 2486,
         "token": "consistency",
         "context": "1. Version consistency validation"
       },
       {
-        "line": 2658,
+        "line": 2487,
         "token": "hook",
         "context": "2. Pre-commit hook functionality"
       },
       {
-        "line": 2659,
+        "line": 2488,
         "token": "startup",
         "context": "3. Server startup warnings"
       },
       {
-        "line": 2660,
+        "line": 2489,
         "token": "developer",
         "context": "4. Interactive developer prompts"
       },
       {
-        "line": 2661,
+        "line": 2490,
         "token": "accuracy",
         "context": "5. Documentation accuracy checks"
       },
       {
-        "line": 2664,
+        "line": 2493,
         "token": "now",
         "context": "- **Developer Workflow**: Developers now automatically guided to use `pip install -e .` for proper setup"
       },
       {
-        "line": 2665,
+        "line": 2494,
         "token": "validates",
         "context": "- **Pre-commit Hook**: Now validates venv consistency before allowing commits"
       },
       {
-        "line": 2666,
+        "line": 2495,
         "token": "developer",
         "context": "- **Installation Process**: Detects developer mode and provides targeted guidance"
       },
       {
-        "line": 2670,
+        "line": 2499,
         "token": "hook",
         "context": "1. **Development**: Pre-commit hook blocks bad commits, detection script validates setup"
       },
       {
-        "line": 2671,
+        "line": 2500,
         "token": "startup",
         "context": "2. **Runtime**: Server startup warnings catch edge cases"
       },
       {
-        "line": 2672,
+        "line": 2501,
         "token": "ai-agent-instructions.md",
         "context": "3. **Documentation**: CLAUDE.md, README.md, ai-agent-instructions.md all updated"
       },
       {
-        "line": 2673,
+        "line": 2502,
         "token": "hook",
         "context": "4. **Automation**: check_dev_setup.py, pre-commit hook, CI/CD workflow"
       },
       {
-        "line": 2674,
+        "line": 2503,
         "token": "prompts",
         "context": "5. **Interactive**: install.py prompts developers for editable install"
       },
       {
-        "line": 2675,
+        "line": 2504,
         "token": "workflow",
         "context": "6. **Testing**: CI/CD workflow with 5 comprehensive test jobs"
       },
       {
-        "line": 2678,
+        "line": 2507,
         "token": "automated",
         "context": "- `scripts/validation/check_dev_setup.py` - NEW automated detection script"
       },
       {
-        "line": 2679,
+        "line": 2508,
         "token": "venv",
         "context": "- `scripts/hooks/pre-commit` - Enhanced with venv validation"
       },
       {
-        "line": 2680,
+        "line": 2509,
         "token": "development",
         "context": "- `CLAUDE.md` - Added development setup guidance"
       },
       {
-        "line": 2681,
+        "line": 2510,
         "token": "runtime",
         "context": "- `src/mcp_memory_service/server.py` - Added runtime version check"
       },
       {
-        "line": 2682,
+        "line": 2511,
         "token": "developer",
         "context": "- `README.md` - Updated developer section"
       },
       {
-        "line": 2683,
+        "line": 2512,
         "token": "docs/development/ai-agent-instructions.md",
         "context": "- `docs/development/ai-agent-instructions.md` - Updated setup commands"
       },
       {
-        "line": 2684,
+        "line": 2513,
         "token": "developer",
         "context": "- `scripts/installation/install.py` - Added developer detection"
       },
       {
-        "line": 2685,
+        "line": 2514,
         "token": "validation",
         "context": "- `.github/workflows/dev-setup-validation.yml` - NEW CI/CD validation"
       },
       {
-        "line": 2688,
+        "line": 2517,
         "token": "pip",
         "context": "- **For Developers**: Run `pip install -e .` to install in editable mode (will be prompted by install.py)"
       },
       {
-        "line": 2689,
+        "line": 2518,
         "token": "action",
         "context": "- **For Users**: No action required - prevention system is transparent for production use"
       },
       {
-        "line": 2690,
+        "line": 2519,
         "token": "installed",
         "context": "- **Pre-commit Hook**: Automatically installed during `install.py`, validates on every commit"
       },
       {
-        "line": 2693,
+        "line": 2522,
         "token": "fb74",
         "context": "- `670fb74` - Phase 1: Automated detection (check_dev_setup.py, pre-commit hook, CLAUDE.md)"
       },
       {
-        "line": 2694,
+        "line": 2523,
         "token": "warnings",
         "context": "- `9537259` - Phase 2: Runtime warnings (server.py) + developer documentation"
       },
       {
-        "line": 2695,
+        "line": 2524,
         "token": "onboarding",
         "context": "- `a17bcc7` - Phase 3: Interactive onboarding (install.py) + CI/CD validation"
       }
@@ -30845,7 +29800,11 @@
     "structure_diff": {
       "heading": [
         189,
-        318
+        315
+      ],
+      "codeblock": [
+        6,
+        2
       ],
       "tables": [
         6,
