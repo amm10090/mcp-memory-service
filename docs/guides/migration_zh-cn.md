@@ -353,7 +353,7 @@ If you continue to experience issues:
 | Dependencies | chromadb, sqlite | sqlite-vec only |
 | Scalability | Better for >10k memories | Optimal for <10k memories |
 
-## Rollback Plan
+## 回滚 Plan
 
 If you need to switch back to ChromaDB:
 
