@@ -1,5 +1,7 @@
 # Multi-Client Setup Guide
 
+[English](multi-client.md) | [简体中文](multi-client_zh-cn.md)
+
 This comprehensive guide covers setting up MCP Memory Service for multiple clients, enabling shared memory access across different applications and devices.
 
 ## Overview

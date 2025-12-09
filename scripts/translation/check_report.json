@@ -53164,70 +53164,185 @@
     "chinese": "docs/guides/mcp-enhancements_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 58,
-        "token": "memory",
-        "context": "示例：`memory://recent/10` 返回最近 10 条记忆。"
+        "line": 15,
+        "token": "now",
+        "context": "The MCP Memory Service now exposes memory collections through URI-based resources, allowing clients to access structured data directly."
       },
       {
-        "line": 67,
-        "token": "memory",
-        "context": "示例：`memory://tag/learning` 返回所有带有 “learning” 标签的记忆。"
+        "line": 25,
+        "token": "response",
+        "context": "Example response:"
       },
       {
-        "line": 76,
+        "line": 42,
+        "token": "response",
+        "context": "Example response:"
+      },
+      {
+        "line": 57,
         "token": "memory",
-        "context": "示例：`memory://search/python%20programming` 搜索与 Python 编程相关的记忆。"
+        "context": "Example: `memory://recent/10` returns the 10 most recent memories."
+      },
+      {
+        "line": 66,
+        "token": "memory",
+        "context": "Example: `memory://tag/learning` returns all memories tagged with \"learning\"."
+      },
+      {
+        "line": 75,
+        "token": "memory",
+        "context": "Example: `memory://search/python%20programming` searches for memories about Python programming."
+      },
+      {
+        "line": 79,
+        "token": "service",
+        "context": "The service provides templates for dynamic resource access:"
+      },
+      {
+        "line": 103,
+        "token": "workflows",
+        "context": "Interactive workflows guide users through common memory operations with structured inputs and outputs."
+      },
+      {
+        "line": 108,
+        "token": "organize",
+        "context": "Review and organize memories from a specific time period."
+      },
+      {
+        "line": 111,
+        "token": "required",
+        "context": "- `time_period` (required): Time period to review (e.g., \"last week\", \"yesterday\")"
       },
       {
         "line": 112,
-        "token": "last",
-        "context": "- `time_period`（必填）：时间范围，如 “last week”“yesterday”。"
+        "token": "optional",
+        "context": "- `focus_area` (optional): Area to focus on (e.g., \"work\", \"personal\")"
       },
       {
-        "line": 113,
-        "token": "work",
-        "context": "- `focus_area`（选填）：关注领域，如 “work”“personal”。"
+        "line": 126,
+        "token": "patterns",
+        "context": "Analyze patterns and themes in stored memories."
+      },
+      {
+        "line": 129,
+        "token": "tags",
+        "context": "- `tags` (optional): Comma-separated tags to analyze"
       },
       {
         "line": 130,
-        "token": "tags",
-        "context": "- `tags`（选填）：逗号分隔的标签列表。"
+        "token": "optional",
+        "context": "- `time_range` (optional): Time range for analysis (e.g., \"last month\")"
       },
       {
-        "line": 131,
-        "token": "last",
-        "context": "- `time_range`（选填）：分析的时间范围，如 “last month”。"
+        "line": 144,
+        "token": "memories",
+        "context": "Export memories in various formats."
+      },
+      {
+        "line": 147,
+        "token": "format",
+        "context": "- `format` (required): Export format (\"json\", \"markdown\", \"text\")"
       },
       {
         "line": 148,
-        "token": "format",
-        "context": "- `format`（必填）：导出格式（`json`、`markdown`、`text`）。"
+        "token": "filter",
+        "context": "- `filter` (optional): Filter criteria (tags or search query)"
       },
       {
-        "line": 149,
-        "token": "filter",
-        "context": "- `filter`（选填）：过滤条件（标签或搜索语句）。"
+        "line": 162,
+        "token": "remove",
+        "context": "Identify and remove duplicate or outdated memories."
+      },
+      {
+        "line": 165,
+        "token": "optional",
+        "context": "- `older_than` (optional): Remove memories older than specified period"
+      },
+      {
+        "line": 166,
+        "token": "optional",
+        "context": "- `similarity_threshold` (optional): Threshold for duplicate detection (0.0-1.0)"
+      },
+      {
+        "line": 180,
+        "token": "structured",
+        "context": "Store structured learning notes with automatic categorization."
+      },
+      {
+        "line": 183,
+        "token": "topic",
+        "context": "- `topic` (required): Learning topic or subject"
       },
       {
         "line": 184,
-        "token": "topic",
-        "context": "- `topic`（必填）：学习主题。"
+        "token": "required",
+        "context": "- `key_points` (required): Comma-separated key points learned"
       },
       {
-        "line": 186,
+        "line": 185,
         "token": "questions",
-        "context": "- `questions`（选填）：后续要研究的问题。"
+        "context": "- `questions` (optional): Questions for further study"
       },
       {
-        "line": 290,
+        "line": 201,
+        "token": "operations",
+        "context": "Long-running operations now provide real-time progress updates through the MCP notification system."
+      },
+      {
+        "line": 206,
+        "token": "progress",
+        "context": "Provides step-by-step progress when deleting memories by tags:"
+      },
+      {
+        "line": 218,
+        "token": "operation",
+        "context": "Each long-running operation receives a unique ID for tracking:"
+      },
+      {
+        "line": 226,
+        "token": "notifications",
+        "context": "Progress notifications follow the MCP protocol:"
+      },
+      {
+        "line": 277,
+        "token": "resources",
+        "context": "1. **Resources**: Use resources for read-only access to memory data"
+      },
+      {
+        "line": 278,
+        "token": "prompts",
+        "context": "2. **Prompts**: Use prompts for interactive, guided workflows"
+      },
+      {
+        "line": 279,
+        "token": "operation",
+        "context": "3. **Progress Tracking**: Monitor operation IDs for long-running tasks"
+      },
+      {
+        "line": 280,
+        "token": "operations",
+        "context": "4. **Error Handling**: All operations return structured error messages"
+      },
+      {
+        "line": 281,
+        "token": "optimized",
+        "context": "5. **Performance**: Resources are optimized for quick access"
+      },
+      {
+        "line": 285,
+        "token": "enhancements",
+        "context": "These enhancements maintain full backward compatibility with existing MCP clients while providing richer functionality for clients that support the extended fea"
+      },
+      {
+        "line": 289,
         "token": "https",
         "context": "- [MCP Specification](https://modelcontextprotocol.info/specification/2024-11-05/)"
       },
       {
-        "line": 292,
+        "line": 291,
         "token": "claude-code-integration.md",
         "context": "- [Claude Code Integration Guide](./claude-code-integration.md)"
       }
@@ -54077,201 +54192,805 @@
     "chinese": "docs/integration/homebrew_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 8,
-        "token": "import",
-        "context": "- **子进程隔离**：防止 import 冲突；"
+        "line": 9,
+        "token": "integration",
+        "context": "The Homebrew PyTorch integration allows MCP Memory Service to use system-installed PyTorch via Homebrew, avoiding package conflicts and reducing installation co"
       },
       {
-        "line": 33,
-        "token": "brew",
-        "context": "1. **验证 Homebrew PyTorch**：`brew list | grep pytorch`；`python -c \"import torch; print(torch.__version__)\"`；"
+        "line": 13,
+        "token": "vector",
+        "context": "- **SQLite-vec**: Lightweight vector database backend"
       },
       {
-        "line": 34,
-        "token": "venv",
-        "context": "2. **安装服务**：创建 venv → `python install.py --use-homebrew-pytorch --skip-pytorch`；"
+        "line": 14,
+        "token": "inference",
+        "context": "- **ONNX Runtime**: CPU-optimized inference engine"
       },
       {
-        "line": 42,
-        "token": "python",
-        "context": "4. **测试**：`python scripts/verify_environment.py`、`python scripts/homebrew/homebrew_server.py --test`。"
+        "line": 15,
+        "token": "isolation",
+        "context": "- **Subprocess Isolation**: Process isolation to avoid import conflicts"
       },
       {
-        "line": 47,
-        "token": "handler",
-        "context": "- MCP handler 包装器确保协议输出；"
+        "line": 16,
+        "token": "between",
+        "context": "- **Custom Integration Layer**: Bridge between MCP protocol and Homebrew environment"
       },
       {
-        "line": 64,
-        "token": "venv",
-        "context": "- 导入冲突 → 重新创建 venv；"
+        "line": 22,
+        "token": "installed",
+        "context": "- Homebrew installed"
       },
       {
-        "line": 67,
-        "token": "echo",
-        "context": "- MCP 协议异常 → `echo '{\"jsonrpc\":...}' | python scripts/homebrew/homebrew_server.py --stdin`。"
+        "line": 24,
+        "token": "via",
+        "context": "- PyTorch via Homebrew: `brew install pytorch`"
+      },
+      {
+        "line": 48,
+        "token": "your",
+        "context": "Add to your Claude Desktop config:"
+      },
+      {
+        "line": 117,
+        "token": "integration",
+        "context": "The integration uses a subprocess-based architecture to isolate the Homebrew PyTorch environment from the MCP server process:"
+      },
+      {
+        "line": 129,
+        "token": "integration",
+        "context": "The integration implements several technical patterns for compatibility:"
+      },
+      {
+        "line": 183,
+        "token": "system",
+        "context": "The system automatically detects Homebrew PyTorch availability:"
+      },
+      {
+        "line": 252,
+        "token": "version",
+        "context": "**Symptom**: `ImportError` or version conflicts"
+      },
+      {
+        "line": 253,
+        "token": "virtual",
+        "context": "**Solution**: Ensure virtual environment isolation:"
+      },
+      {
+        "line": 268,
+        "token": "generation",
+        "context": "**Symptom**: Embedding generation timeouts or empty results"
+      },
+      {
+        "line": 269,
+        "token": "subprocess",
+        "context": "**Solution**: Test subprocess execution manually:"
+      },
+      {
+        "line": 286,
+        "token": "creation",
+        "context": "**Symptom**: Database creation or access errors"
+      },
+      {
+        "line": 287,
+        "token": "installation",
+        "context": "**Solution**: Check SQLite-vec installation and permissions:"
+      },
+      {
+        "line": 300,
+        "token": "connection",
+        "context": "**Symptom**: Claude Desktop connection failures"
+      },
+      {
+        "line": 301,
+        "token": "protocol",
+        "context": "**Solution**: Verify protocol compliance:"
+      },
+      {
+        "line": 313,
+        "token": "false",
+        "context": "| `MCP_MEMORY_USE_HOMEBREW_PYTORCH` | `false` | Enable Homebrew PyTorch integration |"
+      },
+      {
+        "line": 314,
+        "token": "auto",
+        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | `auto` | Force SQLite-vec backend |"
+      },
+      {
+        "line": 315,
+        "token": "false",
+        "context": "| `MCP_MEMORY_USE_ONNX` | `false` | Use ONNX runtime for inference |"
+      },
+      {
+        "line": 316,
+        "token": "database",
+        "context": "| `MCP_MEMORY_SQLITE_PATH` | `~/.mcp_memory_sqlite/memory.db` | SQLite-vec database file path |"
+      },
+      {
+        "line": 317,
+        "token": "path",
+        "context": "| `MCP_MEMORY_HOMEBREW_PYTHON_PATH` | `auto-detect` | Override Homebrew Python path |"
+      },
+      {
+        "line": 318,
+        "token": "false",
+        "context": "| `MCP_MEMORY_DEBUG` | `false` | Enable debug logging |"
+      },
+      {
+        "line": 324,
+        "token": "integration",
+        "context": "The Homebrew integration is optimized for systems with limited memory:"
+      },
+      {
+        "line": 326,
+        "token": "isolation",
+        "context": "- **Subprocess isolation**: Prevents memory leaks in the main process"
+      },
+      {
+        "line": 327,
+        "token": "loading",
+        "context": "- **On-demand loading**: Models loaded only when needed"
+      },
+      {
+        "line": 328,
+        "token": "efficiency",
+        "context": "- **SQLite-vec efficiency**: Minimal memory footprint for vector storage"
+      },
+      {
+        "line": 332,
+        "token": "runtime",
+        "context": "- **ONNX runtime**: CPU-optimized inference"
+      },
+      {
+        "line": 333,
+        "token": "processing",
+        "context": "- **Batch processing**: Efficient handling of multiple embeddings"
+      },
+      {
+        "line": 334,
+        "token": "redundant",
+        "context": "- **Caching**: Avoid redundant model loading"
+      },
+      {
+        "line": 347,
+        "token": "shared",
+        "context": "For shared access across multiple MCP clients:"
+      },
+      {
+        "line": 371,
+        "token": "extending",
+        "context": "When extending the Homebrew integration:"
+      },
+      {
+        "line": 373,
+        "token": "subprocess",
+        "context": "1. Follow the subprocess isolation pattern"
+      },
+      {
+        "line": 374,
+        "token": "protocol",
+        "context": "2. Maintain MCP protocol compliance"
+      },
+      {
+        "line": 375,
+        "token": "comprehensive",
+        "context": "3. Add comprehensive error handling"
+      },
+      {
+        "line": 376,
+        "token": "environment",
+        "context": "4. Update environment variable documentation"
+      },
+      {
+        "line": 377,
+        "token": "diagnostic",
+        "context": "5. Include diagnostic commands for troubleshooting"
+      },
+      {
+        "line": 381,
+        "token": "installation/master-guide.md",
+        "context": "- [Installation Guide](../installation/master-guide.md) - General installation instructions"
+      },
+      {
+        "line": 382,
+        "token": "configuration",
+        "context": "- [Storage Backends](../guides/STORAGE_BACKENDS.md) - SQLite-vec configuration"
+      },
+      {
+        "line": 383,
+        "token": "troubleshooting/general.md",
+        "context": "- [Troubleshooting](../troubleshooting/general.md) - General troubleshooting guide"
+      },
+      {
+        "line": 384,
+        "token": "platforms/macos-intel.md",
+        "context": "- [macOS Intel Setup](../platforms/macos-intel.md) - Platform-specific considerations"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        72,
-        10
-      ],
-      "codeblock": [
-        44,
-        14
-      ],
-      "tables": [
-        12,
-        11
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/integration/multi-client.md",
     "chinese": "docs/integration/multi-client_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
         "line": 9,
+        "token": "supports",
+        "context": "MCP Memory Service supports multi-client access through several deployment patterns:"
+      },
+      {
+        "line": 11,
+        "token": "during",
+        "context": "1. **🌟 Integrated Setup** (Easiest - during installation)"
+      },
+      {
+        "line": 12,
+        "token": "networks",
+        "context": "2. **📁 Shared File Access** (Local networks with shared storage)"
+      },
+      {
+        "line": 13,
         "token": "HTTP/SSE",
-        "context": "3. 🌐 **集中式 HTTP/SSE 服务器**（团队/云端场景）。"
+        "context": "3. **🌐 Centralized HTTP/SSE Server** (Distributed teams and cloud deployment)"
+      },
+      {
+        "line": 19,
+        "token": "easiest",
+        "context": "The easiest way to configure multi-client access is during the initial installation:"
+      },
+      {
+        "line": 30,
+        "token": "integrated",
+        "context": "**Benefits of integrated setup:**"
+      },
+      {
+        "line": 31,
+        "token": "detection",
+        "context": "- ✅ Automatic detection of Claude Desktop, VS Code, Continue, Cursor, and other MCP clients"
+      },
+      {
+        "line": 32,
+        "token": "compatibility",
+        "context": "- ✅ Universal compatibility beyond just Claude applications"
+      },
+      {
+        "line": 33,
+        "token": "manual",
+        "context": "- ✅ Zero manual configuration required"
       },
       {
         "line": 34,
-        "token": "python",
-        "context": "1. 运行脚本：`python setup_multi_client_complete.py`"
+        "token": "setup",
+        "context": "- ✅ Future-proof setup for any MCP application"
       },
       {
-        "line": 35,
-        "token": "export",
-        "context": "2. 设置共享路径：`export MCP_MEMORY_SQLITE_PATH=\"/shared/mcp/memory.db\"`"
+        "line": 51,
+        "token": "integrated",
+        "context": "The integrated setup automatically detects and configures:"
       },
       {
-        "line": 59,
-        "token": "HTTP/SSE",
-        "context": "## 🌐 集中式 HTTP/SSE 服务器"
+        "line": 54,
+        "token": "settings",
+        "context": "- **Claude Desktop**: Updates `claude_desktop_config.json` with multi-client settings"
       },
       {
-        "line": 63,
-        "token": "HTTPS",
-        "context": "- API Key + HTTPS；"
+        "line": 55,
+        "token": "configuration",
+        "context": "- **Continue IDE**: Modifies Continue configuration files"
       },
       {
-        "line": 79,
-        "token": "HTTP",
-        "context": "- **Streamable HTTP**（优先）："
+        "line": 56,
+        "token": "settings",
+        "context": "- **VS Code MCP Extension**: Updates VS Code MCP settings"
+      },
+      {
+        "line": 57,
+        "token": "integration",
+        "context": "- **Cursor**: Configures Cursor MCP integration"
+      },
+      {
+        "line": 58,
+        "token": "similar",
+        "context": "- **Generic MCP Clients**: Updates `.mcp.json` and similar configuration files"
+      },
+      {
+        "line": 61,
+        "token": "implementations",
+        "context": "- **Custom MCP implementations**: May require manual configuration file updates"
+      },
+      {
+        "line": 62,
+        "token": "clients",
+        "context": "- **Enterprise MCP clients**: Check with your IT department for configuration requirements"
+      },
+      {
+        "line": 68,
+        "token": "local",
+        "context": "For local networks with shared storage, multiple clients can access the same SQLite database using Write-Ahead Logging (WAL) mode."
+      },
+      {
+        "line": 72,
+        "token": "setup",
+        "context": "1. **Run the setup script:**"
+      },
+      {
+        "line": 77,
+        "token": "shared",
+        "context": "2. **Configure shared database location:**"
+      },
+      {
+        "line": 85,
+        "token": "each",
+        "context": "3. **Update each client configuration** to point to the shared location."
+      },
+      {
+        "line": 89,
+        "token": "shared",
+        "context": "The shared file access uses SQLite's WAL (Write-Ahead Logging) mode for concurrent access:"
       },
       {
         "line": 91,
-        "token": "stdio",
-        "context": "- **mcp-proxy 桥接**（适用于仅支持 stdio 的客户端）："
+        "token": "multiple",
+        "context": "- **WAL Mode**: Enables multiple readers and one writer simultaneously"
       },
       {
-        "line": 137,
-        "token": "false",
-        "context": "| `MCP_HTTP_ENABLED` | `false` | 启用 HTTP 模式 |"
+        "line": 92,
+        "token": "concurrent",
+        "context": "- **File Locking**: Handles concurrent access safely"
       },
       {
-        "line": 138,
-        "token": "PORT",
-        "context": "| `MCP_HTTP_HOST` / `PORT` | `0.0.0.0` / `8001` | 监听地址/端口 |"
+        "line": 93,
+        "token": "handles",
+        "context": "- **Automatic Recovery**: SQLite handles crash recovery automatically"
       },
       {
-        "line": 139,
-        "token": "HTTP",
-        "context": "| `MCP_API_KEY` | 无 | HTTP 认证（Bearer） |"
+        "line": 97,
+        "token": "each",
+        "context": "For Claude Desktop on each client machine:"
       },
       {
-        "line": 140,
-        "token": "chroma",
-        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | `sqlite_vec` | 也可选 `chroma` / `cloudflare` |"
+        "line": 116,
+        "token": "configured",
+        "context": "- **NFS/SMB Share**: Properly configured network file system"
       },
       {
-        "line": 143,
-        "token": "true",
-        "context": "| `MCP_MDNS_ENABLED` | `true` | mDNS 广播/发现 |"
+        "line": 117,
+        "token": "access",
+        "context": "- **File Permissions**: Read/write access for all client users"
       },
       {
-        "line": 152,
-        "token": "HTTP",
-        "context": "HTTP Server 可通过 `MCP_HTTP_WORKERS`、`MCP_HTTP_TIMEOUT` 等调整。"
+        "line": 118,
+        "token": "network",
+        "context": "- **Network Reliability**: Stable network connection to prevent corruption"
+      },
+      {
+        "line": 120,
+        "token": "HTTP/SSE",
+        "context": "## 🌐 Centralized HTTP/SSE Server (Cloud Deployment)"
+      },
+      {
+        "line": 124,
+        "token": "handling",
+        "context": "- ✅ **True Concurrency**: Proper handling of multiple simultaneous clients"
+      },
+      {
+        "line": 125,
+        "token": "push",
+        "context": "- ✅ **Real-time Updates**: Server-Sent Events (SSE) push changes to all clients instantly"
+      },
+      {
+        "line": 126,
+        "token": "any",
+        "context": "- ✅ **Cross-platform**: Works from any device with HTTP access"
+      },
+      {
+        "line": 127,
+        "token": "key",
+        "context": "- ✅ **Secure**: Optional API key authentication"
+      },
+      {
+        "line": 128,
+        "token": "handle",
+        "context": "- ✅ **Scalable**: Can handle many concurrent clients"
+      },
+      {
+        "line": 129,
+        "token": "file",
+        "context": "- ✅ **Cloud-friendly**: No file locking issues"
       },
       {
         "line": 157,
-        "token": "database",
-        "context": "- **database is locked**：提升 busy_timeout，确保 WAL 生效、文件权限正确；"
+        "token": "your",
+        "context": "1. **Install on your server machine:**"
       },
       {
-        "line": 158,
-        "token": "curl",
-        "context": "- **无法连通**：`curl http://server:8001/api/health`、检查防火墙；"
-      },
-      {
-        "line": 159,
-        "token": "env/path",
-        "context": "- **配置不一致**：各客户端确认相同 env/path。"
+        "line": 164,
+        "token": "HTTP",
+        "context": "2. **Configure HTTP server:**"
       },
       {
         "line": 171,
-        "token": "python",
-        "context": "1. 备份：`python scripts/backup_memories.py`；"
+        "token": "HTTP",
+        "context": "3. **Start the HTTP server:**"
       },
       {
-        "line": 172,
-        "token": "python",
-        "context": "2. `python install.py --setup-multi-client --migrate-existing`；"
+        "line": 176,
+        "token": "HTTP",
+        "context": "### Client Configuration (HTTP Mode)"
       },
       {
-        "line": 173,
-        "token": "python",
-        "context": "3. 或使用 `python scripts/migrate_to_multi_client.py --source ... --target ...`。"
+        "line": 178,
+        "token": "two",
+        "context": "There are two reliable ways for clients to connect to the centralized server:"
       },
       {
-        "line": 175,
-        "token": "HTTP/SSE",
-        "context": "相关文档：安装指南、Docker 部署、排障、HTTP/SSE 设计。"
+        "line": 180,
+        "token": "HTTP",
+        "context": "- Direct Streamable HTTP (for clients that natively support MCP Streamable HTTP)"
       },
       {
         "line": 181,
-        "token": "stdio",
-        "context": "- **Cursor**：本地 stdio / mcp-proxy / Streamable HTTP；"
-      },
-      {
-        "line": 182,
-        "token": "HTTP",
-        "context": "- **Qwen/Gemini**：若原生支持 HTTP 直接配置，否则使用 `mcp-proxy`；"
+        "token": "clients",
+        "context": "- Via mcp-proxy (for stdio-only clients like Codex)"
       },
       {
         "line": 183,
         "token": "HTTP",
-        "context": "- 所有客户端确保 `Authorization: Bearer <MCP_API_KEY>`，如不支持 HTTP 则使用 `mcp-proxy`。"
+        "context": "Option A — Direct Streamable HTTP (preferred when supported):"
       },
       {
-        "line": 185,
-        "token": "mcp",
-        "context": "排障要点：确认使用 `/mcp`（Streamable HTTP），非 `/api/events`；服务器已设置 `MCP_API_KEY`；`curl` 验证健康；必要时使用 `mcp-proxy`。"
+        "line": 199,
+        "token": "bridge",
+        "context": "Option B — mcp-proxy bridge (works with any stdio-only client):"
+      },
+      {
+        "line": 242,
+        "token": "containerized",
+        "context": "For containerized deployment:"
+      },
+      {
+        "line": 269,
+        "token": "HTTP",
+        "context": "Note: For the HTTP server interface, use `MCP_HTTP_HOST`, `MCP_HTTP_PORT`, and `MCP_API_KEY`. These supersede older `MCP_MEMORY_HTTP_*` names in legacy docs. Cl"
+      },
+      {
+        "line": 273,
+        "token": "set",
+        "context": "- mcp-proxy: set `API_ACCESS_TOKEN` to pass the bearer token automatically."
+      },
+      {
+        "line": 274,
+        "token": "set",
+        "context": "- Memory MCP Bridge (`docker-compose/mcp-gateway/scripts/memory-mcp-bridge.js`): set `MCP_MEMORY_API_KEY` and optionally `MCP_MEMORY_HTTP_ENDPOINT`, `MCP_MEMORY"
+      },
+      {
+        "line": 275,
+        "token": "HTTP",
+        "context": "- Direct Streamable HTTP clients: provide `Authorization: Bearer <MCP_API_KEY>` via headers (no special env var required)."
+      },
+      {
+        "line": 281,
+        "token": "false",
+        "context": "| `MCP_HTTP_ENABLED` | `false` | Enable HTTP mode (FastAPI + Streamable HTTP) |"
+      },
+      {
+        "line": 282,
+        "token": "HTTP",
+        "context": "| `MCP_HTTP_HOST` | `0.0.0.0` | HTTP server bind address |"
+      },
+      {
+        "line": 283,
+        "token": "HTTP",
+        "context": "| `MCP_HTTP_PORT` | `8000` | HTTP server port |"
+      },
+      {
+        "line": 284,
+        "token": "none",
+        "context": "| `MCP_API_KEY` | `none` | API key for auth (sent as `Authorization: Bearer ...`) |"
+      },
+      {
+        "line": 285,
+        "token": "false",
+        "context": "| `MCP_HTTPS_ENABLED` | `false` | Enable HTTPS termination |"
+      },
+      {
+        "line": 286,
+        "token": "none",
+        "context": "| `MCP_SSL_CERT_FILE` | `none` | Path to TLS certificate |"
+      },
+      {
+        "line": 287,
+        "token": "none",
+        "context": "| `MCP_SSL_KEY_FILE` | `none` | Path to TLS private key |"
+      },
+      {
+        "line": 288,
+        "token": "CSV",
+        "context": "| `MCP_CORS_ORIGINS` | `*` | CSV list of allowed origins |"
+      },
+      {
+        "line": 289,
+        "token": "heartbeat",
+        "context": "| `MCP_SSE_HEARTBEAT` | `30` | SSE heartbeat interval (seconds) |"
+      },
+      {
+        "line": 290,
+        "token": "chroma",
+        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | `sqlite_vec` | `sqlite_vec`, `chroma`, or `cloudflare` |"
+      },
+      {
+        "line": 291,
+        "token": "base",
+        "context": "| `MCP_MEMORY_SQLITE_PATH` | `<base>/sqlite_vec.db` | SQLite-vec database file path |"
+      },
+      {
+        "line": 292,
+        "token": "none",
+        "context": "| `MCP_MEMORY_SQLITEVEC_PATH` | `none` | Alternate var for SQLite path (if set, used) |"
+      },
+      {
+        "line": 293,
+        "token": "none",
+        "context": "| `MCP_MEMORY_SQLITE_PRAGMAS` | `none` | Override SQLite pragmas (e.g. `busy_timeout=15000,cache_size=20000`) |"
+      },
+      {
+        "line": 294,
+        "token": "true",
+        "context": "| `MCP_MDNS_ENABLED` | `true` | Enable mDNS advertising/discovery |"
+      },
+      {
+        "line": 295,
+        "token": "service",
+        "context": "| `MCP_MDNS_SERVICE_NAME` | `MCP Memory Service` | mDNS service name |"
+      },
+      {
+        "line": 296,
+        "token": "service",
+        "context": "| `MCP_MDNS_SERVICE_TYPE` | `_mcp-memory._tcp.local.` | mDNS service type |"
+      },
+      {
+        "line": 297,
+        "token": "discovery",
+        "context": "| `MCP_MDNS_DISCOVERY_TIMEOUT` | `5` | mDNS discovery timeout (seconds) |"
+      },
+      {
+        "line": 299,
+        "token": "replaced",
+        "context": "Deprecated (replaced):"
+      },
+      {
+        "line": 302,
+        "token": "server",
+        "context": "- `MCP_MEMORY_API_KEY` → `MCP_API_KEY` (server HTTP mode). Note: the standalone Memory MCP Bridge continues to use `MCP_MEMORY_API_KEY`."
+      },
+      {
+        "line": 303,
+        "token": "not",
+        "context": "- `MCP_MEMORY_ENABLE_WAL`: not needed; WAL is enabled by default. Use `MCP_MEMORY_SQLITE_PRAGMAS` to change."
+      },
+      {
+        "line": 304,
+        "token": "not",
+        "context": "- `MCP_MEMORY_ENABLE_SSE`: not required; SSE events are enabled with the HTTP server."
+      },
+      {
+        "line": 305,
+        "token": "not",
+        "context": "- `MCP_MEMORY_MULTI_CLIENT`, `MCP_MEMORY_MAX_CLIENTS`: not used."
+      },
+      {
+        "line": 320,
+        "token": "HTTP",
+        "context": "#### HTTP Server Tuning"
+      },
+      {
+        "line": 335,
+        "token": "database",
+        "context": "**Symptom**: `database is locked` errors during concurrent HTTP + MCP server access"
+      },
+      {
+        "line": 337,
+        "token": "proper",
+        "context": "**Solution (v8.9.0+)**: Configure proper SQLite pragmas for concurrent access:"
+      },
+      {
+        "line": 347,
+        "token": "seconds",
+        "context": "**Root Cause**: Default `busy_timeout=5000ms` (5 seconds) is too short when both HTTP server and MCP server access the same SQLite database. The fix increases t"
+      },
+      {
+        "line": 349,
+        "token": "checks",
+        "context": "**Additional checks** (if issue persists):"
+      },
+      {
+        "line": 363,
+        "token": "can",
+        "context": "**Symptom**: Clients can't connect to HTTP server"
+      },
+      {
+        "line": 364,
+        "token": "firewall",
+        "context": "**Solution**: Check firewall and network connectivity:"
+      },
+      {
+        "line": 376,
+        "token": "use",
+        "context": "**Symptom**: Clients use different configurations"
+      },
+      {
+        "line": 377,
+        "token": "all",
+        "context": "**Solution**: Verify all clients use the same settings:"
+      },
+      {
+        "line": 419,
+        "token": "existing",
+        "context": "1. **Backup existing data:**"
+      },
+      {
+        "line": 424,
+        "token": "setup",
+        "context": "2. **Run multi-client setup:**"
+      },
+      {
+        "line": 429,
+        "token": "client",
+        "context": "3. **Update client configurations** as needed."
+      },
+      {
+        "line": 433,
+        "token": "installer",
+        "context": "The installer automatically handles data migration, but you can also run it manually:"
+      },
+      {
+        "line": 444,
+        "token": "installation/master-guide.md",
+        "context": "- [Installation Guide](../installation/master-guide.md) - General installation instructions"
+      },
+      {
+        "line": 445,
+        "token": "deployment/docker.md",
+        "context": "- [Deployment Guide](../deployment/docker.md) - Docker and cloud deployment"
+      },
+      {
+        "line": 446,
+        "token": "troubleshooting/general.md",
+        "context": "- [Troubleshooting](../troubleshooting/general.md) - Multi-client specific issues"
+      },
+      {
+        "line": 447,
+        "token": "HTTP/SSE",
+        "context": "- [API Reference](../IMPLEMENTATION_PLAN_HTTP_SSE.md) - HTTP/SSE API documentation"
+      },
+      {
+        "line": 451,
+        "token": "section",
+        "context": "This section provides practical, copy-pasteable setups for popular MCP clients. Use Streamable HTTP at `http://<host>:8000/mcp` when supported, or bridge via `m"
+      },
+      {
+        "line": 454,
+        "token": "key",
+        "context": "- Server API key: set `MCP_API_KEY` on the server. Clients must send `Authorization: Bearer <MCP_API_KEY>`."
+      },
+      {
+        "line": 455,
+        "token": "endpoint",
+        "context": "- Our MCP endpoint is Streamable HTTP at `/mcp` (not the SSE events feed at `/api/events`)."
+      },
+      {
+        "line": 457,
+        "token": "via",
+        "context": "### Codex (via mcp-proxy)"
+      },
+      {
+        "line": 459,
+        "token": "does",
+        "context": "Codex does not natively support HTTP transport. Use `mcp-proxy` to bridge stdio ⇄ Streamable HTTP."
+      },
+      {
+        "line": 466,
+        "token": "config",
+        "context": "2) Update Codex MCP config (see Codex docs for exact file location):"
+      },
+      {
+        "line": 484,
+        "token": "template",
+        "context": "Reference template: `examples/codex-mcp-config.json` in this repository."
+      },
+      {
+        "line": 487,
+        "token": "local",
+        "context": "- Replace `your-server` and `your-secure-api-key` accordingly. For local testing use `http://127.0.0.1:8000/mcp`."
+      },
+      {
+        "line": 488,
+        "token": "pass",
+        "context": "- Alternatively pass headers explicitly: `\"args\": [\"http://.../mcp\", \"--transport=streamablehttp\", \"--headers\", \"Authorization\", \"Bearer your-secure-api-key\"]`."
+      },
+      {
+        "line": 492,
+        "token": "one",
+        "context": "Pick one of these depending on your deployment:"
+      },
+      {
+        "line": 494,
+        "token": "stdio",
+        "context": "- Option A — Local stdio (single machine):"
+      },
+      {
+        "line": 509,
+        "token": "central",
+        "context": "- Option B — Remote central server via mcp-proxy (recommended for multi-client):"
+      },
+      {
+        "line": 527,
+        "token": "HTTP",
+        "context": "- Option C — Direct Streamable HTTP (if your Cursor version supports it):"
+      },
+      {
+        "line": 542,
+        "token": "clients",
+        "context": "Qwen clients that support MCP can connect either directly via Streamable HTTP or through `mcp-proxy` when only stdio is available. If your Qwen client UI accept"
+      },
+      {
+        "line": 560,
+        "token": "distributions",
+        "context": "- Some Qwen distributions expose MCP configuration in a UI. Map fields as: transport = Streamable HTTP, URL = `http://<host>:8000/mcp`, header `Authorization: B"
+      },
+      {
+        "line": 564,
+        "token": "integrations",
+        "context": "Gemini-based IDE integrations (e.g., Gemini Code Assist in VS Code/JetBrains) typically support MCP via a config file or UI. Use either direct Streamable HTTP o"
+      },
+      {
+        "line": 566,
+        "token": "HTTP",
+        "context": "- Direct Streamable HTTP (when supported):"
+      },
+      {
+        "line": 579,
+        "token": "works",
+        "context": "- Via mcp-proxy (works everywhere):"
+      },
+      {
+        "line": 595,
+        "token": "your",
+        "context": "If your Gemini client expects a command-only entry, prefer the `mcp-proxy` form."
+      },
+      {
+        "line": 599,
+        "token": "client",
+        "context": "Troubleshooting client connections:"
+      },
+      {
+        "line": 600,
+        "token": "you",
+        "context": "- Ensure you’re using `/mcp` (Streamable HTTP), not `/api/events` (SSE)."
+      },
+      {
+        "line": 601,
+        "token": "server",
+        "context": "- Verify server exports `MCP_API_KEY` and clients send `Authorization: Bearer ...`."
+      },
+      {
+        "line": 602,
+        "token": "remote",
+        "context": "- For remote setups, test reachability: `curl -i http://your-server:8000/api/health`."
+      },
+      {
+        "line": 603,
+        "token": "client",
+        "context": "- If a client doesn’t support Streamable HTTP, use `mcp-proxy`."
       }
     ],
-    "structure_diff": {
-      "heading": [
-        80,
-        18
-      ],
-      "codeblock": [
-        68,
-        18
-      ],
-      "tables": [
-        23,
-        10
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/integrations/gemini.md",

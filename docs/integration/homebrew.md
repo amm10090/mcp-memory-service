@@ -1,5 +1,7 @@
 # Homebrew PyTorch Integration Guide
 
+[English](homebrew.md) | [简体中文](homebrew_zh-cn.md)
+
 This guide covers the integration of MCP Memory Service with Homebrew-installed PyTorch, providing a lightweight solution for systems with complex Python environments or limited resources.
 
 ## Overview

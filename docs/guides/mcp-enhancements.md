@@ -1,5 +1,7 @@
 # MCP Protocol Enhancements Guide
 
+[English](mcp-enhancements.md) | [简体中文](mcp-enhancements_zh-cn.md)
+
 This guide covers the enhanced MCP (Model Context Protocol) features introduced in v4.1.0, including Resources, Prompts, and Progress Tracking.
 
 ## Table of Contents
