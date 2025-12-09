@@ -108,7 +108,7 @@ Ensure these packages are installed in the virtual environment:
 - `sqlite-vec` - Vector database
 - `sentence-transformers` - Embeddings
 
-## 配置
+## 配置说明
 
 ### Environment Variables
 - `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`

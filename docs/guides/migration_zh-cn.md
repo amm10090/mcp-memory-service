@@ -353,7 +353,8 @@ If you continue to experience issues:
 | Dependencies | chromadb, sqlite | sqlite-vec only |
 | Scalability | Better for >10k memories | Optimal for <10k memories |
 
-## 回滚 Plan
+## 回滚
+- 如需回滚，可切换到备份的 ChromaDB，或在迁移后备份点恢复。 Plan
 
 If you need to switch back to ChromaDB:
 

@@ -5,6 +5,9 @@
 本文件概述 `scripts/` 目录中的脚本及用途。
 
 ## 核心脚本
+- `scripts/installation/install.py`：主安装器。
+- `scripts/maintenance/consolidate_memory_types.py`：记忆类型整合。
+- `scripts/maintenance/recover_timestamps_from_cloudflare.py`：时间戳恢复。
 
 ### Server Management
 - `run_memory_server.py`: Main script to start the memory service server

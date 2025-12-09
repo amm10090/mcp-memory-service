@@ -55677,92 +55677,92 @@
         "context": "| Scalability | Better for >10k memories | Optimal for <10k memories |"
       },
       {
-        "line": 358,
+        "line": 359,
         "token": "you",
         "context": "If you need to switch back to ChromaDB:"
       },
       {
-        "line": 368,
+        "line": 369,
         "token": "original",
         "context": "Your original ChromaDB data remains unchanged during migration."
       },
       {
-        "line": 372,
+        "line": 373,
         "token": "successful",
         "context": "After successful migration:"
       },
       {
-        "line": 374,
+        "line": 375,
         "token": "memory",
         "context": "1. ✅ Test memory operations (store, retrieve, search)"
       },
       {
-        "line": 375,
+        "line": 376,
         "token": "HTTP/SSE",
         "context": "2. ✅ Try the HTTP/SSE interface for real-time updates"
       },
       {
-        "line": 376,
+        "line": 377,
         "token": "any",
         "context": "3. ✅ Update any scripts or tools that reference storage paths"
       },
       {
-        "line": 377,
+        "line": 378,
         "token": "backing",
         "context": "4. ✅ Consider backing up your new SQLite-vec database regularly"
       },
       {
-        "line": 378,
+        "line": 379,
         "token": "old",
         "context": "5. ✅ Remove old ChromaDB data after confirming migration success"
       },
       {
-        "line": 382,
+        "line": 383,
         "token": "you",
         "context": "If you encounter issues:"
       },
       {
-        "line": 383,
+        "line": 384,
         "token": "migration",
         "context": "1. Check the migration output and error messages"
       },
       {
-        "line": 384,
+        "line": 385,
         "token": "environment",
         "context": "2. Verify environment variables are set correctly"
       },
       {
-        "line": 385,
+        "line": 386,
         "token": "small",
         "context": "3. Test with a small subset of data first"
       },
       {
-        "line": 386,
+        "line": 387,
         "token": "logs",
         "context": "4. Review logs for detailed error information"
       },
       {
-        "line": 388,
+        "line": 389,
         "token": "migration",
         "context": "The migration preserves all your data including:"
       },
       {
-        "line": 389,
+        "line": 390,
         "token": "content",
         "context": "- Memory content and metadata"
       },
       {
-        "line": 390,
+        "line": 391,
         "token": "timestamps",
         "context": "- Tags and timestamps"
       },
       {
-        "line": 391,
+        "line": 392,
         "token": "hashes",
         "context": "- Content hashes (for deduplication)"
       },
       {
-        "line": 392,
+        "line": 393,
         "token": "embeddings",
         "context": "- Semantic embeddings (regenerated with same model)"
       }
@@ -55777,82 +55777,82 @@
     "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 10,
+        "line": 13,
         "token": "script",
         "context": "- `run_memory_server.py`: Main script to start the memory service server"
       },
       {
-        "line": 16,
+        "line": 19,
         "token": "installation",
         "context": "- `verify_environment.py`: Verifies the installation environment and dependencies"
       },
       {
-        "line": 22,
+        "line": 25,
         "token": "installation",
         "context": "- `test_installation.py`: Tests the installation and basic functionality"
       },
       {
-        "line": 28,
+        "line": 31,
         "token": "integrity",
         "context": "- `validate_memories.py`: Validates the integrity of stored memories"
       },
       {
-        "line": 32,
+        "line": 35,
         "token": "corrupted",
         "context": "- `repair_memories.py`: Repairs corrupted or invalid memories"
       },
       {
-        "line": 36,
+        "line": 39,
         "token": "all",
         "context": "- `list-collections.py`: Lists all available memory collections"
       },
       {
-        "line": 42,
+        "line": 45,
         "token": "migration",
         "context": "- `mcp-migration.py`: Handles migration of MCP-related data"
       },
       {
-        "line": 46,
+        "line": 49,
         "token": "migration",
         "context": "- `memory-migration.py`: Handles migration of memory data"
       },
       {
-        "line": 52,
+        "line": 55,
         "token": "installation",
         "context": "- `verify_pytorch_windows.py`: Verifies PyTorch installation on Windows"
       },
       {
-        "line": 56,
+        "line": 59,
         "token": "verification",
         "context": "- `verify_torch.py`: General PyTorch verification"
       },
       {
-        "line": 62,
+        "line": 65,
         "token": "scripts",
         "context": "- Most scripts can be run directly with Python"
       },
       {
-        "line": 63,
+        "line": 66,
         "token": "scripts",
         "context": "- Some scripts may require specific environment variables to be set"
       },
       {
-        "line": 64,
+        "line": 67,
         "token": "run",
         "context": "- Always run verification scripts after installation or major updates"
       },
       {
-        "line": 65,
+        "line": 68,
         "token": "migration",
         "context": "- Use migration scripts with caution and ensure backups are available"
       },
       {
-        "line": 69,
+        "line": 72,
         "token": "packages",
         "context": "- Required packages listed in `requirements.txt`"
       },
       {
-        "line": 70,
+        "line": 73,
         "token": "scripts",
         "context": "- Some scripts may require additional dependencies listed in `requirements-migration.txt`"
       }
