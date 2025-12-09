@@ -53119,672 +53119,677 @@
         "context": "- [Appendix](#appendix)"
       },
       {
-        "line": 34,
+        "line": 31,
+        "token": "pyscn",
+        "context": "- 三层策略：预提交（LLM 快速检查）→ PR Gate（标准+pyscn）→ 周期性复盘。"
+      },
+      {
+        "line": 36,
         "token": "workflow",
         "context": "The workflow uses three complementary layers to ensure code quality:"
       },
       {
-        "line": 46,
+        "line": 48,
         "token": "complexity",
         "context": "| **Groq API** | LLM complexity checks | <5s | Yes (>8) | Pre-commit |"
       },
       {
-        "line": 47,
+        "line": 49,
         "token": "fallback",
         "context": "| **Gemini CLI** | LLM fallback | ~3s | Yes (>8) | Pre-commit |"
       },
       {
-        "line": 48,
+        "line": 50,
         "token": "pyscn",
         "context": "| **pyscn** | Static analysis | 30-60s | Yes (<50) | PR + weekly |"
       },
       {
-        "line": 49,
+        "line": 51,
         "token": "review",
         "context": "| **code-quality-guard** | Manual review | Variable | No | On-demand |"
       },
       {
-        "line": 55,
+        "line": 57,
         "token": "quality",
         "context": "Catch quality issues before they enter the codebase."
       },
       {
-        "line": 60,
+        "line": 62,
         "token": "editable",
         "context": "- Verify editable install (`pip install -e .`)"
       },
       {
-        "line": 61,
+        "line": 63,
         "token": "version",
         "context": "- Check version consistency (source vs installed)"
       },
       {
-        "line": 62,
+        "line": 64,
         "token": "stale",
         "context": "- Prevent stale package issues"
       },
       {
-        "line": 65,
+        "line": 67,
         "token": "functions",
         "context": "- Rate functions 1-10"
       },
       {
-        "line": 66,
+        "line": 68,
         "token": "any",
         "context": "- Block if any function >8"
       },
       {
-        "line": 67,
+        "line": 69,
         "token": "any",
         "context": "- Warn if any function =7"
       },
       {
-        "line": 70,
+        "line": 72,
         "token": "injection",
         "context": "- SQL injection (raw SQL queries)"
       },
       {
-        "line": 71,
+        "line": 73,
         "token": "unescaped",
         "context": "- XSS (unescaped HTML)"
       },
       {
-        "line": 72,
+        "line": 74,
         "token": "injection",
         "context": "- Command injection (shell=True)"
       },
       {
-        "line": 73,
+        "line": 75,
         "token": "secrets",
         "context": "- Hardcoded secrets"
       },
       {
-        "line": 121,
+        "line": 123,
         "token": "any",
         "context": "- **Block**: Complexity >8, any security issues"
       },
       {
-        "line": 123,
+        "line": 125,
         "token": "security",
         "context": "- **Pass**: Complexity <7, no security issues"
       },
       {
-        "line": 129,
+        "line": 131,
         "token": "checks",
         "context": "Comprehensive checks before code review and merge."
       },
       {
-        "line": 133,
+        "line": 135,
         "token": "automatically",
         "context": "Run automatically on PR creation:"
       },
       {
-        "line": 140,
+        "line": 142,
         "token": "complexity",
         "context": "1. Code complexity (Gemini CLI)"
       },
       {
-        "line": 141,
+        "line": 143,
         "token": "vulnerabilities",
         "context": "2. Security vulnerabilities"
       },
       {
-        "line": 142,
+        "line": 144,
         "token": "coverage",
         "context": "3. Test coverage (code files vs test files)"
       },
       {
-        "line": 143,
+        "line": 145,
         "token": "changes",
         "context": "4. Breaking changes detection"
       },
       {
-        "line": 145,
+        "line": 147,
         "token": "seconds",
         "context": "**Duration:** ~10-30 seconds"
       },
       {
-        "line": 147,
+        "line": 149,
         "token": "pyscn",
         "context": "### Comprehensive Checks (with pyscn)"
       },
       {
-        "line": 149,
+        "line": 151,
         "token": "deep",
         "context": "Optional deep analysis:"
       },
       {
-        "line": 156,
+        "line": 158,
         "token": "complexity",
         "context": "- Cyclomatic complexity scoring"
       },
       {
-        "line": 157,
+        "line": 159,
         "token": "code",
         "context": "- Dead code detection"
       },
       {
-        "line": 158,
+        "line": 160,
         "token": "duplication",
         "context": "- Code duplication analysis"
       },
       {
-        "line": 159,
+        "line": 161,
         "token": "metrics",
         "context": "- Coupling metrics (CBO)"
       },
       {
-        "line": 160,
+        "line": 162,
         "token": "violations",
         "context": "- Architecture violations"
       },
       {
-        "line": 162,
+        "line": 164,
         "token": "seconds",
         "context": "**Duration:** ~30-60 seconds"
       },
       {
-        "line": 203,
+        "line": 205,
         "token": "pyscn",
         "context": "**Comprehensive Checks (with pyscn):**"
       },
       {
-        "line": 222,
+        "line": 224,
         "token": "issues",
         "context": "- **Block PR**: Security issues, health score <50"
       },
       {
-        "line": 223,
+        "line": 225,
         "token": "health",
         "context": "- **Warn**: Complexity >7, health score 50-69"
       },
       {
-        "line": 224,
+        "line": 226,
         "token": "security",
         "context": "- **Pass**: No security issues, health score ≥70"
       },
       {
-        "line": 230,
+        "line": 232,
         "token": "quality",
         "context": "Track quality trends, detect regressions, plan refactoring."
       },
       {
-        "line": 234,
+        "line": 236,
         "token": "manually",
         "context": "**Run manually or via cron:**"
       },
       {
-        "line": 239,
+        "line": 241,
         "token": "after",
         "context": "**Frequency:** Weekly or after major changes"
       },
       {
-        "line": 242,
+        "line": 244,
         "token": "score",
         "context": "- Health score over time"
       },
       {
-        "line": 243,
+        "line": 245,
         "token": "metrics",
         "context": "- Complexity metrics (avg, max)"
       },
       {
-        "line": 244,
+        "line": 246,
         "token": "percentage",
         "context": "- Duplication percentage"
       },
       {
-        "line": 245,
+        "line": 247,
         "token": "code",
         "context": "- Dead code issues"
       },
       {
-        "line": 246,
+        "line": 248,
         "token": "violations",
         "context": "- Architecture violations"
       },
       {
-        "line": 249,
+        "line": 251,
         "token": "CSV",
         "context": "- CSV file: `.pyscn/history/metrics.csv`"
       },
       {
-        "line": 250,
+        "line": 252,
         "token": "HTML",
         "context": "- HTML report: `.pyscn/reports/analyze_*.html`"
       },
       {
-        "line": 286,
+        "line": 288,
         "token": "manually",
         "context": "**Run manually or via cron:**"
       },
       {
-        "line": 292,
+        "line": 294,
         "token": "current",
         "context": "- Compare current vs last week's metrics"
       },
       {
-        "line": 293,
+        "line": 295,
         "token": "markdown",
         "context": "- Generate markdown trend report"
       },
       {
-        "line": 294,
+        "line": 296,
         "token": "regressions",
         "context": "- Identify regressions (>5% health score drop)"
       },
       {
-        "line": 295,
+        "line": 297,
         "token": "create",
         "context": "- Optionally create GitHub issue for significant regressions"
       },
       {
-        "line": 328,
+        "line": 330,
         "token": "pyscn",
         "context": "## pyscn Integration"
       },
       {
-        "line": 336,
+        "line": 338,
         "token": "https",
         "context": "**Repository:** https://github.com/ludo-technologies/pyscn"
       },
       {
-        "line": 341,
+        "line": 343,
         "token": "scoring",
         "context": "- Function-level scoring (1-100)"
       },
       {
-        "line": 342,
+        "line": 344,
         "token": "maximum",
         "context": "- Average, maximum, high-risk functions"
       },
       {
-        "line": 343,
+        "line": 345,
         "token": "complexity",
         "context": "- Detailed complexity breakdown"
       },
       {
-        "line": 346,
+        "line": 348,
         "token": "code",
         "context": "- Unreachable code after returns"
       },
       {
-        "line": 347,
+        "line": 349,
         "token": "imports",
         "context": "- Unused imports"
       },
       {
-        "line": 351,
+        "line": 353,
         "token": "duplicates",
         "context": "- Exact duplicates"
       },
       {
-        "line": 352,
+        "line": 354,
         "token": "duplicates",
         "context": "- Near-exact duplicates (>90% similarity)"
       },
       {
-        "line": 353,
+        "line": 355,
         "token": "groups",
         "context": "- Clone groups and fragments"
       },
       {
-        "line": 357,
+        "line": 359,
         "token": "classes",
         "context": "- High-coupling classes"
       },
       {
-        "line": 358,
+        "line": 360,
         "token": "coupling",
         "context": "- Average coupling score"
       },
       {
-        "line": 361,
+        "line": 363,
         "token": "dependencies",
         "context": "- Module dependencies"
       },
       {
-        "line": 362,
+        "line": 364,
         "token": "dependency",
         "context": "- Circular dependency detection"
       },
       {
-        "line": 363,
+        "line": 365,
         "token": "depth",
         "context": "- Dependency depth"
       },
       {
-        "line": 366,
+        "line": 368,
         "token": "architecture",
         "context": "- Layered architecture compliance"
       },
       {
-        "line": 367,
+        "line": 369,
         "token": "violation",
         "context": "- Layer violation detection"
       },
       {
-        "line": 368,
+        "line": 370,
         "token": "dependencies",
         "context": "- Cross-layer dependencies"
       },
       {
-        "line": 382,
+        "line": 384,
         "token": "JSON",
         "context": "**JSON Output:**"
       },
       {
-        "line": 393,
+        "line": 395,
         "token": "functions",
         "context": "| **Complexity** | 40/100 | Poor | 28 high-risk functions (>7), avg 9.5 |"
       },
       {
-        "line": 394,
+        "line": 396,
         "token": "issues",
         "context": "| **Dead Code** | 70/100 | Fair | 27 issues, 2 critical |"
       },
       {
-        "line": 395,
+        "line": 397,
         "token": "duplication",
         "context": "| **Duplication** | 30/100 | Poor | 6.0% duplication, 18 clone groups |"
       },
       {
-        "line": 397,
+        "line": 399,
         "token": "cycles",
         "context": "| **Dependencies** | 85/100 | Good | 0 cycles, depth 7 |"
       },
       {
-        "line": 398,
+        "line": 400,
         "token": "violations",
         "context": "| **Architecture** | 75/100 | Good | 58 violations, 75.5% compliance |"
       },
       {
-        "line": 411,
+        "line": 413,
         "token": "functions",
         "context": "**Action:** Refactor functions with complexity >10 using:"
       },
       {
-        "line": 412,
+        "line": 414,
         "token": "method",
         "context": "- Extract method refactoring"
       },
       {
-        "line": 413,
+        "line": 415,
         "token": "pattern",
         "context": "- Strategy pattern for conditionals"
       },
       {
-        "line": 414,
+        "line": 416,
         "token": "functions",
         "context": "- Helper functions for complex operations"
       },
       {
-        "line": 420,
+        "line": 422,
         "token": "merge",
         "context": "**Status:** 🔴 **Cannot merge or release**"
       },
       {
-        "line": 423,
+        "line": 425,
         "token": "full",
         "context": "1. Review full pyscn report"
       },
       {
-        "line": 424,
+        "line": 426,
         "token": "top",
         "context": "2. Identify top 5 complexity hotspots"
       },
       {
-        "line": 425,
+        "line": 427,
         "token": "refactoring",
         "context": "3. Create refactoring tasks"
       },
       {
-        "line": 426,
+        "line": 428,
         "token": "immediate",
         "context": "4. Schedule immediate refactoring sprint"
       },
       {
-        "line": 427,
+        "line": 429,
         "token": "progress",
         "context": "5. Track progress in issue #240"
       },
       {
-        "line": 429,
+        "line": 431,
         "token": "resolve",
         "context": "**Timeline:** Must resolve before any merges"
       },
       {
-        "line": 433,
+        "line": 435,
         "token": "refactoring",
         "context": "**Status:** 🟡 **Plan refactoring within 2 weeks**"
       },
       {
-        "line": 436,
+        "line": 438,
         "token": "complexity",
         "context": "1. Analyze complexity trends"
       },
       {
-        "line": 437,
+        "line": 439,
         "token": "project",
         "context": "2. Create project board for tracking"
       },
       {
-        "line": 438,
+        "line": 440,
         "token": "sprint",
         "context": "3. Allocate 20% sprint capacity to quality"
       },
       {
-        "line": 439,
+        "line": 441,
         "token": "duplication",
         "context": "4. Review duplication for consolidation"
       },
       {
-        "line": 440,
+        "line": 442,
         "token": "dead",
         "context": "5. Remove dead code"
       },
       {
-        "line": 442,
+        "line": 444,
         "token": "week",
         "context": "**Timeline:** 2-week improvement plan"
       },
       {
-        "line": 446,
+        "line": 448,
         "token": "trends",
         "context": "**Status:** ✅ **Monitor trends, continue development**"
       },
       {
-        "line": 449,
+        "line": 451,
         "token": "quality",
         "context": "- Monthly quality reviews"
       },
       {
-        "line": 450,
+        "line": 452,
         "token": "complexity",
         "context": "- Track complexity trends"
       },
       {
-        "line": 451,
+        "line": 453,
         "token": "health",
         "context": "- Keep health score above 70"
       },
       {
-        "line": 452,
+        "line": 454,
         "token": "new",
         "context": "- Address new issues proactively"
       },
       {
-        "line": 456,
+        "line": 458,
         "token": "current",
         "context": "**Status:** 🎯 **Maintain current standards**"
       },
       {
-        "line": 459,
+        "line": 461,
         "token": "quality",
         "context": "- Document quality patterns"
       },
       {
-        "line": 460,
+        "line": 462,
         "token": "refactoring",
         "context": "- Share refactoring techniques"
       },
       {
-        "line": 461,
+        "line": 463,
         "token": "team",
         "context": "- Mentor team members"
       },
       {
-        "line": 462,
+        "line": 464,
         "token": "wins",
         "context": "- Celebrate wins"
       },
       {
-        "line": 468,
+        "line": 470,
         "token": "pyscn",
         "context": "**Issue:** pyscn not found"
       },
       {
-        "line": 474,
+        "line": 476,
         "token": "hook",
         "context": "**Issue:** Pre-commit hook not running"
       },
       {
-        "line": 481,
+        "line": 483,
         "token": "errors",
         "context": "**Issue:** Groq API errors"
       },
       {
-        "line": 494,
+        "line": 496,
         "token": "pyscn",
         "context": "**Issue:** pyscn analysis too slow"
       },
       {
-        "line": 501,
+        "line": 503,
         "token": "positive",
         "context": "**Issue:** False positive security warnings"
       },
       {
-        "line": 513,
+        "line": 515,
         "token": "only",
         "context": "- Analyze only staged files"
       },
       {
-        "line": 514,
+        "line": 516,
         "token": "checks",
         "context": "- Skip checks if no Python files"
       },
       {
-        "line": 517,
+        "line": 519,
         "token": "standard",
         "context": "- Run standard checks first (fast)"
       },
       {
-        "line": 518,
+        "line": 520,
         "token": "comprehensive",
         "context": "- Use `--with-pyscn` for comprehensive analysis"
       },
       {
-        "line": 519,
+        "line": 521,
         "token": "pyscn",
         "context": "- Cache pyscn reports for repeated checks"
       },
       {
-        "line": 522,
+        "line": 524,
         "token": "during",
         "context": "- Schedule during off-hours (cron)"
       },
       {
-        "line": 523,
+        "line": 525,
         "token": "JSON",
         "context": "- Use JSON output for scripting"
       },
       {
-        "line": 524,
+        "line": 526,
         "token": "old",
         "context": "- Archive old reports (keep last 30 days)"
       },
       {
-        "line": 532,
+        "line": 534,
         "token": "quality",
         "context": "| `scripts/hooks/pre-commit` | Pre-commit quality checks | Auto-runs on `git commit` |"
       },
       {
-        "line": 533,
+        "line": 535,
         "token": "quality",
         "context": "| `scripts/pr/quality_gate.sh` | PR quality gates | `bash scripts/pr/quality_gate.sh <PR>` |"
       },
       {
-        "line": 534,
+        "line": 536,
         "token": "pyscn",
         "context": "| `scripts/pr/run_pyscn_analysis.sh` | pyscn PR analysis | `bash scripts/pr/run_pyscn_analysis.sh --pr <PR>` |"
       },
       {
-        "line": 535,
+        "line": 537,
         "token": "tracking",
         "context": "| `scripts/quality/track_pyscn_metrics.sh` | Metrics tracking | `bash scripts/quality/track_pyscn_metrics.sh` |"
       },
       {
-        "line": 536,
+        "line": 538,
         "token": "review",
         "context": "| `scripts/quality/weekly_quality_review.sh` | Weekly review | `bash scripts/quality/weekly_quality_review.sh` |"
       },
       {
-        "line": 542,
+        "line": 544,
         "token": "pyscn",
         "context": "| `.pyscn/.gitignore` | Ignore pyscn reports and history |"
       },
       {
-        "line": 543,
+        "line": 545,
         "token": "quality",
         "context": "| `.pyscn/history/metrics.csv` | Historical quality metrics |"
       },
       {
-        "line": 544,
+        "line": 546,
         "token": "html",
         "context": "| `.pyscn/reports/*.html` | pyscn HTML reports |"
       },
       {
-        "line": 545,
+        "line": 547,
         "token": "claude/agents/code-quality-guard.md",
         "context": "| `.claude/agents/code-quality-guard.md` | Code quality agent specification |"
       },
       {
-        "line": 549,
+        "line": 551,
         "token": "conventions",
         "context": "- [CLAUDE.md](../../CLAUDE.md) - Project conventions and workflows"
       },
       {
-        "line": 550,
+        "line": 552,
         "token": "claude/agents/code-quality-guard.md",
         "context": "- [`.claude/agents/code-quality-guard.md`](../../.claude/agents/code-quality-guard.md) - Agent workflows"
       },
       {
-        "line": 551,
+        "line": 553,
         "token": "documentation",
         "context": "- [scripts/README.md](../../scripts/README.md) - Script documentation"
       },
       {
-        "line": 552,
+        "line": 554,
         "token": "https",
         "context": "- [Issue #240](https://github.com/doobidoo/mcp-memory-service/issues/240) - Quality improvements tracking"
       },
       {
-        "line": 556,
+        "line": 558,
         "token": "pyscn",
         "context": "- [pyscn GitHub](https://github.com/ludo-technologies/pyscn) - pyscn documentation"
       },
       {
-        "line": 557,
+        "line": 559,
         "token": "https",
         "context": "- [Groq API Docs](https://console.groq.com/docs) - Groq API reference"
       },
       {
-        "line": 558,
+        "line": 560,
         "token": "https",
         "context": "- [Gemini CLI](https://www.npmjs.com/package/@google/generative-ai-cli) - Gemini CLI docs"
       },
       {
-        "line": 564,
+        "line": 566,
         "token": "comprehensive",
         "context": "- v1.0.0 (2025-11-24): Initial comprehensive documentation with pyscn integration"
       }

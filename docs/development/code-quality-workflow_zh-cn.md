@@ -11,6 +11,12 @@
 This document describes the comprehensive code quality workflow for the MCP Memory Service project, integrating LLM-based analysis (Groq/Gemini) with static analysis (pyscn) for multi-layer quality assurance.
 
 ## 目录
+- 目标与范围
+- 三层质量策略
+- 工作流细节
+- 指标与阈值
+- 工具与脚本
+- 故障排查
 
 - [Quality Strategy](#quality-strategy)
 - [Layer 1: Pre-commit Checks](#layer-1-pre-commit-checks)
@@ -21,7 +27,9 @@ This document describes the comprehensive code quality workflow for the MCP Memo
 - [Troubleshooting](#troubleshooting)
 - [Appendix](#appendix)
 
-## Quality Strategy
+## 质量策略
+- 三层策略：预提交（LLM 快速检查）→ PR Gate（标准+pyscn）→ 周期性复盘。
+- 指标覆盖：圈复杂度、死代码、重复、耦合、依赖、架构。
 
 ### Three-Layer Approach
 
@@ -455,7 +463,7 @@ Top 5 High-Complexity Functions:
 - Mentor team members
 - Celebrate wins
 
-## Troubleshooting
+## 故障排查
 
 ### Common Issues
 
