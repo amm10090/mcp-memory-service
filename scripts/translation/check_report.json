@@ -49820,217 +49820,217 @@
     "outdated": true,
     "untranslated_snippets": [
       {
-        "line": 7,
+        "line": 9,
         "token": "installation/master-guide.md",
         "context": "- **新用户**：阅读 [安装总览](installation/master-guide.md)"
       },
       {
-        "line": 8,
+        "line": 10,
         "token": "integration/multi-client.md",
         "context": "- **多客户端场景**：参见 [多客户端集成](integration/multi-client.md)"
       },
       {
-        "line": 9,
+        "line": 11,
         "token": "deployment/docker.md",
         "context": "- **Docker 用户**：查看 [Docker 部署](deployment/docker.md)"
       },
       {
-        "line": 10,
+        "line": 12,
         "token": "troubleshooting/general.md",
         "context": "- **疑难排查**：访问 [常规故障排除](troubleshooting/general.md)"
       },
       {
-        "line": 16,
+        "line": 18,
         "token": "installation/master-guide.md",
         "context": "- **[安装总览](installation/master-guide.md)**：覆盖所有平台的安装步骤。"
       },
       {
-        "line": 18,
+        "line": 20,
         "token": "platforms/macos-intel.md",
         "context": "- [macOS Intel](platforms/macos-intel.md)：含 2013-2017 旧机型注意事项。"
       },
       {
-        "line": 19,
+        "line": 21,
         "token": "platforms/windows.md",
         "context": "- [Windows](platforms/windows.md)：支持 CUDA / DirectML。"
       },
       {
-        "line": 20,
+        "line": 22,
         "token": "platforms/ubuntu.md",
         "context": "- [Ubuntu](platforms/ubuntu.md)：桌面与服务器设置。"
       },
       {
-        "line": 24,
+        "line": 26,
         "token": "integration/multi-client.md",
         "context": "- **[多客户端共享](integration/multi-client.md)**：多应用共享记忆。"
       },
       {
-        "line": 25,
+        "line": 27,
         "token": "integration/homebrew.md",
         "context": "- **[Homebrew 集成](integration/homebrew.md)**：使用系统级 PyTorch。"
       },
       {
-        "line": 26,
+        "line": 28,
         "token": "guides/claude_integration.md",
-        "context": "- **[Claude Desktop 指南](guides/claude_integration.md)**。"
+        "context": "- **[Claude Desktop 指南](guides/claude_integration.md)**"
       },
       {
-        "line": 27,
+        "line": 29,
         "token": "ide-compatability.md",
         "context": "- **[IDE 兼容性](ide-compatability.md)**：VS Code、Continue 等。"
       },
       {
-        "line": 31,
+        "line": 33,
         "token": "deployment/docker.md",
         "context": "- **[Docker 部署](deployment/docker.md)**：多种容器方案。"
       },
       {
-        "line": 32,
+        "line": 34,
         "token": "deployment/multi-client-server.md",
         "context": "- **[服务器部署](deployment/multi-client-server.md)**：生产级架构。"
       },
       {
-        "line": 33,
+        "line": 35,
         "token": "glama-deployment.md",
         "context": "- **[云平台部署](glama-deployment.md)**。"
       },
       {
-        "line": 37,
+        "line": 39,
         "token": "guides/mcp-enhancements.md",
         "context": "- **[MCP 协议增强](guides/mcp-enhancements.md)**：资源、提示、进度跟踪。"
       },
       {
-        "line": 39,
+        "line": 41,
         "token": "guides/migration.md",
         "context": "- **[迁移指南](guides/migration.md)**。"
       },
       {
-        "line": 40,
+        "line": 42,
         "token": "guides/scripts.md",
         "context": "- **[脚本参考](guides/scripts.md)**：辅助工具。"
       },
       {
-        "line": 41,
+        "line": 43,
         "token": "guides/invocation_guide.md",
         "context": "- **[调用方式](guides/invocation_guide.md)**。"
       },
       {
-        "line": 45,
+        "line": 47,
         "token": "tutorials/data-analysis.md",
         "context": "- **[数据分析示例](tutorials/data-analysis.md)**。"
       },
       {
-        "line": 46,
+        "line": 48,
         "token": "tutorials/advanced-techniques.md",
         "context": "- **[高级技巧](tutorials/advanced-techniques.md)**。"
       },
       {
-        "line": 47,
+        "line": 49,
         "token": "tutorials/demo-session-walkthrough.md",
         "context": "- **[演示会话](tutorials/demo-session-walkthrough.md)**。"
       },
       {
-        "line": 51,
+        "line": 53,
         "token": "maintenance/memory-maintenance.md",
         "context": "- **[记忆维护](maintenance/memory-maintenance.md)**：清理、优化、备份。"
       },
       {
-        "line": 52,
+        "line": 54,
         "token": "implementation/health_checks.md",
         "context": "- **[健康检查](implementation/health_checks.md)**。"
       },
       {
-        "line": 53,
+        "line": 55,
         "token": "implementation/performance.md",
         "context": "- **[性能调优](implementation/performance.md)**。"
       },
       {
-        "line": 57,
+        "line": 59,
         "token": "api/memory-metadata-api.md",
-        "context": "- **[Memory Metadata API](api/memory-metadata-api.md)**。"
+        "context": "- **[Memory Metadata API](api/memory-metadata-api.md)**"
       },
       {
-        "line": 58,
+        "line": 60,
         "token": "api/tag-standardization.md",
         "context": "- **[标签标准化](api/tag-standardization.md)**。"
       },
       {
-        "line": 59,
+        "line": 61,
         "token": "HTTP",
         "context": "- **[HTTP / SSE API](IMPLEMENTATION_PLAN_HTTP_SSE.md)**。"
       },
       {
-        "line": 63,
+        "line": 65,
         "token": "technical/development.md",
         "context": "- **[开发指南](technical/development.md)**：贡献流程。"
       },
       {
-        "line": 64,
+        "line": 66,
         "token": "development/multi-client-architecture.md",
         "context": "- **[架构概览](development/multi-client-architecture.md)**。"
       },
       {
-        "line": 66,
+        "line": 68,
         "token": "technical/memory-migration.md",
         "context": "- [记忆迁移](technical/memory-migration.md)"
       },
       {
-        "line": 67,
+        "line": 69,
         "token": "technical/tag-storage.md",
         "context": "- [标签存储](technical/tag-storage.md)"
       },
       {
-        "line": 71,
+        "line": 73,
         "token": "troubleshooting/general.md",
         "context": "- **[通用问题](troubleshooting/general.md)**。"
       },
       {
-        "line": 72,
+        "line": 74,
         "token": "deployment/docker.md",
         "context": "- **[Docker 排障](deployment/docker.md#troubleshooting)**。"
       },
       {
-        "line": 93,
+        "line": 95,
         "token": "HTTP/SSE",
         "context": "- ✅ 完整部署方案（HTTP/SSE、认证、监控）。"
       },
       {
-        "line": 101,
+        "line": 103,
         "token": "HTTP/SSE",
         "context": "- **HTTP/SSE API**：实时多客户端通信。"
       },
       {
-        "line": 105,
+        "line": 107,
         "token": "installation/master-guide.md",
         "context": "- 安装问题：参见 [安装指南](installation/master-guide.md)。"
       },
       {
-        "line": 106,
+        "line": 108,
         "token": "troubleshooting/general.md",
         "context": "- 配置疑问：查看 [故障排除](troubleshooting/general.md)。"
       },
       {
-        "line": 107,
+        "line": 109,
         "token": "integration/multi-client.md",
         "context": "- 多客户端：阅读 [多客户端指南](integration/multi-client.md)。"
       },
       {
-        "line": 108,
+        "line": 110,
         "token": "implementation/performance.md",
         "context": "- 性能瓶颈：参考 [性能调优](implementation/performance.md)。"
       },
       {
-        "line": 112,
+        "line": 114,
         "token": "bug",
         "context": "- **GitHub Issues**：提交 bug / feature。"
       },
       {
-        "line": 118,
+        "line": 120,
         "token": "technical/development.md",
         "context": "详见 [开发指南](technical/development.md)：开发环境、测试、PR 流程、编码规范。"
       },
       {
-        "line": 124,
+        "line": 126,
         "token": "HTTP/SSE",
         "context": "- **v0.2.1**：Docker 修复、HTTP/SSE 增强。"
       }

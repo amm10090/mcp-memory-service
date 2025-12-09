@@ -1,5 +1,7 @@
 # MCP Memory Service 文档索引
 
+[简体中文](README_zh-cn.md) | [English](README.md)
+
 欢迎查阅 MCP Memory Service 的完整文档。该服务基于 Model Context Protocol，为 Claude Desktop 等 MCP 客户端提供语义记忆与持久化存储能力。
 
 ## 快速入口
@@ -23,7 +25,7 @@
 
 - **[多客户端共享](integration/multi-client.md)**：多应用共享记忆。
 - **[Homebrew 集成](integration/homebrew.md)**：使用系统级 PyTorch。
-- **[Claude Desktop 指南](guides/claude_integration.md)**。
+- **[Claude Desktop 指南](guides/claude_integration.md)**
 - **[IDE 兼容性](ide-compatability.md)**：VS Code、Continue 等。
 
 ### 🚀 部署
@@ -54,7 +56,7 @@
 
 ### 📖 API 参考
 
-- **[Memory Metadata API](api/memory-metadata-api.md)**。
+- **[Memory Metadata API](api/memory-metadata-api.md)**
 - **[标签标准化](api/tag-standardization.md)**。
 - **[HTTP / SSE API](IMPLEMENTATION_PLAN_HTTP_SSE.md)**。
 

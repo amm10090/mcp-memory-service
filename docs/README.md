@@ -1,5 +1,7 @@
 # MCP Memory Service Documentation
 
+[English](README.md) | [简体中文](README_zh-cn.md)
+
 Welcome to the comprehensive documentation for MCP Memory Service - a Model Context Protocol server that provides semantic memory and persistent storage capabilities for Claude Desktop and other MCP clients.
 
 ## Quick Start
