@@ -1,5 +1,7 @@
 # Scripts Documentation
 
+[English](scripts.md) | [简体中文](scripts_zh-cn.md)
+
 This document provides an overview of the available scripts in the `scripts/` directory and their purposes.
 
 ## Essential Scripts

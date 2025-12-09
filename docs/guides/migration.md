@@ -1,5 +1,7 @@
 # ChromaDB to SQLite-vec Migration Guide
 
+[English](migration.md) | [简体中文](migration_zh-cn.md)
+
 This guide walks you through migrating your existing ChromaDB memories to the new SQLite-vec backend.
 
 > **⚠️ Important Update (v5.0.1):** We've identified and fixed critical migration issues. If you experienced problems with v5.0.0 migration, please use the enhanced migration script or update to v5.0.1.

@@ -55329,112 +55329,534 @@
     "chinese": "docs/guides/migration_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
+        "line": 11,
+        "token": "offers",
+        "context": "SQLite-vec offers several advantages over ChromaDB for the MCP Memory Service:"
+      },
+      {
+        "line": 13,
+        "token": "file",
+        "context": "- **Lightweight**: Single file database, no external dependencies"
+      },
+      {
+        "line": 14,
+        "token": "startup",
+        "context": "- **Faster startup**: No collection initialization overhead"
+      },
+      {
+        "line": 15,
+        "token": "performance",
+        "context": "- **Better performance**: Optimized for small to medium datasets"
+      },
+      {
         "line": 16,
+        "token": "deployment",
+        "context": "- **Simpler deployment**: No persistence directory management"
+      },
+      {
+        "line": 17,
+        "token": "consistently",
+        "context": "- **Cross-platform**: Works consistently across all platforms"
+      },
+      {
+        "line": 18,
         "token": "HTTP/SSE",
-        "context": "- **HTTP/SSE 支持**：新 Web 控制台仅兼容 SQLite-vec。"
+        "context": "- **HTTP/SSE support**: New web interface only works with SQLite-vec"
+      },
+      {
+        "line": 24,
+        "token": "provided",
+        "context": "Use the provided migration script for a safe, automated migration:"
+      },
+      {
+        "line": 31,
+        "token": "script",
+        "context": "The script will:"
+      },
+      {
+        "line": 32,
+        "token": "your",
+        "context": "- ✅ Check your existing ChromaDB data"
+      },
+      {
+        "line": 33,
+        "token": "all",
+        "context": "- ✅ Count all memories to migrate"
+      },
+      {
+        "line": 34,
+        "token": "confirmation",
+        "context": "- ✅ Ask for confirmation before proceeding"
+      },
+      {
+        "line": 35,
+        "token": "memories",
+        "context": "- ✅ Migrate memories in batches with progress tracking"
+      },
+      {
+        "line": 36,
+        "token": "duplicates",
+        "context": "- ✅ Skip duplicates if running multiple times"
+      },
+      {
+        "line": 37,
+        "token": "migration",
+        "context": "- ✅ Verify migration completed successfully"
+      },
+      {
+        "line": 38,
+        "token": "next",
+        "context": "- ✅ Provide next steps"
+      },
+      {
+        "line": 42,
+        "token": "you",
+        "context": "If you want to start fresh with SQLite-vec (losing existing memories):"
+      },
+      {
+        "line": 56,
+        "token": "but",
+        "context": "### 1. Backup Your Data (Optional but Recommended)"
+      },
+      {
+        "line": 107,
+        "token": "successful",
+        "context": "After successful migration, update your environment:"
       },
       {
         "line": 117,
-        "token": "HTTP/SSE",
-        "context": "### 5. （可选）启用 HTTP/SSE 控制台"
-      },
-      {
-        "line": 132,
-        "token": "chroma",
-        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | 存储后端（`chroma` 或 `sqlite_vec`） | `chroma` |"
-      },
-      {
-        "line": 134,
-        "token": "HTTP/SSE",
-        "context": "| `MCP_HTTP_ENABLED` | 是否启用 HTTP/SSE | `false` |"
+        "token": "permanent",
+        "context": "**For permanent configuration, add to your shell profile:**"
       },
       {
         "line": 135,
-        "token": "HTTP",
-        "context": "| `MCP_HTTP_PORT` | HTTP 端口 | `8001` |"
+        "token": "HTTP/SSE",
+        "context": "### 5. Enable HTTP/SSE Interface (Optional)"
       },
       {
-        "line": 164,
+        "line": 137,
+        "token": "use",
+        "context": "To use the new web interface:"
+      },
+      {
+        "line": 156,
+        "token": "backend",
+        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | Storage backend (`chroma` or `sqlite_vec`) | `chroma` |"
+      },
+      {
+        "line": 157,
+        "token": "database",
+        "context": "| `MCP_MEMORY_SQLITE_PATH` | SQLite-vec database file path | `~/.mcp_memory/sqlite_vec.db` |"
+      },
+      {
+        "line": 158,
+        "token": "HTTP/SSE",
+        "context": "| `MCP_HTTP_ENABLED` | Enable HTTP/SSE interface | `false` |"
+      },
+      {
+        "line": 159,
+        "token": "HTTP",
+        "context": "| `MCP_HTTP_PORT` | HTTP server port | `8000` |"
+      },
+      {
+        "line": 163,
+        "token": "your",
+        "context": "Update your `claude_desktop_config.json`:"
+      },
+      {
+        "line": 189,
+        "token": "you",
+        "context": "> **If you're experiencing issues with v5.0.0 migration, please use the enhanced migration script:**"
+      },
+      {
+        "line": 190,
         "token": "bash",
         "context": "> ```bash"
       },
       {
-        "line": 165,
+        "line": 191,
         "token": "python",
         "context": "> python scripts/migrate_v5_enhanced.py --help"
       },
       {
-        "line": 182,
-        "token": "constraint",
-        "context": "- 出现 “NOT NULL constraint failed: memories.content_hash”；"
+        "line": 196,
+        "token": "script",
+        "context": "**Problem:** Migration script uses hardcoded paths and ignores custom ChromaDB locations."
       },
       {
-        "line": 239,
+        "line": 213,
+        "token": "fails",
+        "context": "**Problem:** Migration fails with \"NOT NULL constraint failed: memories.content_hash\""
+      },
+      {
+        "line": 215,
+        "token": "has",
+        "context": "**Solution:** This has been fixed in v5.0.1. The migration script now generates proper SHA256 hashes. If you encounter this:"
+      },
+      {
+        "line": 216,
+        "token": "latest",
+        "context": "1. Update to latest version: `git pull`"
+      },
+      {
+        "line": 217,
+        "token": "enhanced",
+        "context": "2. Use the enhanced migration script: `python scripts/migrate_v5_enhanced.py`"
+      },
+      {
+        "line": 221,
+        "token": "become",
+        "context": "**Problem:** Tags become corrupted during migration, appearing as `['tag1', 'tag2']` instead of `tag1,tag2`"
+      },
+      {
+        "line": 223,
+        "token": "enhanced",
+        "context": "**Solution:** The enhanced migration script includes tag validation and correction:"
+      },
+      {
+        "line": 234,
+        "token": "appears",
+        "context": "**Problem:** Migration appears to hang with no progress indication"
+      },
+      {
+        "line": 236,
         "token": "verbose",
-        "context": "1. 使用 `--verbose` 查看详细日志；"
+        "context": "**Solution:** Use verbose mode and batch size control:"
       },
       {
-        "line": 241,
-        "token": "https",
-        "context": "3. 在 [GitHub Issues](https://github.com/doobidoo/mcp-memory-service/issues) 反馈问题；"
+        "line": 245,
+        "token": "certificate",
+        "context": "**Problem:** SSL certificate errors, version conflicts with ChromaDB/sentence-transformers"
       },
       {
-        "line": 247,
-        "token": "python",
-        "context": "2. **先执行 Dry-run**：`python scripts/migrate_v5_enhanced.py --dry-run`"
+        "line": 262,
+        "token": "migration",
+        "context": "After migration, always validate the data:"
       },
       {
-        "line": 248,
-        "token": "python",
-        "context": "3. **迁移后立刻校验**：`python scripts/validate_migration.py`"
+        "line": 273,
+        "token": "migration",
+        "context": "If migration failed or corrupted data:"
       },
       {
-        "line": 251,
+        "line": 275,
+        "token": "backup",
+        "context": "1. **Restore from backup:**"
+      },
+      {
+        "line": 288,
+        "token": "enhanced",
+        "context": "3. **Re-migrate with enhanced script:**"
+      },
+      {
+        "line": 302,
+        "token": "you",
+        "context": "If you continue to experience issues:"
+      },
+      {
+        "line": 304,
+        "token": "logs",
+        "context": "1. **Check logs:** Add `--verbose` flag for detailed output"
+      },
+      {
+        "line": 305,
+        "token": "data",
+        "context": "2. **Validate data:** Use `scripts/validate_migration.py`"
+      },
+      {
+        "line": 306,
+        "token": "issues",
+        "context": "3. **Report issues:** [GitHub Issues](https://github.com/doobidoo/mcp-memory-service/issues)"
+      },
+      {
+        "line": 307,
+        "token": "rollback",
+        "context": "4. **Emergency rollback:** Your ChromaDB data remains untouched"
+      },
+      {
+        "line": 311,
+        "token": "backup",
+        "context": "1. **Always backup first:**"
+      },
+      {
+        "line": 321,
+        "token": "after",
+        "context": "3. **Validate after migration:**"
+      },
+      {
+        "line": 326,
+        "token": "data",
+        "context": "4. **Keep ChromaDB data until confirmed:**"
+      },
+      {
+        "line": 327,
+        "token": "delete",
+        "context": "- Don't delete ChromaDB data immediately"
+      },
+      {
+        "line": 328,
+        "token": "migrated",
+        "context": "- Test the migrated database thoroughly"
+      },
+      {
+        "line": 329,
+        "token": "backups",
+        "context": "- Keep backups for at least a week"
+      },
+      {
+        "line": 331,
         "token": "verification",
-        "context": "出现 “Migration verification failed” 表示部分记忆未成功迁移，可根据报告重新执行。"
+        "context": "**\"Migration verification failed\"**"
       },
       {
-        "line": 255,
+        "line": 332,
+        "token": "memories",
+        "context": "- Some memories may have failed to migrate"
+      },
+      {
+        "line": 333,
+        "token": "error",
+        "context": "- Check error summary in migration output"
+      },
+      {
+        "line": 334,
+        "token": "migration",
+        "context": "- Consider re-running migration"
+      },
+      {
+        "line": 338,
         "token": "backend",
-        "context": "- **“Storage backend not found”**：确认 `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`，并安装 SQLite-vec 依赖；"
+        "context": "**\"Storage backend not found\"**"
       },
       {
-        "line": 256,
+        "line": 340,
+        "token": "dependencies",
+        "context": "- Check that SQLite-vec dependencies are installed"
+      },
+      {
+        "line": 342,
         "token": "file",
-        "context": "- **“Database file not found”**：检查 `MCP_MEMORY_SQLITE_PATH` 路径与文件权限。"
+        "context": "**\"Database file not found\"**"
       },
       {
-        "line": 265,
+        "line": 343,
+        "token": "points",
+        "context": "- Verify `MCP_MEMORY_SQLITE_PATH` points to migrated database"
+      },
+      {
+        "line": 344,
+        "token": "file",
+        "context": "- Check file permissions"
+      },
+      {
+        "line": 350,
+        "token": "time",
+        "context": "| Startup time | ~2-3 seconds | ~0.5 seconds |"
+      },
+      {
+        "line": 351,
+        "token": "usage",
+        "context": "| Memory usage | ~100-200MB | ~20-50MB |"
+      },
+      {
+        "line": 352,
+        "token": "files",
+        "context": "| Storage | Directory + files | Single file |"
+      },
+      {
+        "line": 353,
         "token": "chromadb",
-        "context": "| 依赖 | chromadb、sqlite 等 | 仅 sqlite-vec |"
+        "context": "| Dependencies | chromadb, sqlite | sqlite-vec only |"
       },
       {
-        "line": 281,
+        "line": 354,
+        "token": "memories",
+        "context": "| Scalability | Better for >10k memories | Optimal for <10k memories |"
+      },
+      {
+        "line": 358,
+        "token": "you",
+        "context": "If you need to switch back to ChromaDB:"
+      },
+      {
+        "line": 368,
+        "token": "original",
+        "context": "Your original ChromaDB data remains unchanged during migration."
+      },
+      {
+        "line": 372,
+        "token": "successful",
+        "context": "After successful migration:"
+      },
+      {
+        "line": 374,
+        "token": "memory",
+        "context": "1. ✅ Test memory operations (store, retrieve, search)"
+      },
+      {
+        "line": 375,
         "token": "HTTP/SSE",
-        "context": "2. ✅ 尝试 HTTP/SSE 控制台；"
+        "context": "2. ✅ Try the HTTP/SSE interface for real-time updates"
+      },
+      {
+        "line": 376,
+        "token": "any",
+        "context": "3. ✅ Update any scripts or tools that reference storage paths"
+      },
+      {
+        "line": 377,
+        "token": "backing",
+        "context": "4. ✅ Consider backing up your new SQLite-vec database regularly"
+      },
+      {
+        "line": 378,
+        "token": "old",
+        "context": "5. ✅ Remove old ChromaDB data after confirming migration success"
+      },
+      {
+        "line": 382,
+        "token": "you",
+        "context": "If you encounter issues:"
+      },
+      {
+        "line": 383,
+        "token": "migration",
+        "context": "1. Check the migration output and error messages"
+      },
+      {
+        "line": 384,
+        "token": "environment",
+        "context": "2. Verify environment variables are set correctly"
+      },
+      {
+        "line": 385,
+        "token": "small",
+        "context": "3. Test with a small subset of data first"
+      },
+      {
+        "line": 386,
+        "token": "logs",
+        "context": "4. Review logs for detailed error information"
+      },
+      {
+        "line": 388,
+        "token": "migration",
+        "context": "The migration preserves all your data including:"
+      },
+      {
+        "line": 389,
+        "token": "content",
+        "context": "- Memory content and metadata"
+      },
+      {
+        "line": 390,
+        "token": "timestamps",
+        "context": "- Tags and timestamps"
+      },
+      {
+        "line": 391,
+        "token": "hashes",
+        "context": "- Content hashes (for deduplication)"
+      },
+      {
+        "line": 392,
+        "token": "embeddings",
+        "context": "- Semantic embeddings (regenerated with same model)"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        61,
-        39
-      ],
-      "codeblock": [
-        44,
-        34
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/guides/scripts.md",
     "chinese": "docs/guides/scripts_zh-cn.md",
-    "status": "ok",
+    "status": "outdated",
     "missing": false,
-    "outdated": true,
-    "untranslated_snippets": [],
+    "outdated": false,
+    "untranslated_snippets": [
+      {
+        "line": 10,
+        "token": "script",
+        "context": "- `run_memory_server.py`: Main script to start the memory service server"
+      },
+      {
+        "line": 16,
+        "token": "installation",
+        "context": "- `verify_environment.py`: Verifies the installation environment and dependencies"
+      },
+      {
+        "line": 22,
+        "token": "installation",
+        "context": "- `test_installation.py`: Tests the installation and basic functionality"
+      },
+      {
+        "line": 28,
+        "token": "integrity",
+        "context": "- `validate_memories.py`: Validates the integrity of stored memories"
+      },
+      {
+        "line": 32,
+        "token": "corrupted",
+        "context": "- `repair_memories.py`: Repairs corrupted or invalid memories"
+      },
+      {
+        "line": 36,
+        "token": "all",
+        "context": "- `list-collections.py`: Lists all available memory collections"
+      },
+      {
+        "line": 42,
+        "token": "migration",
+        "context": "- `mcp-migration.py`: Handles migration of MCP-related data"
+      },
+      {
+        "line": 46,
+        "token": "migration",
+        "context": "- `memory-migration.py`: Handles migration of memory data"
+      },
+      {
+        "line": 52,
+        "token": "installation",
+        "context": "- `verify_pytorch_windows.py`: Verifies PyTorch installation on Windows"
+      },
+      {
+        "line": 56,
+        "token": "verification",
+        "context": "- `verify_torch.py`: General PyTorch verification"
+      },
+      {
+        "line": 62,
+        "token": "scripts",
+        "context": "- Most scripts can be run directly with Python"
+      },
+      {
+        "line": 63,
+        "token": "scripts",
+        "context": "- Some scripts may require specific environment variables to be set"
+      },
+      {
+        "line": 64,
+        "token": "run",
+        "context": "- Always run verification scripts after installation or major updates"
+      },
+      {
+        "line": 65,
+        "token": "migration",
+        "context": "- Use migration scripts with caution and ensure backups are available"
+      },
+      {
+        "line": 69,
+        "token": "packages",
+        "context": "- Required packages listed in `requirements.txt`"
+      },
+      {
+        "line": 70,
+        "token": "scripts",
+        "context": "- Some scripts may require additional dependencies listed in `requirements-migration.txt`"
+      }
+    ],
     "structure_diff": {}
   },
   {
