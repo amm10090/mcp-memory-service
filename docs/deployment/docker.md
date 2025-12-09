@@ -1,5 +1,7 @@
 # Docker Deployment Guide
 
+[English](docker.md) | [简体中文](docker_zh-cn.md)
+
 This comprehensive guide covers deploying MCP Memory Service using Docker, including various configurations for different use cases and environments.
 
 ## Overview

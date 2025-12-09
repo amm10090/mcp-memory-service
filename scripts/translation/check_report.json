@@ -51118,113 +51118,240 @@
     "chinese": "docs/deployment/docker_zh-cn.md",
     "status": "outdated",
     "missing": false,
-    "outdated": true,
+    "outdated": false,
     "untranslated_snippets": [
       {
-        "line": 4,
-        "token": "boot",
-        "context": "支持多种模式：标准（供 MCP 客户端）、Standalone（测试/防止 boot loop）、HTTP/SSE、多副本生产等。"
+        "line": 9,
+        "token": "provides",
+        "context": "MCP Memory Service provides Docker support with multiple deployment configurations:"
+      },
+      {
+        "line": 11,
+        "token": "clients",
+        "context": "- **Standard Mode**: For MCP clients (Claude Desktop, VS Code, etc.)"
+      },
+      {
+        "line": 12,
+        "token": "testing",
+        "context": "- **Standalone Mode**: For testing and development (prevents boot loops)"
+      },
+      {
+        "line": 13,
+        "token": "HTTP/SSE",
+        "context": "- **HTTP/SSE Mode**: For web services and multi-client access"
+      },
+      {
+        "line": 14,
+        "token": "scalable",
+        "context": "- **Production Mode**: For scalable server deployments"
       },
       {
         "line": 18,
-        "token": "HTTP",
-        "context": "- `docker-compose.standalone.yml`：`MCP_STANDALONE_MODE=1`，映射 `8001`，适合测试/HTTP；"
+        "token": "installed",
+        "context": "- **Docker** 20.10+ installed on your system"
       },
       {
-        "line": 22,
-        "token": "metrics",
-        "context": "- `docker-compose.monitoring.yml`：暴露 metrics、接入 Prometheus。"
+        "line": 19,
+        "token": "recommended",
+        "context": "- **Docker Compose** 2.0+ (recommended for simplified deployment)"
+      },
+      {
+        "line": 20,
+        "token": "knowledge",
+        "context": "- Basic knowledge of Docker concepts"
+      },
+      {
+        "line": 21,
+        "token": "disk",
+        "context": "- Sufficient disk space for Docker images and container volumes"
+      },
+      {
+        "line": 39,
+        "token": "will",
+        "context": "This will:"
+      },
+      {
+        "line": 40,
+        "token": "image",
+        "context": "- Build a Docker image for the Memory Service"
+      },
+      {
+        "line": 41,
+        "token": "persistent",
+        "context": "- Create persistent volumes for the database and backups"
       },
       {
         "line": 42,
-        "token": "chromadb/sqlite_vec",
-        "context": "- `MCP_MEMORY_STORAGE_BACKEND`（chromadb/sqlite_vec）；"
-      },
-      {
-        "line": 43,
-        "token": "MCP_HTTP_HOST/PORT",
-        "context": "- `MCP_HTTP_HOST/PORT`、`MCP_STANDALONE_MODE`；"
+        "token": "service",
+        "context": "- Start the service configured for MCP clients"
       },
       {
         "line": 48,
-        "token": "restart",
-        "context": "- Docker Compose + `restart: unless-stopped` 或 Swarm/K8s；"
+        "token": "clients",
+        "context": "**Best for**: MCP clients like Claude Desktop, VS Code with MCP extension"
       },
       {
-        "line": 50,
-        "token": "PVC",
-        "context": "- 建议使用命名卷或 PVC 持久化数据；"
+        "line": 72,
+        "token": "development",
+        "context": "**Best for**: Testing, development, and preventing boot loops when no MCP client is connected"
       },
       {
-        "line": 51,
-        "token": "docker",
-        "context": "- 时常备份：`docker run --rm -v volume:/data ... tar czf backup.tar.gz /data`。"
+        "line": 103,
+        "token": "dependency",
+        "context": "**Best for**: Enhanced dependency management with UV package manager"
       },
       {
-        "line": 54,
-        "token": "healthcheck",
-        "context": "- `healthcheck`：`curl -f http://localhost:8001/health`；"
+        "line": 125,
+        "token": "path",
+        "context": "**Best for**: Custom Python path configurations and development mode"
       },
       {
-        "line": 55,
-        "token": "logs",
-        "context": "- 日志：`docker-compose logs -f` 或配置 json-file 滚动；"
+        "line": 186,
+        "token": "chromadb",
+        "context": "| `MCP_MEMORY_STORAGE_BACKEND` | `chromadb` | Storage backend (chromadb, sqlite_vec) |"
       },
       {
-        "line": 56,
-        "token": "metrics",
-        "context": "- Prometheus：通过环境变量开启 metrics 并暴露端口。"
+        "line": 187,
+        "token": "HTTP",
+        "context": "| `MCP_HTTP_HOST` | `0.0.0.0` | HTTP server bind address |"
       },
       {
-        "line": 59,
-        "token": "true",
-        "context": "1. **容器秒退**：未开启 Standalone／缺少 TTY → `stdin_open: true`、`tty: true`；"
+        "line": 188,
+        "token": "HTTP",
+        "context": "| `MCP_HTTP_PORT` | `8000` | HTTP server port |"
       },
       {
-        "line": 60,
-        "token": "chown",
-        "context": "2. **权限**：`chown -R 1000:1000 ./data` 或使用 `--user`；"
+        "line": 189,
+        "token": "false",
+        "context": "| `MCP_STANDALONE_MODE` | `false` | Enable standalone HTTP mode |"
       },
       {
-        "line": 62,
-        "token": "curl",
-        "context": "4. **网络不可达**：确认端口映射、`curl http://localhost:8001/health`；"
+        "line": 190,
+        "token": "none",
+        "context": "| `MCP_API_KEY` | `none` | API key for authentication |"
       },
       {
-        "line": 75,
-        "token": "openssl",
-        "context": "- 设置 `MCP_API_KEY=$(openssl rand -hex 32)`；"
+        "line": 196,
+        "token": "running",
+        "context": "| `DOCKER_CONTAINER` | `auto-detect` | Indicates running in Docker |"
       },
       {
-        "line": 76,
+        "line": 197,
+        "token": "false",
+        "context": "| `UV_ACTIVE` | `false` | Use UV package manager |"
+      },
+      {
+        "line": 198,
+        "token": "module",
+        "context": "| `PYTHONPATH` | `/app/src` | Python module search path |"
+      },
+      {
+        "line": 425,
+        "token": "exits",
+        "context": "**Symptom**: Container exits immediately with code 0"
+      },
+      {
+        "line": 427,
+        "token": "standalone",
+        "context": "**Solution**: Use standalone mode or ensure proper TTY configuration:"
+      },
+      {
+        "line": 440,
+        "token": "denied",
+        "context": "**Symptom**: Permission denied errors in container"
+      },
+      {
+        "line": 442,
+        "token": "volume",
+        "context": "**Solution**: Fix volume permissions:"
+      },
+      {
+        "line": 454,
+        "token": "initialization",
+        "context": "**Symptom**: Database initialization failures"
+      },
+      {
+        "line": 456,
+        "token": "containers",
+        "context": "**Solution**: Use SQLite-vec for containers:"
+      },
+      {
+        "line": 467,
+        "token": "connect",
+        "context": "**Symptom**: Cannot connect to containerized service"
+      },
+      {
+        "line": 469,
+        "token": "port",
+        "context": "**Solution**: Check port mapping and firewall:"
+      },
+      {
+        "line": 484,
+        "token": "couldn",
+        "context": "**Symptom**: `OSError: We couldn't connect to 'https://huggingface.co'` when starting container"
+      },
+      {
+        "line": 486,
+        "token": "cannot",
+        "context": "**Issue**: Container cannot download sentence-transformer models due to network restrictions"
+      },
+      {
+        "line": 490,
+        "token": "models",
+        "context": "1. **Pre-download models and mount cache (Recommended)**:"
+      },
+      {
+        "line": 506,
+        "token": "proxy",
+        "context": "2. **Configure proxy for Docker Desktop (Windows/Corporate networks)**:"
+      },
+      {
+        "line": 518,
+        "token": "offline",
+        "context": "3. **Use offline mode with pre-cached models**:"
+      },
+      {
+        "line": 531,
+        "token": "model",
+        "context": "4. **Docker Compose with model cache**:"
+      },
+      {
+        "line": 551,
+        "token": "mount",
+        "context": "**Prevention**: Always mount the Hugging Face cache directory as a volume to persist models between container runs and avoid re-downloading."
+      },
+      {
+        "line": 621,
         "token": "HTTPS",
-        "context": "- HTTPS：挂载证书并设置 `MCP_HTTPS_ENABLED=true`、`MCP_SSL_CERT_FILE/KEY_FILE`；"
+        "context": "### HTTPS Configuration"
       },
       {
-        "line": 77,
-        "token": "true",
-        "context": "- 容器限制：`--security-opt no-new-privileges:true --cap-drop ALL --read-only --tmpfs /tmp`。"
+        "line": 715,
+        "token": "installation/master-guide.md",
+        "context": "- [Installation Guide](../installation/master-guide.md) - General installation instructions"
       },
       {
-        "line": 83,
-        "token": "docker",
-        "context": "- 构建多架构镜像：`docker buildx build --platform linux/amd64,linux/arm64 ...`。"
+        "line": 716,
+        "token": "integration/multi-client.md",
+        "context": "- [Multi-Client Setup](../integration/multi-client.md) - Multi-client configuration"
+      },
+      {
+        "line": 717,
+        "token": "platforms/ubuntu.md",
+        "context": "- [Ubuntu Setup](../platforms/ubuntu.md) - Ubuntu Docker deployment"
+      },
+      {
+        "line": 718,
+        "token": "platforms/windows.md",
+        "context": "- [Windows Setup](../platforms/windows.md) - Windows Docker deployment"
+      },
+      {
+        "line": 719,
+        "token": "troubleshooting/general.md",
+        "context": "- [Troubleshooting](../troubleshooting/general.md) - Docker-specific troubleshooting"
       }
     ],
-    "structure_diff": {
-      "heading": [
-        111,
-        15
-      ],
-      "codeblock": [
-        74,
-        6
-      ],
-      "tables": [
-        12,
-        0
-      ]
-    }
+    "structure_diff": {}
   },
   {
     "english": "docs/deployment/dual-service.md",
