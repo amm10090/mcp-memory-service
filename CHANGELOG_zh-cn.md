@@ -4,13 +4,13 @@
 
 > 说明：本文件以时间倒序记录 v8.24.0 及以上版本的主要变更。保留英文关键词便于对照提交与 Issue。
 
-**Recent releases for MCP Memory Service (v8.0.0 and later)**
+（以下为 v8.0.0+ 版本的主要更新）
 
-All notable changes to the MCP Memory Service project will be documented in this file.
+本文件记录 MCP Memory Service 的主要变更。
 
-For older releases, see [CHANGELOG-HISTORIC.md](./CHANGELOG-HISTORIC.md).
+更早版本请见 [CHANGELOG-HISTORIC.md](./CHANGELOG-HISTORIC.md)。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式遵循 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并遵守 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [8.16.1] - 2025-11-02
 
@@ -104,19 +104,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- **Critical Python Syntax Error in Hook Installer** - Fixed IndentationError in `claude-hooks/install_hooks.py` (line 790)
-  - **Issue**: Extra closing braces in SessionEnd hook configuration caused installation to fail
-  - **Symptom**: `IndentationError: unexpected indent` when running `python install_hooks.py`
-  - **Root Cause**: Git merge conflict resolution left two extra `}` characters (lines 790-791)
-  - **Impact**: Users could not install or update hooks after pulling v8.15.0
-  - **Fix**: Removed extra closing braces, corrected indentation
+- **严重：Hook 安装脚本语法错误** —— 修复 `claude-hooks/install_hooks.py` 第 790 行的 IndentationError
+  - **问题**：SessionEnd 钩子配置多了两个 `}`，导致安装失败。
+  - **症状**：运行 `python install_hooks.py` 报 `IndentationError: unexpected indent`。
+  - **根因**：合并冲突处理后遗留 2 个多余 `}`（行 790-791）。
+  - **影响**：拉取 v8.15.0 后无法安装/更新钩子。
+  - **修复**：移除多余 `}`，修正缩进。
   - **Files Modified**: `claude-hooks/install_hooks.py`
-  - **Testing**: Verified successful installation on macOS after fix
+  - **测试**：修复后在 macOS 验证安装通过。
 
-### Technical Details
+### 技术细节
 
 - **Line Numbers**: 788-791 in install_hooks.py
-- **Error Type**: IndentationError (Python syntax)
+- **错误类型**：IndentationError（Python 语法）
 - **Detection Method**: Manual testing during hook reinstallation
 - **Resolution Time**: Immediate (same-day patch)
 
@@ -164,7 +164,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Breaking Change**: None - fully backward compatible
   - **Upstream Issue**: Awaiting fix from Anthropic Claude Code team (claude-code#9542)
 
-### Technical Details
+### 技术细节
 
 - **Files Created**: 1 new slash command
   - `claude_commands/session-start.md` - Full command documentation
@@ -226,7 +226,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Mock updated for proper method delegation
   - Real storage backends (SqliteVecMemoryStorage, HybridMemoryStorage) work correctly
 
-### Technical Details
+### 技术细节
 
 - **Files Modified**: 5 files
 
@@ -271,7 +271,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Enables direct memory retrieval by content hash without loading all memories
   - See issue #196 for planned optimization to use this method in MemoryService
 
-### Technical Details
+### 技术细节
 
 - **Files Modified**:
   - `src/mcp_memory_service/services/memory_service.py`: Added 14 TypedDict classes, updated 6 method signatures
@@ -320,7 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - No need to remember which parameter accepts which format
     - Improved developer experience and reduced friction
 
-### Technical Details
+### 技术细节
 
 - **Affected Components**: MemoryService (business logic layer), MCP server documentation
 - **Breaking Changes**: None - fully backward compatible
@@ -351,7 +351,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Result**: Clean, consistent tree structure with proper visual hierarchy and no redundancy
   - **User Impact**: Professional CLI output, easier to scan, maintains continuous blue tree lines properly
 
-### Technical Details
+### 技术细节
 
 - **Affected Component**: Claude Code memory awareness hooks (SessionStart display)
 - **Deployment**: Hooks loaded from repository automatically, no server restart needed
@@ -383,7 +383,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Git context weight adjusts based on actual ages
   - **Note**: Affects all users using HTTP protocol for memory hooks
 
-### Technical Details
+### 技术细节
 
 - **Affected Component**: Claude Code memory awareness hooks (HTTP protocol path)
 - **File Changed**: `claude-hooks/utilities/memory-client.js` (lines 273-294)
@@ -410,7 +410,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Result**: MCP tools now work correctly with proper error messages
   - **Note**: Requires MCP server restart (`/mcp` command in Claude Code) to load fix
 
-### Technical Details
+### 技术细节
 
 - **Introduced**: v8.12.0 MemoryService architecture refactoring (#176)
 - **Affected Tools**: store_memory, all MCP protocol operations
@@ -457,7 +457,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Prevents "database is locked" errors from concurrent CREATE TABLE/INDEX attempts
   - **Result**: MCP and HTTP servers now coexist without conflicts, maintaining pre-v8.9.0 concurrent access behavior
 
-### Technical Details
+### 技术细节
 
 - **Timeline**: Bug discovered during memory consolidation testing, fixed same day
 - **Affected Versions**: v8.9.0 introduced database lock prevention pragmas but didn't fix concurrent initialization
@@ -539,7 +539,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Analytics Endpoint Performance** - Increased monthly sample from 2,000 to 5,000 memories
 - **Code Quality** - Added TODO comments for moving monthly calculations to storage layer
 
-### Technical Details
+### 技术细节
 
 - **Timeline**: All 4 bugs discovered and fixed within 4 hours of v8.12.0 release (15:03 UTC → 22:03 UTC)
 - **Post-Mortem**: Created Issue #190 for HTTP server integration tests to prevent future production bugs
@@ -601,7 +601,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Scalable pagination with offset/limit at storage layer
   - Efficient tag and type filtering
 
-### Technical Details
+### 技术细节
 
 - **Files Modified**: 6 files, 1469 additions, 356 deletions
 - **Test Coverage**: 55 new tests (34 unit + 21 integration)
@@ -708,7 +708,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Cloudflare credentials included when backend requires them
   - Backward compatible with existing installations
 
-### Technical Details
+### 技术细节
 
 - **Files Modified**:
   - `scripts/installation/install.py`: Lines 655-659 (compatibility), 758 (menu), 784-802 (selection), 970-1017 (hybrid install), 1123-1133 (env config), 1304 (path config), 1381-1401 (Claude Desktop config), 1808-1821 (final messages)
@@ -867,7 +867,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **find_all_duplicates.py** - Fast duplicate detection with timestamp normalization (<2s for 2000 memories)
   - **README.md** - Complete documentation with performance benchmarks, best practices, and troubleshooting
 
-### Technical Details
+### 技术细节
 
 - **Migration Approach**: Drop-and-recreate embeddings table to change distance metric (vec0 limitation)
 - **Retry Logic**: Exponential backoff for database locking (1s → 2s → 4s delays)
@@ -970,7 +970,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Partial success handling for bulk operations with clear error reporting
   - Progress tracking for background tasks with status updates
 
-### Technical Details
+### 技术细节
 
 - **Testing**: 19 Gemini Code Assist reviews addressed with comprehensive fixes
 - **Performance**: Document viewer handles 430+ chunks efficiently
@@ -1355,7 +1355,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - 现可使用完整 3 天上下文，记忆召回更佳。
   - 位置：`~/.claude/hooks/config.json`。
 
-### Technical Details
+### 技术细节
 - **HTTP Server Manager Architecture**:
   - PID tracking via `/tmp/mcp_memory_http.pid` (shared location for orphan detection)
   - Config fingerprinting via MD5 hash of `.env` file (detects credential/backend changes)
@@ -1391,7 +1391,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **迁移**：直接替换，无需改配置。
   - **位置**：`src/mcp_memory_service/models/memory.py:84`（已移除）。
 
-### Technical Details
+### 技术细节
 - **错误信息**：`UnboundLocalError: cannot access local variable 'calendar' where it is not associated with a value`
 - **触发频率**：Cloudflare 混合后端初始化期间持续 ~100ms 重复。
 - **测试结果**：修复后服务可正常启动，健康检查响应正常，Cloudflare 同步无报错。
@@ -1427,7 +1427,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Result: 0 sync failures, all operations processing successfully
   - Locations: `src/mcp_memory_service/storage/hybrid.py` (lines 547-559, 77-119), `src/mcp_memory_service/storage/cloudflare.py` (lines 606-612, 741-747, 830-836, 1474-1480)
 
-### Technical Details
+### 技术细节
 - **Compression Architecture**: Phase 1 of 3-phase metadata optimization plan
   - Phase 1 (COMPLETE): CSV-based compression for quality/consolidation metadata
   - Phase 2 (AVAILABLE): Binary encoding with struct/msgpack (85-90% reduction target)
@@ -1561,7 +1561,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - All tests use monkeypatch for configuration override
   - 100% test pass rate (5/5 new tests, 17/18 total consolidation tests)
 
-### Technical Details
+### 技术细节
 - Feature enabled by default to provide immediate value
 - Boost calculation time: ~5-10 microseconds per memory (negligible overhead)
 - Memory overhead: ~200 bytes per boosted memory (5 metadata fields)
@@ -1594,7 +1594,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Passes flag to Cloudflare backend during update operations
   - Maintains temporal consistency across hybrid backends
 
-### Technical Details
+### 技术细节
 - Affects only hybrid backend with Cloudflare secondary storage
 - SQLite-vec primary storage was working correctly (scores persisted locally)
 - Issue manifested during background sync to Cloudflare D1
@@ -1615,7 +1615,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Warnings appeared because importing `mcp_memory_service` loaded sqlite-vec/sentence_transformers dependencies
   - Provides clean installation experience without misleading warnings
 
-### Technical Details
+### 技术细节
 - Root cause (session-start): `memory-client.js` missing function implementation for combined tag+time queries
 - Root cause (installer warnings): Hook installer imported main package for version detection, triggering model initialization warnings
 - Fix applies to all platforms (Windows, macOS, Linux)
@@ -1629,7 +1629,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Added explicit `encoding='utf-8'` to all JSON file read/write operations
   - Added `ensure_ascii=False` to `json.dump()` for proper Unicode handling
 
-### Technical Details
+### 技术细节
 - Root cause: Windows console default encoding (CP1252) doesn't support Unicode emojis (✅, ⚠️, etc.)
 - Fix applies to all Windows systems regardless of console code page setting
 
@@ -1659,7 +1659,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 - Updated hook scoring weights: timeDecay (20%), tagRelevance (30%), contentRelevance (10%), contentQuality (20%), backendQuality (20%)
 
-### Technical Details
+### 技术细节
 - Hook evaluation: Non-blocking with 10s timeout, graceful fallback on failure
 - Requires Memory Quality System (v8.45.0+) to be enabled
 
@@ -1675,7 +1675,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Model now exports to `~/.cache/mcp_memory/onnx_models/ms-marco-MiniLM-L-6-v2/model.onnx` on first initialization
 - Added graceful fallback: tries `local_files_only` first, then online download if not cached
 
-### Technical Details
+### 技术细节
 - Performance: 7-16ms per memory scoring on CPU (CPUExecutionProvider)
 - Model size: ~23MB exported ONNX model
 - Dependencies: Requires `transformers`, `torch`, `onnxruntime`, `onnx` packages
@@ -2568,7 +2568,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Performance**: First run downloads model, subsequent runs use cache
   - **File Modified**: `.github/workflows/main.yml`
 
-### Technical Details
+### 技术细节
 - **PR #224**: Drift detection script now properly initializes Cloudflare backend with all required parameters (api_token, account_id, d1_database_id, vectorize_index)
 - **PR #225**: CI environment now caches embedding models, eliminating network dependency during test execution
 - **Testing**: Both fixes validated in PR test runs - drift detection now works, tests pass consistently
@@ -2602,7 +2602,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Periodic sync includes drift detection checks at configurable intervals
 - Sync statistics tracking expanded with drift detection metrics
 
-### Technical Details
+### 技术细节
 - **Files Modified**:
   - `src/mcp_memory_service/config.py` - Added 3 configuration variables
   - `src/mcp_memory_service/storage/hybrid.py` - Drift detection implementation (~150 lines)
@@ -2623,7 +2623,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Performance impact: Minor - reduced DOM query overhead
   - Breaking changes: None
 
-### Technical Details
+### 技术细节
 - **Files Modified**: `src/mcp_memory_service/web/api/documents.py`, `src/mcp_memory_service/web/static/app.js`, `src/mcp_memory_service/web/static/index.html`
 - **Code Quality**: Regex-based sanitization more scalable, DOM element caching reduces redundant queries
 - **Commit**: ffc6246 - refactor: code quality improvements from Gemini review (issue #180)
@@ -2650,7 +2650,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - GitHub release workflow now more reliable with enhanced agent guardrails
 - Test suite provides better coverage for multi-filter memory retrieval scenarios
 
-### Technical Details
+### 技术细节
 - **Files Modified**:
   - `.claude/agents/github-release-manager.md` - Added CRITICAL section for Previous Releases maintenance
   - `tests/test_time_filtering.py` - 10 new unit tests for tag+time filtering
@@ -2673,7 +2673,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Workflow tests can now properly validate that the development setup validator correctly detects problems
 - Exit code capture no longer uses "|| true" pattern (was making all commands return 0)
 
-### Technical Details
+### 技术细节
 - **Files Modified**: .github/workflows/dev-setup-validation.yml
 - **Pattern Change**:
   - Before: `python script.py || true` (always returns 0, breaks exit code testing)
@@ -2696,7 +2696,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Test suite now has cleaner baseline for detecting new regressions
 - All async test fixtures now use @pytest_asyncio.fixture decorator
 
-### Technical Details
+### 技术细节
 - **Automated Fix**: Used amp-bridge agent for pattern-based refactoring
 - **Execution Time**: ~15 minutes (vs 1-2 hours manual)
 - **Files Modified**: 11 test files across tests/ and tests/integration/
@@ -2717,7 +2717,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Distribution Method**: Added PyPI as primary distribution channel alongside GitHub releases
 - **Installation Documentation**: Updated guides to include pip-based installation as recommended method
 
-### Technical Details
+### 技术细节
 - **Files Modified**:
   - `.github/workflows/publish.yml` - NEW workflow for automated PyPI publishing
   - GitHub repository secrets - Added `PYPI_TOKEN` for authentication
@@ -2763,7 +2763,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Pre-commit Hook**: Now validates venv consistency before allowing commits
 - **Installation Process**: Detects developer mode and provides targeted guidance
 
-### Technical Details
+### 技术细节
 - **6-Layer Prevention System**:
   1. **Development**: Pre-commit hook blocks bad commits, detection script validates setup
   2. **Runtime**: Server startup warnings catch edge cases
