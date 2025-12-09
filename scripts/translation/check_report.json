@@ -29113,289 +29113,39 @@
       },
       {
         "line": 2318,
-        "token": "now",
-        "context": "- **PyPI Publishing Automation** - Package now available via `pip install mcp-memory-service`"
+        "token": "pip",
+        "context": "- **PyPI 发布自动化** —— 现可通过 `pip install mcp-memory-service` 获取。"
       },
       {
         "line": 2319,
-        "token": "workflow",
-        "context": "- **Workflow Automation**: Configured GitHub Actions workflow to automatically publish to PyPI on tag pushes"
+        "token": "tag",
+        "context": "- GitHub Actions 在打 tag 时自动发布到 PyPI（使用 `PYPI_TOKEN` 机密）。"
       },
       {
         "line": 2320,
-        "token": "can",
-        "context": "- **Installation Simplification**: Users can now install directly via `pip install mcp-memory-service` or `uv pip install mcp-memory-service`"
+        "token": "pip",
+        "context": "- 安装更简：`pip install mcp-memory-service` 或 `uv pip install mcp-memory-service`。"
       },
       {
         "line": 2321,
-        "token": "installation",
-        "context": "- **Accessibility**: Resolves installation barriers for users without git access or familiarity"
+        "token": "git/",
+        "context": "- 解决无 git/不熟悉源码用户的安装门槛。"
       },
       {
-        "line": 2322,
-        "token": "secret",
-        "context": "- **Token Configuration**: Secured with `PYPI_TOKEN` GitHub secret for automated publishing"
-      },
-      {
-        "line": 2323,
-        "token": "only",
-        "context": "- **Quality Gates**: Publishes only after successful test suite execution"
+        "line": 2325,
+        "token": "release",
+        "context": "- 发行渠道：新增 PyPI 为主渠道，保留 GitHub release。"
       },
       {
         "line": 2326,
-        "token": "primary",
-        "context": "- **Distribution Method**: Added PyPI as primary distribution channel alongside GitHub releases"
-      },
-      {
-        "line": 2327,
-        "token": "guides",
-        "context": "- **Installation Documentation**: Updated guides to include pip-based installation as recommended method"
-      },
-      {
-        "line": 2331,
-        "token": "workflow",
-        "context": "- `.github/workflows/publish.yml` - NEW workflow for automated PyPI publishing"
-      },
-      {
-        "line": 2332,
-        "token": "repository",
-        "context": "- GitHub repository secrets - Added `PYPI_TOKEN` for authentication"
-      },
-      {
-        "line": 2333,
-        "token": "runs",
-        "context": "- **Trigger**: Workflow runs automatically on git tag creation (pattern: `v*.*.*`)"
-      },
-      {
-        "line": 2334,
-        "token": "build",
-        "context": "- **Build System**: Uses Hatchling build backend with `python-semantic-release`"
-      },
-      {
-        "line": 2337,
-        "token": "installation",
-        "context": "- **For New Users**: Preferred installation is now `pip install mcp-memory-service`"
-      },
-      {
-        "line": 2338,
-        "token": "action",
-        "context": "- **For Existing Users**: No action required - git-based installation continues to work"
-      },
-      {
-        "line": 2339,
-        "token": "creation",
-        "context": "- **For Contributors**: Tag creation now triggers PyPI publishing automatically"
-      },
-      {
-        "line": 2344,
-        "token": "layer",
-        "context": "- **Stale Virtual Environment Prevention System** - Comprehensive 6-layer strategy to prevent \"stale venv vs source code\" version mismatches"
-      },
-      {
-        "line": 2345,
-        "token": "servers",
-        "context": "- **Root Cause**: MCP servers load from site-packages, not source files. System restart doesn't help - it relaunches with same stale package"
-      },
-      {
-        "line": 2346,
-        "token": "issue",
-        "context": "- **Impact**: Prevented issue that caused v8.23.0 tag validation bug to persist despite v8.22.2 fix (source showed v8.23.0 while venv had v8.5.3)"
-      },
-      {
-        "line": 2350,
-        "token": "version",
-        "context": "- New `scripts/validation/check_dev_setup.py` - Validates source/venv version consistency, detects editable installs"
-      },
-      {
-        "line": 2351,
-        "token": "commits",
-        "context": "- Enhanced `scripts/hooks/pre-commit` - Blocks commits when venv is stale, provides actionable error messages"
-      },
-      {
-        "line": 2352,
-        "token": "development",
-        "context": "- Added CLAUDE.md development setup section with explicit `pip install -e .` guidance"
-      },
-      {
-        "line": 2355,
-        "token": "function",
-        "context": "- Added `check_version_consistency()` function in `src/mcp_memory_service/server.py`"
-      },
-      {
-        "line": 2356,
-        "token": "startup",
-        "context": "- Server startup warnings when version mismatch detected (source vs package)"
-      },
-      {
-        "line": 2357,
-        "token": "developer",
-        "context": "- Updated README.md developer section with editable install instructions"
-      },
-      {
-        "line": 2358,
-        "token": "docs/development/ai-agent-instructions.md",
-        "context": "- Enhanced `docs/development/ai-agent-instructions.md` with proper setup commands"
-      },
-      {
-        "line": 2361,
-        "token": "developer",
-        "context": "- Enhanced `scripts/installation/install.py` with developer detection (checks for git repo)"
-      },
-      {
-        "line": 2362,
-        "token": "prompt",
-        "context": "- Interactive prompt guides developers to use `pip install -e .` for editable installs"
-      },
-      {
-        "line": 2363,
-        "token": "workflow",
-        "context": "- New CI/CD workflow `.github/workflows/dev-setup-validation.yml` with 5 comprehensive test jobs:"
-      },
-      {
-        "line": 2364,
-        "token": "consistency",
-        "context": "1. Version consistency validation"
-      },
-      {
-        "line": 2365,
-        "token": "hook",
-        "context": "2. Pre-commit hook functionality"
-      },
-      {
-        "line": 2366,
-        "token": "startup",
-        "context": "3. Server startup warnings"
-      },
-      {
-        "line": 2367,
-        "token": "developer",
-        "context": "4. Interactive developer prompts"
-      },
-      {
-        "line": 2368,
-        "token": "accuracy",
-        "context": "5. Documentation accuracy checks"
-      },
-      {
-        "line": 2371,
-        "token": "now",
-        "context": "- **Developer Workflow**: Developers now automatically guided to use `pip install -e .` for proper setup"
-      },
-      {
-        "line": 2372,
-        "token": "validates",
-        "context": "- **Pre-commit Hook**: Now validates venv consistency before allowing commits"
-      },
-      {
-        "line": 2373,
-        "token": "developer",
-        "context": "- **Installation Process**: Detects developer mode and provides targeted guidance"
-      },
-      {
-        "line": 2377,
-        "token": "hook",
-        "context": "1. **Development**: Pre-commit hook blocks bad commits, detection script validates setup"
-      },
-      {
-        "line": 2378,
-        "token": "startup",
-        "context": "2. **Runtime**: Server startup warnings catch edge cases"
-      },
-      {
-        "line": 2379,
-        "token": "ai-agent-instructions.md",
-        "context": "3. **Documentation**: CLAUDE.md, README.md, ai-agent-instructions.md all updated"
-      },
-      {
-        "line": 2380,
-        "token": "hook",
-        "context": "4. **Automation**: check_dev_setup.py, pre-commit hook, CI/CD workflow"
-      },
-      {
-        "line": 2381,
-        "token": "prompts",
-        "context": "5. **Interactive**: install.py prompts developers for editable install"
-      },
-      {
-        "line": 2382,
-        "token": "workflow",
-        "context": "6. **Testing**: CI/CD workflow with 5 comprehensive test jobs"
-      },
-      {
-        "line": 2385,
-        "token": "automated",
-        "context": "- `scripts/validation/check_dev_setup.py` - NEW automated detection script"
-      },
-      {
-        "line": 2386,
-        "token": "venv",
-        "context": "- `scripts/hooks/pre-commit` - Enhanced with venv validation"
-      },
-      {
-        "line": 2387,
-        "token": "development",
-        "context": "- `CLAUDE.md` - Added development setup guidance"
-      },
-      {
-        "line": 2388,
-        "token": "runtime",
-        "context": "- `src/mcp_memory_service/server.py` - Added runtime version check"
-      },
-      {
-        "line": 2389,
-        "token": "developer",
-        "context": "- `README.md` - Updated developer section"
-      },
-      {
-        "line": 2390,
-        "token": "docs/development/ai-agent-instructions.md",
-        "context": "- `docs/development/ai-agent-instructions.md` - Updated setup commands"
-      },
-      {
-        "line": 2391,
-        "token": "developer",
-        "context": "- `scripts/installation/install.py` - Added developer detection"
-      },
-      {
-        "line": 2392,
-        "token": "validation",
-        "context": "- `.github/workflows/dev-setup-validation.yml` - NEW CI/CD validation"
-      },
-      {
-        "line": 2395,
         "token": "pip",
-        "context": "- **For Developers**: Run `pip install -e .` to install in editable mode (will be prompted by install.py)"
-      },
-      {
-        "line": 2396,
-        "token": "action",
-        "context": "- **For Users**: No action required - prevention system is transparent for production use"
-      },
-      {
-        "line": 2397,
-        "token": "installed",
-        "context": "- **Pre-commit Hook**: Automatically installed during `install.py`, validates on every commit"
-      },
-      {
-        "line": 2400,
-        "token": "fb74",
-        "context": "- `670fb74` - Phase 1: Automated detection (check_dev_setup.py, pre-commit hook, CLAUDE.md)"
-      },
-      {
-        "line": 2401,
-        "token": "warnings",
-        "context": "- `9537259` - Phase 2: Runtime warnings (server.py) + developer documentation"
-      },
-      {
-        "line": 2402,
-        "token": "onboarding",
-        "context": "- `a17bcc7` - Phase 3: Interactive onboarding (install.py) + CI/CD validation"
+        "context": "- 安装文档：更新为优先推荐 pip 安装。"
       }
     ],
     "structure_diff": {
       "heading": [
         189,
-        296
+        288
       ],
       "codeblock": [
         6,
