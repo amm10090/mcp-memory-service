@@ -1981,46 +1981,9 @@
 ## [8.38.0] - 2025-11-25
 
 ### Improved
-- **Code Quality: Phase 2b Duplicate Consolidation COMPLETE** - Eliminated ~176-186 lines of duplicate code (issue #246)
-  - **Document chunk processing consolidation (Group 3)**:
-    - Extracted `process_document_chunk()` helper function from duplicate implementations
-    - Consolidated chunk_text/chunk_size/chunk_overlap pattern across document ingestion tools
-    - 2 occurrences reduced to 1 canonical implementation with consistent metadata handling
-  - **MCP response parsing consolidation (Group 3)**:
-    - Extracted `parse_mcp_response()` helper for isError/error/content pattern
-    - Standardized error handling across MCP tool invocations
-    - 2 occurrences reduced to 1 canonical implementation
-  - **Cache statistics logging consolidation (Group 5)**:
-    - Extracted `log_cache_statistics()` helper for storage/service cache metrics
-    - Standardized cache performance logging format (hits, misses, hit rates)
-    - 2 occurrences reduced to 1 canonical implementation with consistent percentage formatting
-  - **Winter season boundary logic consolidation (Group 7)**:
-    - Extracted `is_winter_boundary_case()` helper for cross-year winter season handling
-    - Centralized December-January transition logic (Dec 21 - Mar 20 spans years)
-    - 2 occurrences reduced to 1 canonical implementation
-  - **Test tempfile setup consolidation (Groups 10, 11)**:
-    - Extracted `create_test_document()` helper for pytest tmp_path fixture patterns
-    - Standardized temporary file creation across document ingestion tests
-    - 6 occurrences reduced to 2 canonical implementations (PDF, DOCX variants)
-  - **MCP server configuration consolidation (Phase 2b-3)**:
-    - Consolidated duplicate server config sections in install.py and scripts/installation/install.py
-    - Unified JSON serialization logic for mcpServers configuration blocks
-    - Improved maintainability through shared configuration structure
-  - **User input prompt consolidation (Phase 2b-2)**:
-    - Extracted shared prompt logic for backend selection and configuration
-    - Standardized input validation patterns across installation scripts
-    - Reduced code duplication in interactive installation workflows
-  - **Additional GPU detection consolidation (Phase 2b-1)**:
-    - Completed GPU platform detection consolidation from Phase 2a
-    - Refined helper function extraction for test_gpu_platform() and related utilities
-    - Enhanced configuration-driven GPU detection architecture
-  - **Consolidation Summary**:
-    - Total duplicate code eliminated: ~176-186 lines across 10 consolidation commits
-    - Functions/patterns consolidated: 10+ duplicate implementations → canonical versions
-    - Strategic deference: 5 groups intentionally skipped (high-risk/low-benefit per session analysis)
-    - Code maintainability: Enhanced through focused helper methods and consistent patterns
-    - 100% backward compatibility maintained (no breaking changes)
-    - Test coverage: 100% maintained across all consolidations
+- **代码质量：Phase 2b 去重完成** —— 共消除约 176-186 行重复代码（#246）。
+  - 文档分块处理、MCP 响应解析、缓存统计日志、冬季跨年边界、测试临时文件、MCP 服务器配置、用户交互提示、GPU 检测等均抽取 Helper 统一；多处重复归一。
+  - 汇总：10 次合并，10+ 重复实现→规范版本；保留 5 组高风险/低收益未动；完全向后兼容，测试覆盖 100%。
 
 ### Code Quality
 - **Phase 2b Duplicate Consolidation**: 10 consolidation commits addressing multiple duplication groups
@@ -2036,21 +1999,9 @@
 ## [8.37.0] - 2025-11-24
 
 ### Improved
-- **Code Quality: Phase 2a Duplicate Consolidation COMPLETE** - Eliminated 5 duplicate high-complexity functions (issue #246)
-  - **detect_gpu() consolidation (3 duplicates → 1 canonical)**:
-    - Consolidated ROOT install.py::detect_gpu() (119 lines, complexity 30) with refactored scripts/installation/install.py version (187 lines, configuration-driven)
-    - Refactored scripts/validation/verify_environment.py::EnvironmentVerifier.detect_gpu() (123 lines, complexity 27) to use helper-based architecture
-    - Final canonical implementation in install.py: GPU_PLATFORM_CHECKS config dict + test_gpu_platform() helper + CUDA_VERSION_PARSER
-    - Impact: -4% high-complexity functions (27 → 26), improved maintainability
-  - **verify_installation() consolidation (2 duplicates → 1 canonical)**:
-    - Replaced scripts/installation/install.py simplified version with canonical ROOT install.py implementation
-    - Added tokenizers check for ONNX dependencies, safer DirectML version handling
-    - Improved error messaging and user guidance
-  - **Consolidation Summary**:
-    - Total duplicate functions eliminated: 5 (3x detect_gpu + 2x verify_installation)
-    - High-complexity functions reduced: 27 → 24 (-11%)
-    - Code maintainability improved through focused helper methods and configuration-driven design
-    - 100% backward compatibility maintained (no breaking changes)
+- **代码质量：Phase 2a 去重完成** —— 清理 5 个高复杂度重复函数（#246）。
+  - `detect_gpu()` 3 处归一；`verify_installation()` 2 处归一；补充 ONNX 依赖检查与 DirectML 处理；错误提示更完善。
+  - 高复杂度函数 27→24（-11%），保持 100% 兼容。
 
 ### Code Quality
 - **Phase 2a Duplicate Consolidation**: 5 of 5 target functions consolidated (100% complete)
