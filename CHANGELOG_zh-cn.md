@@ -1503,182 +1503,182 @@
 ## [8.47.0] - 2025-12-06
 
 ### Added
-- **Association-Based Quality Boost** - Memories with many connections automatically receive quality score boosts during consolidation
-  - Well-connected memories (≥5 connections by default) get 20% quality boost
-  - Leverages network effect: frequently referenced memories are likely more valuable
-  - Configurable via environment variables: `MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED`, `MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST`, `MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR`
-  - Valid boost factor range: 1.0-2.0 (default: 1.2 = 20% boost)
-  - Quality scores capped at 1.0 to prevent over-promotion
-  - Full metadata persistence with audit trail (connection count, original scores, boost date, boost reason)
-  - Impact: Boosted quality affects relevance scoring (~4% increase) and retention tier (can move from medium to high retention)
+- **基于关联的质量加成** —— 连接数多的记忆在整合时自动提升质量分。
+  - 默认连接数 ≥5 的记忆获得 20% 质量加成。
+  - 利用网络效应：被频繁引用的记忆往往更有价值。
+  - 可通过环境变量配置：`MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED`、`MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST`、`MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR`。
+  - 加成系数范围 1.0–2.0（默认 1.2 = 20%）。
+  - 质量分封顶 1.0，避免过度提升。
+  - 元数据完整留痕：连接数、原始分、加成时间与原因。
+  - 影响：质量加成约提升相关性 4%，可提升保留等级。
   - Location: `src/mcp_memory_service/consolidation/decay.py`
 
-- **Quality Boost Metadata Tracking** - Complete audit trail for all quality boosts applied during consolidation
-  - `quality_boost_applied`: Boolean flag indicating boost was applied
-  - `quality_boost_date`: ISO timestamp of when boost occurred
-  - `quality_boost_reason`: Always "association_connections" for this release
-  - `quality_boost_connection_count`: Number of connections that triggered the boost
-  - `original_quality_before_boost`: Preserved original quality score for analysis
+- **质量加成元数据追踪** —— 为整合过程中的每次加成记录审计信息。
+  - `quality_boost_applied`：是否已加成。
+  - `quality_boost_date`：加成时间（ISO）。
+  - `quality_boost_reason`：本版固定为 association_connections。
+  - `quality_boost_connection_count`：触发加成的连接数。
+  - `original_quality_before_boost`：保留原始质量分。
 
-- **Configuration Variables** - Three new environment variables with validation
-  - `MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED` (default: true) - Master toggle
-  - `MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST` (default: 5, range: 1-100) - Minimum connections required
-  - `MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR` (default: 1.2, range: 1.0-2.0) - Boost multiplier
+- **配置变量** —— 新增 3 个带校验的环境变量。
+  - `MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED`（默认 true）：总开关。
+  - `MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST`（默认 5，范围 1-100）：触发最低连接数。
+  - `MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR`（默认 1.2，范围 1.0-2.0）：加成倍数。
 
 ### Changed
-- **Exponential Decay Calculation** - Enhanced to include association-based quality boost
-  - Quality boost applied before quality multiplier calculation
-  - Debug logging for each boost application
-  - Info logging when persisting boosted scores to memory metadata
-  - Preserved original quality score in RelevanceScore metadata for comparison
+- **指数衰减计算** —— 纳入关联质量加成。
+  - 先应用质量加成，再计算质量乘子。
+  - 每次加成均记录调试日志。
+  - 持久化加成分时写 info 日志。
+  - 在 RelevanceScore 元数据中保留原始分以便对比。
 
-- **Memory Relevance Metadata** - Extended to include quality boost tracking
-  - `update_memory_relevance_metadata()` now persists boosted quality scores
-  - Automatic quality score update if boost was applied
-  - Metadata fields added: `quality_boost_applied`, `quality_boost_date`, `quality_boost_reason`, etc.
+- **记忆相关性元数据** —— 扩展以记录质量加成。
+  - `update_memory_relevance_metadata()` 会写入加成后的质量分。
+  - 若加成已应用，自动刷新质量分。
+  - 新增字段：`quality_boost_applied`、`quality_boost_date`、`quality_boost_reason` 等。
 
 ### Documentation
-- Added comprehensive feature guide: `docs/features/association-quality-boost.md`
-  - Configuration examples (conservative, balanced, aggressive)
-  - Impact on memory lifecycle (relevance, retention, forgetting resistance)
-  - Use cases (knowledge graphs, code documentation, research notes)
-  - Monitoring and troubleshooting guides
-  - Performance impact analysis (negligible computational cost)
-  - Future enhancement roadmap (connection quality analysis, temporal decay, bidirectional boost)
+- 新增完整特性指南：`docs/features/association-quality-boost.md`，含配置示例/影响/故障排查/性能。
+  - 覆盖保守/均衡/激进三类配置示例。
+  - 说明对相关性、保留期、遗忘抵抗的影响。
+  - 适用场景：知识图谱、代码文档、研究笔记等。
+  - 监控与故障排查指南。
+  - 性能影响评估（开销可忽略）。
+  - 后续路线：连接质量分析、时间衰减、双向加成。
 
-- Updated `CLAUDE.md` with v8.47.0 release information
-  - Added association-based quality boost to consolidation features list
-  - Added configuration examples with environment variables
-  - Updated version summary at top of file
+- 更新 `CLAUDE.md`，加入 v8.47.0 相关说明与配置示例。
+  - 在整合特性列表中新增关联质量加成说明。
+  - 补充环境变量配置示例。
+  - 更新文件顶部版本摘要。
 
 ### Tests
-- Added 5 comprehensive test cases in `tests/consolidation/test_decay.py`
-  - `test_association_quality_boost_enabled`: Validates boost increases scores
-  - `test_association_quality_boost_threshold`: Confirms minimum connection enforcement
-  - `test_association_quality_boost_caps_at_one`: Verifies quality cap at 1.0
-  - `test_association_quality_boost_disabled`: Tests feature disable functionality
-  - `test_association_quality_boost_persists_to_memory`: Validates metadata persistence
-  - All tests use monkeypatch for configuration override
-  - 100% test pass rate (5/5 new tests, 17/18 total consolidation tests)
+- 在 `tests/consolidation/test_decay.py` 新增 5 个测试用例。
+  - `test_association_quality_boost_enabled`：验证加成能提升分数。
+  - `test_association_quality_boost_threshold`：验证最低连接数阈值。
+  - `test_association_quality_boost_caps_at_one`：验证质量分封顶 1.0。
+  - `test_association_quality_boost_disabled`：验证关闭开关逻辑。
+  - `test_association_quality_boost_persists_to_memory`：验证元数据持久化。
+  - 测试均用 monkeypatch 注入配置。
+  - 通过率 100%（新 5/5，整合类 17/18）。
 
 ### 技术细节
-- Feature enabled by default to provide immediate value
-- Boost calculation time: ~5-10 microseconds per memory (negligible overhead)
-- Memory overhead: ~200 bytes per boosted memory (5 metadata fields)
-- No measurable impact on consolidation duration
-- Integration point: `ExponentialDecayCalculator._calculate_memory_relevance()`
-- Quality boost applied BEFORE quality multiplier calculation in relevance scoring
-- Boost only applied if: enabled, connection count ≥ threshold, boost would increase score
-- Future-proof: `MCP_CONSOLIDATION_MIN_CONNECTED_QUALITY` reserved for Phase 2 (connection quality analysis)
+- 默认开启，开箱即用。
+- 计算耗时约 5-10 µs/条，几乎无开销。
+- 内存开销约 200B/条（5 个元数据字段）。
+- 对整合耗时无显著影响。
+- 集成点：`ExponentialDecayCalculator._calculate_memory_relevance()`
+- 质量加成在相关性评分的质量乘子计算之前应用。
+- 仅在：开关开启、连接数达阈值且能提升分数时应用。
+- 预留 `MCP_CONSOLIDATION_MIN_CONNECTED_QUALITY` 供第二阶段（连接质量分析）。
 
 ## [8.46.3] - 2025-12-06
 
 ### Fixed
-- **Quality Score Persistence in Hybrid Backend** - Fixed ONNX quality scores not persisting to Cloudflare in hybrid storage backend
-  - Scores remained at default 0.5 instead of evaluated ~1.0 values
-  - Root cause: `/api/quality/evaluate` endpoint was passing entire `memory.metadata` dict to `update_memory_metadata()`
-  - Cloudflare backend expects quality fields wrapped in 'metadata' key, not as top-level fields
+- **混合后端质量分持久化** —— 修复 ONNX 质量分未同步到 Cloudflare。
+  - 评分停留在默认 0.5，未写入评估值 ~1.0。
+  - 根因：`/api/quality/evaluate` 将整份 `memory.metadata` 传给 `update_memory_metadata()`。
+  - Cloudflare 期望质量字段包在 `metadata` 内，而非顶层。
 
-- **Metadata Normalization for Cloudflare** - Added `_normalize_metadata_for_cloudflare()` helper function
-  - Separates Cloudflare-recognized top-level keys (metadata, memory_type, tags, timestamps) from custom metadata fields
-  - Wraps custom fields in 'metadata' key as expected by Cloudflare D1 backend
+- **Cloudflare 元数据规范化** —— 新增 `_normalize_metadata_for_cloudflare()` 帮助函数。
+  - 拆分 Cloudflare 认可的顶层键（metadata/memory_type/tags/timestamps）与自定义字段。
+  - 将自定义字段包裹到 `metadata`，符合 D1 预期。
   - Only wraps if not already wrapped (idempotent operation)
 
-- **Quality API Metadata Handling** - Modified `/api/quality/evaluate` endpoint to extract only quality-related fields
-  - Now passes only: quality_score, quality_provider, ai_scores, quality_components
-  - Prevents accidental metadata overwrites from passing entire metadata dict
+- **质量 API 元数据处理** —— `/api/quality/evaluate` 仅提取质量相关字段。
+  - 仅传：quality_score/quality_provider/ai_scores/quality_components。
+  - 避免整份元数据覆盖。
   - Added detailed logging for troubleshooting persistence issues
 
-- **Hybrid Backend Sync Operation** - Enhanced `SyncOperation` dataclass with `preserve_timestamps` flag
-  - Ensures timestamp preservation through background sync queue
-  - Passes flag to Cloudflare backend during update operations
-  - Maintains temporal consistency across hybrid backends
+- **混合后端同步操作** —— `SyncOperation` 增加 `preserve_timestamps` 标记。
+  - 通过后台队列保持时间戳。
+  - 更新时将标记传递给 Cloudflare。
+  - 维持混合后端时间一致性。
 
 ### 技术细节
-- Affects only hybrid backend with Cloudflare secondary storage
-- SQLite-vec primary storage was working correctly (scores persisted locally)
-- Issue manifested during background sync to Cloudflare D1
-- Verification: Search results now show quality scores of 1.000 instead of 0.500
+- 仅影响以 Cloudflare 为次级存储的混合后端。
+- SQLite-vec 主存储正常（本地评分已落盘）。
+- 问题出现在同步到 Cloudflare D1 的后台流程。
+- 验证：搜索结果质量分已从 0.500 恢复为 1.000。
 
 ## [8.46.2] - 2025-12-06
 
 ### Fixed
-- **Session-Start Hook Crash** - Added missing `queryMemoriesByTagsAndTime()` function to HTTP memory client
-  - Hook was calling undefined function, causing "is not a function" error on session start
-  - Implemented client-side tag filtering on time-based search results
-  - Works with both HTTP and MCP protocols
-  - Enables users to use session-start hooks without crashes
+- **Session-Start 钩子崩溃** —— 为 HTTP memory client 补上 `queryMemoriesByTagsAndTime()`。
+  - 钩子调用未定义函数，触发 session start 报错“is not a function”。
+  - 在客户端对按时间搜索结果做标签过滤。
+  - 兼容 HTTP 与 MCP 协议。
+  - 现在可安全使用 session-start 钩子。
 
-- **Hook Installer Warnings Eliminated** - Removed confusing package import warnings during installation
-  - Created `_version.py` to isolate version metadata from main package
-  - Updated `install_hooks.py` to read version from `pyproject.toml` (avoids heavy imports)
-  - Warnings appeared because importing `mcp_memory_service` loaded sqlite-vec/sentence_transformers dependencies
-  - Provides clean installation experience without misleading warnings
+- **消除钩子安装警告** —— 移除安装时的包导入警告。
+  - 新增 `_version.py` 孤立版本元数据。
+  - `install_hooks.py` 改为从 `pyproject.toml` 读取版本，避免重型依赖导入。
+  - 原因：导入 `mcp_memory_service` 会加载 sqlite-vec / sentence_transformers。
+  - 现在安装输出干净、无误导警告。
 
 ### 技术细节
-- Root cause (session-start): `memory-client.js` missing function implementation for combined tag+time queries
-- Root cause (installer warnings): Hook installer imported main package for version detection, triggering model initialization warnings
-- Fix applies to all platforms (Windows, macOS, Linux)
+- 根因（session-start）：`memory-client.js` 缺少标签+时间查询实现。
+- 根因（安装警告）：安装器为读版本导入主包，触发模型初始化警告。
+- 修复对所有平台生效（Windows/macOS/Linux）。
 
 ## [8.46.1] - 2025-12-06
 
 ### Fixed
-- **Windows Hooks Installer Encoding** - Fixed `'charmap' codec can't encode character` error when running `install_hooks.py` on Windows
-  - Added UTF-8 console configuration (CP65001) at script startup
-  - Reconfigured stdout/stderr with `encoding='utf-8', errors='replace'`
-  - Added explicit `encoding='utf-8'` to all JSON file read/write operations
-  - Added `ensure_ascii=False` to `json.dump()` for proper Unicode handling
+- **Windows 钩子安装器编码** —— 修复在 Windows 运行 `install_hooks.py` 报 `'charmap' codec can't encode character`。
+  - 启动时将控制台编码设置为 UTF-8（CP65001）。
+  - 重设 stdout/stderr：`encoding='utf-8', errors='replace'`。
+  - 所有 JSON 读写显式指定 `encoding='utf-8'`。
+  - `json.dump()` 使用 `ensure_ascii=False`，正确处理 Unicode。
 
 ### 技术细节
-- Root cause: Windows console default encoding (CP1252) doesn't support Unicode emojis (✅, ⚠️, etc.)
-- Fix applies to all Windows systems regardless of console code page setting
+- 根因：Windows 控制台默认 CP1252 不支持表情符（✅、⚠️ 等）。
+- 适用于所有 Windows 系统，与代码页设置无关。
 
 ## [8.46.0] - 2025-12-06
 
 ### Added
-- **Quality System + Hooks Integration** - Complete 3-phase integration of AI quality scoring into memory awareness hooks:
-  - **Phase 1**: Hooks read `backendQuality` from memory metadata (20% weight in scoring)
-  - **Phase 2**: Session-end hook triggers async `/api/quality/memories/{hash}/evaluate` endpoint
-  - **Phase 3**: Quality-boosted search with `quality_boost` and `quality_weight` parameters
+- **质量系统 + 钩子集成** —— 将 AI 质量评分分三阶段融入记忆感知钩子：
+  - **Phase 1**：钩子从元数据读取 `backendQuality`（权重 20%）。
+  - **Phase 2**：session-end 钩子异步触发 `/api/quality/memories/{hash}/evaluate`。
+  - **Phase 3**：检索支持 `quality_boost` / `quality_weight` 进行质量增强。
 
-- **`POST /api/quality/memories/{hash}/evaluate`** - New endpoint to trigger AI-based quality evaluation
-  - Uses multi-tier system (ONNX local → Groq → Gemini → Implicit)
-  - Returns quality_score, quality_provider, ai_score, evaluation_time_ms
-  - Performance: ~355ms with ONNX ranker
+- **`POST /api/quality/memories/{hash}/evaluate`** —— 触发 AI 质量评估的新端点。
+  - 多层体系：ONNX 本地 → Groq → Gemini → 隐式。
+  - 返回：quality_score、quality_provider、ai_score、evaluation_time_ms。
+  - ONNX 评估约 355ms。
 
-- **Quality-Boosted Search** - Added `quality_boost` and `quality_weight` to `/api/search`
-  - Over-fetches 3x results, reranks with composite score
-  - Formula: `(1-weight)*semantic + weight*quality`
-  - Returns `search_type: "semantic_quality_boost"` with score breakdown
+- **质量增强搜索** —— `/api/search` 增加 `quality_boost`、`quality_weight`。
+  - 过取 3× 结果后用综合分重排。
+  - 公式：`(1-weight)*semantic + weight*quality`。
+  - 返回 `search_type: "semantic_quality_boost"` 及分数构成。
 
-- **Hook Integration Functions**
-  - `calculateBackendQuality()` in `memory-scorer.js` extracts quality_score from metadata
-  - `triggerQualityEvaluation()` in `session-end.js` for async scoring
-  - `queryMemories()` in `memory-client.js` supports `qualityBoost` option
+- **钩子集成函数**
+  - `calculateBackendQuality()`（memory-scorer.js）从元数据取质量分。
+  - `triggerQualityEvaluation()`（session-end.js）触发异步评分。
+  - `queryMemories()`（memory-client.js）支持 `qualityBoost` 选项。
 
 ### Changed
-- Updated hook scoring weights: timeDecay (20%), tagRelevance (30%), contentRelevance (10%), contentQuality (20%), backendQuality (20%)
+- 钩子评分权重调整：timeDecay 20%，tagRelevance 30%，contentRelevance 10%，contentQuality 20%，backendQuality 20%。
 
 ### 技术细节
-- Hook evaluation: Non-blocking with 10s timeout, graceful fallback on failure
-- Requires Memory Quality System (v8.45.0+) to be enabled
+- 钩子评估：10s 超时，失败回退且非阻塞。
+- 需开启 Memory Quality System（v8.45.0+）。
 
 ## [8.45.3] - 2025-12-06
 
 ### Fixed
-- **ONNX Ranker Model Export** - Fixed broken model download URL (404 from HuggingFace) by implementing automatic model export from transformers to ONNX format on first use
-- **Offline Mode Support** - Added `local_files_only=True` support for air-gapped/offline environments using cached HuggingFace models
-- **Tokenizer Loading** - Fixed tokenizer initialization to load from exported pretrained files instead of broken archive
+- **ONNX Ranker 模型导出** —— 首次使用自动从 transformers 导出 ONNX，修复 HuggingFace 404 下载问题。
+- **离线模式支持** —— `local_files_only=True` 支持隔离/离线环境使用缓存模型。
+- **Tokenizer 加载** —— 改为从导出的预训练文件加载，避免损坏的压缩包。
 
 ### Changed
-- Replaced failing `onnx.tar.gz` download approach with dynamic export from `cross-encoder/ms-marco-MiniLM-L-6-v2` via transformers
-- Model now exports to `~/.cache/mcp_memory/onnx_models/ms-marco-MiniLM-L-6-v2/model.onnx` on first initialization
-- Added graceful fallback: tries `local_files_only` first, then online download if not cached
+- 取消失败的 `onnx.tar.gz` 下载，改用 transformers 动态导出 `cross-encoder/ms-marco-MiniLM-L-6-v2`。
+- 首次初始化导出到 `~/.cache/mcp_memory/onnx_models/ms-marco-MiniLM-L-6-v2/model.onnx`。
+- 优雅回退：先尝试 `local_files_only`，无缓存再联机下载。
 
 ### 技术细节
-- Performance: 7-16ms per memory scoring on CPU (CPUExecutionProvider)
-- Model size: ~23MB exported ONNX model
-- Dependencies: Requires `transformers`, `torch`, `onnxruntime`, `onnx` packages
+- 性能：CPU 评分约 7–16ms/条（CPUExecutionProvider）。
+- 模型大小：导出 ONNX 约 23MB。
+- 依赖：`transformers`、`torch`、`onnxruntime`、`onnx`。
 
 ## [8.45.2] - 2025-12-06
 
