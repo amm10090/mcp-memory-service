@@ -108,7 +108,10 @@ Ensure these packages are installed in the virtual environment:
 - `sqlite-vec` - Vector database
 - `sentence-transformers` - Embeddings
 
-## 配置说明
+## 配置
+- 端口：默认 8000/8001，可在 `.env`/环境变量中覆盖。
+- HTTPS：`MCP_HTTPS_ENABLED=true`，指定 cert/key。
+- 同步：若为 Hybrid，配置 `MCP_HYBRID_SYNC_OWNER` 避免重复同步。说明
 
 ### Environment Variables
 - `MCP_MEMORY_STORAGE_BACKEND=sqlite_vec`
@@ -125,6 +128,9 @@ Both services share the same SQLite-vec database:
 - **Model**: `all-MiniLM-L6-v2`
 
 ## 故障排查
+- 无法访问 HTTP：检查防火墙/端口占用。
+- MCP 无响应：确认 `uv run memory server` 进程与日志。
+- 证书错误：核对路径、权限与域名匹配。
 
 ### Services Not Accessible
 1. Check if services are running: `systemctl status [service]`
