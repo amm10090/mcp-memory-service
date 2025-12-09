@@ -1,5 +1,7 @@
 # MCP Memory Service - Agent Guidelines
 
+[English](AGENTS.md) | [简体中文](AGENTS_zh-cn.md)
+
 ## Available Agents
 
 ### amp-bridge

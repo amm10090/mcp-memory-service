@@ -1,55 +1,59 @@
-# AGENTS 配置指南（中文概述）
+# MCP Memory Service - Agent 指南（中文完整版）
 
-- 介绍 Codex Agents 的全局配置、行为原则与 MCP 集成规范。
-- 强调使用中文、清晰推理链、最小权限、记忆集成（my-local-mcp）、代码索引、GitHub、Replicate、Shadcn、Exa 等服务。
-- 工作流：先检索记忆与代码索引，再执行，再存储关键结论。
-- 小步修改、阶段性进度报告、文档化输出。
+[简体中文](AGENTS_zh-cn.md) | [English](AGENTS.md)
 
-下文保留英文原文。
-
----
-
-<!-- 说明：以下保留英文原文，供核对；若需中文摘要请参考主文档。 -->
-# MCP Memory Service - Agent Guidelines
-
-## Available Agents
+## 可用代理（Agents）
 
 ### amp-bridge
-**Purpose**: Leverage Amp CLI capabilities (research, code analysis, web search) without consuming Claude Code credits.
+**用途**：调用 Amp CLI（研究、代码分析、网页搜索）而不消耗 Claude Code 配额。
 
-**Usage**: `Use @agent-amp-bridge to research XYZ`
+**用法示例**：`Use @agent-amp-bridge to research XYZ`
 
-**How it works**:
-1. Agent creates concise prompt in `.claude/amp/prompts/pending/{uuid}.json`
-2. Shows you command: `amp @{prompt-file}`
-3. You run command in your authenticated Amp session (free tier)
-4. Amp writes response to `.claude/amp/responses/ready/{uuid}.json`
-5. Agent detects, reads, and presents results
+**工作流程**：
+1. 在 `.claude/amp/prompts/pending/{uuid}.json` 写入简短提示。
+2. 显示待执行命令：`amp @{prompt-file}`。
+3. 在已登录的 Amp 会话中运行该命令（免费版即可）。
+4. Amp 输出结果到 `.claude/amp/responses/ready/{uuid}.json`。
+5. Agent 读取并呈现结果。
 
-**Key principle**: Agent creates SHORT, focused prompts (2-4 sentences) to conserve Amp credits.
+**关键原则**：提示要短而聚焦（2–4 句），以节省 Amp 额度。
 
-**Example**:
-- ❌ Bad: "Research TypeScript 5.0 in detail covering: 1. Const params... 2. Decorators... 3. Export modifiers..."
-- ✅ Good: "Research TypeScript 5.0's key new features with brief code examples."
+**反例/正例**：
+- ❌ 过长：“Research TypeScript 5.0 in detail covering: 1. Const params... 2. Decorators... 3. Export modifiers...”
+- ✅ 合理：“Research TypeScript 5.0's key new features with brief code examples.”
 
-## Build/Lint/Test Commands
-- **Run all tests**: `pytest tests/`
-- **Run single test**: `pytest tests/test_filename.py::test_function_name -v`
-- **Run specific test class**: `pytest tests/test_filename.py::TestClass -v`
-- **Run with markers**: `pytest -m "unit or integration"`
-- **Server startup**: `uv run memory server`
-- **Install dependencies**: `python scripts/installation/install.py`
+## 构建 / Lint / 测试命令
+- 运行全部测试：`pytest tests/`
+- 运行单个测试：`pytest tests/test_filename.py::test_function_name -v`
+- 运行特定测试类：`pytest tests/test_filename.py::TestClass -v`
+- 按标记运行：`pytest -m "unit or integration"`
+- 启动服务器：`uv run memory server`
+- 安装依赖：`python scripts/installation/install.py`
 
-## Architecture & Codebase Structure
-- **Main package**: `src/mcp_memory_service/` - Core MCP server implementation
-- **Storage backends**: `storage/` (SQLite-Vec, Cloudflare, Hybrid) implementing abstract `MemoryStorage` class
-- **Web interface**: `web/` - FastAPI dashboard with real-time updates via SSE
-- **MCP protocol**: `server.py` - Model Context Protocol implementation with async handlers
-- **Memory consolidation**: `consolidation/` - Autonomous memory management and deduplication
-- **Document ingestion**: `ingestion/` - PDF/DOCX/PPTX loaders with optional semtools integration
-- **CLI tools**: `cli/` - Command-line interface for server management
+## 架构与代码结构
+- 主包：`src/mcp_memory_service/` —— MCP 服务器核心实现
+- 存储后端：`storage/`（SQLite-Vec、Cloudflare、Hybrid），实现抽象 `MemoryStorage`
+- Web 界面：`web/` —— 基于 FastAPI，SSE 实时更新
+- MCP 协议：`server.py` —— 异步处理器实现
+- 记忆合并：`consolidation/` —— 自动去重与整合
+- 文档摄取：`ingestion/` —— PDF/DOCX/PPTX 加载，可选 semtools
+- CLI 工具：`cli/` —— 服务器管理命令行
 
-## Code Style Guidelines
+## 代码风格指南
+- `Imports`：优先绝对引用；可选依赖使用条件导入。
+- `Types`：Python 3.10+ 类型注解，MCP 响应用 `TypedDict`。
+- `Async/await`：所有 I/O 使用异步模式。
+- `Naming`：函数/变量 `snake_case`，类 `PascalCase`，常量 `SCREAMING_SNAKE_CASE`。
+- `Error handling`：使用针对性的 try/except 并记录日志。
+- `Memory types`：使用 24 个核心记忆类型（note、reference、session、implementation 等）。
+- `Documentation`：采用 NumPy 风格注释；项目约定详见 `CLAUDE.md`。
+
+## 开发规则（源自 CLAUDE.md）
+- 遵循 MCP 协议规范的工具 schema 与响应格式。
+- 存储后端需继承抽象基类实现。
+- 提交信息使用语义化、conventional commit 格式。
+- Web 界面需在开启/关闭 OAuth 两种模式下测试。
+- 校验搜索端点：语义搜索、标签搜索、时间搜索均需覆盖。
 - **Imports**: Absolute imports preferred, conditional imports for optional dependencies
 - **Types**: Python 3.10+ type hints throughout, TypedDict for MCP responses
 - **Async/await**: All I/O operations use async/await pattern
