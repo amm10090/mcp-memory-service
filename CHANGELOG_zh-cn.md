@@ -1285,76 +1285,75 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [8.48.4] - 2025-12-08
 
 ### Fixed
-- **Cloudflare D1 Drift Detection Performance** - Fixed slow/failing queries in hybrid backend drift detection (issue #264)
-  - **Root Cause**: `get_memories_updated_since()` used slow ISO string comparison (`updated_at_iso > ?`) instead of fast numeric comparison
-  - **Fix**: Changed WHERE clause to use indexed `updated_at` column with numeric comparison (`updated_at > ?`)
-  - **Performance Impact**: 10-100x faster queries, eliminates D1 timeout/400 Bad Request errors on large datasets
-  - **Affected Function**: `CloudflareStorage.get_memories_updated_since()` (lines 1638-1667)
-  - **Location**: `src/mcp_memory_service/storage/cloudflare.py`
-  - **Credit**: Root cause analysis by Claude Code workflow (GitHub Actions)
+- **Cloudflare D1 漂移检测性能** —— 修复混合后端漂移检测查询缓慢/失败（Issue #264）
+  - **原因**：`get_memories_updated_since()` 使用了字符串比较 `updated_at_iso > ?`，未利用索引。
+  - **修复**：改为使用索引列 `updated_at` 的数值比较 `updated_at > ?`。
+  - **性能效果**：查询提速 10–100 倍，消除 D1 大数据集的超时/400 错误。
+  - **受影响函数**：`CloudflareStorage.get_memories_updated_since()`（1638-1667 行）。
+  - **位置**：`src/mcp_memory_service/storage/cloudflare.py`
+  - **致谢**：Claude Code 工作流（GitHub Actions）完成根因分析。
 
 ## [8.48.3] - 2025-12-08
 
 ### Fixed
-- **Code Execution Hook Failure** - Fixed session-start hook falling back to MCP tools instead of using fast Code Execution API
-  - **Root Cause 1**: Invalid `time_filter` parameter passed to `search()` function (API signature only accepts `query`, `limit`, `tags`)
-  - **Root Cause 2**: Python `transformers` library emitted `FutureWarning` to stderr, causing `execSync()` to fail
-  - **Root Cause 3**: Installer used system `python3` instead of detecting venv Python path
-  - **Fix 1**: Removed time_filter parameter from Code Execution queries (line 325 in `claude-hooks/core/session-start.js`)
-  - **Fix 2**: Added `-W ignore` flag to suppress Python warnings during execution (line 359)
-  - **Fix 3**: Updated installer to use `sys.executable` for automatic venv detection (`claude-hooks/install_hooks.py:271-299`)
-  - **Impact**: 75% token reduction per session start (1200-2400 tokens → 300-600 tokens with Code Execution)
-  - **Behavior**: Hook now successfully uses Code Execution API instead of falling back to slower MCP tools
-  - **Documentation**: Added memory with troubleshooting guide for future reference
-  - **Location**: `claude-hooks/core/session-start.js:315-363`, `claude-hooks/install_hooks.py:271-299`
+- **Code Execution 钩子失败** —— 修复 Session-Start 钩子回退到 MCP 工具而非快速 Code Execution API 的问题。
+  - **原因 1**：向 `search()` 传入无效 `time_filter` 参数（签名仅接受 `query/limit/tags`）。
+  - **原因 2**：`transformers` 向 stderr 输出 `FutureWarning`，导致 `execSync()` 失败。
+  - **原因 3**：安装脚本使用系统 `python3`，未自动检测虚拟环境。
+  - **修复 1**：移除 Code Execution 查询中的 `time_filter`（`claude-hooks/core/session-start.js:325`）。
+  - **修复 2**：执行时添加 `-W ignore` 抑制 Python 警告（行 359）。
+  - **修复 3**：安装器改用 `sys.executable` 自动发现 venv（`claude-hooks/install_hooks.py:271-299`）。
+  - **影响**：Session Start Token 消耗降低 75%（1200-2400 → 300-600）。
+  - **行为**：钩子会优先使用 Code Execution API，而非回退 MCP 工具。
+  - **文档**：增加故障排查记忆条目以供复用。
+  - **位置**：`claude-hooks/core/session-start.js:315-363`，`claude-hooks/install_hooks.py:271-299`
 
 ### Changed
-- **Session-Start Hook Connection Timeout** - Increased quick connection timeout from 2s to 5s
-  - Prevents premature timeout during memory client initialization
-  - Allows more time for HTTP server connection during high-load periods
-  - Location: `~/.claude/hooks/core/session-start.js:750` (user installation)
+- **Session-Start 钩子连接超时** —— 快速连接超时从 2s 增至 5s。
+  - 防止内存客户端初始化过早超时。
+  - 高负载时为 HTTP 连接留出更多时间。
+  - 位置：`~/.claude/hooks/core/session-start.js:750`（用户安装目录）。
 
 ## [8.48.2] - 2025-12-08
 
 ### Added
-- **HTTP Server Auto-Start System** - Smart service management with comprehensive health checks
-  - Created `scripts/service/http_server_manager.sh` with 376 lines of robust service management
-  - Orphaned process detection and cleanup (handles stale PIDs from crashes/force kills)
-  - Version mismatch detection (alerts when installed version differs from running version)
-  - Config change detection (monitors .env file modification timestamps, triggers restart on changes)
-  - Hybrid storage initialization wait (10-second timeout ensures storage backends are ready)
-  - Health check with retry logic (3 attempts with 2s intervals before declaring failure)
-  - Commands: `status`, `start`, `stop`, `restart`, `auto-start`, `logs`
-  - Shell integration support (add to ~/.zshrc for automatic startup on terminal launch)
-  - Location: `scripts/service/http_server_manager.sh`
+- **HTTP 服务自启动系统** —— 智能管理并含完整健康检查。
+  - 新增 `scripts/service/http_server_manager.sh`（376 行），负责健壮的服务管理。
+  - 孤儿进程检测与清理（处理崩溃/强杀留下的 PID）。
+  - 版本不一致检测（运行版本与已安装版本不符时告警）。
+  - 配置变更检测（监控 .env 修改时间，变化则重启）。
+  - 混合存储初始化等待（10s 超时，确保后端就绪）。
+  - 健康检查含重试逻辑（2s 间隔，3 次后判失败）。
+  - 支持命令：`status`、`start`、`stop`、`restart`、`auto-start`、`logs`。
+  - Shell 集成：可写入 `~/.zshrc`，终端启动即自启服务。
+  - 位置：`scripts/service/http_server_manager.sh`。
 
-- **Session-Start Hook Health Check** - Proactive HTTP server availability monitoring
-  - Added health check warning in `~/.claude/hooks/core/session-start.js` (lines 657-674)
-  - Displays clear error message when HTTP server is unreachable
-  - Provides actionable fix instructions (how to start server, how to enable auto-start)
-  - Detects connection errors: ECONNREFUSED, fetch failed, network errors, timeout
-  - Non-blocking check (warns but doesn't block Claude Code session initialization)
-  - Location: `~/.claude/hooks/core/session-start.js:657-674`
+- **Session-Start 钩子健康检查** —— 主动检测 HTTP 服务可用性。
+  - 在 `~/.claude/hooks/core/session-start.js`（657-674 行）增加健康检查提示。
+  - 无法连通时给出清晰错误与可操作的修复步骤。
+  - 识别连接错误：ECONNREFUSED、fetch failed、网络错误、超时。
+  - 非阻塞：告警但不阻断 Claude Code 会话初始化。
+  - 位置：`~/.claude/hooks/core/session-start.js:657-674`。
 
 ### Fixed
-- **Time Parser "Last N Periods" Support** - Fixed issue #266 (time expressions not working)
-  - Added new regex pattern `last_n_periods` to match "last N days/weeks/months/years"
-  - Implemented `get_last_n_periods_range(n, period)` function for date calculations
-  - Pattern positioning: Checked BEFORE `last_period` pattern to match more specific expressions first
-  - Properly handles:
-    - "last 3 days" → From 3 days ago 00:00:00 to now
-    - "last 2 weeks" → From 2 weeks ago Monday 00:00:00 to now
-    - "last 1 month" → From 1 month ago first day 00:00:00 to now
-    - "last 5 years" → From 5 years ago Jan 1 00:00:00 to now
-  - Backward compatible with existing "last week", "last month" patterns
-  - Location: `src/mcp_memory_service/utils/time_parser.py`
+- **时间解析器支持 “last N periods”** —— 解决 Issue #266（相对时间短语无法解析）。
+  - 新增 `last_n_periods` 正则，匹配 “last N days/weeks/months/years”。
+  - 实现 `get_last_n_periods_range(n, period)` 进行日期计算。
+  - 匹配顺序：先检查 `last_n_periods` 再检查 `last_period`，优先精准匹配。
+  - 正确处理：
+    - “last 3 days” → 从 3 天前 00:00:00 至今
+    - “last 2 weeks” → 从 2 周前周一 00:00:00 至今
+    - “last 1 month” → 从 1 个月前月初 00:00:00 至今
+    - “last 5 years” → 从 5 年前 1 月 1 日 00:00:00 至今
+  - 兼容既有 “last week/月” 表达。
+  - 位置：`src/mcp_memory_service/utils/time_parser.py`。
 
 ### Changed
-- **Hook Configuration Time Windows** - Reverted to "last 3 days" (now works with parser fix)
-  - Applied to `recentTimeWindow` and `fallbackTimeWindow` in hook config
-  - Previously limited to "yesterday" due to parser bug
-  - Now leverages full 3-day context window for better memory recall
-  - Location: `~/.claude/hooks/config.json`
+- **钩子时间窗口** —— 恢复为 “last 3 days”（解析器已修复）。
+  - 应用于配置中的 `recentTimeWindow` 与 `fallbackTimeWindow`。
+  - 之前因解析器缺陷被迫用 “yesterday”。
+  - 现可使用完整 3 天上下文，记忆召回更佳。
+  - 位置：`~/.claude/hooks/config.json`。
 
 ### Technical Details
 - **HTTP Server Manager Architecture**:
